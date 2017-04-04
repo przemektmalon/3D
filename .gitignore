@@ -70,6 +70,17 @@ artifacts/
 *.svclog
 *.scc
 
+*.jpg
+*.png
+*.bmp
+*.shader
+*.tga
+*.7z
+*.bin
+*.mtl
+*.obj
+*.ttf
+
 # Chutzpah Test files
 _Chutzpah*
 
@@ -259,3 +270,9 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+/3D/res/fonts/clear-sans/Apache License.txt
+/3D/res/skybox/ame_cotton/readme
+/3D/res/skybox/hw_crater/license.txt
+/3D/res/skybox/morning/license.txt
+/3D/res/skybox/stormydays/README.TXT
+/3D/res/fonts/clear-sans/Apache License.txt

@@ -302,33 +302,6 @@
   <ItemGroup>
     <ResourceCompile Include="3D.rc" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="res\shader\bilatBlur.frag" />
-    <None Include="res\shader\bilatBlur.vert" />
-    <None Include="res\shader\frustCull.comp" />
-    <None Include="res\shader\GaussBlur.frag" />
-    <None Include="res\shader\GaussBlurH.vert" />
-    <None Include="res\shader\GaussBlurV.vert" />
-    <None Include="res\shader\gBufferPass.frag" />
-    <None Include="res\shader\gBufferPass.vert" />
-    <None Include="res\shader\minMaxZ.comp" />
-    <None Include="res\shader\shadowPass.frag" />
-    <None Include="res\shader\shadowPass.vert" />
-    <None Include="res\shader\Shape2DShader.frag" />
-    <None Include="res\shader\Shape2DShader.vert" />
-    <None Include="res\shader\skybox.frag" />
-    <None Include="res\shader\skybox.vert" />
-    <None Include="res\shader\ssao.frag" />
-    <None Include="res\shader\ssao.vert" />
-    <None Include="res\shader\ssao2.frag" />
-    <None Include="res\shader\Standard.frag" />
-    <None Include="res\shader\Standard.vert" />
-    <None Include="res\shader\test.frag" />
-    <None Include="res\shader\test.vert" />
-    <None Include="res\shader\text.frag" />
-    <None Include="res\shader\text.vert" />
-    <None Include="res\shader\tileCull.comp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

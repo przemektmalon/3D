@@ -1,0 +1,176 @@
+#version 430 compatibility
+#extension GL_NV_gpu_shader5 : enable
+#extension GL_ARB_compute_shader : enable
+//#extension GL_ARB_compute_variable_group_size : enable
+
+struct MeshMeta
+{
+	//vec4 posRad;
+	uvec4 cmds_radX;//RADIUS IN W-VALUE
+	uvec4 texHandle_radYZ;
+	uvec4 normalBumpTexIDs;
+};
+
+uniform uint objectCount;
+layout(std140, binding=0) buffer ObjectBuffer
+{
+	MeshMeta metaIn[];
+};	
+
+layout(std140, binding=1) buffer TextureHandleBuffer
+{
+	uvec4 texHandleOut[];
+};
+
+layout(std140, binding=2) buffer CommandBuffer
+{
+	uvec4 cmdsOut[];
+};
+
+layout(std140, binding=3) buffer RetBuffer
+{
+	uint drawCount;
+};
+
+layout(std140, binding=4) buffer TransformsBuffer
+{
+	mat4 transformsIn[];
+};
+
+layout(std140, binding=5) buffer InstanceBuffer
+{
+	mat4 instancesOut[];
+};
+
+layout(std140, binding=6) buffer InstanceIDBuffer
+{
+	uint id[];
+};
+
+
+//NUM_OBJ == CEIL(OBJ_COUNT / WORK_SIZE) * WORK_SIZE
+#define NUM_OBJ 10240
+#define WORK_SIZE 512
+#define OBJ_PER_GROUP NUM_OBJ / WORK_SIZE
+
+//layout(local_size_variable) in;
+layout(local_size_x=WORK_SIZE, local_size_y=1, local_size_z=1) in;
+
+layout(location = 3) uniform mat4  proj;
+layout(location = 4) uniform mat4 view;
+layout(location = 5) uniform mat4 planes;
+
+#define FAR 1000000.f
+
+shared uint sharedIndex;
+
+void main()
+{
+	if(gl_GlobalInvocationID.x == 0)
+		sharedIndex = 0;
+
+	for(uint j = 0; j < OBJ_PER_GROUP; ++j)
+	{
+		uint ii = (gl_GlobalInvocationID.x * (OBJ_PER_GROUP)) + j;
+
+		mat4 transform = transformsIn[ii];
+		vec4 pos = view * transform * vec4(0.f,0.f,0.f,1.f); ////TODO: EXTRACT FROM MATRIX
+		uvec4 cmds_radX = metaIn[ii].cmds_radX;
+		uvec4 texHandle_radYZ = metaIn[ii].texHandle_radYZ;
+		uvec4 normalBumpTexIDs = metaIn[ii].normalBumpTexIDs;
+		vec3 radiusVec = vec3(uintBitsToFloat(cmds_radX.w) * transform[0][0],uintBitsToFloat(texHandle_radYZ.z) * transform[1][1],uintBitsToFloat(texHandle_radYZ.w) * transform[2][2]);
+		float radiusLen = length(radiusVec);
+
+		bool inFrustum = true;
+
+		for(uint k = 3; (k >= 0) && inFrustum; --k) //TODO: UNROLL
+		{
+			float dist = dot(planes[k], pos);
+			inFrustum = (inFrustum && (dist >= -radiusLen));
+		}
+
+		//barrier();
+
+		if(inFrustum && (transform[0][0] != 0))
+		{
+			uint nextIndex = atomicAdd(sharedIndex, 1);
+			cmdsOut[nextIndex] = cmds_radX;
+			cmdsOut[nextIndex][3] = 0;
+			texHandleOut[nextIndex].xy = texHandle_radYZ.xy;
+			texHandleOut[nextIndex].zw = normalBumpTexIDs.xy;
+			instancesOut[nextIndex] = transform;
+			id[nextIndex] = ii+1;
+		}
+
+		//barrier();
+	}
+
+	barrier();
+
+
+	if(gl_GlobalInvocationID.x == 0)
+		drawCount = sharedIndex;
+}
+
+/*void main()
+{
+	
+	uvec3 gid = gl_GlobalInvocationID;
+	sharedIndex = 0;
+	mat4 transform = transforms[gid.x];
+	
+	bool inFrustum = true;
+	vec4 pos = transform * vec4(0.f,0.f,0.f,1.f);
+	uvec4 cmds = meta[gid.x].cmds;
+	
+	float rad = uintBitsToFloat(cmds.w) * transform[0][0];
+	//WARNING: ONLY WORKS WITH UNIFORM SCALE
+
+	for(uint j = 3; (j >= 0) && (inFrustum == true); --j)
+	{
+		float dist = dot(planes[j], view * vec4(pos.xyz,1.f));
+		inFrustum = (inFrustum && (dist >= -rad));
+	}
+
+	if(inFrustum == true)
+	{
+		uint nextIndex = atomicAdd(sharedIndex,1);
+
+		cmdsOut[nextIndex] = cmds;
+		cmdsOut[nextIndex][3] = 0;
+		texHandleOut[nextIndex] = meta[gid.x].texHandle;
+		instancesOut[nextIndex] = transforms[gid.x];
+	}
+
+	barrier();
+
+	if(gid.x == 0)
+	{
+		drawCount = sharedIndex;
+	}
+	//atomicAdd(drawCount, sharedIndex);
+}*/
+
+/*vec4 planes[4];
+
+	mat4 pr = proj;
+
+	if(gid.x == 1)
+	{
+	planes[0] = pr[3] - pr[0];//Right
+	planes[1] = pr[3] + pr[0];//Left
+	planes[2] = pr[3] - pr[1];//Top
+	planes[3] = pr[3] + pr[1];//Bottom
+	//planes[4] = vec4(0.f,0.f,1.f, 1.0);
+	//planes[5] = vec4(0.f,0.f,-1.f,float(FAR));
+
+	//planes[0] *= 1.f / length(planes[0].xyz);
+	//planes[1] *= 1.f / length(planes[1].xyz);
+	//planes[2] *= 1.f / length(planes[2].xyz);
+	//planes[3] *= 1.f / length(planes[3].xyz);
+
+	planes[0] = normalize(planes[0]);
+	planes[1] = normalize(planes[1]);
+	planes[2] = normalize(planes[2]);
+	planes[3] = normalize(planes[3]);
+	}*/
