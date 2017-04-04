@@ -30,6 +30,7 @@ public:
 				++pSource;
 				//std::string varName; varName.reserve(20);
 				char varName[32];
+				//String::replicate
 				u32 varNameIndex = 0;
 				for (;;)
 				{

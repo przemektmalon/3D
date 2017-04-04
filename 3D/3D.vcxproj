@@ -133,6 +133,7 @@
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderPreprocessor.h" />
     <ClInclude Include="SSBO.h" />
+    <ClInclude Include="StackStrings.h" />
     <ClInclude Include="Text.h" />
     <ClInclude Include="TextShader.h" />
     <ClInclude Include="Time.h" />

@@ -22,6 +22,8 @@
 
 #define MODEL_PATH std::string("res/model/")
 
+#include "StackStrings.h"
+
 #include "UILabel.h"
 
 FT_Library Engine::ftLib;
@@ -238,6 +240,11 @@ void mouseUp()
 
 void Engine::mainLoop()
 {
+	String64 str;
+
+	str.append(String32("abc")).append(String32("_DEFG")).removeCases(String32("bc")).replaceWhere(String32("DE"), String32("EDFGHIJ")).overwrite(String32("haha"));
+
+
 	glewExperimental = GL_TRUE;
 	glewInit();
 	wglewInit();
