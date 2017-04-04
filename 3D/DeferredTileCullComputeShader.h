@@ -2,26 +2,36 @@
 #include "ComputeShader.h"
 #include "Include.h"
 
-class DeferredTileCullComputeShader : public ComputeShader
+class DeferredTileCullComputeShader : public ShaderProgram
 {
 public:
-	DeferredTileCullComputeShader() { }
+	DeferredTileCullComputeShader() 
+	{
+		name.overwrite(String32("tileCull")); 
+		type = Compute;
+
+	}
 	~DeferredTileCullComputeShader() {}
 
-	void initialise()
+	int initialise()
 	{
-		load(String32("res/shader/tileCull"), true);
+		//load(String32("res/shader/tileCull"), true);
+		//load("tileCull", Compute);
+		//compile();
 		use();
-		viewPosLoc = glGetUniformLocation(program, "viewPos");
-		viewRaysLoc = glGetUniformLocation(program, "viewRays");
-		projLoc = glGetUniformLocation(program, "proj");
-		viewLoc = glGetUniformLocation(program, "view");
-		exposureLoc = glGetUniformLocation(program, "exposure");
-		pointLightCountLoc = glGetUniformLocation(program, "pointLightCount");
-		spotLightCountLoc = glGetUniformLocation(program, "spotLightCount");
-		selectedIDLoc = glGetUniformLocation(program, "selectedID");
+		viewPosLoc = glGetUniformLocation(GLID, "viewPos");
+		viewRaysLoc = glGetUniformLocation(GLID, "viewRays");
+		projLoc = glGetUniformLocation(GLID, "proj");
+		viewLoc = glGetUniformLocation(GLID, "view");
+		exposureLoc = glGetUniformLocation(GLID, "exposure");
+		pointLightCountLoc = glGetUniformLocation(GLID, "pointLightCount");
+		spotLightCountLoc = glGetUniformLocation(GLID, "spotLightCount");
+		selectedIDLoc = glGetUniformLocation(GLID, "selectedID");
 		//setExposure(11.f);
+		setPointLightCount(100);
+		setSpotLightCount(0);
 		stop();
+		return 1;
 	}
 
 	void setSelectedID(u32 pID)

@@ -1,10 +1,13 @@
 #pragma once
 #include "UIElement.h"
+
+class UIWindow;
+
 class UISlider :
 	public UIElement
 {
 public:
-	UISlider();
+	UISlider(UIWindow* pParent);
 	~UISlider();
 };
 

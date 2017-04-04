@@ -12,7 +12,6 @@ void test2(int x, float y) {
 	OutputDebugStringA((std::to_string(x) + std::to_string(y)).c_str());
 }
 
-
 void test3(glm::ivec3 iv3, glm::fvec2 fv2, int i, String32 str, float f, int i2)
 {
 	std::stringstream ss;
@@ -124,8 +123,8 @@ void Console::submitCommand(String512& command)
 
 	BEGIN_FUNC_SWITCH(funcName)
 		CHECK_CONSOLE_CALLABLE(1, test, 1);
-	CHECK_CONSOLE_CALLABLE(2, test2, 2);
-	CHECK_CONSOLE_CALLABLE(3, test3, 6);
+		CHECK_CONSOLE_CALLABLE(2, test2, 2);
+		CHECK_CONSOLE_CALLABLE(3, test3, 6);
 	END_FUNC_SWITCH
 
 }

@@ -7,11 +7,17 @@
 #include "UILabel.h"
 #include "AssetManager.h"
 #include "World.h"
+#include "Text.h"
+#include "GPUMeshManager.h"
+
+#include "UIRectangleShape.h"
+#include "UIConsole.h"
+#include "UIButton.h"
 
 const s32 MasterRenderer::validResolutionsRaw[2][NUM_VALID_RESOLUTIONS] =
 {
-	{ 1920, 1600, 1536, 1366, 1280, 1024, 960, 848 },
-	{ 1080, 900,  864,  768 , 720 , 576 , 540, 480 },
+	{ 1920, 1600, 1536, 1366, 1280, 1024, 960, 848},
+	{ 1080, 900,  864,  768 , 720 , 576 , 540, 480},
 };
 
 GLfloat skyboxVertices[] = {
@@ -120,40 +126,41 @@ inline void MasterRenderer::initialiseScreenQuad()
 	glBindBuffer(GL_ARRAY_BUFFER, vboQuadViewRays);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVerticesViewRays), quadVerticesViewRays, GL_STATIC_DRAW);
 
-	Engine::s.use();
+	auto program = shaderStore.getShader(String<32>("Standard"));
+	program->use();
 
 	glBindVertexArray(vaoQuadViewRays);
 	glBindBuffer(GL_ARRAY_BUFFER, vboQuadViewRays);
 
-	posAttrib = glGetAttribLocation(Engine::s(), "position");
+	posAttrib = glGetAttribLocation(program->getGLID(), "position");
 	glEnableVertexAttribArray(posAttrib);
 	glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
 
-	texAttrib = glGetAttribLocation(Engine::s(), "texCoord");
+	texAttrib = glGetAttribLocation(program->getGLID(), "texCoord");
 	glEnableVertexAttribArray(texAttrib);
 	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
 
-	auto viewAttrib = glGetAttribLocation(Engine::s(), "viewRay");
+	auto viewAttrib = glGetAttribLocation(program->getGLID(), "viewRay");
 	glEnableVertexAttribArray(viewAttrib);
 	glVertexAttribPointer(viewAttrib, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(4 * sizeof(GLfloat)));
 
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	Engine::testShader.use();
+	program = shaderStore.getShader(String<32>("test"));
 
 	glBindVertexArray(vaoQuadViewRays);
 	glBindBuffer(GL_ARRAY_BUFFER, vboQuadViewRays);
 
-	posAttrib = glGetAttribLocation(Engine::testShader(), "p");
+	posAttrib = glGetAttribLocation(program->getGLID(), "p");
 	glEnableVertexAttribArray(posAttrib);
 	glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
 
-	texAttrib = glGetAttribLocation(Engine::testShader(), "t");
+	texAttrib = glGetAttribLocation(program->getGLID(), "t");
 	glEnableVertexAttribArray(texAttrib);
 	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
 
-	viewAttrib = glGetAttribLocation(Engine::testShader(), "v");
+	viewAttrib = glGetAttribLocation(program->getGLID(), "v");
 	glEnableVertexAttribArray(viewAttrib);
 	glVertexAttribPointer(viewAttrib, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(4 * sizeof(GLfloat)));
 
@@ -208,7 +215,7 @@ inline void MasterRenderer::initialiseScreenFramebuffer()
 
 inline void MasterRenderer::initialiseSkybox()
 {
-
+	
 	skyboxShader.use();
 
 	glGenVertexArrays(1, &vaoSkybox);
@@ -230,7 +237,7 @@ inline void MasterRenderer::initialiseSkybox()
 
 	std::vector<std::string> faces;
 
-	const char* paths[6] =
+	const char* paths[6] = 
 	{
 		{ "res/skybox/sky/right.png" },
 		{ "res/skybox/sky/left.png" },
@@ -240,7 +247,7 @@ inline void MasterRenderer::initialiseSkybox()
 		{ "res/skybox/sky/back.png" }
 	};
 
-
+	
 	sk.createFromFiles(&paths[0]);
 
 	faces.push_back(skyboxPath + "right.png");
@@ -295,13 +302,13 @@ inline void MasterRenderer::initialiseLights()
 		auto cc = Engine::rand() % 3;
 		switch (cc)
 		{
-		case(0):
+		case(0) :
 			l.colour = glm::fvec3(10, 0, 0);
 			break;
-		case(1):
+		case(1) :
 			l.colour = glm::fvec3(0, 10, 0);
 			break;
-		case(2):
+		case(2) :
 			l.colour = glm::fvec3(0, 0, 10);
 			break;
 		}
@@ -321,8 +328,13 @@ inline void MasterRenderer::initialiseLights()
 	tileCullShader.setPointLightCount(lightManager.pointLights.size());
 	tileCullShader.setSpotLightCount(lightManager.spotLights.size());
 
-	Engine::s.use();
-
+	int plc = lightManager.pointLights.size();
+	int slc = lightManager.spotLights.size();
+	//tileCullShader->use();
+	//tileCullShader->setUniform(String64("pointLightCount"), &plc);
+	//tileCullShader->setUniform(String64("spotLightCount"), &slc);
+	//tileCullShader->sendUniforms();
+	
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
 	glm::fvec3 ddir(-2, -2, -4);
@@ -349,7 +361,7 @@ inline void MasterRenderer::initialiseLights()
 
 inline void MasterRenderer::initialiseSamplers()
 {
-
+	
 	defaultSampler.initialiseDefaults();
 	defaultSampler.setTextureWrapS(GL_REPEAT);
 	defaultSampler.setTextureWrapT(GL_REPEAT);
@@ -369,7 +381,7 @@ inline void MasterRenderer::initialiseSamplers()
 	postSampler.setTextureMagFilter(GL_LINEAR);
 	postSampler.setTextureCompareMode(GL_NONE);
 	//postSampler.setTextureAnisotropy(16);
-
+	
 	//postSampler.bind(2);
 	//postSampler.bind(3);
 	postSampler.bind(4);
@@ -381,7 +393,7 @@ inline void MasterRenderer::initialiseSamplers()
 	cubeSampler.setTextureMinFilter(GL_LINEAR);
 	cubeSampler.setTextureMagFilter(GL_LINEAR);
 	cubeSampler.bind(15);
-
+	
 	textSampler.setTextureWrapS(GL_CLAMP_TO_EDGE);
 	textSampler.setTextureWrapT(GL_CLAMP_TO_EDGE);
 	textSampler.setTextureWrapR(GL_CLAMP_TO_EDGE);
@@ -389,26 +401,49 @@ inline void MasterRenderer::initialiseSamplers()
 	textSampler.setTextureMagFilter(GL_LINEAR);
 	textSampler.bind(12);
 
-	Engine::h1 = glGetTextureSamplerHandleARB(Engine::t1.getGLID(), defaultSampler.getGLID());
-	Engine::h2 = glGetTextureSamplerHandleARB(Engine::t2.getGLID(), defaultSampler.getGLID());
-	Engine::h3 = glGetTextureSamplerHandleARB(Engine::t3.getGLID(), defaultSampler.getGLID());
+	auto h1 = Engine::assets.get2DTex("g")->getHandle(defaultSampler.getGLID());
+	auto h2 = Engine::assets.get2DTex("gN")->getHandle(defaultSampler.getGLID());
+	auto h3 = Engine::assets.get2DTex("gS")->getHandle(defaultSampler.getGLID());
 
-	glMakeTextureHandleResidentARB(Engine::h1);
-	glMakeTextureHandleResidentARB(Engine::h2);
-	glMakeTextureHandleResidentARB(Engine::h3);
+	auto h4 = Engine::assets.get2DTex("oo")->getHandle(defaultSampler.getGLID());
+	//auto h5 = Engine::assets.get2DTex("pf")->getHandle(defaultSampler.getGLID());
+	//auto h6 = Engine::assets.get2DTex("sp")->getHandle(defaultSampler.getGLID());
+
+	auto h7 = Engine::assets.get2DTex("ooN")->getHandle(defaultSampler.getGLID());
+	//auto h8 = Engine::assets.get2DTex("pfN")->getHandle(defaultSampler.getGLID());
+	//auto h9 = Engine::assets.get2DTex("spN")->getHandle(defaultSampler.getGLID());
+
+	///TODO: make null texture (return when not found)
+	///TODO: Auto make handles resident!!
+
+	//Engine::h1 = glGetTextureSamplerHandleARB(Engine::t1.getGLID(), defaultSampler.getGLID());
+	//Engine::h2 = glGetTextureSamplerHandleARB(Engine::t2.getGLID(), defaultSampler.getGLID());
+	//Engine::h3 = glGetTextureSamplerHandleARB(Engine::t3.getGLID(), defaultSampler.getGLID());
+
+	glMakeTextureHandleResidentARB(h1);
+	glMakeTextureHandleResidentARB(h2);
+	glMakeTextureHandleResidentARB(h3);
+
+	glMakeTextureHandleResidentARB(h4);
+	//glMakeTextureHandleResidentARB(h5);
+	//glMakeTextureHandleResidentARB(h6);
+
+	glMakeTextureHandleResidentARB(h7);
+	//glMakeTextureHandleResidentARB(h8);
+	//glMakeTextureHandleResidentARB(h9);
 }
 
 void MasterRenderer::initialiseRenderer(Window * pwin, Camera & cam)
 {
 	window = pwin;
 	//MSAALevel = Msaalev;
-	viewport.bot = 0; viewport.left = 0; viewport.width = window->getSizeX(); viewport.height = window->getSizeY();
+	viewport.top = 0; viewport.left = 0; viewport.width = window->getSizeX(); viewport.height = window->getSizeY();
 	rC.frameScale = 1.f;
 	rC.renderResolution.x = viewport.width * rC.frameScale;
 	rC.renderResolution.y = viewport.height * rC.frameScale;
 
 	initialiseSamplers();
-	initialiseShaders();
+	//initialiseShaders();
 
 	setActiveCam(cam);
 
@@ -422,18 +457,30 @@ void MasterRenderer::initialiseRenderer(Window * pwin, Camera & cam)
 	fboLight.setClearDepth(0.f);
 	//glDepthRangedNV(1.f, -1.f);
 	th.createFromStream(GL_RGBA32F, rC.renderResolution.x, rC.renderResolution.y, GL_RGBA, GL_FLOAT, NULL);
-	//glBindImageTexture(0, th.getGLID(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+
+	console = new UIConsole();
+	console->initOGL();
 }
 
 void MasterRenderer::initialiseShaders()
 {
-	tileCullShader.initialise();
-	gBufferShader.initialise();
+	//shaderStore.loadShader(ShaderProgram::Compute, String32("tileCull"));
+	shaderStore.loadShader(&tileCullShader);
+	//tileCullShader = shaderStore.loadShader(ShaderProgram::Compute, String32("tileCull"));
+	//tileCullShader->stop();
+	//tileCullShader.initialise();
+	//gBufferShader.initialise();
 	ssaoShader.initialise();
 	blurShader.load("res/shader/bilatBlur", "res/shader/bilatBlur");
 	skyboxShader.load("res/shader/skybox", "res/shader/skybox");
 	shadowShader.load("res/shader/shadowPass", "res/shader/shadowPass");
-	frustCullShader.load(String32("res/shader/frustCull"));
+	frustCullShader.load(String<32>("res/shader/frustCull"));
+
+	
+	shaderStore.loadShader(ShaderProgram::VertFrag, String32("Shape2DShader"));
+	shaderStore.loadShader(ShaderProgram::VertFrag, String32("Standard"));
+	shaderStore.loadShader(ShaderProgram::VertFrag, String32("gBufferPass"));
+	shaderStore.loadShader(ShaderProgram::VertFrag, String32("test"));
 }
 
 void MasterRenderer::initialiseFramebuffers()
@@ -506,92 +553,97 @@ void MasterRenderer::render()
 
 	lightManager.updateAllPointLights();
 
-	glViewport(0, 0, rC.renderResolution.x, rC.renderResolution.y);
-
-	//fboDefault.bind();
-	//fboDefault.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	fboGBuffer.bind();
-	fboGBuffer.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glm::uvec4 clearC(0, 0, 0, 0);
-	glClearBufferuiv(GL_COLOR, GL_COLOR_ATTACHMENT2, &clearC.x);
-
-	glDepthRangedNV(-1.f, 1.f);
-	glClearDepth(1.f);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-
-	if (rC.wireFrame)
+	//Frustum cull pass
 	{
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glViewport(0, 0, rC.renderResolution.x, rC.renderResolution.y);
+		fboGBuffer.bind();
+		fboGBuffer.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glm::uvec4 clearC(0, 0, 0, 0);
+		glClearBufferuiv(GL_COLOR, GL_COLOR_ATTACHMENT2, &clearC.x);
+
+		glDepthRangedNV(-1.f, 1.f);
+		glClearDepth(1.f);
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		glDisable(GL_BLEND);
+		glCullFace(GL_BACK);
+
+		if (rC.wireFrame)
+		{
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		}
+
+		u32 id = 1;
+
+		frustCullShader.use();
+
+		glUniform3fv(1, 1, &activeCam->pos[0]);
+		glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(activeCam->proj));
+		glUniformMatrix4fv(4, 1, GL_FALSE, glm::value_ptr(activeCam->view));
+
+		world->objectMetaBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 0);
+		world->texHandleBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 1);
+		world->drawIndirectBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 2);
+		world->drawCountBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 3);
+		world->instanceTransformsBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 4);
+		world->visibleTransformsBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 5);
+		world->instanceIDBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 6);
+
+		auto pr = glm::transpose(activeCam->proj);
+
+		glm::fvec4 p[4];
+		p[0] = pr[3] - pr[0];
+		p[1] = pr[3] + pr[0];
+		p[2] = pr[3] - pr[1];
+		p[3] = pr[3] + pr[1];
+
+		for (int i = 0; i <= 3; ++i)
+			p[i] = glm::normalize(p[i]);
+
+		glUniformMatrix4fv(5, 1, GL_FALSE, &(p[0][0]));
+
+		glDispatchCompute(1, 1, 1);
+
+		world->drawCountBuffer.getBufferSubData(0, sizeof(drawCount), &drawCount);
 	}
 
-	u32 id = 1;
-
-	frustCullShader.use();
-
-	glUniform3fv(1, 1, &activeCam->pos[0]);
-	glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(activeCam->proj));
-	glUniformMatrix4fv(4, 1, GL_FALSE, glm::value_ptr(activeCam->view));
-
-	world->objectMetaBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 0);
-	world->texHandleBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 1);
-	world->drawIndirectBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 2);
-	world->drawCountBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 3);
-	world->instanceTransformsBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 4);
-	world->visibleTransformsBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 5);
-	world->instanceIDBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 6);
-
-
-	//glBindBuffer(GL_SHADER_STORAGE_BUFFER, drawIndirectBuffer);
-	//glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(glm::uvec4) * 8192, 0);
-	//glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_RGBA32UI, GL_RGBA, GL_UNSIGNED_INT, NULL);
-	//glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(glm::uvec4) * 8192, NULL, GL_STREAM_DRAW);
-
-	auto pr = glm::transpose(activeCam->proj);
-
-	glm::fvec4 p[4];
-	p[0] = pr[3] - pr[0];
-	p[1] = pr[3] + pr[0];
-	p[2] = pr[3] - pr[1];
-	p[3] = pr[3] + pr[1];
-
-	for (int i = 0; i <= 3; ++i)
-		p[i] = glm::normalize(p[i]);
-
-	glUniformMatrix4fv(5, 1, GL_FALSE, &(p[0][0]));
-
-	glDispatchCompute(1, 1, 1);
-
-
-	world->drawCountBuffer.getBufferSubData(0, sizeof(drawCount), &drawCount);
-
-	//drawCount = 8192 * 8;
-	gBufferShader.use();
-	gBufferShader.setProj(activeCam->proj);
-	gBufferShader.setView(activeCam->view);
-	gBufferShader.setCamPos(activeCam->pos);
-
-	const GPUMeshManager& mm = Engine::assets.meshManager;
-
-	glBindVertexArray(mm.solidBatches[0].vaoID);
-
-	world->texHandleBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 3);
-	world->visibleTransformsBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 4);
-	world->drawIndirectBuffer.bind(GL_DRAW_INDIRECT_BUFFER);
-	world->instanceIDBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 6);
-
-	glMultiDrawArraysIndirect(GL_TRIANGLES, 0, drawCount, 0);
-	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
-
-	if (rC.wireFrame)
+	//GBuffer pass
 	{
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		auto gbs = shaderStore.getShader(String32("gBufferPass"));
+		//gBufferShader.use();
+		//gBufferShader.setProj(activeCam->proj);
+		//gBufferShader.setView(activeCam->view);
+		//gBufferShader.setCamPos(activeCam->pos);
+
+		gbs->use();
+		gbs->setUniform(String64("proj"), &activeCam->proj);
+		gbs->setUniform(String64("view"), &activeCam->view);
+		gbs->setUniform(String64("camPos"), &activeCam->pos);
+		gbs->sendUniforms();
+
+		const GPUMeshManager& mm = Engine::assets.meshManager;
+
+		glBindVertexArray(mm.solidBatches.find(PNUU_T_S_N)->second.vaoID);
+
+		world->texHandleBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 3);
+		world->visibleTransformsBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 4);
+		world->drawIndirectBuffer.bind(GL_DRAW_INDIRECT_BUFFER);
+		world->instanceIDBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 6);
+
+		//glDrawArrays(GL_TRIANGLES, 0, 18);
+
+		glMultiDrawArraysIndirect(GL_TRIANGLES, 0, drawCount, 0);
+		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
+
+		if (rC.wireFrame)
+		{
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		}
+
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
-
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
+	
 	// *********************************************************** G-BUFFER PASS *********************************************************** //
 
 	/*glViewport(0, 0, shadRes.x*shadScale, shadRes.y*shadScale);
@@ -625,38 +677,39 @@ void MasterRenderer::render()
 
 	for (auto itr = entities.begin(); itr != entities.end(); ++itr)
 	{
-	glBindVertexArray(itr->first->vao);
-	glBindBuffer(GL_ARRAY_BUFFER, itr->first->vbo);
-	for (auto itr2 = itr->second.begin(); itr2 != itr->second.end(); ++itr2)
-	{
-	glUniformMatrix4fv(2, 1, GL_FALSE, glm::value_ptr(*itr2));
-	glDrawArrays(GL_TRIANGLES, 0, itr->first->data.numVert);
-	}
+		glBindVertexArray(itr->first->vao);
+		glBindBuffer(GL_ARRAY_BUFFER, itr->first->vbo);
+		for (auto itr2 = itr->second.begin(); itr2 != itr->second.end(); ++itr2)
+		{
+			glUniformMatrix4fv(2, 1, GL_FALSE, glm::value_ptr(*itr2));
+			glDrawArrays(GL_TRIANGLES, 0, itr->first->data.numVert);
+		}
 	}
 
 	glBindVertexArray(0);*/
 
 	// *********************************************************** SSAO PASS *********************************************************** //
+	
+	//SSAO pass
+	{
+		glViewport(0, 0, rC.renderResolution.x * rC.ssaoScale, rC.renderResolution.y * rC.ssaoScale);
 
-	glViewport(0, 0, rC.renderResolution.x * rC.ssaoScale, rC.renderResolution.y * rC.ssaoScale);
+		//fboDefault.bind();
+		//fboDefault.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		fboSSAO.bind();
+		fboSSAO.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//fboDefault.bind();
-	//fboDefault.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	fboSSAO.bind();
-	fboSSAO.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_CULL_FACE);
+		glCullFace(GL_FRONT);
 
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
-	glCullFace(GL_FRONT);
+		ssaoShader.use();
 
-	ssaoShader.use();
-
-
-
-	glBindVertexArray(vaoQuad);
-	fboGBuffer.textureAttachments[2].bind(0);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-	glDisable(GL_BLEND);
+		glBindVertexArray(vaoQuad);
+		fboGBuffer.textureAttachments[2].bind(0);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glDisable(GL_BLEND);
+	}
 
 	// *********************************************************** SSAO PASS *********************************************************** //
 
@@ -718,14 +771,25 @@ void MasterRenderer::render()
 	vrays.z = activeCam->viewRays2[0].x;
 	vrays.w = activeCam->viewRays2[0].y;
 
-	auto loc = glGetUniformLocation(tileCullShader(), "viewRays");
-	glUniform4fv(loc, 1, &vrays.x);
+	//vrays = glm::fvec4(1.f, 0.f, 1.f, 1.f);
+
+	auto loc = glGetUniformLocation(tileCullShader.getGLID(), "viewRays");
+	//glUniformMatrix4fv(loc, 1, GL_TRUE, &activeCam->view[0][0]);
+	glUniform4fv(loc, 1, &vrays[0]);
+
+	//loc = glGetUniformLocation(tileCullShader.getGLID(), "view");
+	//glUniformMatrix4fv(loc, 1, GL_TRUE, glm::value_ptr(activeCam->view));
+	//loc = glGetUniformLocation(tileCullShader.getGLID(), "viewPos");
+	//glUniform3fv(loc, 1, &activeCam->pos.x);
+
+	//tileCullShader->setUniform(String64("viewRays"), &vrays.x);
+	//tileCullShader->setUniform(String64("view"), &activeCam->view[0][0], 1);
+	//tileCullShader->setUniform(String64("viewPos"), &activeCam->pos);
+	//tileCullShader->sendUniforms();
 
 	tileCullShader.setView(activeCam->view);
 	tileCullShader.setViewPos(activeCam->pos);
 
-
-	//glDispatchComputeGroupSizeARB(1280/16, 720/16, 1, 16, 16, 1);
 	lightManager.pointLightsBuffer.bindBase(0);
 	lightManager.spotLightsBuffer.bindBase(1);
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
@@ -737,31 +801,39 @@ void MasterRenderer::render()
 	fboDefault.bind();
 	fboDefault.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);//TODO: ENABLE CULLING AND FLIP VERTICES IF NEEDED
+	glEnable(GL_CULL_FACE);//TODO: ENABLE CULLING AND FLIP VERTICES IF NEEDED
 
 	glBindVertexArray(vaoQuadViewRays);
-	Engine::testShader.use();
+	auto program = shaderStore.getShader(String<32>("test"));
+	program->use();
 
-	loc = glGetUniformLocation(Engine::testShader(), "tex");
+	/*loc = glGetUniformLocation(Engine::testShader(), "tex");
 	glUniform1i(loc, 2);
 	auto locc = glGetUniformLocation(Engine::testShader(), "proj");
 	glUniformMatrix4fv(locc, 1, GL_FALSE, glm::value_ptr(activeCam->proj));
 	auto locc2 = glGetUniformLocation(Engine::testShader(), "view");
 	glUniformMatrix4fv(locc2, 1, GL_FALSE, glm::value_ptr(activeCam->view));
 	auto loccc = glGetUniformLocation(Engine::testShader(), "camPos");
-	glUniform3fv(loccc, 1, &activeCam->pos[0]);
+	glUniform3fv(loccc, 1, &activeCam->pos[0]);*/
 
+	//glDisable(GL_BLEND);
+	glUniform1i(glGetUniformLocation(program->getGLID(), "tex"), 2);
 	th.bind(2);
 	//fboGBuffer.textureAttachments[1].bind(2);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
+	//auto shader = Engine::r->shaderStore.getShader(String32("Shape2DShader"));
 
-
+	glDisable(GL_CULL_FACE);
+	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	Engine::uiw->draw();
-	glDisable(GL_BLEND);
 
+	if (Engine::consoleOpen)
+	{
+		console->draw();
+	}
+	
 	window->swapBuffers();
 }
 

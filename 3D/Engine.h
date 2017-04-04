@@ -5,10 +5,8 @@
 //#include "Text.h"
 #include <random>
 #include "UserInputManager.h"
-
+#include "Logger.h"
 #include "UIWindow.h"
-
-
 
 #include <ft2build.h>
 #include FT_FREETYPE_H;
@@ -31,30 +29,16 @@ public:
 
 	static void start(HINSTANCE pHInstance);
 	static void mainLoop();
-	static void processFrame();
+	static void processGameFrame();
+	static void processMenuFrame();
 	static void stop();
 	static void select(glm::ivec2 mPos);
 
-	static u64 h1;
-	static u64 h2;
-	static u64 h3;
-
 	static World* world;
-
-	static GLTexture2DMip t1;
-	static GLTexture2DMip t2;
-	static GLTexture2DMip t3;
-	static GLTexture2DMip t4;
 
 	static float programTime;
 
-	static Shader s;
-	static Shader gPassShader;
-	static Shader testShader;
-
 	static std::mt19937_64 rand;
-
-	//static Text t;
 
 	static Camera defaultOrthoCam;
 	//static FontStore fontStore;
@@ -69,16 +53,20 @@ public:
 	static QPC qpc;
 	static glm::ivec2 lastM;
 	static UIM uim;
+	static Logger logger;
 
 	static s32 selectedID;
 
 	static UIWindow* uiw;
 	static bool windowClicked;
 	static glm::ivec2 clickedPos;
+	static Log log;
 
 	static AssetManager assets;
 
-	//private:
+	static bool consoleOpen;
+
+//private:
 
 	enum EngineState { InGame, Menu, Quitting };
 

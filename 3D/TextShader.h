@@ -5,8 +5,8 @@ class TextShader : public ShaderProgram
 {
 public:
 	TextShader() { initialise(); }
-
-	void initialise()
+	
+	int initialise()
 	{
 		load("text", VertFrag);
 		compile();
@@ -18,6 +18,7 @@ public:
 		colourLoc = glGetUniformLocation(GLID, "colour");
 		setFontBinding(12);
 		stop();
+		return 1;
 	}
 
 	void setFontBinding(int pBinding)

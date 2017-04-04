@@ -5,7 +5,7 @@
 class Camera
 {
 public:
-	Camera()
+	Camera() 
 	{
 		//StandardShader s;
 
@@ -122,7 +122,7 @@ public:
 		float weightFactor = 1.15f;
 		pitch = ler(pitch, targetPitch, weightFactor);
 		yaw = ler(yaw, targetYaw, weightFactor);
-
+		
 		matRoll = glm::rotate(glm::fmat4(), roll, glm::vec3(0.0f, 0.0f, 1.0f));
 		matPitch = glm::rotate(glm::fmat4(), pitch, glm::vec3(1.0f, 0.0f, 0.0f));
 		matYaw = glm::rotate(glm::fmat4(), yaw, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -134,7 +134,8 @@ public:
 		glm::fmat4 translate = glm::fmat4(1.0f);
 		translate = glm::translate(translate, -pos);
 
-		rotation = matRoll * matPitch * matYaw;
+		//rotation = matRoll * matPitch * matYaw;
+		rotation = glm::fmat4(qRot);
 		view = rotation * translate;
 
 		projView = proj * view;
@@ -148,6 +149,8 @@ public:
 	glm::fmat4 matPitch;
 	glm::fmat4 matRoll;
 	glm::fmat4 rotation;
+
+	glm::quat qRot;
 
 	glm::fmat4 proj, view, projView;
 	glm::fmat4 inverseProj;

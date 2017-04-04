@@ -1,15 +1,16 @@
 #pragma once
 #include "UIElement.h"
 #include "Text.h"
+#include "UIRectangleShape.h"
 
 class UIButton :
 	public UIElement
 {
 public:
-	UIButton();
+	UIButton(UIWindow* pParent);
 	~UIButton();
-
-	void mouseDown()
+	
+	void mouseDown() 
 	{
 		if (text.getColour().x == 1.f)
 		{
@@ -27,6 +28,9 @@ public:
 
 	void draw()
 	{
+		rect.setProj(parentWindow->getProj());
+		rect.draw();
+
 		text.shader->setProj(parentWindow->getProj());
 		text.shader->setModel(glm::fmat4());
 		text.shader->setView(glm::fmat4());
@@ -34,23 +38,16 @@ public:
 		text.draw();
 	}
 
-	glm::ivec2 getPosition() { //return text.getPosition(); }
-	}
+	//glm::ivec2 getPosition() { return rect.bounds.topLeft; }
+	glm::ivec2 getPosition() { return glm::ivec2(1.f,1.f); }
+	glm::ivec2 getTopLeft() { return getPosition(); }
+	//glm::ivec2 getSize() { return rect.bounds.size; }
+	glm::ivec2 getSize() { return glm::ivec2(1.f,1.f); }
 
-	glm::ivec2 getTopLeft()
-	{
-		return text.getPosition();
-	}
-
-	glm::ivec2 getSize()
-	{
-		return glm::ivec2(text.getBoundingBox().width, text.getBoundingBox().height);
-	}
-
-	//private:
+//private:
 
 	Text2D text;
-
+	RectangleShape rect;
 
 };
 

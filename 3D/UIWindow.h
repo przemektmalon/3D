@@ -3,6 +3,8 @@
 #include "Framebuffer.h"
 #include "Shape2DShader.h"
 #include "Window.h"
+#include "Event.h"
+#include "Rect.h"
 
 class Font;
 class UIElement;
@@ -16,7 +18,10 @@ public:
 
 	void draw();
 	void update();
-	void mouseDown();
+	void mouseDown(MouseEvent& pMouseEvent);
+	void mouseUp(MouseEvent& pMouseEvent);
+	void keyDown(KeyEvent& pMouseEvent);
+	void keyUp(KeyEvent& pMouseEvent);
 	const GLTexture2D& getTexture() { return renderTarget.textureAttachments[0]; }
 
 	void setTitle(std::string pTitle);
@@ -38,16 +43,16 @@ public:
 
 	void updateWindowVBO()
 	{
-		float windowVerts[32] = {
-			windowArea.left, parentWindow->getSizeY() - windowArea.top,  0.0f, 1.0f,//TL
-			windowArea.left + windowArea.width,  parentWindow->getSizeY() - windowArea.top,  1.0f, 1.0f,//TR
-			windowArea.left + windowArea.width,parentWindow->getSizeY() - windowArea.top - windowArea.height,  1.0f, 0.0f,//BR
-			windowArea.left, parentWindow->getSizeY() - windowArea.top - windowArea.height,  0.0f, 0.0f,//BL
+		float windowVerts[40] = {
+			windowArea.left, parentWindow->getSizeY() - windowArea.top,0.f,  0.0f, 1.0f,//TL
+			windowArea.left + windowArea.width,  parentWindow->getSizeY() - windowArea.top,0.f,  1.0f, 1.0f,//TR
+			windowArea.left + windowArea.width,parentWindow->getSizeY() - windowArea.top - windowArea.height,0.f,  1.0f, 0.0f,//BR
+			windowArea.left, parentWindow->getSizeY() - windowArea.top - windowArea.height,0.f,  0.0f, 0.0f,//BL
 
-			borderWidth,windowArea.height - borderWidth - titleWidth ,0,1,
-			windowArea.width - borderWidth, windowArea.height - borderWidth - titleWidth,1,1,
-			windowArea.width - borderWidth, borderWidth,1,0,
-			borderWidth,borderWidth,0,0
+			borderWidth,windowArea.height - borderWidth - titleWidth ,0.f,0,1,
+			windowArea.width - borderWidth, windowArea.height - borderWidth - titleWidth,0.f,1,1,
+			windowArea.width - borderWidth, borderWidth,0.f,1,0,
+			borderWidth,borderWidth,0.f,0,0
 
 			/*borderWidth,	windowArea.height - borderWidth - 20,  0.0f, 1.0f,//TL
 			windowArea.width - borderWidth, windowArea.height - 20 - borderWidth,  1.0f, 1.0f,//TR
@@ -55,13 +60,19 @@ public:
 			borderWidth, borderWidth,  0.0f, 0.0f,//BL*/
 		};
 
+		glBindVertexArray(vao);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(windowVerts), windowVerts, GL_STATIC_DRAW);
+
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 		//glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(windowVerts), windowVerts);
 		//glBufferSubData(GL_ARRAY_BUFFER, sizeof(windowVerts), sizeof(elementVerts), elementVerts);
 	}
 
 	UIRect getWindowArea() { return windowArea; }
+	irect getWindowRect() { return irect(windowArea.left, windowArea.top, windowArea.width, windowArea.height); }
 
 	void drag(glm::ivec2 delta)
 	{
@@ -77,7 +88,7 @@ public:
 		updateWindowVBO();
 	}
 
-	//private:
+//private:
 
 	UIRect windowArea;
 	UIRect elementArea;
@@ -89,7 +100,7 @@ public:
 	std::vector<UIElement*> elements;
 	UILabel* title;
 
-	Shape2DShader shader;
+	ShaderProgram* shader;
 
 	GLuint vao;
 	GLuint vbo;
@@ -99,5 +110,5 @@ public:
 
 
 
-
+	
 };

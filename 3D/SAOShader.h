@@ -7,7 +7,7 @@ class SAOShader : public ShaderProgram
 public:
 	SAOShader() {}
 
-	void initialise()
+	int initialise()
 	{
 		load("ssao", VertFrag);
 		compile();
@@ -21,10 +21,12 @@ public:
 		viewLoc = glGetUniformLocation(GLID, "view");
 		projInfoLoc = glGetUniformLocation(GLID, "projInfo");
 
-		setRadius(36.f);
-		setIntensity(6.4f);
+		setRadius(0.36f);
+		setIntensity(2.4f);
 
 		stop();
+
+		return 1;
 	}
 
 	void setProj(glm::fmat4 &proj, glm::ivec2 viewport)

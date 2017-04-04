@@ -10,8 +10,13 @@ public:
 		KC_BACK = 0x08,
 		KC_TAB = 0x09,
 
-		KC_RETURN = 0x0d,
-		KC_SHIFT = 0x10,
+		KC_SYS = VK_LWIN,
+		KC_RETURN = VK_RETURN,
+		KC_SHIFT = VK_SHIFT,
+		KC_CTRL = VK_CONTROL,
+		KC_ALT = VK_MENU,
+		KC_CAPS = VK_CAPITAL,
+		KC_ESCAPE = VK_ESCAPE
 	};
 	Code code;
 };

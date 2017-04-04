@@ -1,9 +1,11 @@
 #pragma once
 #include <functional>
 #include "Keyboard.h"
+#include <queue>
 
 void escapePress();
 void screenshot();
+
 
 struct ControlArray
 {
@@ -50,7 +52,7 @@ public:
 		auto fnc = ca->keyDownFunctions[keyCode.code];
 		if (fnc != nullptr)
 		{
-			ca->keyDownFunctions[keyCode.code]();
+			fnc();
 		}
 	}
 
@@ -59,7 +61,7 @@ public:
 		auto fnc = ca->keyUpFunctions[keyCode.code];
 		if (fnc != nullptr)
 		{
-			ca->keyUpFunctions[keyCode.code]();
+			fnc();
 		}
 	}
 

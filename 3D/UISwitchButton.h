@@ -1,11 +1,13 @@
 #pragma once
 #include "UIElement.h"
 
+class UIWindow;
+
 class UISwitchButton :
 	public UIElement
 {
 public:
-	UISwitchButton();
+	UISwitchButton(UIWindow* pParent);
 	~UISwitchButton();
 
 

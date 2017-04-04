@@ -1,10 +1,10 @@
 #pragma once
 #include <GL\glew.h>
-#include <string>
+//#include <string>
 #include <iostream>
 #include <fstream>
 #include "ShaderPreprocessor.h"
-#include "StackStrings.h"
+#include "StringGenerics.h"
 
 class ComputeShader : public ShaderPreprocessor
 {
@@ -12,7 +12,7 @@ public:
 	ComputeShader() {}
 	~ComputeShader() { glDeleteProgram(program); }
 
-	GLuint load(StackString& pCompPath, bool preprocess = false)
+	GLuint load(StringGeneric& pCompPath, bool preprocess = false)
 	{
 		pCompPath += String32(".comp");
 

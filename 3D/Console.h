@@ -163,10 +163,10 @@ public:
 			{
 				if (ret.type == Flt)
 				{
-					ret.type = Err;
+					ret.type = Err; 
 					return ret;
 				}
-				ret.type = Flt;
+				ret.type = Flt; 
 				len2 = len;
 				lenP = &len2;
 				++*ccp;
@@ -178,7 +178,7 @@ public:
 			{
 				ret.type = Err; return ret;
 			}
-
+			
 			nums[*lenP] = *cc - 48;
 			++*lenP;
 
@@ -201,7 +201,7 @@ public:
 			ret.integer = 0;
 			for (u8 i = 0; i < len; ++i)
 			{
-				ret.integer += u32(nums[i]) * u32(std::pow(10, len - i - 1));
+				ret.integer += u32(nums[i]) * u32(std::pow(10,len-i-1));
 			}
 			return ret;
 		case Flt:
@@ -212,7 +212,7 @@ public:
 			}
 			for (u8 i = 0; i < len2; ++i)
 			{
-				ret.floating += float(nums[len + i]) / float(std::pow(10.f, i + 1));
+				ret.floating += float(nums[len+i]) / float(std::pow(10.f, i+1));
 			}
 			return ret;
 		}
@@ -275,10 +275,8 @@ public:
 
 			if (*cc == ',')
 			{
-				if (++curNum == 4)
-				{
-					ret.type = Err; return ret;
-				}
+				if (++curNum == 4) 
+				{ ret.type = Err; return ret; }
 			}
 
 			if (*cc == '-')
@@ -299,9 +297,8 @@ public:
 				}
 				++curNum;
 				if (*cc == ',')
-					if (curNum == 4) {
-						ret.type = Err; return ret;
-					}
+					if (curNum == 4) { 
+						ret.type = Err; return ret; }
 				if (*cc == ')')
 					break;
 				else
@@ -332,7 +329,7 @@ public:
 			if (*cc == ')')
 				break;
 		}
-
+		
 		ret.length = curNum;
 		return ret;
 	}
@@ -357,7 +354,7 @@ public:
 	struct CParam
 	{
 		CParam() : type(Err) {}
-		CParam(CParam& pPar) : type(pPar.type), str(pPar.str) {}
+		CParam(CParam& pPar) : type(pPar.type) , str(pPar.str) {}
 		CParam(CNumber* pNum) : num(pNum) { type = pNum->type; }
 		CParam(CVector* pVec) : vec(pVec) { type = Vec; }
 		CParam(String32* pStr) : str(pStr), type(Str) {}

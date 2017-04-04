@@ -3,6 +3,8 @@
 #include "Engine.h"
 #include "Camera.h"
 #include "Renderer.h"
+#include "Keyboard.h"
+#include "Event.h"
 
 Window* Window::engineWindow;
 
@@ -189,7 +191,7 @@ void Window::registerInputDevices()
 	}
 }
 
-void Window::screenshot(StackString& fileName)
+void Window::screenshot(StringGeneric& fileName)
 {
 	u32 imageSize = getSizeX() * getSizeY() * 3;
 	u32 rowSize = getSizeX() * 3;
@@ -266,12 +268,18 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 	}
 	case WM_KEYDOWN:
 	{
-		Engine::uim.keyDown(KeyCode(wParam));
+		engineWindow->keyboard.keyState[wParam] = false;
+		auto check = [](u8 pKey) -> bool { return engineWindow->keyboard.isKeyPressed(pKey); };
+		Event newEvent(Event::KeyDown); newEvent.constructKey(wParam, check(KeyCode::KC_SHIFT), check(KeyCode::KC_ALT), check(KeyCode::KC_SYS), check(KeyCode::KC_CAPS), check(KeyCode::KC_CTRL));
+		engineWindow->eventQ.pushEvent(newEvent);
 		break;
 	}
 	case WM_KEYUP:
 	{
-		Engine::uim.keyUp(KeyCode(wParam));
+		engineWindow->keyboard.keyState[wParam] = true;
+		auto check = [](u8 pKey) -> bool { return engineWindow->keyboard.isKeyPressed(pKey); };
+		Event newEvent(Event::KeyUp); newEvent.constructKey(wParam, check(KeyCode::KC_SHIFT), check(KeyCode::KC_ALT), check(KeyCode::KC_SYS), check(KeyCode::KC_CAPS), check(KeyCode::KC_CTRL));
+		engineWindow->eventQ.pushEvent(newEvent);
 		break;
 	}
 	case WM_INPUT:
@@ -279,15 +287,14 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 		UINT dwSize;
 
 		GetRawInputData((HRAWINPUT)lParam, RID_INPUT, NULL, &dwSize,
-			sizeof(RAWINPUTHEADER));
+		sizeof(RAWINPUTHEADER));
 		LPBYTE lpb = new BYTE[dwSize];
 		if (lpb == NULL)
 		{
-			return 0;
+		return 0;
 		}
 
-		if (GetRawInputData((HRAWINPUT)lParam, RID_INPUT, lpb, &dwSize,
-			sizeof(RAWINPUTHEADER)) != dwSize)
+		if (GetRawInputData((HRAWINPUT)lParam, RID_INPUT, lpb, &dwSize, sizeof(RAWINPUTHEADER)) != dwSize)
 			OutputDebugString(TEXT("GetRawInputData does not return correct size !\n"));
 
 		RAWINPUT* raw = (RAWINPUT*)lpb;
@@ -309,37 +316,38 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 				const auto lMouseClick = RI_MOUSE_LEFT_BUTTON_DOWN & buttonFlag;
 				const auto rMouseClick = RI_MOUSE_RIGHT_BUTTON_DOWN & buttonFlag;
 				const auto mMouseClick = RI_MOUSE_MIDDLE_BUTTON_DOWN & buttonFlag;
-
+				
 				const auto anyMouseRelease = (RI_MOUSE_LEFT_BUTTON_UP | RI_MOUSE_RIGHT_BUTTON_UP | RI_MOUSE_MIDDLE_BUTTON_UP) & buttonFlag;
 				const auto lMouseRelease = RI_MOUSE_LEFT_BUTTON_UP & buttonFlag;
 				const auto rMouseRelease = RI_MOUSE_RIGHT_BUTTON_UP & buttonFlag;
 				const auto mMouseRelease = RI_MOUSE_MIDDLE_BUTTON_UP & buttonFlag;
 
-				if (lMouseClick) {
+				glm::ivec2 mPos; mPos = engineWindow->mouse.getWindowPosition(engineWindow);
+
+				if (lMouseClick){
 					engineWindow->mouse.leftDown = true;
-					if (engineWindow->isMouseInClientArea())
-					{
-						Engine::select(engineWindow->mouse.getWindowPosition(engineWindow));
-					}
-					Engine::uim.mouseDown(0);
+					Event newEvent(Event::MouseDown); newEvent.constructMouse(0, mPos, 0);
+					engineWindow->eventQ.pushEvent(newEvent);
 					std::string mp;
-					mp = std::to_string(engineWindow->mouse.getWindowPosition(engineWindow).x) + " : " + std::to_string(engineWindow->mouse.getWindowPosition(engineWindow).y) + '\n';
-					//OutputDebugString(mp.c_str());
+					mp = std::to_string(engineWindow->mouse.getWindowPosition(engineWindow).x)  + " : " + std::to_string(engineWindow->mouse.getWindowPosition(engineWindow).y) + '\n';
 				}
-				else if (lMouseRelease) {
+				else if (lMouseRelease){
 					engineWindow->mouse.leftDown = false;
-					Engine::uim.mouseUp(0);
+					Event newEvent(Event::MouseUp); newEvent.constructMouse(0, mPos, 0);
+					engineWindow->eventQ.pushEvent(newEvent);
 				}
 
-				if (rMouseClick) {
+				if (rMouseClick){
 					engineWindow->mouse.rightDown = true;
-					Engine::uim.mouseDown(1);
+					Event newEvent(Event::MouseDown); newEvent.constructMouse(1, mPos, 0);
+					engineWindow->eventQ.pushEvent(newEvent);
 					//TODO: IF MOUSE DISAPPEAR WHEN CLICKED
 					ShowCursor(false);
 				}
-				else if (rMouseRelease) {
+				else if (rMouseRelease){
 					engineWindow->mouse.rightDown = false;
-					Engine::uim.mouseUp(1);
+					Event newEvent(Event::MouseUp); newEvent.constructMouse(1, mPos, 0);
+					engineWindow->eventQ.pushEvent(newEvent);
 					ShowCursor(true);
 				}
 
@@ -361,8 +369,13 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 
 					Engine::cam.targetYaw += mouseX_Sensitivity * mouseDelta.x;
 					Engine::cam.targetPitch += mouseY_Sensitivity * mouseDelta.y;
-				}
 
+					glm::quat rotation(glm::angleAxis(Engine::cam.targetPitch, glm::vec3(1.0f, 0.0f, 0.0f)));
+					rotation = rotation * glm::angleAxis(Engine::cam.targetYaw, glm::vec3(0.0f, 1.0f, 0.0f));
+
+					Engine::cam.qRot = rotation;
+				}
+				
 				engineWindow->mouse.setDelta(mouseDelta);
 
 				//Engine::select();
@@ -374,7 +387,7 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 				{
 					if (engineWindow->isMouseInClientArea())
 					{
-
+						
 						engineWindow->captureMouseFocus();
 					}
 				}
@@ -443,7 +456,7 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 		PWINDOWPOS data = PWINDOWPOS(lParam);
 		engineWindow->posX = data->x;
 		engineWindow->posY = data->y;
-
+		
 		//SetWindowPos(engineWindow->windowHandle, HWND_TOP, data->x, data->y, data->cx, data->cy, data->flags);
 
 		break;

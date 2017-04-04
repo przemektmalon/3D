@@ -4,17 +4,17 @@
 #include <vector>
 #include <assert.h>
 #include <map>
-#include "StackStrings.h"
+#include "Strings.h"
 
 class ShaderPreprocessor
 {
 public:
 	ShaderPreprocessor() {}
 	~ShaderPreprocessor() {}
-
+	
 	char* preProcess(char* pSource, s32 size)
 	{
-		char* processedShader = new char[size + (1024 * 1024)];
+		char* processedShader = new char[size+(1024*1024)];
 
 		bool converting = false;
 
@@ -32,7 +32,7 @@ public:
 				//std::string varName; varName.reserve(20);
 				//char varName[32];
 				String32 varName;
-
+				
 				u32 varNameIndex = 0;
 				for (;;)
 				{
@@ -57,7 +57,7 @@ public:
 					for (u32 i = 0; i < 32; ++i)
 					{
 						//if (memcmp(varName, varVals[i].var, 32) == 0)
-						if (varName == varVals[i].var)
+						if(varName == varVals[i].var)
 						{
 							findVal = &varVals[i].val;
 							break;
@@ -67,14 +67,14 @@ public:
 
 				if (findVal == nullptr)
 					assert(0);
-
-				StackString::copyChars(&processedShader[outputIndex], findVal->getString(), findVal->getLength());
+			
+				StringGeneric::copyChars(&processedShader[outputIndex], findVal->getString(), findVal->getLength());
 				outputIndex += findVal->getLength();
 				converting = false;
 			}
 
 			processedShader[outputIndex] = *pSource;
-
+			
 			++outputIndex;
 			++sourceIndex;
 
@@ -94,7 +94,7 @@ public:
 				varVals[i].val.overwrite(val);
 				break;
 			}
-
+			
 			if (varVals[i].var.getString()[0] == '\0')
 			{
 				varVals[i].val.overwrite(val);

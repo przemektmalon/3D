@@ -10,7 +10,7 @@ struct PointLightData
 {
 public:
 	PointLightData() {}
-	PointLightData(glm::fvec3 pos, glm::fvec3 col, float lin = 0.0001f, float quad = 0.0003f) : positionRad(glm::fvec4(pos, lin))/*, colourQuad(glm::fvec4(col,quad))*/ {}
+	PointLightData(glm::fvec3 pos, glm::fvec3 col, float lin = 0.0001f, float quad = 0.0003f) : positionRad(glm::fvec4(pos,lin))/*, colourQuad(glm::fvec4(col,quad))*/ {}
 	~PointLightData() {}
 
 	union
@@ -49,7 +49,7 @@ public:
 	{
 		//radius = (0.5 * (std::sqrtf(linear*linear + (396.f * quadratic) - linear))) / quadratic;
 		radius = (0.5 * (std::sqrtf(linear*linear + (MIN_LIGHT_CONSTANT * quadratic) - linear))) / quadratic;
-
+		
 	}
 };
 
@@ -122,7 +122,7 @@ struct DirectLightData
 class PointLight
 {
 public:
-
+	
 	float calculateRadius()
 	{
 		data.radius = (0.5 * (std::sqrtf(data.linear*data.linear + (MIN_LIGHT_CONSTANT * data.quadratic) - data.linear))) / data.quadratic;

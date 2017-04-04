@@ -75,10 +75,10 @@ public:
 	{
 		//glBindBuffer(GL_SHADER_STORAGE_BUFFER, GLID);
 	}
-	~SSBO()
+	~SSBO() 
 	{
 	}
-
+	
 	inline void bufferData(GLsizeiptr pSize, void* pData, GLenum pUsage)
 	{
 		sizeInBytes = pSize;

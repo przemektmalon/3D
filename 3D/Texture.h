@@ -1,21 +1,36 @@
 #pragma once
 #include "Include.h"
 #include "SOIL.h"
+#include "Asset.h"
 #include <Windows.h>
 
-class GLTexture
+class GLTexture : public Asset
 {
 public:
 	GLTexture() {}
+	GLTexture(String<128>& pPath, String<32>& pName) : Asset(pPath, pName) {}
 	~GLTexture() {}
 
-	void release()
+	void release() 
 	{
 		glDeleteTextures(1, &GLID);
 	}
 
+	virtual void load() = 0;
 	virtual GLuint getGLID() { return GLID; }
-	virtual GLuint64 getHandle(GLuint pSampler) { return glGetTextureSamplerHandleARB(GLID, pSampler); }
+	virtual GLuint64 getHandle(GLuint pSampler) 
+	{
+		handle = glGetTextureSamplerHandleARB(GLID, pSampler);
+		return handle;
+	}
+	virtual void makeResident(GLuint pSampler) 
+	{
+		if (handle == 0)
+		{
+			getHandle(pSampler);
+		}
+		glMakeTextureHandleResidentARB(handle);
+	}
 
 	virtual void bind(GLint pTextureUnit = 0) = 0;
 
@@ -28,8 +43,11 @@ protected:
 	GLint internalFormat;
 	GLint pixelAlignment;
 	GLuint GLID;
+	GLuint64 handle;
+	GLuint sampler;
 	s32 width;
 	s32 height;
+	s32 mipLevels;
 };
 
 class GLTextureCube : public GLTexture
@@ -37,6 +55,11 @@ class GLTextureCube : public GLTexture
 public:
 	GLTextureCube() {}
 	~GLTextureCube() {}
+
+	void load()
+	{
+		
+	}
 
 	void createFromFiles(const char* pFilePaths[6])
 	{
@@ -50,7 +73,7 @@ public:
 			SOIL_free_image_data(image);
 		}
 	}
-
+	
 	void bind(GLint pTextureUnit = 0)
 	{
 		glBindTextureUnit(pTextureUnit, GLID);
@@ -70,19 +93,37 @@ public:
 class GLTexture2D : public GLTexture
 {
 public:
-	GLTexture2D() {}
+	GLTexture2D(bool mipMapped = true) 
+	{
+		if (mipMapped)
+			mipLevels = 1;
+		else
+			mipLevels = 0;
+	}
+	GLTexture2D(String<128>& pPath, String<32>& pName, bool mipMapped = true) : GLTexture(pPath, pName)
+	{
+
+	}
 	~GLTexture2D() { }
 
-	virtual void createFromFile(std::string pFilePath)
+	void load()
+	{
+		createFromFile(diskPath);
+	}
+
+	void createFromFile(StringGeneric& pPath) 
 	{
 		glCreateTextures(GL_TEXTURE_2D, 1, &GLID);
 		glBindTexture(GL_TEXTURE_2D, GLID);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-		unsigned char* image = SOIL_load_image(pFilePath.c_str(), &width, &height, 0, SOIL_LOAD_RGBA);
+		unsigned char* image = SOIL_load_image(pPath.getString(), &width, &height, 0, SOIL_LOAD_RGBA);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
 		SOIL_free_image_data(image);
-	} //TODO: Implement load from file
-	virtual void createFromStream(GLint pInternalFormat, s32 pWidth, s32 pHeight, GLint pFormat, GLenum pType, const void* pPixels, GLint pTextureUnit = 0, GLenum pPixelAlignment = 4)
+		if (mipLevels != 0)
+			glGenerateMipmap(GL_TEXTURE_2D);
+	}
+
+	void createFromStream(GLint pInternalFormat, s32 pWidth, s32 pHeight, GLint pFormat, GLenum pType, const void* pPixels, GLint pTextureUnit = 0, GLenum pPixelAlignment = 4)
 	{
 		internalFormat = pInternalFormat;
 		width = pWidth; height = pHeight;
@@ -94,7 +135,7 @@ public:
 		glActiveTexture(GL_TEXTURE0);
 		glCreateTextures(GL_TEXTURE_2D, 1, &GLID);
 		glBindTextureUnit(0, GLID);
-
+		
 		//glGenTextures(1, &GLID);
 		glBindTexture(GL_TEXTURE_2D, GLID);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
@@ -122,25 +163,25 @@ public:
 		u32 sourcePixelSize;
 		switch (internalFormat)
 		{
-		case(GL_RED):
+		case(GL_RED) :
 			sourcePixelSize = 1;
 			break;
-		case(GL_RGB):
+		case(GL_RGB) :
 			sourcePixelSize = 3;
 			break;
-		case(GL_RGB16F):
+		case(GL_RGB16F) :
 			sourcePixelSize = 6;
 			break;
 		case(GL_RGB32F):
 			sourcePixelSize = 12;
 			break;
-		case(GL_RGBA):
+		case(GL_RGBA) :
 			sourcePixelSize = 4;
 			break;
-		case(GL_RGBA16F):
+		case(GL_RGBA16F) :
 			sourcePixelSize = 8;
 			break;
-		case(GL_RGBA32F):
+		case(GL_RGBA32F) :
 			sourcePixelSize = 16;
 			break;
 		default:
@@ -217,33 +258,6 @@ public:
 	}
 
 private:
-};
-
-class GLTexture2DMip : public GLTexture2D
-{
-public:
-	GLTexture2DMip() {}
-	~GLTexture2DMip() {}
-
-	virtual void createFromFile(std::string pFilePath)
-	{
-		glCreateTextures(GL_TEXTURE_2D, 1, &GLID);
-		glBindTexture(GL_TEXTURE_2D, GLID);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-		unsigned char* image = SOIL_load_image(pFilePath.c_str(), &width, &height, 0, SOIL_LOAD_RGBA);
-		auto c = SOIL_last_result();
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-		SOIL_free_image_data(image);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	void createFromStream(GLint pInternalFormat, s32 pWidth, s32 pHeight, GLint pFormat, GLenum pType, const void* pPixels, s32 mipLevels, s8 pTextureUnit = 0)
-	{
-		glActiveTexture(GL_TEXTURE0 + pTextureUnit);
-		glGenTextures(1, &GLID);
-		glBindTexture(GL_TEXTURE_2D, GLID);
-		glTexImage2D(GL_TEXTURE_2D, 0, pInternalFormat, pWidth, pHeight, 0, pFormat, pType, pPixels);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
 };
 
 class GLRenderbuffer

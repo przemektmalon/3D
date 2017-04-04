@@ -6,7 +6,7 @@ class GBufferShader : public ShaderProgram
 public:
 	GBufferShader() {}
 
-	void initialise()
+	int initialise()
 	{
 		load("gBufferPass", VertFrag);
 		compile();
@@ -21,6 +21,7 @@ public:
 		setDiffuseBinding(0);
 		setSpecularBinding(1);
 		stop();
+		return 1;
 	}
 
 	void setDiffuseBinding(int pBinding)

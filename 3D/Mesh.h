@@ -10,6 +10,8 @@
 
 #include "Texture.h"
 
+#include "Bounds3D.h"
+
 struct ObjectData
 {
 	std::vector<float> verts;
@@ -26,186 +28,157 @@ struct InterlacedObjectData
 	s32 size;
 };
 
-struct MeshRenderMeta
+class VertexAttrib
 {
-	u32 batchID;
+public:
+
+	enum VertexAttribType {
+		flt2, flt3, flt4,
+		dbl2, dbl3, dbl4,
+		AttribTypesCount
+	};
+
+	static const int typeSizes[AttribTypesCount];
+	static const String<16> typeNames[AttribTypesCount];
+
+	String<32> name;
+	VertexAttribType type;
+
+	void operator=(VertexAttrib& rhs)
+	{
+		name.overwrite(rhs.name);
+		type = rhs.type;
+	}
+};
+
+class VertexFormat
+{
+public:
+
+	VertexAttrib attribs[12];
+	s32 numAttribs;
+	s32 size;
+
+	s32 calculateSizeInBytes()
+	{
+		size = 0;
+		for (int i = 0; i < numAttribs; ++i)
+		{
+			size += VertexAttrib::typeSizes[attribs[i].type];
+		}
+		return size;
+	}
+
+	void operator=(VertexFormat& rhs)
+	{
+		for (int i = 0; i < 12; ++i)
+		{
+			attribs[i] = rhs.attribs[i];
+		}
+		numAttribs = rhs.numAttribs;
+		size = rhs.size;
+	}
+
+	void defineGLVertexAttribs(GLuint vao);
+
+};
+
+enum MaterialID
+{
+	PN,
+	PNUU_T_S_N,
+	PNUU_TT_SS_NN,
+	PNUU_TT_SS,
+	PNUU_TT_NN,
+	PNUU_TTT_SSS_NNN,
+	MATERIALS_COUNT
+};
+
+class Material
+{
+public:
+	Material() {}
+
+	MaterialID matID;
+
+	GLTexture2D* albedo[4];
+	GLTexture2D* specular[4];
+	GLTexture2D* normal[4];
+
+	static VertexFormat vertexFormats[MATERIALS_COUNT];
+	static void initVertexFormats()
+	{
+		VertexFormat* vf = vertexFormats + PNUU_T_S_N;
+		vf->numAttribs = 3;
+		vf->attribs[0].name.setToChars("p");
+		vf->attribs[0].type = VertexAttrib::flt3;
+		vf->attribs[1].name.setToChars("n");
+		vf->attribs[1].type = VertexAttrib::flt3;
+		vf->attribs[2].name.setToChars("t");
+		vf->attribs[2].type = VertexAttrib::flt2;
+		vf->calculateSizeInBytes();
+	}
+};
+
+class OBJMeshData;
+
+class InterleavedVertexData
+{
+public:
+	InterleavedVertexData() : data(nullptr) {}
+	~InterleavedVertexData()
+	{
+		if (data != nullptr)
+		{
+			delete[] data;
+		}
+	}
+
+	void fromOBJMeshData(OBJMeshData* obj);
+
+	s32 getDataSizeInBytes() { return size * sizeof(float); }
+
+	VertexFormat format;
+	float* data;
+	s32 size;
+
+};
+
+class MeshBatch;
+
+class MeshRenderMeta
+{
+public:
+	//u32 batchID;
+	MeshBatch* batchPtr;
 	u32 batchIndex;
+};
+
+struct MeshInstanceMeta
+{
+	MeshRenderMeta renderMeta;
+	SGNode* nodePtr;
 };
 
 class Mesh : public Asset
 {
+	friend class GPUMeshManager;
+	friend class MeshUtility;
+	friend class World;
 public:
 	Mesh() {}
 	Mesh(String128& pPath, String32& pName) : Asset(pPath, pName) {}
-	~Mesh() {}
-
-	void load()
+	~Mesh() 
 	{
-		loadBinary();
+		for (int i = 0; i < triangleLists.size(); ++i)
+		{
+			delete[] triangleLists[i].data;
+		}
 	}
-
-	/*void load(std::string objPath)
-	{
-	std::ifstream ifs(objPath);
-
-	if (ifs.bad())
-	{
-	std::cout << "Error loading " << objPath << std::endl;
-	return;
-	}
-
-	if (!ifs.good())
-	{
-	std::cout << "Error loading " << objPath << std::endl;
-	return;
-	}
-
-	if (!ifs.is_open())
-	{
-	std::cout << "Error loading " << objPath << std::endl;
-	return;
-	}
-
-	while (!ifs.eof())
-	{
-	std::string type;
-	std::getline(ifs, type, ' ');
-	if (type == "v")
-	{
-	std::string xstr, ystr, zstr;
-	std::getline(ifs, xstr, ' ');
-	std::getline(ifs, ystr, ' ');
-	std::getline(ifs, zstr, '\n');
-	data.verts.push_back(std::stof(xstr));
-	data.verts.push_back(std::stof(ystr));
-	data.verts.push_back(std::stof(zstr));
-	}
-	else if (type == "vt")
-	{
-	std::string ustr, tstr;
-	std::getline(ifs, ustr, ' ');
-	std::getline(ifs, tstr, '\n');
-	data.texCoords.push_back(std::stof(ustr));
-	data.texCoords.push_back(std::stof(tstr));
-	}
-	else if (type == "vn")
-	{
-	std::string xstr, ystr, zstr;
-	std::getline(ifs, xstr, ' ');
-	std::getline(ifs, ystr, ' ');
-	std::getline(ifs, zstr, '\n');
-	data.normals.push_back(std::stof(xstr));
-	data.normals.push_back(std::stof(ystr));
-	data.normals.push_back(std::stof(zstr));
-	}
-	else if (type == "f")
-	{
-	std::string xstr, ystr, zstr;
-	std::getline(ifs, xstr, '/');
-	std::getline(ifs, ystr, '/');
-	std::getline(ifs, zstr, ' ');
-	data.indices.push_back(abs(std::stoi(xstr)));
-	data.indices.push_back(abs(std::stoi(ystr)));
-	data.indices.push_back(abs(std::stoi(zstr)));
-	std::getline(ifs, xstr, '/');
-	std::getline(ifs, ystr, '/');
-	std::getline(ifs, zstr, ' ');
-	data.indices.push_back(abs(std::stoi(xstr)));
-	data.indices.push_back(abs(std::stoi(ystr)));
-	data.indices.push_back(abs(std::stoi(zstr)));
-	std::getline(ifs, xstr, '/');
-	std::getline(ifs, ystr, '/');
-	std::getline(ifs, zstr, '\n');
-	data.indices.push_back(abs(std::stoi(xstr)));
-	data.indices.push_back(abs(std::stoi(ystr)));
-	data.indices.push_back(abs(std::stoi(zstr)));
-
-	/*std::string xstr, ystr, zstr;
-	std::getline(ifs, xstr, '/');
-	std::getline(ifs, ystr, '/');
-	std::getline(ifs, zstr, ' ');
-	data.indices.push_back(abs(std::stoi(xstr)));
-	data.indices.push_back(0);
-	data.indices.push_back(abs(std::stoi(zstr)));
-	std::getline(ifs, xstr, '/');
-	std::getline(ifs, ystr, '/');
-	std::getline(ifs, zstr, ' ');
-	data.indices.push_back(abs(std::stoi(xstr)));
-	data.indices.push_back(0);
-	data.indices.push_back(abs(std::stoi(zstr)));
-	std::getline(ifs, xstr, '/');
-	std::getline(ifs, ystr, '/');
-	std::getline(ifs, zstr, '\n');
-	data.indices.push_back(abs(std::stoi(xstr)));
-	data.indices.push_back(0);
-	data.indices.push_back(abs(std::stoi(zstr)));///////////
-	}
-	else
-	{
-	std::getline(ifs, type, '\n');
-	}
-	}
-
-	data.numVert = data.indices.size() / 3;
-	data.numTris = data.numVert / 3;
-
-	int numVert = data.numVert;
-	int vertSize = 8;
-	float* glvertices = new float[numVert * vertSize];
-
-	int count = -1;
-	for (auto itr = data.indices.begin(); itr != data.indices.end(); itr += 3)
-	{
-	int index = 3 * (*(itr)-1);
-	glvertices[++count] = data.verts[index];
-	glvertices[++count] = data.verts[index + 1];
-	glvertices[++count] = data.verts[index + 2];
-
-	index = 2 * (*(itr + 1) - 1);
-	glvertices[++count] = data.texCoords[index];
-	glvertices[++count] = data.texCoords[index + 1];
-
-	index = 3 * (*(itr + 2) - 1);
-	glvertices[++count] = data.normals[index];
-	glvertices[++count] = data.normals[index + 1];
-	glvertices[++count] = data.normals[index + 2];
-	}
-
-	intData.interlacedData = glvertices;
-	intData.size = numVert * vertSize;
-
-	std::cout << intData.size << std::endl;
-	std::cout << data.numVert << std::endl;
-	std::cout << data.numTris << std::endl;
-
-	glUseProgram(Engine::gPassShader());
-
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, intData.size * sizeof(GLfloat), intData.interlacedData, GL_STATIC_DRAW);
-
-	auto posAttrib = glGetAttribLocation(Engine::gPassShader(), "p");
-	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
-	glEnableVertexAttribArray(posAttrib);
-
-	auto texAttrib = glGetAttribLocation(Engine::gPassShader(), "t");
-	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(texAttrib);
-
-	auto norAttrib = glGetAttribLocation(Engine::gPassShader(), "n");
-	glVertexAttribPointer(norAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(5 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(norAttrib);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-	}*/
 
 	void loadBinary()
 	{
-		std::ifstream ifs(diskPath.getString(), std::ios_base::binary);
+		/*std::ifstream ifs(diskPath.getString(), std::ios_base::binary);
 		s32 size;
 		float* glVerts;
 		ifs.read((char*)&size, sizeof(size));
@@ -213,32 +186,122 @@ public:
 		ifs.read((char*)intData.interlacedData, sizeof(GLfloat) * size);
 		intData.size = size;
 		data.numVert = size / 8;
-		data.numTris = data.numVert / 3;
+		data.numTris = data.numVert / 3;*/
 	}
 
-	void saveBinary(std::string binPath)
+	void saveBinary(StringGeneric& binPath)
 	{
-		std::ofstream ofs(binPath, std::ios_base::binary);
+		/*std::ofstream ofs(binPath.getString(), std::ios_base::binary);
 		ofs.write((char*)&intData.size, sizeof(intData.size));
 		std::cout << intData.size << std::endl;
-		ofs.write((char*)intData.interlacedData, intData.size * sizeof(float));
+		ofs.write((char*)intData.interlacedData, intData.size * sizeof(float));*/
 	}
 
-	ObjectData data;
-	InterlacedObjectData intData;
-	MeshRenderMeta renderMeta;
-};
+	void saveBinV10(StringGeneric& binPath)
+	{
+		std::ofstream ofs(binPath.getString(), std::ios_base::binary);
+		char major = 1; char minor = 0;
+		ofs.write(&major, sizeof(major));
+		ofs.write(&minor, sizeof(minor));
+		ofs.write(getName().getString(), getName().getCapacity());
+		auto numTriLists = triangleLists.size();
+		ofs.write((char*)&(numTriLists), sizeof(numTriLists));
 
-struct MeshLoadMeta
-{
-	String128 path;
-	String32 name;
-};
+		for (auto i = 0; i < triangleLists.size(); ++i)
+		{
+			TriangleList* tl = &triangleLists[i];
+			ofs.write((char*)&tl->material.matID, sizeof(tl->material.matID));
+			ofs.write((char*)&tl->numVerts, sizeof(tl->numVerts));
+			ofs.write(tl->material.albedo[0]->getName().getString(), tl->material.albedo[0]->getName().getCapacity());
+			auto size = tl->getDataSizeInBytes();
+			ofs.write((char*)&size, sizeof(size));
+			ofs.write((char*)tl->data, size);
+		}
+	}
 
-struct MeshInstanceMeta
-{
+	void load()
+	{
+		loadBinV10();
+		sortTriangleLists();
+	}
+
+	void loadBinV10();
+
+	void sortTriangleLists()
+	{
+		for (auto itr = triangleLists.begin(); itr != triangleLists.end(); ++itr)
+		{
+			bool added = false;
+			for (auto itr2 = triangleListsSorted.begin(); itr2 != triangleListsSorted.end(); ++itr2)
+			{
+				if (itr2->first == itr->material.matID)
+				{
+					itr2->second.push_back(&(*itr));
+					added = true;
+					break;
+				}
+			}
+			if (!added)
+			{
+				triangleListsSorted.push_back(std::make_pair(itr->material.matID, std::vector<Mesh::TriangleList*>(1, &(*itr))));
+			}
+		}
+	}
+
+	//ObjectData data;
+	//InterlacedObjectData intData;
 	MeshRenderMeta renderMeta;
-	SGNode* nodePtr;
+	//InterleavedVertexData ivd;
+	//OBJMeshData* objMeshData;
+
+	struct TriangleList
+	{
+		TriangleList() {}
+
+		Material material;
+		s32 numVerts;
+		s32 first;
+		float* data;
+
+		MeshRenderMeta renderMeta;
+
+		void copyConstruct(TriangleList& tl)
+		{
+			data = new float[tl.numVerts * tl.material.vertexFormats->size];
+			numVerts = tl.numVerts;
+			material = tl.material;
+			first = tl.first;
+			memcpy(data, tl.data, tl.numVerts * tl.material.vertexFormats->calculateSizeInBytes());
+		}
+
+		s32 getDataSizeInBytes()
+		{
+			return numVerts * material.vertexFormats[material.matID].size;
+		}
+	};
+
+	u32 getNumGPUTriLists()
+	{
+		u32 ret = 0;
+		for (auto itr = triangleListsSorted.begin(); itr != triangleListsSorted.end(); ++itr)
+		{
+			///TODO: THIS ISNT THE ONLY MATERIAL THE GPU SHOULD TAKE
+			if (itr->first == PNUU_T_S_N)
+			{
+				ret++;
+			}
+		}
+		return ret;
+	}
+
+//private:
+
+	std::vector<TriangleList> triangleLists;
+	std::vector<std::pair<MaterialID, std::vector<TriangleList*>>> triangleListsSorted;
+	std::vector<String<32>> listTextureNames;
+
+	AABounds3D bounds;
+	float radius;
 };
 
 struct MeshGPUMeta
@@ -263,156 +326,17 @@ public:
 	MeshInstance() {}
 	~MeshInstance() {}
 
-	//private:
-	//u32 meshID;
-	u32 instanceID;
+//private:
+	Mesh* mesh;
+	//u32 instanceID;
 	MeshRenderMeta renderMeta;
 	SGNode* sgNode;
-	GLTexture2DMip texx;
-	GLTexture2DMip specTex;
-	GLTexture2DMip normalTex;
-	GLTexture2DMip bumpTex;
+	//GLTexture2DMip texx;
+	//GLTexture2DMip specTex;
+	//GLTexture2DMip normalTex;
+	//GLTexture2DMip bumpTex;
 };
 
 #define MAX_BATCH_COUNT 512
 #define MAX_BATCH_SIZE 1024*1024*64
 
-struct MeshCPUMeta
-{
-	MeshCPUMeta(const char* pPath, const char* pName)
-	{
-		//strcpy_s(loadMeta.path, pPath);
-		//strcpy_s(loadMeta.name, pName);
-		loadMeta.path.setToChars(pPath);
-		loadMeta.name.setToChars(pName);
-	}
-	MeshLoadMeta loadMeta;
-	MeshRenderMeta renderMeta;
-};
-
-class GPUMeshManager
-{
-public:
-	GPUMeshManager() {}
-	~GPUMeshManager() {}
-
-	//MeshRenderMeta loadMesh(char* pPath)
-	//{
-	//	InterlacedObjectData intData;
-	//	std::ifstream ifs(pPath, std::ios_base::binary);
-	//	s32 size;
-	//	float* glVerts;
-	//	ifs.read((char*)&size, sizeof(size));
-	//	intData.interlacedData = (new float[size]);
-	//	ifs.read((char*)intData.interlacedData, sizeof(GLfloat) * size);
-	//	intData.size = size;
-
-	//	//data.numVert = size / 8;
-	//	//data.numTris = data.numVert / 3;
-
-	//	return pushMeshToBatch(intData.interlacedData, size, intData.size * sizeof(float), intData.size / (8), 10000);
-	//}
-
-	//MeshRenderMeta pushMeshToBatch(float* pData, s32 pDataSizeInBytes, s32 pMeshSize, s32 pVertCount, float pRadius)
-	MeshRenderMeta pushMeshToBatch(Mesh& pMesh)
-	{
-		u32 batchID = 0;
-		for (auto itr = solidBatches.begin(); itr != solidBatches.end(); ++itr)
-		{
-			GLsizei size = 0;
-			for (int i = 0; i < itr->length; ++i)
-			{
-				size += itr->counts[i] * 8 * sizeof(float);
-			}
-
-			GLsizei spaceLeft = MAX_BATCH_SIZE - size;
-
-			if (size < spaceLeft)
-			{
-				auto prevFirst = itr->length == 0 ? 0 : itr->firsts[itr->length - 1];
-				auto prevCount = itr->length == 0 ? 0 : itr->counts[itr->length - 1];
-				//itr->firsts[itr->length] = itr->firsts[itr->length - 1] + itr->counts[itr->length - 1];
-				itr->firsts[itr->length] = prevFirst + prevCount;
-				itr->counts[itr->length] = pMesh.intData.size / 8;
-				itr->data[itr->length] = pMesh.intData.interlacedData;
-				itr->dataSizeInBytes[itr->length] = pMesh.intData.size * sizeof(float);
-				itr->radii[itr->length] = glm::fvec3(1000.f); //TODO: CALCULATE REAL RADIUS
-
-															  //TODO: MAPPING ?
-				glBindBuffer(GL_ARRAY_BUFFER, solidBatches[batchID].vboID);
-				glBufferSubData(GL_ARRAY_BUFFER, size, pMesh.intData.size * sizeof(float), pMesh.intData.interlacedData);
-				glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-				MeshRenderMeta ret;
-				ret.batchID = batchID;
-				ret.batchIndex = itr->length;
-				pMesh.renderMeta = ret;
-
-
-				++itr->length;
-
-				return ret;
-			}
-			++batchID;
-		}
-		assert(0);
-	}
-
-	void newBatch()
-	{
-		SolidMeshBatch nextBatch;
-
-		glUseProgram(Engine::gPassShader());
-
-		glGenVertexArrays(1, &nextBatch.vaoID);
-		glBindVertexArray(nextBatch.vaoID);
-		glGenBuffers(1, &nextBatch.vboID);
-		glBindBuffer(GL_ARRAY_BUFFER, nextBatch.vboID);
-
-		glBufferData(GL_ARRAY_BUFFER, MAX_BATCH_SIZE, NULL, GL_STATIC_DRAW);
-
-		nextBatch.length = 0;
-		//nextBatch.firsts[0] = 0;
-		//nextBatch.counts[0] = 0;
-
-		auto posAttrib = glGetAttribLocation(Engine::gPassShader(), "p");
-		glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
-		glEnableVertexAttribArray(posAttrib);
-
-		auto texAttrib = glGetAttribLocation(Engine::gPassShader(), "t");
-		glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
-		glEnableVertexAttribArray(texAttrib);
-
-		auto norAttrib = glGetAttribLocation(Engine::gPassShader(), "n");
-		glVertexAttribPointer(norAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(5 * sizeof(GLfloat)));
-		glEnableVertexAttribArray(norAttrib);
-
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-
-		solidBatches.push_back(nextBatch);
-	}
-
-private:
-	class SolidMeshBatch
-	{
-	public:
-		GLint firsts[MAX_BATCH_COUNT];
-		GLsizei counts[MAX_BATCH_COUNT];
-		GLsizei length;
-
-		GLfloat* data[MAX_BATCH_COUNT];
-		GLint dataSizeInBytes[MAX_BATCH_COUNT];
-
-		glm::fvec3 radii[MAX_BATCH_COUNT];
-
-		GLuint vboID;
-		GLuint vaoID;
-	};
-
-public:
-	std::vector<SolidMeshBatch> solidBatches;
-
-
-
-};

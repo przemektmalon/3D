@@ -5,15 +5,19 @@
 #include "SAOShader.h"
 #include "GBufferShader.h"
 #include "Framebuffer.h"
-#include "Text.h"
 #include "BufferObjects.h"
 #include <chrono>
 #include <time.h>
 #include "Lights.h"
 #include "DeferredTileCullComputeShader.h"
 #include "Sampler.h"
+#include "ShaderStore.h"
+
 
 #define NUM_VALID_RESOLUTIONS 8
+
+class RectangleShape;
+class UIConsole;
 
 typedef struct {
 	u32 count;
@@ -26,7 +30,7 @@ typedef struct {
 class MasterRenderer
 {
 public:
-	MasterRenderer() : shadScale(1.f)
+	MasterRenderer() : shadScale(1.f) 
 	{
 		rC.ssaoPower = (1.f);
 		rC.ssaoScale = (1.f);
@@ -38,7 +42,7 @@ public:
 	inline void initialiseGBuffer();
 
 	inline void initialiseSSAOBuffer();
-
+	
 	inline void initialiseScreenFramebuffer();
 
 	inline void initialiseSkybox();
@@ -83,7 +87,7 @@ public:
 		Rect() {}
 		~Rect() {}
 
-		T bot, left, width, height;
+		T top, left, width, height;
 	};
 
 	//std::vector<MeshInstance> ents;
@@ -100,36 +104,26 @@ public:
 
 	//std::vector<GLuint> 
 
+	RectangleShape* rectShape;
+	UIConsole* console;
+
 	u32 drawCount;
 
 	ComputeShader frustCullShader;
 
-
-
-	//GLuint objectMetaBuffer;
-	//GLuint boundsBuffer;
-	//GLuint texHandleBuffer;
-	//GLuint drawIndirectBuffer;
-	//GLuint distsBuffer;
-	//GLuint transformBuffer;
-	//GLuint instanceBuffer;
-
-	//std::unordered_map<Mesh*, std::vector<glm::fmat4>> entities;
-	std::vector<PointLightData> pointLights;
-	std::vector<SpotLightData> spotLights;
-	std::vector<DirectLightData> directLights;
+	ShaderStore shaderStore;
 
 	Rect<int> viewport;
 
 	Window* window;
 	World* world;
-
+	
 	DefaultFramebuffer fboDefault;
 	Framebuffer fboSSAOBlur;
 	Framebuffer fboSSAO;
 	Framebuffer fboGBuffer;
 	Framebuffer fboScreen;
-
+	
 	GLuint vaoQuad;
 	GLuint vboQuad;
 
@@ -143,15 +137,16 @@ public:
 	GBufferShader gBufferShader;
 	SAOShader ssaoShader;
 	DeferredTileCullComputeShader tileCullShader;
+	//ShaderProgram* tileCullShader;
 
 	Shader blurShader;
 	Shader shadowShader;
 	Framebuffer fboLight;
 	float shadScale;
-	const glm::ivec2 shadRes = glm::ivec2(1000, 1000);
+	const glm::ivec2 shadRes = glm::ivec2(1000,1000);
 
 	LightManager lightManager;
-
+	
 	GLTexture2D th;
 	glm::fmat4 lightView;
 	Camera* activeCam;
