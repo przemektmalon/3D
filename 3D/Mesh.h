@@ -28,7 +28,6 @@ public:
 
 	void load(std::string objPath)
 	{
-
 		std::ifstream ifs(objPath);
 
 		while (!ifs.eof())
@@ -65,25 +64,45 @@ public:
 			}
 			else if (type == "f")
 			{
+				//std::string xstr, ystr, zstr;
+				//std::getline(ifs, xstr, '/');
+				//std::getline(ifs, ystr, '/');
+				//std::getline(ifs, zstr, ' ');
+				//data.indices.push_back(abs(std::stoi(xstr)));
+				//data.indices.push_back(abs(std::stoi(ystr)));
+				//data.indices.push_back(abs(std::stoi(zstr)));
+				//std::getline(ifs, xstr, '/');
+				//std::getline(ifs, ystr, '/');
+				//std::getline(ifs, zstr, ' ');
+				//data.indices.push_back(abs(std::stoi(xstr)));
+				//data.indices.push_back(abs(std::stoi(ystr)));
+				//data.indices.push_back(abs(std::stoi(zstr)));
+				//std::getline(ifs, xstr, '/');
+				//std::getline(ifs, ystr, '/');
+				//std::getline(ifs, zstr, '\n');
+				//data.indices.push_back(abs(std::stoi(xstr)));
+				//data.indices.push_back(abs(std::stoi(ystr)));
+				//data.indices.push_back(abs(std::stoi(zstr)));
+
 				std::string xstr, ystr, zstr;
 				std::getline(ifs, xstr, '/');
 				std::getline(ifs, ystr, '/');
 				std::getline(ifs, zstr, ' ');
-				data.indices.push_back(std::stoi(xstr));
-				data.indices.push_back(std::stoi(ystr));
-				data.indices.push_back(std::stoi(zstr));
+				data.indices.push_back(abs(std::stoi(xstr)));
+				data.indices.push_back(0);
+				data.indices.push_back(abs(std::stoi(zstr)));
 				std::getline(ifs, xstr, '/');
 				std::getline(ifs, ystr, '/');
 				std::getline(ifs, zstr, ' ');
-				data.indices.push_back(std::stoi(xstr));
-				data.indices.push_back(std::stoi(ystr));
-				data.indices.push_back(std::stoi(zstr));
+				data.indices.push_back(abs(std::stoi(xstr)));
+				data.indices.push_back(0);
+				data.indices.push_back(abs(std::stoi(zstr)));
 				std::getline(ifs, xstr, '/');
 				std::getline(ifs, ystr, '/');
 				std::getline(ifs, zstr, '\n');
-				data.indices.push_back(std::stoi(xstr));
-				data.indices.push_back(std::stoi(ystr));
-				data.indices.push_back(std::stoi(zstr));
+				data.indices.push_back(abs(std::stoi(xstr)));
+				data.indices.push_back(0);
+				data.indices.push_back(abs(std::stoi(zstr)));
 			}
 			else
 			{
@@ -106,11 +125,9 @@ public:
 			glvertices[++count] = data.verts[index + 1];
 			glvertices[++count] = data.verts[index + 2];
 
-			std::cout << data.verts[index] << " " << data.verts[index + 1] << " " << data.verts[index + 2] << std::endl;
-
 			index = 2 * (*(itr + 1) - 1);
-			glvertices[++count] = data.texCoords[index];
-			glvertices[++count] = data.texCoords[index + 1];
+			glvertices[++count] = 0;// data.texCoords[index];
+			glvertices[++count] = 0;// data.texCoords[index + 1];
 
 			index = 3 * (*(itr + 2) - 1);
 			glvertices[++count] = data.normals[index];
@@ -120,6 +137,10 @@ public:
 
 		intData.interlacedData = glvertices;
 		intData.size = numVert * vertSize;
+
+		std::cout << intData.size << std::endl;
+		std::cout << data.numVert << std::endl;
+		std::cout << data.numTris << std::endl;
 
 		//glGenVertexArrays(1, &vao);
 		//glBindVertexArray(vao);
@@ -144,6 +165,41 @@ public:
 
 		//glBindBuffer(GL_ARRAY_BUFFER, 0);
 		//glBindVertexArray(0);
+	}
+
+	void loadBinary(std::string binPath)
+	{
+		std::ifstream ifs(binPath, std::ios_base::binary);
+		s32 size;
+		float* glVerts;
+		ifs.read((char*)&size, sizeof(size));
+		intData.interlacedData = (new float[size]);
+		ifs.read((char*)intData.interlacedData, sizeof(GLfloat) * size);
+		intData.size = size;
+		data.numVert = size / 8;
+		data.numTris = data.numVert / 3;
+
+		//for (int i = 0; i < intData.size; i += 8)
+		//{
+		//	printf("%f,%f,%f\n", intData.interlacedData[i], intData.interlacedData[i + 1], intData.interlacedData[i + 2]);
+		//	if (intData.interlacedData[i] < -10 || intData.interlacedData[i] > 10)
+		//	{
+		//		std::cout << i << std::endl;
+		//		return;
+		//	}
+		//}
+
+		std::cout << intData.size << std::endl;
+		std::cout << data.numVert << std::endl;
+		std::cout << data.numTris << std::endl;
+	}
+
+	void saveBinary(std::string binPath)
+	{
+		std::ofstream ofs(binPath, std::ios_base::binary);
+		ofs.write((char*)&intData.size, sizeof(intData.size));
+		std::cout << intData.size << std::endl;
+		ofs.write((char*)intData.interlacedData, intData.size * sizeof(float));
 	}
 
 	void draw()

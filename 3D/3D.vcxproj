@@ -112,8 +112,11 @@
   <ItemGroup>
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Include.h" />
+    <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="QPC.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="Time.h" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
