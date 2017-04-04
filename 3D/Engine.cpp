@@ -16,14 +16,18 @@
 #define MODEL_PATH std::string("res/model/")
 
 FT_Library Engine::ftLib;
-FontStore Engine::fontStore;
+//FontStore Engine::fontStore;
 Camera Engine::defaultOrthoCam;
-Text Engine::t;
+//Text Engine::t;
 Window Engine::window;
 Shader Engine::s;
+Shader Engine::testShader;
 Shader Engine::gPassShader;
 bool Engine::wf;
 std::mt19937_64 Engine::rand;
+s64 Engine::startTime;
+Mesh Engine::uSphere;
+bool Engine::movingLight;
 
 int main(int argc, char *argv[])
 {
@@ -36,17 +40,6 @@ void Engine::start()
 	window.createWindow();
 	mainLoop();
 }
-
-// Quad vertices
-GLfloat quadVertices[] = {
-	-1.0f,  1.0f,  0.0f, 1.0f,
-	1.0f,  1.0f,  1.0f, 1.0f,
-	1.0f, -1.0f,  1.0f, 0.0f,
-
-	1.0f, -1.0f,  1.0f, 0.0f,
-	-1.0f, -1.0f,  0.0f, 0.0f,
-	-1.0f,  1.0f,  0.0f, 1.0f
-};
 
 void specifyScreenVertexAttributes(GLuint shaderProgram)
 {
@@ -66,8 +59,10 @@ void Engine::mainLoop()
 
 	rand.seed(rand.default_seed);
 
-	FT_Init_FreeType(&ftLib);
-	fontStore.initialise();
+	startTime = std::chrono::system_clock::now().time_since_epoch().count();
+
+	//FT_Init_FreeType(&ftLib);
+	//fontStore.initialise();
 
 	//Font font;
 	//font.load(size, "gor.ttf", fc);
@@ -77,11 +72,10 @@ void Engine::mainLoop()
 	//t.setCharSize(size);
 	//t.setString("Hello!");
 
-	glActiveTexture(GL_TEXTURE0);
-
-	s.load("res/shader/Standard", "res/shader/Standard"); glUseProgram(s());
+	s.load("res/shader/Standard", "res/shader/Standard");
 	gPassShader.load("res/shader/gBufferPass", "res/shader/gBufferPass");
-
+	testShader.load("res/shader/test", "res/shader/test");
+	glUseProgram(s());
 	//Mesh m;
 	//m.loadBinary("MONKEY.bin");
 	////m.load("MONKEY2.obj");
@@ -101,9 +95,11 @@ void Engine::mainLoop()
 	//ballpyr.load(MODEL_PATH + "ballpyr.obj");
 	//ballpyr.saveBinary(MODEL_PATH + "ballpyr.bin");
 	Mesh floor;
-	floor.load(MODEL_PATH + "PLANE.obj");
+	floor.load(MODEL_PATH + "Plane.obj");
 	Mesh surf;
 	surf.load(MODEL_PATH + "surface.obj");
+
+	uSphere.load(MODEL_PATH + "UnitSphere.obj");
 
 	SDL_GL_SetSwapInterval(1);
 
@@ -118,7 +114,6 @@ void Engine::mainLoop()
 	unsigned char* image = SOIL_load_image(fileName.c_str(), &width, &height, 0, SOIL_LOAD_RGBA);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
 	SOIL_free_image_data(image);
-
 
 	fileName = std::string("wd.jpg");
 	GLuint specularMap;
@@ -147,25 +142,25 @@ void Engine::mainLoop()
 		inst.push_back(in);
 	}
 	MasterRenderer r;
-	r.entities.insert(std::make_pair(&buddha, inst));
+	//r.entities.insert(std::make_pair(&buddha, inst));
 	std::vector<glm::fmat4> inst2;
 	for (int i = 0; i < 1; ++i)
 	{
-		auto in = glm::translate(glm::fmat4(), glm::fvec3(40, -45, -150));
+		auto in = glm::translate(glm::fmat4(), glm::fvec3(40, 35, -150));
 		in = glm::scale(in, glm::fvec3(10.f));
 		in = glm::rotate(in, float(PI) / 4.f, glm::fvec3(0, 1, 0));
 		inst2.push_back(in);
 	}
 	r.entities.insert(std::make_pair(&dragon, inst2));
 	std::vector<glm::fmat4> inst3;
-	inst3.push_back(glm::scale(glm::translate(glm::fmat4(), glm::fvec3(1000, -88, 500)), glm::fvec3(100)));
-	r.entities.insert(std::make_pair(&surf, inst3));
-	std::vector<glm::fmat4> inst4;
-	inst4.push_back(glm::scale(glm::translate(glm::fmat4(), glm::fvec3(-30, -5, 70)), glm::fvec3(0.8)));
-	r.entities.insert(std::make_pair(&ballpyr, inst4));
-	std::vector<glm::fmat4> inst5;
-	inst5.push_back(glm::rotate(glm::scale(glm::translate(glm::fmat4(), glm::fvec3(0, -88, 0)), glm::fvec3(50)), glm::radians(-32.f), glm::fvec3(0, 1, 0)));
-	r.entities.insert(std::make_pair(&table, inst5));
+	inst3.push_back(glm::scale(glm::translate(glm::fmat4(), glm::fvec3(10, -10, 10)), glm::fvec3(50)));
+	r.entities.insert(std::make_pair(&floor, inst3));
+	//std::vector<glm::fmat4> inst4;
+	//inst4.push_back(glm::scale(glm::translate(glm::fmat4(), glm::fvec3(-30, -5, 70)), glm::fvec3(0.8)));
+	//r.entities.insert(std::make_pair(&ballpyr, inst4));
+	//std::vector<glm::fmat4> inst5;
+	//inst5.push_back(glm::rotate(glm::scale(glm::translate(glm::fmat4(), glm::fvec3(0, -88, 0)), glm::fvec3(50)), glm::radians(-32.f), glm::fvec3(0, 1, 0)));
+	//r.entities.insert(std::make_pair(&table, inst5));
 
 	GLuint sampler;
 	glGenSamplers(1, &sampler);
@@ -187,7 +182,7 @@ void Engine::mainLoop()
 	glSamplerParameteri(postSampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	glBindSampler(4, postSampler);
-	glBindSampler(6, postSampler);
+	glBindSampler(5, postSampler);
 
 	GLuint cubemapSampler;
 	glGenSamplers(1, &cubemapSampler);
@@ -197,7 +192,7 @@ void Engine::mainLoop()
 	glSamplerParameteri(cubemapSampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glSamplerParameteri(cubemapSampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	glBindSampler(5, cubemapSampler);
+	glBindSampler(6, cubemapSampler);
 
 	GLuint textSampler;
 	glCreateSamplers(1, &textSampler);
@@ -225,17 +220,17 @@ void Engine::mainLoop()
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glActiveTexture(GL_TEXTURE0);
 
-	r.initialiseRenderer(1, &window);
+	Camera cam;
+	cam.initialiseProj(float(window.getSizeX()) / float(window.getSizeY()));
+	cam.calculateViewRays();
+	r.initialiseRenderer(1, &window, cam);
 
 	defaultOrthoCam.initaliseOrtho(window.getSizeX(), window.getSizeY());
-
 
 	Time dt;
 	QPC qpc;
 
 	s64 tot = 0;
-	Camera cam;
-	cam.initialiseProj(float(window.getSizeX()) / float(window.getSizeY()));
 
 	glm::ivec2 lastM;
 	SDL_Event ev;
@@ -244,8 +239,6 @@ void Engine::mainLoop()
 
 	auto expval = glGetUniformLocation(s(), "exposure");
 	float exposure = 1.f;
-
-	r.setActiveCam(cam);
 
 	std::string stringg;
 
@@ -275,6 +268,14 @@ void Engine::mainLoop()
 				if (ev.key.keysym.sym == SDLK_KP_2)
 				{
 					wf = false;
+				}
+				if (ev.key.keysym.sym == SDLK_KP_4)
+				{
+					movingLight = true;
+				}
+				if (ev.key.keysym.sym == SDLK_KP_5)
+				{
+					movingLight = false;
 				}
 				if (ev.key.keysym.sym == SDLK_q)
 				{

@@ -31,7 +31,7 @@ public:
 
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
 
-		bool fullscreen = false;
+		bool fullscreen = true;
 		sizeX = 1280; sizeY = 720;
 		int posx = 960 - (sizeX / 2), posy = 540 - (sizeY / 2);
 		if (fullscreen)
@@ -69,19 +69,19 @@ public:
 		SDL_GL_SwapWindow(sdlWindow);
 	}
 
-	void screenshot(std::string fileName = std::string("___AUTO_GENERATE_NAME___"))
+	void screenshot()
 	{
-		if (fileName == std::string("___AUTO_GENERATE_NAME___"))
-		{
-			time_t now = time(0);
-			tm  tstruct;
-			char buf[80];
-			localtime_s(&tstruct, &now);
-			strftime(buf, sizeof(buf), "%F_%H;%M;%S", &tstruct);
+		time_t now = time(0);
+		tm  tstruct;
+		char buf[80];
+		localtime_s(&tstruct, &now);
+		strftime(buf, sizeof(buf), "%F_%H;%M;%S", &tstruct);
+		auto fileName = std::string("Screenshot_") + std::string(buf);
+		screenshot(fileName);
+	}
 
-			fileName = std::string("Screenshot_") + std::string(buf);
-		}
-
+	void screenshot(std::string fileName)
+	{
 		u32 imageSize = getSizeX() * getSizeY() * 3;
 		u32 rowSize = getSizeX() * 3;
 		u8* screenshot = new u8[imageSize];

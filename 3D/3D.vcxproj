@@ -113,6 +113,8 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ComputeShader.h" />
     <ClInclude Include="ConfigParser.h" />
+    <ClInclude Include="Console.h" />
+    <ClInclude Include="DeferredTileComputeShader.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="FontStore.h" />
     <ClInclude Include="Include.h" />

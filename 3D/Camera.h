@@ -39,11 +39,23 @@ public:
 	}
 	~Camera() {}
 
-	void initialiseProj(float pAspect, float pFOV = float(PI) / 2.5f, float pNear = 5.f, float pFar = 10000.f)
+	//void initialiseProj(float pAspect, float pFOV = float(PI) / 2.5f, float pNear = 0.1f, float pFar = 100000000000000000000000000000000000000.f)
+	void initialiseProj(float pAspect, float pFOV = float(PI) / 2.5f, float pNear = 0.0000001f, float pFar = 10000.f)
 	{
 		fov = pFOV;
 		aspect = pAspect;
 		proj = glm::perspective(fov, aspect, pNear, pFar);
+		inverseProj = glm::inverse(proj);
+		infProj = glm::infinitePerspective(fov, aspect, pNear);
+
+		//float tanHalfFovy = std::tan(fov / 2.f);
+
+		//proj = glm::fmat4(0.f);
+		//proj[0][0] = 1.f / (aspect * tanHalfFovy);
+		//proj[1][1] = 1.f / (tanHalfFovy);
+		//proj[2][2] = (pNear) / (pNear - pFar);
+		//proj[2][3] = -1.f;
+		//proj[3][2] = (pFar * pNear) / (pNear - pFar);
 	}
 
 	void initaliseOrtho(int sizeX, int sizeY, float pNear = 0.99f, float pFar = 100.f)
@@ -63,20 +75,61 @@ public:
 		return glm::fvec3(glm::sin(yaw) * glm::cos(pitch), -glm::sin(pitch), -glm::cos(yaw) * glm::cos(pitch));
 	}
 
+	void calculateViewRays()
+	{
+		viewRays[0] = glm::fvec4(-1.f, -1.f, -1.f, 1.f);//BL
+		viewRays[1] = glm::fvec4(1.f, -1.f, -1.f, 1.f);//BR
+		viewRays[2] = glm::fvec4(1.f, 1.f, -1.f, 1.f);//TR
+		viewRays[3] = glm::fvec4(-1.f, 1.f, -1.f, 1.f);//TL
+
+		for (int i = 0; i < 4; ++i)
+		{
+			viewRays[i] = inverseProj * viewRays[i];
+			viewRays[i] /= viewRays[i].w;
+			viewRays[i] /= viewRays[i].z;
+			//viewRays[i] = view * glm::fvec4(viewRays[i].x, viewRays[i].y, 1.f, 1.f);
+		}
+
+		viewRays2[0] = glm::fvec2(viewRays[0]);
+		viewRays2[1] = glm::fvec2(viewRays[1]);
+		viewRays2[2] = glm::fvec2(viewRays[2]);
+		viewRays2[3] = glm::fvec2(viewRays[3]);
+
+		//viewRaysDat = glm::fvec4(viewRays[0].x, viewRays[0].y, viewRays[2].x, viewRays[2].y);
+	}
+
+	void calculateViewRaysDat()
+	{
+		//glm::fvec4 p1(viewRays[0].x, viewRays[0].y, 1.f, 1.f);
+		//glm::fvec4 p2(viewRays[2].x, viewRays[2].y, 1.f, 1.f);
+
+		//p1 = view * p1;
+		//p2 = view * p2;
+
+		for (int i = 0; i < 4; ++i)
+		{
+			//viewRaysDat[i] = glm::normalize(glm::fvec4(viewRays[i].x, viewRays[i].y, 1.f, 1.f) * glm::transpose(view));
+			viewRaysDat[i] = viewRays[i];
+		}
+
+		//viewRaysDat[0].x = p1.x; viewRaysDat[0].y = p1.y; viewRaysDat[0].z = p1.z;
+		//viewRaysDat[1].x = p2.x; viewRaysDat[1].y = p2.y; viewRaysDat[1].z = p2.z;
+	}
+
 	void update(Time& dt)
 	{
 		targetPitch = glm::clamp(targetPitch, -float(PI) / 2.f, float(PI) / 2.f);
-		pitch = ler(pitch, targetPitch, 1.5f);
-		yaw = ler(yaw, targetYaw, 1.5f);
-
+		float weightFactor = 1.f;
+		pitch = ler(pitch, targetPitch, weightFactor);
+		yaw = ler(yaw, targetYaw, weightFactor);
 
 		matRoll = glm::rotate(glm::fmat4(), roll, glm::vec3(0.0f, 0.0f, 1.0f));
 		matPitch = glm::rotate(glm::fmat4(), pitch, glm::vec3(1.0f, 0.0f, 0.0f));
 		matYaw = glm::rotate(glm::fmat4(), yaw, glm::vec3(0.0f, 1.0f, 0.0f));
 
-		pos.x = ler(pos.x, targetPos.x, 5.f);
-		pos.y = ler(pos.y, targetPos.y, 5.f);
-		pos.z = ler(pos.z, targetPos.z, 5.f);
+		pos.x = ler(pos.x, targetPos.x, 3.f);
+		pos.y = ler(pos.y, targetPos.y, 3.f);
+		pos.z = ler(pos.z, targetPos.z, 3.f);
 
 		glm::fmat4 translate = glm::fmat4(1.0f);
 		translate = glm::translate(translate, -pos);
@@ -97,8 +150,14 @@ public:
 	glm::fmat4 rotation;
 
 	glm::fmat4 proj, view, projView;
+	glm::fmat4 inverseProj;
+	glm::fmat4 infProj;
 
 	float fov, aspect;
+
+	glm::fvec4 viewRays[4];
+	glm::fvec2 viewRays2[4];
+	glm::fvec4 viewRaysDat[4];
 
 	//GLuint ubo;
 	//GLuint uboBlockIndex;

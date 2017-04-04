@@ -17,8 +17,12 @@ public:
 		glDeleteBuffers(1, &vbo);
 	}
 	void setFont(Font* pFont) { font = pFont; updateVBO(); }
-	void setCharSize(u8 pSize) { charSize = pSize; glyphContainer = font->requestGlyphs(charSize, this); updateVBO(); }
+	void setCharSize(u8 pSize) {
+		//charSize = pSize; glyphContainer = font->requestGlyphs(charSize, this); updateVBO(); 
+	}
 	void setString(std::string pStr) { string = pStr; updateVBO(); }
+
+	std::string getString() { return string; }
 
 	void init()
 	{
@@ -29,8 +33,8 @@ public:
 		shader = new TextShader();
 		shader->use();
 
-		glCreateVertexArrays(1, &vao);
-		glCreateBuffers(1, &vbo);
+		glGenVertexArrays(1, &vao);
+		glGenBuffers(1, &vbo);
 
 		glBindVertexArray(vao);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
