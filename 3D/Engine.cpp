@@ -6,8 +6,17 @@
 #include "Time.h"
 #include "QPC.h"
 #include "SOIL.h"
+#include "Camera.h"
+#include "Renderer.h"
+#include <chrono>
+
+#define MODEL_PATH std::string("res/model/")
 
 Window Engine::window;
+Shader Engine::s;
+Shader Engine::gPassShader;
+bool Engine::wf;
+std::mt19937_64 Engine::rand;
 
 int main(int argc, char *argv[])
 {
@@ -21,59 +30,59 @@ void Engine::start()
 	mainLoop();
 }
 
+// Quad vertices
+GLfloat quadVertices[] = {
+	-1.0f,  1.0f,  0.0f, 1.0f,
+	1.0f,  1.0f,  1.0f, 1.0f,
+	1.0f, -1.0f,  1.0f, 0.0f,
+
+	1.0f, -1.0f,  1.0f, 0.0f,
+	-1.0f, -1.0f,  0.0f, 0.0f,
+	-1.0f,  1.0f,  0.0f, 1.0f
+};
+
+void specifyScreenVertexAttributes(GLuint shaderProgram)
+{
+	GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
+	glEnableVertexAttribArray(posAttrib);
+	glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
+
+	GLint texAttrib = glGetAttribLocation(shaderProgram, "texcoord");
+	glEnableVertexAttribArray(texAttrib);
+	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
+}
+
 void Engine::mainLoop()
 {
 	glewExperimental = GL_TRUE;
 	glewInit();
 
-	glEnable(GL_BLEND);
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-	glFrontFace(GL_CCW);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	rand.seed(rand.default_seed);
 
-	Shader s;
-	s.load("min2");
-	glUseProgram(s());
+	s.load("res/shader/Standard", "res/shader/Standard"); glUseProgram(s());
+	gPassShader.load("res/shader/gBufferPass", "res/shader/gBufferPass");
 
-	//float verts[] = { -100, -100, 0, 0, 0, 0, 0, 0,
-	//	100, -100, 0, 0, 0, 0, 0, 0,
-	//	0, 100, 0, 0, 0, 0, 0, 0,
-	//	-100, -100, 0, 0, 0, 0, 0, 0,
-	//	-200, 100, 0, 0, 0, 0, 0, 0,
-	//	0, 100, 0, 0, 0, 0, 0, 0 };
+	//Mesh m;
+	//m.loadBinary("MONKEY.bin");
+	////m.load("MONKEY2.obj");
+	////m.saveBinary("MONKEY.bin");
 
-	//GLuint vbo;
-	//glGenBuffers(1, &vbo);
-	//glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
+	//Mesh m2;
+	//m2.load("GROUND.obj");
+	//m2.transform.setRoll(PI);
+	//m2.transform.setScale(glm::fvec3(10.f));
+	//m2.transform.setTranslation(glm::fvec3(0, -80, 0));
 
-	//auto posAt = glGetAttribLocation(s(), "position");
-	//glVertexAttribPointer(posAt, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
-	//glEnableVertexAttribArray(posAt);
+	Mesh buddha(MODEL_PATH + "buddha.bin");
+	Mesh dragon(MODEL_PATH + "DRG.bin");
+	Mesh floor;
+	floor.load(MODEL_PATH + "PLANE.obj");
+	Mesh surf;
+	surf.load(MODEL_PATH + "surface.obj");
 
-	auto projLoc = glGetUniformLocation(s(), "proj");
-	auto modelLoc = glGetUniformLocation(s(), "model");
+	SDL_GL_SetSwapInterval(1);
 
-	glm::fmat4 proj, model;
-	//proj = glm::ortho(-1280.f / 2.f, 1280.f / 2.f, -720.f / 2.f, 720.f / 2.f, 0.1.f, 2000.f);
-	proj = glm::perspective(float(PI) / 2.f, float(window.sizeX) / float(window.sizeY), 1.f, 10000.f);
-	proj = glm::translate(proj, glm::fvec3(0, 0, 0));
-
-	glm::fmat4 view, projView;
-
-	Mesh m;
-	m.loadBinary("MONKEY.bin");
-	//m.load("MONKEY.obj");
-	//m.saveBinary("MONKEY.bin");
-
-	//for (int i = 0; i < m.intData.size; i+=8)
-	//{
-	//	printf("%f,%f,%f\n", m.intData.interlacedData[i], m.intData.interlacedData[i + 1], m.intData.interlacedData[i + 2]);
-	//	//std::cout << m.intData.interlacedData[i] << "," << m.intData.interlacedData[i + 1] << "," << m.intData.interlacedData[i + 2] << std::endl;
-	//}
+	glViewport(0, 0, window.getSizeX(), window.getSizeY());
 
 	std::string fileName("marble.png");
 	int width, height;
@@ -103,33 +112,28 @@ void Engine::mainLoop()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
 	SOIL_free_image_data(image);
 
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	GLuint vbo;
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, m.intData.size * sizeof(GLfloat), m.intData.interlacedData, GL_STATIC_DRAW);
-
-	//glGenVertexArrays(1, &m.vao);
-	//glBindVertexArray(m.vao);
-
-	//glGenBuffers(1, &m.vbo);
-	//glBindBuffer(GL_ARRAY_BUFFER, m.vbo);
-	//glBufferData(m.vbo, m.intData.size, m.intData.interlacedData, GL_STATIC_DRAW);
-
-	auto posAttrib = glGetAttribLocation(s(), "p");
-	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
-	glEnableVertexAttribArray(posAttrib);
-
-	auto texAttrib = glGetAttribLocation(s(), "t");
-	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(texAttrib);
-
-	auto norAttrib = glGetAttribLocation(s(), "n");
-	glVertexAttribPointer(norAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(5 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(norAttrib);
-
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	std::vector<glm::fmat4> inst;
+	for (int i = 0; i < 2; ++i)
+	{
+		auto in = glm::translate(glm::fmat4(), glm::fvec3(i * 150, 0, 0));
+		in = glm::scale(in, glm::fvec3(10.f));
+		//in = glm::rotate(in, i * float(PI) / 5.f, glm::fvec3(0.5, 0.5, 0));
+		inst.push_back(in);
+	}
+	MasterRenderer r;
+	r.entities.insert(std::make_pair(&buddha, inst));
+	std::vector<glm::fmat4> inst2;
+	for (int i = 0; i < 2; ++i)
+	{
+		auto in = glm::translate(glm::fmat4(), glm::fvec3(i * 100, -45, -150));
+		in = glm::scale(in, glm::fvec3(10.f));
+		in = glm::rotate(in, float(PI) / 4.f, glm::fvec3(0, 1, 0));
+		inst2.push_back(in);
+	}
+	r.entities.insert(std::make_pair(&dragon, inst2));
+	std::vector<glm::fmat4> inst3;
+	inst3.push_back(glm::scale(glm::translate(glm::fmat4(), glm::fvec3(1000, -88, 500)), glm::fvec3(100)));
+	r.entities.insert(std::make_pair(&surf, inst3));
 
 	GLuint sampler;
 	glGenSamplers(1, &sampler);
@@ -140,6 +144,36 @@ void Engine::mainLoop()
 	glBindSampler(0, sampler);
 	glBindSampler(1, sampler);
 	glBindSampler(2, sampler);
+	glBindSampler(3, sampler);
+
+	GLuint postSampler;
+	glGenSamplers(1, &postSampler);
+	glSamplerParameteri(postSampler, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+	glSamplerParameteri(postSampler, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+
+	glSamplerParameteri(postSampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glSamplerParameteri(postSampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glBindSampler(4, postSampler);
+
+	GLuint cubemapSampler;
+	glGenSamplers(1, &cubemapSampler);
+	glSamplerParameteri(cubemapSampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glSamplerParameteri(cubemapSampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glSamplerParameteri(cubemapSampler, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glSamplerParameteri(cubemapSampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glSamplerParameteri(cubemapSampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glBindSampler(5, cubemapSampler);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, textureID);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, specularMap);
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, marble);
 
 	auto aa = glGetUniformLocation(s(), "viewPos");
 	auto ab = glGetUniformLocation(s(), "material.diffuse");
@@ -154,30 +188,23 @@ void Engine::mainLoop()
 	glUniform1i(ad, 2);
 	glUniform1f(ae, 0.3f);
 	glUniform1f(af, 32.0f);
+	auto projLoc = glGetUniformLocation(s(), "proj");
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, textureID);
-
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, specularMap);
-
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, marble);
-
-	float pitch = 0, yaw = 0, roll = 0;
-	float targetPitch = 0, targetYaw = 0;
-	float camYaw = 0;
+	r.initialiseRenderer(1, &window);
 
 	Time dt;
 	QPC qpc;
 
-	SDL_GL_SetSwapInterval(0);
-
 	s64 tot = 0;
-	glm::fvec3 pos;
+	Camera cam;
 	glm::ivec2 lastM;
 	SDL_Event ev;
 	bool quit = false;
+	wf = false;
+
+	auto expval = glGetUniformLocation(s(), "exposure");
+	float exposure = 1.f;
+
 	while (!quit)
 	{
 		qpc.start();
@@ -191,139 +218,110 @@ void Engine::mainLoop()
 				}
 				if (ev.key.keysym.sym == SDLK_KP_1)
 				{
-					glUniform1f(af, 1.f);
+					wf = true;
 				}
 				if (ev.key.keysym.sym == SDLK_KP_2)
 				{
-					glUniform1f(af, 2.0f);
+					wf = false;
 				}
-				if (ev.key.keysym.sym == SDLK_KP_3)
+				if (ev.key.keysym.sym == SDLK_q)
 				{
-					glUniform1f(af, 4.0f);
+					glUseProgram(Engine::s());
+					auto val = glGetUniformLocation(s(), "filmic");
+					glUniform1i(val, 0);
 				}
-				if (ev.key.keysym.sym == SDLK_KP_4)
+				if (ev.key.keysym.sym == SDLK_e)
 				{
-					glUniform1f(af, 8.0f);
+					glUseProgram(Engine::s());
+					auto val = glGetUniformLocation(s(), "filmic");
+					glUniform1i(val, 1);
 				}
-				if (ev.key.keysym.sym == SDLK_KP_5)
+				if (ev.key.keysym.sym == SDLK_PERIOD)
 				{
-					glUniform1f(af, 16.0f);
+					window.screenshot();
 				}
-				if (ev.key.keysym.sym == SDLK_KP_6)
+			}
+			if (ev.type == SDL_WINDOWEVENT)
+			{
+				if (ev.window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
 				{
-					glUniform1f(af, 32.0f);
+					std::cout << "FOCUS GAINED" << std::endl;
+					int x, y;
+					SDL_GetWindowPosition(window.sdlWindow, &x, &y);
+					SDL_WarpMouseGlobal(x + window.sizeX / 2, y + window.sizeY / 2);
+					SDL_ShowCursor(0);
 				}
-				if (ev.key.keysym.sym == SDLK_KP_7)
+				if (ev.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
 				{
-					glUniform1f(af, 64.0f);
-				}
-				if (ev.key.keysym.sym == SDLK_KP_8)
-				{
-					glUniform1f(af, 128.0f);
-				}
-				if (ev.key.keysym.sym == SDLK_KP_9)
-				{
-					glUniform1f(af, 256.0f);
+					std::cout << "FOCUS LOST" << std::endl;
+					SDL_ShowCursor(1);
 				}
 			}
 			if (ev.type == SDL_MOUSEMOTION)
 			{
-				int x, y;
-				auto m = SDL_GetMouseState(&x, &y);
+				u32 mask = SDL_GetWindowFlags(window.sdlWindow);
+				if (((mask & SDL_WINDOW_INPUT_FOCUS) == SDL_WINDOW_INPUT_FOCUS))
+				{
+					int x, y;
+					auto m = SDL_GetMouseState(&x, &y);
 
-				glm::vec2 mouse_delta = glm::vec2(x, y) - glm::vec2(lastM.x, lastM.y);
+					//glm::vec2 mouse_delta = glm::vec2(x, y) - glm::vec2(lastM.x, lastM.y);
+					glm::ivec2 mouse_delta = glm::ivec2(x, y) - glm::ivec2(window.sizeX / 2, window.sizeY / 2);
 
-				const float mouseX_Sensitivity = 0.002f;
-				const float mouseY_Sensitivity = 0.002f;
+					const float mouseX_Sensitivity = 0.002f;
+					const float mouseY_Sensitivity = 0.002f;
 
-				targetYaw += mouseX_Sensitivity * mouse_delta.x;
-				targetPitch += mouseY_Sensitivity * mouse_delta.y;
+					cam.targetYaw += mouseX_Sensitivity * mouse_delta.x;
+					cam.targetPitch += mouseY_Sensitivity * mouse_delta.y;
+
+					SDL_WarpMouseInWindow(window.sdlWindow, window.sizeX / 2, window.sizeY / 2);
+					SDL_ShowCursor(0);
+				}
 			}
 		}
+		//SDL_GetMouseFocus() == window.sdlWindow && 
 
-		SDL_GetMouseState(&lastM.x, &lastM.y);
 
-		if (lastM.x <= float(window.sizeX) * 0.1f || lastM.x >= float(window.sizeX) * 0.9f)
-		{
-			SDL_WarpMouseInWindow(window.sdlWindow, window.sizeX / 2, lastM.y);
-			lastM.x = window.sizeX / 2;
-		}
-
-		if (lastM.y <= float(window.sizeY) * 0.1f || lastM.y >= float(window.sizeY) * 0.9f)
-		{
-			SDL_WarpMouseInWindow(window.sdlWindow, lastM.x, window.sizeY / 2);
-			lastM.y = window.sizeY / 2;
-		}
-
-		//SDL_WarpMouseInWindow(window.sdlWindow, window.sizeX / 2, window.sizeY / 2);
-
-		SDL_ShowCursor(0);
-
-		glm::fmat4 matRoll = glm::rotate(glm::fmat4(), roll, glm::vec3(0.0f, 0.0f, 1.0f));
-		glm::fmat4 matPitch = glm::rotate(glm::fmat4(), pitch, glm::vec3(1.0f, 0.0f, 0.0f));
-		glm::fmat4 matYaw = glm::rotate(glm::fmat4(), yaw, glm::vec3(0.0f, 1.0f, 0.0f));
-
-		float moveSpeed = 100;
+		const float moveSpeed = 80;
 
 		auto keyboardState = SDL_GetKeyboardState(NULL);
 
-		auto move = glm::fvec3(glm::fvec4(0, 0, moveSpeed * dt.getSeconds(), 1) * matYaw);
-		pos -= move * float(keyboardState[SDL_SCANCODE_W]);
+		auto move = glm::fvec3(glm::fvec4(0, 0, moveSpeed * dt.getSeconds(), 1) * cam.matYaw);
+		cam.targetPos -= move * float(keyboardState[SDL_SCANCODE_W]);
 
-		move = glm::cross(glm::fvec3(glm::fvec4(0, 0, moveSpeed * dt.getSeconds(), 1) * matYaw), glm::fvec3(0, 1, 0));
-		pos += move * float(keyboardState[SDL_SCANCODE_A]);
+		move = glm::cross(glm::fvec3(glm::fvec4(0, 0, moveSpeed * dt.getSeconds(), 1) * cam.matYaw), glm::fvec3(0, 1, 0));
+		cam.targetPos += move * float(keyboardState[SDL_SCANCODE_A]);
 
-		move = glm::fvec3(glm::fvec4(0, 0, moveSpeed * dt.getSeconds(), 1) * matYaw);
-		pos += move * float(keyboardState[SDL_SCANCODE_S]);
+		move = glm::fvec3(glm::fvec4(0, 0, moveSpeed * dt.getSeconds(), 1) * cam.matYaw);
+		cam.targetPos += move * float(keyboardState[SDL_SCANCODE_S]);
 
-		move = glm::cross(glm::fvec3(glm::fvec4(0, 0, moveSpeed * dt.getSeconds(), 1) * matYaw), glm::fvec3(0, 1, 0));
-		pos -= move * float(keyboardState[SDL_SCANCODE_D]);
+		move = glm::cross(glm::fvec3(glm::fvec4(0, 0, moveSpeed * dt.getSeconds(), 1) * cam.matYaw), glm::fvec3(0, 1, 0));
+		cam.targetPos -= move * float(keyboardState[SDL_SCANCODE_D]);
 
-		pos.y += moveSpeed * dt.getSeconds() * float(keyboardState[SDL_SCANCODE_R]);
+		cam.targetPos.y += moveSpeed * dt.getSeconds() * float(keyboardState[SDL_SCANCODE_R]);
 
-		pos.y -= moveSpeed * dt.getSeconds() * float(keyboardState[SDL_SCANCODE_F]);
+		cam.targetPos.y -= moveSpeed * dt.getSeconds() * float(keyboardState[SDL_SCANCODE_F]);
 
-		glm::fmat4 translate = glm::fmat4(1.0f);
-		translate = glm::translate(translate, -pos);
+		exposure += float(keyboardState[SDL_SCANCODE_X]) * dt.getSeconds();
+		exposure -= float(keyboardState[SDL_SCANCODE_Z]) * dt.getSeconds();
+		exposure = max(0.f, exposure);
+		s.use();
+		glUniform1f(expval, exposure);
+		s.stop();
 
-		targetPitch = glm::clamp(targetPitch, -float(PI) / 2.f, float(PI) / 2.f);
+		cam.update(dt);
 
-		pitch = glm::mix(pitch, targetPitch, 10.f * dt.getSeconds());
-		yaw = glm::mix(yaw, targetYaw, 10.f * dt.getSeconds());
-		//scal = lerp(10.f * et, scal, scales);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, textureID);
 
-		glm::fmat4 rotate = matRoll * matPitch * matYaw;
-		view = rotate * translate;
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, specularMap);
 
-		rotate = matYaw;
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, marble);
 
-		projView = proj * view;
-
-		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-		glClearColor(0.05, 0.05, 0.05, 1.0);
-
-		glUniform3f(aa, pos.x, pos.y, pos.z);
-
-		model = glm::rotate(model, dt.getSecondsf(), glm::fvec3(0, 1, 0));
-
-		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projView));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glDrawArrays(GL_TRIANGLES, 0, m.data.numVert);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-		//m.draw();
-
-		window.swapBuffers();
+		r.render(cam);
 
 		dt.setMicroSeconds(qpc.getElapsedTime());
-
-		tot += dt.getMicroSeconds();
-		if (tot > 100000)
-		{
-			std::cout << 1.f / dt.getSecondsf() << std::endl;
-			tot = 0;
-		}
 	}
 };

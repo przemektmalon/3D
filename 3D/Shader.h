@@ -114,6 +114,9 @@ public:
 		return program;
 	}
 
+	void use() { glUseProgram(program); }
+	void stop() { glUseProgram(0); }
+
 private:
 
 	GLuint program;

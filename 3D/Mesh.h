@@ -25,11 +25,33 @@ class Mesh
 {
 public:
 	Mesh() {}
+	Mesh(std::string path)
+	{
+		loadBinary(path);
+	}
 	~Mesh() {}
 
 	void load(std::string objPath)
 	{
 		std::ifstream ifs(objPath);
+
+		if (ifs.bad())
+		{
+			std::cout << "Error loading " << objPath << std::endl;
+			return;
+		}
+
+		if (!ifs.good())
+		{
+			std::cout << "Error loading " << objPath << std::endl;
+			return;
+		}
+
+		if (!ifs.is_open())
+		{
+			std::cout << "Error loading " << objPath << std::endl;
+			return;
+		}
 
 		while (!ifs.eof())
 		{
@@ -143,7 +165,7 @@ public:
 		std::cout << data.numVert << std::endl;
 		std::cout << data.numTris << std::endl;
 
-		glUseProgram(Engine::s());
+		glUseProgram(Engine::gPassShader());
 
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
@@ -152,15 +174,15 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 		glBufferData(GL_ARRAY_BUFFER, intData.size * sizeof(GLfloat), intData.interlacedData, GL_STATIC_DRAW);
 
-		auto posAttrib = glGetAttribLocation(Engine::s(), "p");
+		auto posAttrib = glGetAttribLocation(Engine::gPassShader(), "p");
 		glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
 		glEnableVertexAttribArray(posAttrib);
 
-		auto texAttrib = glGetAttribLocation(Engine::s(), "t");
+		auto texAttrib = glGetAttribLocation(Engine::gPassShader(), "t");
 		glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
 		glEnableVertexAttribArray(texAttrib);
 
-		auto norAttrib = glGetAttribLocation(Engine::s(), "n");
+		auto norAttrib = glGetAttribLocation(Engine::gPassShader(), "n");
 		glVertexAttribPointer(norAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(5 * sizeof(GLfloat)));
 		glEnableVertexAttribArray(norAttrib);
 
@@ -180,7 +202,7 @@ public:
 		data.numVert = size / 8;
 		data.numTris = data.numVert / 3;
 
-		glUseProgram(Engine::s());
+		glUseProgram(Engine::gPassShader());
 
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
@@ -189,15 +211,17 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 		glBufferData(GL_ARRAY_BUFFER, intData.size * sizeof(GLfloat), intData.interlacedData, GL_STATIC_DRAW);
 
-		auto posAttrib = glGetAttribLocation(Engine::s(), "p");
+
+
+		auto posAttrib = glGetAttribLocation(Engine::gPassShader(), "p");
 		glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
 		glEnableVertexAttribArray(posAttrib);
 
-		auto texAttrib = glGetAttribLocation(Engine::s(), "t");
+		auto texAttrib = glGetAttribLocation(Engine::gPassShader(), "t");
 		glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
 		glEnableVertexAttribArray(texAttrib);
 
-		auto norAttrib = glGetAttribLocation(Engine::s(), "n");
+		auto norAttrib = glGetAttribLocation(Engine::gPassShader(), "n");
 		glVertexAttribPointer(norAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(5 * sizeof(GLfloat)));
 		glEnableVertexAttribArray(norAttrib);
 

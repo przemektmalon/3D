@@ -27,44 +27,54 @@ public:
 
 		//glBindBufferBase(GL_UNIFORM_BUFFER, uboBlockIndex, ubo);
 
-		proj = glm::perspective(float(PI) / 2.5f, float(Engine::window.sizeX) / float(Engine::window.sizeY), 1.f, 10000.f);
+		fov = float(PI) / 2.5f;
+		aspect = float(Engine::window.getSizeX()) / float(Engine::window.getSizeY());
+		proj = glm::perspective(fov, aspect, 1.f, 10000.f);
 
 		yaw = 0; pitch = 0; roll = 0;
 		targetYaw = 0; targetPitch = 0; targetRoll = 0;
 		pos = glm::fvec3(0, 0, 0);
+		targetPos = glm::fvec3(0, 0, 0);
 	}
 	~Camera() {}
 
-	float ler(float a, float b)
+	float ler(float a, float b, float N)
 	{
-		float N = 1.5f;
 		float v = ((a * (N - 1)) + b) / N;
 		return v;
+	}
+
+	glm::fvec3 getDirectionVector()
+	{
+		return glm::fvec3(glm::sin(yaw) * glm::cos(pitch), -glm::sin(pitch), -glm::cos(yaw) * glm::cos(pitch));
 	}
 
 	void update(Time& dt)
 	{
 		targetPitch = glm::clamp(targetPitch, -float(PI) / 2.f, float(PI) / 2.f);
-		pitch = ler(pitch, targetPitch);
-		yaw = ler(yaw, targetYaw);
+		pitch = ler(pitch, targetPitch, 1.5f);
+		yaw = ler(yaw, targetYaw, 1.5f);
 
 
 		matRoll = glm::rotate(glm::fmat4(), roll, glm::vec3(0.0f, 0.0f, 1.0f));
 		matPitch = glm::rotate(glm::fmat4(), pitch, glm::vec3(1.0f, 0.0f, 0.0f));
 		matYaw = glm::rotate(glm::fmat4(), yaw, glm::vec3(0.0f, 1.0f, 0.0f));
 
+		pos.x = ler(pos.x, targetPos.x, 5.f);
+		pos.y = ler(pos.y, targetPos.y, 5.f);
+		pos.z = ler(pos.z, targetPos.z, 5.f);
+
 		glm::fmat4 translate = glm::fmat4(1.0f);
 		translate = glm::translate(translate, -pos);
 
-		glm::fmat4 rotate = matRoll * matPitch * matYaw;
-		view = rotate * translate;
-
-		rotate = matYaw;
+		rotation = matRoll * matPitch * matYaw;
+		view = rotation * translate;
 
 		projView = proj * view;
 	}
 
 	glm::fvec3 pos;
+	glm::fvec3 targetPos;
 	float yaw, pitch, roll;
 	float targetYaw, targetPitch, targetRoll;
 	glm::fmat4 matYaw;
@@ -73,6 +83,8 @@ public:
 	glm::fmat4 rotation;
 
 	glm::fmat4 proj, view, projView;
+
+	float fov, aspect;
 
 	//GLuint ubo;
 	//GLuint uboBlockIndex;
