@@ -1,9 +1,9 @@
-#include "ResourceManager.h"
+#include "AssetManager.h"
 
-ResourceManager::ResourceManager()
+AssetManager::AssetManager()
 {
 }
 
-ResourceManager::~ResourceManager()
+AssetManager::~AssetManager()
 {
 }

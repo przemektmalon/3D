@@ -4,6 +4,7 @@
 #include <vector>
 #include <assert.h>
 #include <map>
+#include "StackStrings.h"
 
 class ShaderPreprocessor
 {
@@ -29,12 +30,14 @@ public:
 			{
 				++pSource;
 				//std::string varName; varName.reserve(20);
-				char varName[32];
-				//String::replicate
+				//char varName[32];
+				String32 varName;
+
 				u32 varNameIndex = 0;
 				for (;;)
 				{
-					varName[varNameIndex] = *pSource;
+					varName.append(*pSource);
+
 					++varNameIndex;
 
 					if (varNameIndex > 31) { assert(0); }
@@ -48,38 +51,25 @@ public:
 
 				//auto find = std::find(varNamesVals.begin(), varNamesVals.end(), varName);
 
-				char* findVal = nullptr;
-
+				String1024* findVal = nullptr;
 
 				{
 					for (u32 i = 0; i < 32; ++i)
 					{
-						if (memcmp(varName, varVals[i].var, 32) == 0)
+						//if (memcmp(varName, varVals[i].var, 32) == 0)
+						if (varName == varVals[i].var)
 						{
-							findVal = varVals[i].val;
+							findVal = &varVals[i].val;
 							break;
 						}
 					}
 				}
 
-
 				if (findVal == nullptr)
 					assert(0);
 
-				u32 valIndex = 0;
-				for (;;)
-				{
-					if (findVal[valIndex] != '\0')
-					{
-						++valIndex;
-						processedShader[outputIndex] = findVal[valIndex];
-						++outputIndex;
-					}
-					else
-					{
-						break;
-					}
-				}
+				StackString::copyChars(&processedShader[outputIndex], findVal->getString(), findVal->getLength());
+				outputIndex += findVal->getLength();
 				converting = false;
 			}
 
@@ -95,19 +85,21 @@ public:
 		return processedShader;
 	}
 
-	void setVarVal(char* var, char* val)
+	void setVarVal(String32& var, String1024& val)
 	{
 		for (u32 i = 0; i < 32; ++i)
 		{
-			if (memcmp(var, varVals[i].var, 32))
+			if (varVals[i].var == var)
 			{
-				memcpy(varVals[i].val, val, 1024 - 32);
+				varVals[i].val.overwrite(val);
+				break;
 			}
 
-			if (varVals[i].var[0] == '\0')
+			if (varVals[i].var.getString()[0] == '\0')
 			{
-				memcpy(varVals[i].var, var, 32);
-				memcpy(varVals[i].val, val, 1024 - 32);
+				varVals[i].val.overwrite(val);
+				varVals[i].var.overwrite(var);
+				break;
 			}
 		}
 	}
@@ -116,12 +108,9 @@ private:
 
 	struct VarAndVal
 	{
-		char var[32];
-		char val[1024 - 32];
+		String32 var;
+		String1024 val;
 	};
 
-	//std::map<std::string,std::string> varNamesVals;
 	VarAndVal varVals[32];
-
-
 };

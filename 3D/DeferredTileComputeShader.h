@@ -10,7 +10,7 @@ public:
 
 	void initialise()
 	{
-		load("res/shader/tileCull", true);
+		load(String32("res/shader/tileCull"), true);
 		use();
 		viewPosLoc = glGetUniformLocation(program, "viewPos");
 		viewRaysLoc = glGetUniformLocation(program, "viewRays");

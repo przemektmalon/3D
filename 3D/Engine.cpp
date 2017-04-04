@@ -18,13 +18,16 @@
 //#include "SDL_syswm.h"
 #include <functional>
 #include "resource.h"
-#include "ResourceManager.h"
+#include "AssetManager.h"
 
 #define MODEL_PATH std::string("res/model/")
+
+#include "World.h"
 
 #include "StackStrings.h"
 
 #include "UILabel.h"
+#include "UIButton.h"
 
 FT_Library Engine::ftLib;
 //FontStore Engine::fontStore;
@@ -47,11 +50,11 @@ glm::ivec2 Engine::lastM;
 UIM Engine::uim;
 char Engine::workingDirectory[MAX_PATH];
 u32 Engine::workingDirectoryLength;
-u32 Engine::selectedID;
+s32 Engine::selectedID;
 UIWindow* Engine::uiw;
 bool Engine::windowClicked = false;
 glm::ivec2 Engine::clickedPos;
-ResourceManager Engine::resMan;
+AssetManager Engine::assets;
 u64 Engine::h1;
 u64 Engine::h2;
 u64 Engine::h3;
@@ -59,19 +62,17 @@ GLTexture2DMip Engine::t1;
 GLTexture2DMip Engine::t2;
 GLTexture2DMip Engine::t3;
 GLTexture2DMip Engine::t4;
-
-/*int main(int argc, char *argv[])
-{
-Engine::start();
-return 0;
-}*/
-
-
-MasterRenderer* asd;
+World* Engine::world;
+float Engine::programTime = 0;
 
 Window Engine::window;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+
+#include <stdio.h>
+#include <io.h>
+#include <fcntl.h>
+#include <windows.h>
 
 int WinMain(__in HINSTANCE hInstance, __in_opt HINSTANCE hPrevInstance, __in_opt LPSTR lpCmdLine, __in int nShowCmd)
 {
@@ -102,8 +103,19 @@ void toggleWF()
 	Engine::r->rC.wireFrame = !Engine::r->rC.wireFrame;
 }
 
+#include "Console.h"
+
 void Engine::start(HINSTANCE pHInstance)
 {
+	Console::registerConsoleFuncs();
+
+	Console::submitCommand(String512("FUNCNAME (1,5,6) (2.3 2.4) 5 \"STRING\" 10000.0002 9999"));
+	Console::submitCommand(String512("FUNC 5"));
+	Console::submitCommand(String512("FOO 1 5.0"));
+
+	const char* s1 = "sssssssssd";
+	const int asd = sizeof(*s1);
+
 	instance = pHInstance;
 
 	int bytes = GetModuleFileName(NULL, workingDirectory, MAX_PATH);
@@ -176,8 +188,6 @@ void savePosition()
 	//fstr.open("res/dat/position.dat");
 	if (fstr.is_open())
 	{
-
-
 		fstr.write((char*)&Engine::cam.targetPos, sizeof(glm::fvec2));
 		fstr.close();
 	}
@@ -191,34 +201,72 @@ void loadPosition()
 	fstr.close();
 }
 
+
 void moveObjXP()
 {
-	Engine::r->ents[Engine::selectedID - 1].transform.translate(glm::fvec3(Engine::dt.getSeconds() * 50, 0, 0));
+	if (Engine::selectedID == -1) return;
+	auto i = Engine::world->getMeshInstance(Engine::selectedID);
+	//i->sgNode->transform.translate(glm::fvec3(0,0,Engine::dt.getSeconds() * 500));
+	i->sgNode->transform.rotate(glm::fvec3(Engine::dt.getSeconds() * 4.5, 0, 0));
+	//i->sgNode->transform.setTranslation(glm::fvec3(std::cos(i->sgNode->transform.getRoll()) * 5, std::sin(i->sgNode->transform.getRoll()) * 5, 0));
+	i->sgNode->updateAll();
+	Engine::world->updateGLBuffers();
 }
 
 void moveObjXN()
 {
-	Engine::r->ents[Engine::selectedID - 1].transform.translate(glm::fvec3(Engine::dt.getSeconds() * -50, 0, 0));
+	if (Engine::selectedID == -1) return;
+	auto i = Engine::world->getMeshInstance(Engine::selectedID);
+	//i->sgNode->transform.translate(glm::fvec3(0,0,Engine::dt.getSeconds() * -500));
+	i->sgNode->transform.rotate(glm::fvec3(-Engine::dt.getSeconds() * 4.5, 0, 0));
+	//i->sgNode->transform.setTranslation(glm::fvec3(std::cos(i->sgNode->transform.getRoll()) * 5, std::sin(i->sgNode->transform.getRoll()) * 5, 0));
+	i->sgNode->updateAll();
+	Engine::world->updateGLBuffers();
 }
+
 
 void moveObjZP()
 {
-	Engine::r->ents[Engine::selectedID - 1].transform.translate(glm::fvec3(0, 0, Engine::dt.getSeconds() * 50));
+	if (Engine::selectedID == -1) return;
+	auto i = Engine::world->getMeshInstance(Engine::selectedID);
+	//i->sgNode->transform.translate(glm::fvec3(0,0,Engine::dt.getSeconds() * 500));
+	i->sgNode->transform.rotate(glm::fvec3(0, Engine::dt.getSeconds() * 4.5, 0));
+	//i->sgNode->transform.setTranslation(glm::fvec3(std::cos(i->sgNode->transform.getRoll()) * 5, std::sin(i->sgNode->transform.getRoll()) * 5, 0));
+	i->sgNode->updateAll();
+	Engine::world->updateGLBuffers();
 }
 
 void moveObjZN()
 {
-	Engine::r->ents[Engine::selectedID - 1].transform.translate(glm::fvec3(0, 0, Engine::dt.getSeconds() * -50));
+	if (Engine::selectedID == -1) return;
+	auto i = Engine::world->getMeshInstance(Engine::selectedID);
+	//i->sgNode->transform.translate(glm::fvec3(0,0,Engine::dt.getSeconds() * 500));
+	i->sgNode->transform.rotate(glm::fvec3(0, Engine::dt.getSeconds() * -4.5, 0));
+	//i->sgNode->transform.setTranslation(glm::fvec3(std::cos(i->sgNode->transform.getRoll()) * 5, std::sin(i->sgNode->transform.getRoll()) * 5, 0));
+	i->sgNode->updateAll();
+	Engine::world->updateGLBuffers();
 }
 
 void moveObjYP()
 {
-	Engine::r->ents[Engine::selectedID - 1].transform.translate(glm::fvec3(0, Engine::dt.getSeconds() * 50, 0));
+	if (Engine::selectedID == -1) return;
+	auto i = Engine::world->getMeshInstance(Engine::selectedID);
+	//i->sgNode->transform.translate(glm::fvec3(0,0,Engine::dt.getSeconds() * 500));
+	i->sgNode->transform.rotate(glm::fvec3(0, 0, Engine::dt.getSeconds() * 4.5));
+	//i->sgNode->transform.setTranslation(glm::fvec3(std::cos(i->sgNode->transform.getRoll()) * 5, std::sin(i->sgNode->transform.getRoll()) * 5, 0));
+	i->sgNode->updateAll();
+	Engine::world->updateGLBuffers();
 }
 
 void moveObjYN()
 {
-	Engine::r->ents[Engine::selectedID - 1].transform.translate(glm::fvec3(0, Engine::dt.getSeconds() * -50, 0));
+	if (Engine::selectedID == -1) return;
+	auto i = Engine::world->getMeshInstance(Engine::selectedID);
+	//i->sgNode->transform.translate(glm::fvec3(0,0,Engine::dt.getSeconds() * 500));
+	i->sgNode->transform.rotate(glm::fvec3(0, 0, Engine::dt.getSeconds() * -4.5));
+	//i->sgNode->transform.setTranslation(glm::fvec3(std::cos(i->sgNode->transform.getRoll()) * 5, std::sin(i->sgNode->transform.getRoll()) * 5, 0));
+	i->sgNode->updateAll();
+	Engine::world->updateGLBuffers();
 }
 
 void mouseDown()
@@ -231,6 +279,7 @@ void mouseDown()
 		Engine::windowClicked = true;
 		Engine::clickedPos = mPos - glm::ivec2(wa.left, wa.top);
 	}
+	uiw->mouseDown();
 }
 
 void mouseUp()
@@ -238,16 +287,13 @@ void mouseUp()
 	Engine::windowClicked = false;
 }
 
+#include "HeapString.h"
+
 void Engine::mainLoop()
 {
-	String64 str;
-
-	str.append(String32("abc")).append(String32("_DEFG")).removeCases(String32("bc")).replaceWhere(String32("DE"), String32("EDFGHIJ")).overwrite(String32("haha"));
-
-
 	glewExperimental = GL_TRUE;
 	glewInit();
-	wglewInit();
+	//wglewInit();
 
 	wglSwapIntervalEXT(0);
 
@@ -274,6 +320,13 @@ void Engine::mainLoop()
 
 	startTime = std::chrono::system_clock::now().time_since_epoch().count();
 
+
+	//HeapString ab("A");
+
+	//ab.append("BCDhelloworld");
+	//ab.append("EFGhelloworldHIJK").removeCases("helloworld");
+	//ab.insertAt(4, "4").insertWhere("BCD\0","OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO\0");
+
 	FT_Init_FreeType(&ftLib);
 	//fontStore.initialise();
 
@@ -285,7 +338,7 @@ void Engine::mainLoop()
 	//t.setCharSize(size);
 	//t.setString("Hello!");
 
-	s.load("res/shader/Standard", "res/shader/Standard");
+	//s.load("res/shader/Standard", "res/shader/Standard");
 	gPassShader.load("res/shader/gBufferPass", "res/shader/gBufferPass");
 	testShader.load("res/shader/test", "res/shader/test");
 	glUseProgram(s());
@@ -329,25 +382,29 @@ void Engine::mainLoop()
 
 	//uSphere.load(MODEL_PATH + "UnitSphere.obj");
 
-	//glViewport(0, 0, window.getSizeX(), window.getSizeY());
 
-	resMan.init();
+	assets.init();
 
 	char b1[] = "res/model/box.bin";
 	char b1n[] = "egg";
 
-	char b2[] = "res/model/pf.bin";
-	char b2n[] = "pf";
+	char b2[] = "res/model/SCENE.bin";
+	char b2n[] = "ter";
 
-	char b3[] = "res/model/oo.bin";
-	char b3n[] = "oo";
+	//char b3[] = "res/model/oo.bin";
+	//char b3n[] = "oo";
 
-	auto a = resMan.registerMesh(b1, b1n);
-	//auto b = resMan.registerMesh(b2, b2n);
+	Mesh& a = (Mesh&)assets.prepareAsset(Asset::Mesh, b1, b1n);
+	Mesh& b = (Mesh&)assets.prepareAsset(Asset::Mesh, b2, b2n);
 	//auto c = resMan.registerMesh(b3, b3n);
 
-	resMan.loadMesh(a);
-	//resMan.loadMesh(b);
+	a.load();
+	assets.meshManager.pushMeshToBatch(a);
+	b.load();
+	assets.meshManager.pushMeshToBatch(b);
+
+	//assets.loadMesh(a);
+	//assets.loadMesh(b);
 	//resMan.loadMesh(c);
 
 	//t1.createFromFile("res/sp.jpg");
@@ -355,26 +412,18 @@ void Engine::mainLoop()
 	//t3.createFromFile("res/oo.jpg");
 	//t4.createFromFile("res/gB.jpg");
 
-	t1.createFromFile("res/g.jpg");
-	t2.createFromFile("res/gN.jpg");
-	t3.createFromFile("res/gD.jpg");
-	t4.createFromFile("res/gB.jpg");
+	t1.createFromFile("res/tex/g.jpg");
+	t2.createFromFile("res/tex/gN.jpg");
+	t3.createFromFile("res/tex/gD.jpg");
+	t4.createFromFile("res/tex/gB.jpg");
 
-	const MeshManager& mm = Engine::resMan.meshManager;
-
-	typedef struct {
-		u32 count;
-		u32 instanceCount;
-		u32 first;
-		//u32 baseInstance;
-		float radius;
-	} CMD;
+	const GPUMeshManager& mm = Engine::assets.meshManager;
 
 	const u32 maxObjects = 65536;
 
-	CMD* cmds = new CMD[maxObjects];
+	GLCMD* cmds = new GLCMD[maxObjects];
 
-	auto eggMesh = resMan.getMesh("egg");
+	auto eggMesh = assets.getMesh("egg");
 	auto bid = eggMesh.renderMeta.batchID;
 	auto bi = eggMesh.renderMeta.batchIndex;
 	auto data = mm.solidBatches.at(bid).data[bi];
@@ -431,132 +480,7 @@ void Engine::mainLoop()
 		cmds[i].radius = maxDist;
 	}
 
-	for (int i = 0; i < maxObjects; ++i)
-	{
-		r->meta[i].cmds[0] = cmds[i].count;
-		r->meta[i].cmds[1] = cmds[i].instanceCount;
-		r->meta[i].cmds[2] = cmds[i].first;
-		r->meta[i].radius = cmds[i].radius;
-		//r->meta[i].posRad = glm::fvec4(400 * (i % 30), 0, 400 * std::floor(i / 30), 1.f);
-	}
 
-
-
-	glCreateBuffers(1, &r->drawIndirectBuffer);
-	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, r->drawIndirectBuffer);
-	glBufferData(GL_DRAW_INDIRECT_BUFFER, sizeof(CMD) * maxObjects, 0, GL_STATIC_READ);
-	//glBufferSubData(GL_DRAW_INDIRECT_BUFFER, 0, sizeof(CMD) * 3, cmds);
-	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
-
-
-
-	/*std::string fileName("wd.jpg");
-	int width, height;
-	GLuint textureID;
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-	unsigned char* image = SOIL_load_image(fileName.c_str(), &width, &height, 0, SOIL_LOAD_RGBA);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-	SOIL_free_image_data(image);
-
-	fileName = std::string("wd.jpg");
-	GLuint specularMap;
-	glGenTextures(1, &specularMap);
-	glBindTexture(GL_TEXTURE_2D, specularMap);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-	image = SOIL_load_image(fileName.c_str(), &width, &height, 0, SOIL_LOAD_RGBA);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-	SOIL_free_image_data(image);
-
-	fileName = std::string("m.png");
-	GLuint marble;
-	glGenTextures(1, &marble);
-	glBindTexture(GL_TEXTURE_2D, marble);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-	image = SOIL_load_image(fileName.c_str(), &width, &height, 0, SOIL_LOAD_RGBA);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-	SOIL_free_image_data(image);*/
-
-	std::vector<glm::fmat4> inst;
-	for (int i = 0; i < 1; ++i)
-	{
-		auto in = glm::translate(glm::fmat4(), glm::fvec3(i * 150, 30, 0));
-		in = glm::scale(in, glm::fvec3(4.f));
-		in = glm::rotate(in, float(PI) / 5.f, glm::fvec3(0, 1.f, 0));
-		inst.push_back(in);
-	}
-	//MasterRenderer r;
-	//r.entities.insert(std::make_pair(&buddha, inst));
-	//std::vector<glm::fmat4> inst2;
-	//for (int i = 0; i < 10; ++i)
-	//{
-	//	auto in = glm::translate(glm::fmat4(), glm::fvec3(i * 200, 35, -150));
-	//	in = glm::scale(in, glm::fvec3(10.f));
-	//	in = glm::rotate(in, float(PI) / 4.f, glm::fvec3(0, 1, 0));
-	//	inst2.push_back(in);
-	//}
-	//r->entities.insert(std::make_pair(&dragon, inst2));
-	//MeshInstance m1;
-	//m1.meshData = &dragon;
-	//m1.transform = Transform().scale(10);
-	//m1.texx.createFromFile("m.png");
-	//r->ents.push_back(m1);
-	//MeshInstance m2;
-	//m2.meshData = &sp;
-	//m2.transform = Transform().translate(glm::fvec3(100, 0, 0)).scale(10);
-	//m2.texx.createFromFile("res/sp.jpg");
-	//r->ents.push_back(m2);
-	//MeshInstance m3;
-	//m3.meshData = &oo;
-	//m3.transform = Transform().translate(glm::fvec3(200, 0, 0)).scale(10);
-	//m3.texx.createFromFile("res/oo.jpg");
-	//r->ents.push_back(m3);
-	//MeshInstance m4;
-	//m4.meshData = &pf;
-	//m4.transform = Transform().translate(glm::fvec3(-200, 0, 0)).scale(20);
-	//m4.texx.createFromFile("res/pf.jpg");
-	//r->ents.push_back(m4);
-	//MeshInstance m5;
-	//m5.meshData = &ter;
-	//m5.transform = Transform().scale(400);
-	//m5.texx.createFromFile("res/tex/stone.png");
-	//m5.specTex.createFromFile("res/tex/stone.png");
-	//m5.normalTex.createFromFile("res/tex/stoneN.png");
-	//m5.texx.createFromFile("res/tex/g.jpg");
-	//m5.specTex.createFromFile("res/tex/gS.jpg");
-	//m5.normalTex.createFromFile("res/tex/gN.jpg");
-	//m5.bumpTex.createFromFile("res/tex/gB.jpg");
-	//r->ents.push_back(m5);
-	//std::vector<glm::fmat4> inst3;
-	//inst3.push_back(glm::scale(glm::translate(glm::fmat4(), glm::fvec3(10, -10, 10)), glm::fvec3(50)));
-	//r->entities.insert(std::make_pair(&floor, inst3));
-	//std::vector<glm::fmat4> inst4;
-	//inst4.push_back(glm::scale(glm::translate(glm::fmat4(), glm::fvec3(-30, -5, 70)), glm::fvec3(0.8)));
-	//r.entities.insert(std::make_pair(&ballpyr, inst4));
-	//std::vector<glm::fmat4> inst5;
-	//inst5.push_back(glm::rotate(glm::scale(glm::translate(glm::fmat4(), glm::fvec3(0, -88, 0)), glm::fvec3(50)), glm::radians(-32.f), glm::fvec3(0, 1, 0)));
-	//r.entities.insert(std::make_pair(&table, inst5));
-
-	std::vector<glm::fmat4> inst4;
-	inst4.push_back(glm::scale(glm::translate(glm::fmat4(), glm::fvec3(0, 100, 0)), glm::fvec3(10)));
-
-	//r->entities.insert(std::make_pair(&sp, inst4));
-	//sp.tex.createFromFile("res/sp.jpg");
-
-	inst4[0] = glm::translate(inst4[0], glm::fvec3(22, 0, 0));
-
-	//r->entities.insert(std::make_pair(&oo, inst4));
-	//oo.tex.createFromFile("res/oo.jpg");
-
-	//glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_2D, textureID);
-
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glActiveTexture(GL_TEXTURE0);
-
-	//Camera cam;
 	cam.initialiseProj(float(window.getSizeX()) / float(window.getSizeY()));
 	cam.calculateViewRays();
 	r->initialiseRenderer(&window, cam);
@@ -574,13 +498,15 @@ void Engine::mainLoop()
 
 	std::string stringg;
 
-	Font font;
-	font.load("res/fonts/clear-sans/ClearSans-Regular.ttf");
-	font.loadGlyphs(16);
+	assets.prepareAsset(Asset::Type::Font, "res/fonts/clear-sans/ClearSans-Regular.ttf", "clearsans").load();
+
+	//Font font;
+	//font.load("res/fonts/clear-sans/ClearSans-Regular.ttf");
+	//font.loadGlyphs(16);
 
 	UILabel lbl;
 	lbl.text.init();
-	lbl.text.setFont(&font);
+	lbl.text.setFont(&assets.getFont("clearsans"));
 	lbl.text.setCharSize(16);
 	lbl.text.setWindowSize(glm::ivec2(500, 500));
 	lbl.text.setWindowOrigin(Text2D::TopLeft);
@@ -589,10 +515,50 @@ void Engine::mainLoop()
 	lbl.text.setPosition(glm::fvec2(20, 50));
 	lbl.text.setColour(glm::fvec3(0.95f, 0.95f, 0.95f));
 
+	UIButton lbl2;
+	lbl2.text.init();
+	lbl2.text.setFont(&assets.getFont("clearsans"));
+	lbl2.text.setCharSize(56);
+	lbl2.text.setWindowSize(glm::ivec2(500, 500));
+	lbl2.text.setWindowOrigin(Text2D::TopLeft);
+	lbl2.text.setString("Resolution: 1920x1080");
+	lbl2.text.setTextOrigin(glm::ivec2(0, 16));
+	lbl2.text.setPosition(glm::fvec2(20, 150));
+	lbl2.text.setColour(glm::fvec3(1.f, 0.f, 0.f));
+
 	uiw = new UIWindow(UIRect(0, 0, 500, 500), 6, &window);
 
 	uiw->setTitle("DEBUG OPTIONS");
 	uiw->addElement(&lbl);
+	uiw->addElement(&lbl2);
+
+	world = new World();
+	world->initialiseGLBuffers(10000);
+
+	auto prevNode = world->getWorldRootNode();
+
+	for (int i = 0; i < 100; ++i)
+	{
+		auto i1 = world->addMeshInstance(a, prevNode);
+		prevNode = i1->sgNode;
+		//i1->sgNode->transform.translate(glm::fvec3((i%100) * 500, 0, std::floor(float(i) / 100) * 500)).scale(100);
+		i1->sgNode->transform.translate(glm::fvec3(5, 0, 0)).scale(i == 0 ? 100 : 1);
+		i1->sgNode->transform.updateMatrix();
+	}
+
+	auto i2 = world->addMeshInstance(b, world->getWorldRootNode());
+	i2->sgNode->transform.scale(100).translate(glm::fvec3(0, -50, 0));
+	i2->sgNode->transform.updateMatrix();
+
+	world->sg.updateAll();
+
+	world->updateGLBuffers();
+	r->world = world;
+
+	ShaderProgram sh;
+	sh.load("gBufferPass", ShaderProgram::VertFrag);
+	sh.compile();
+
 
 	while (engineState != Quitting) {
 		if (!window.processMessages())
@@ -602,146 +568,11 @@ void Engine::mainLoop()
 			processFrame();
 		}
 	}
-	int x = 10;
 };
 
 void Engine::processFrame()
 {
 	qpc.start();
-
-	/*while (SDL_PollEvent(&ev))
-	{
-	if (ev.type == SDL_KEYDOWN)
-	{
-	if (ev.key.keysym.sym == SDLK_BACKSPACE)
-	{
-	if (stringg.size() > 0)
-	{
-	stringg.assign(stringg.begin(), stringg.end() - 1);
-	//t.setString(stringg);
-	}
-	}
-	if (ev.key.keysym.sym == SDLK_ESCAPE)
-	{
-	quit = true;
-	}
-	if (ev.key.keysym.sym == SDLK_KP_1)
-	{
-	wf = true;
-	}
-	if (ev.key.keysym.sym == SDLK_KP_2)
-	{
-	wf = false;
-	}
-	if (ev.key.keysym.sym == SDLK_KP_4)
-	{
-	movingLight = true;
-	}
-	if (ev.key.keysym.sym == SDLK_KP_5)
-	{
-	movingLight = false;
-	}
-	if (ev.key.keysym.sym == SDLK_q)
-	{
-	glUseProgram(Engine::s());
-	auto val = glGetUniformLocation(s(), "filmic");
-	glUniform1i(val, 0);
-	}
-	if (ev.key.keysym.sym == SDLK_e)
-	{
-	glUseProgram(Engine::s());
-	auto val = glGetUniformLocation(s(), "filmic");
-	glUniform1i(val, 1);
-	}
-	if (ev.key.keysym.sym == SDLK_PERIOD)
-	{
-	window.screenshot();
-	}
-	}
-	if (ev.type == SDL_WINDOWEVENT)
-	{
-	if (ev.window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
-	{
-	std::cout << "FOCUS GAINED" << std::endl;
-	int x, y;
-
-	//SetCursorPos(window.getSizeX() / 2, window.getSizeY() / 2);
-
-	hasFocus = true;
-	//SDL_ShowCursor(1);
-	}
-	if (ev.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
-	{
-	std::cout << "FOCUS LOST" << std::endl;
-	hasFocus = false;
-	//SDL_ShowCursor(1);
-	}
-	}
-	if (ev.type == SDL_MOUSEBUTTONDOWN)
-	{
-	if (ev.button.button == SDL_BUTTON_RIGHT)
-	{
-	mousePosAtClick = glm::ivec2(ev.button.x, ev.button.y);
-	//SDL_WarpMouseInWindow(window.sdlWindow, window.sizeX / 2, window.sizeY / 2);
-
-	//SetCursorPos(window.sizeX / 2, window.sizeY / 2);
-
-	POINT p;
-	GetCursorPos(&p);
-
-	std::cout << "0. " << p.x << " " << p.y << std::endl;
-	warpedToMidAfterClick = true;
-	lastM = glm::ivec2(p.x, p.y);
-	mouseRightDown = true;
-	//SDL_GetRelativeMouseState(NULL, NULL);
-	//SDL_ShowCursor(0);
-	}
-	}
-	if (ev.type == SDL_MOUSEBUTTONUP)
-	{
-	if (ev.button.button == SDL_BUTTON_RIGHT)
-	{
-	mouseRightDown = false;
-	lastM = glm::ivec2(window.sizeX / 2, window.sizeY / 2);
-	//SDL_WarpMouseInWindow(window.sdlWindow, mousePosAtClick.x, mousePosAtClick.y);
-	//SDL_ShowCursor(1);
-	}
-	}
-	if (ev.type == SDL_MOUSEMOTION)
-	{
-	u32 mask = SDL_GetWindowFlags(window.sdlWindow);
-	if (((mask & SDL_WINDOW_INPUT_FOCUS) == SDL_WINDOW_INPUT_FOCUS) && mouseRightDown)
-	{
-	POINT m;
-	GetCursorPos(&m);
-	//auto m = SDL_GetMouseState(&x, &y);
-	//auto m = SDL_GetRelativeMouseState(&x, &y);
-
-
-
-	glm::vec2 mouse_delta = glm::vec2(m.x, m.y) - glm::vec2(lastM);
-	//glm::ivec2 mouse_delta = glm::ivec2(m.x, m.y) - glm::ivec2(window.sizeX / 2, window.sizeY / 2);
-	lastM = glm::ivec2(m.x, m.y);
-
-	std::cout << "1. " << mouse_delta.x << " " << mouse_delta.y << std::endl;
-	std::cout << "2. " << m.x << " " << m.y << std::endl << std::endl;
-
-	const float mouseX_Sensitivity = 0.004f;
-	const float mouseY_Sensitivity = 0.004f;
-
-	cam.targetYaw += mouseX_Sensitivity * mouse_delta.x;
-	cam.targetPitch += mouseY_Sensitivity * mouse_delta.y;
-
-	//SDL_WarpMouseInWindow(window.sdlWindow, window.sizeX / 2, window.sizeY / 2);
-	//SetCursorPos(window.sizeX / 2, window.sizeY / 2);
-	}
-	}
-	if (ev.type == SDL_TEXTINPUT)
-	{
-	stringg += ev.text.text[0];
-	//t.setString(stringg);
-	}
-	}*/
 
 	if (window.mouse.rightDown)
 	{
@@ -793,14 +624,12 @@ void Engine::processFrame()
 		r->tileCullShader.setExposure(exposure);
 	}
 
-
-
-	r->ssaoShader.setIntensity(r->ssaoShader.intensity + (float(keyboardState['B']) * 5 * dt.getSeconds()));
-	r->ssaoShader.setIntensity(r->ssaoShader.intensity - (float(keyboardState['V']) * 5 * dt.getSeconds()));
+	r->ssaoShader.setIntensity(r->ssaoShader.intensity + (float(keyboardState['B']) * 1 * dt.getSeconds()));
+	r->ssaoShader.setIntensity(r->ssaoShader.intensity - (float(keyboardState['V']) * 1 * dt.getSeconds()));
 	r->ssaoShader.intensity = std::max(0.f, r->ssaoShader.intensity);
 
-	r->ssaoShader.setRadius(r->ssaoShader.radius + (float(keyboardState['H']) * 5 * dt.getSeconds()));
-	r->ssaoShader.setRadius(r->ssaoShader.radius - (float(keyboardState['G']) * 5 * dt.getSeconds()));
+	r->ssaoShader.setRadius(r->ssaoShader.radius + (float(keyboardState['H']) * 1 * dt.getSeconds()));
+	r->ssaoShader.setRadius(r->ssaoShader.radius - (float(keyboardState['G']) * 1 * dt.getSeconds()));
 	r->ssaoShader.radius = std::max(0.f, r->ssaoShader.radius);
 
 	cam.update(dt);
@@ -812,6 +641,7 @@ void Engine::processFrame()
 	static float cc;
 
 	cc += dt.getSecondsf();
+	programTime += dt.getSecondsf();
 
 	if (cc > (1.f / 60.f))
 	{

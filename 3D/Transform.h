@@ -11,7 +11,12 @@
 class Transform
 {
 public:
-	Transform() : translation(glm::fvec3(0, 0, 0)), roll(0), pitch(0), yaw(0), origin(glm::fvec3(0.f, 0.f, 0.f)), scalem(glm::fvec3(1.f, 1.f, 1.f)), needUpdate(true) {}
+	Transform() : translation(glm::fvec3(0, 0, 0)), roll(0), pitch(0), yaw(0), origin(glm::fvec3(0.f, 0.f, 0.f)), scalem(glm::fvec3(1.f, 1.f, 1.f)), needUpdate(true)
+	{
+
+		//updateMatrix();
+	}
+	Transform(glm::fmat4& mat) : translation(glm::fvec3(0, 0, 0)), roll(0), pitch(0), yaw(0), origin(glm::fvec3(0.f, 0.f, 0.f)), scalem(glm::fvec3(1.f, 1.f, 1.f)), needUpdate(true), transform(mat) {}
 	~Transform() {}
 
 	void setTransformMat(glm::fmat4 pT)
@@ -22,22 +27,32 @@ public:
 
 	inline glm::fmat4 getTransformMat()
 	{
-		if (needUpdate)
-		{
-			updateMatrix();
-		}
+		//if (needUpdate)
+		//{
+		//	updateMatrix();
+		//}
 
 		return transform;
 	}
 
 	inline glm::fmat4 getInverseTransformMat()
 	{
-		if (needUpdate)
-		{
-			updateMatrix();
-		}
+		//if (needUpdate)
+		//{
+		//	updateMatrix();
+		//}
 
 		return glm::inverse(transform);
+	}
+
+	Transform operator*(Transform& other)
+	{
+		return (transform * other.getTransformMat());
+	}
+
+	void operator*=(Transform& other)
+	{
+		transform = transform * other.getTransformMat();
 	}
 
 	inline Transform& combine(Transform& other)
@@ -101,8 +116,6 @@ public:
 		ifs.read((char*)&scalem, sizeof(scalem));
 	}
 
-private:
-
 	inline void updateMatrix()
 	{
 		needUpdate = false;
@@ -112,11 +125,14 @@ private:
 		glm::fmat4 matRoll = glm::rotate(glm::fmat4(), roll, glm::fvec3(0.0f, 0.0f, 1.0f));
 		glm::fmat4 matPitch = glm::rotate(glm::fmat4(), pitch, glm::fvec3(1.0f, 0.0f, 0.0f));
 		glm::fmat4 matYaw = glm::rotate(glm::fmat4(), yaw, glm::fvec3(0.0f, 1.0f, 0.0f));
+
 		glm::fmat4 rrotate = matRoll * matPitch * matYaw;
 		glm::fmat4 tttranslate = glm::translate(glm::fmat4(), origin);
 
 		transform = ttranslate * rrotate * sscale * tttranslate;
 	}
+
+private:
 
 	glm::fvec3 translation;
 	glm::fvec3 origin;

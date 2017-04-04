@@ -1,42 +1,33 @@
 #include "Font.h"
 
-GlyphContainer* Font::requestGlyphs(u16 pCharSize, Text * pTarget)
+GlyphContainer* Font::requestGlyphs(u16 pCharSize, Text * pUser)
 {
-	return glyphContainers.find(pCharSize)->second;
+	auto find = useTrack.find(pCharSize);
+	if (find == useTrack.end())
+	{
+		auto ret = loadGlyphs(pCharSize);
+		useTrack.insert(std::make_pair(pCharSize, std::set<Text*>({ pUser })));
+	}
+	else
+	{
+		find->second.insert(pUser);
+		return &glyphContainers.at(pCharSize);
+	}
+}
 
-	/*auto glyphFind = glyphContainers.find(pCharSize);
-	auto trackFind = useTrack.find(pCharSize);
-	if (trackFind == useTrack.end())
+void Font::releaseGlyphs(u16 pCharSize, Text* pUser)
+{
+	auto find = useTrack.find(pCharSize);
+	if (find == useTrack.end())
 	{
-	if (glyphFind == glyphContainers.end())
-	{
-	std::cout << "GLYPHS REQUESTED: GLYPH CONTAINER DOESN'T EXIST, TEXT OBJECT NOT TRACKED, GLYPHS CREATED, TEXT OBJECT TRACKED, GLYPHS RETURNED" << std::endl;
-	auto newGlyphs = loadGlyphs(pCharSize);
-	useTrack.insert(std::make_pair(pCharSize, std::list<Text*>()));
-	useTrack[pCharSize].push_back(pTarget);
-	return newGlyphs;
-	}
-	else
-	assert(false);
+
 	}
 	else
 	{
-	if (glyphFind == glyphContainers.end())
-	assert(false);
-	else
-	{
-	auto trackSpecificFind = std::find(trackFind->second.begin(), trackFind->second.end(), pTarget);
-	if (trackSpecificFind == trackFind->second.end())
-	{
-	std::cout << "GLYPHS REQUESTED: TEXT OBJECT NOT TRACKED(FIRST REQUEST), GLYPHS RETURNED" << std::endl;
-	trackFind->second.push_back(pTarget);
-	return glyphFind->second;
+		find->second.erase(pUser);
+		if (find->second.size() == 0)
+		{
+			glyphContainers.erase(pCharSize);
+		}
 	}
-	else
-	{
-	std::cout << "GLYPHS REQUESTED: TEXT OBJECT ALREADY TRACKED, GLYPHS RETURNED" << std::endl;
-	return glyphFind->second;
-	}
-	}
-	}*/
 }

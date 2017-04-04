@@ -15,9 +15,11 @@
 #include <basetsd.h>
 #include <set>
 
-#include <GL\glew.h>
+#include <gl/glew.h>
+//#include <gl/wglew.h>
 #include <GL\GL.h>
 //#include <GL\wglew.h>
+
 #include <glm\glm.hpp>
 #include "glm\gtc\type_ptr.hpp"
 #include "glm\gtc\matrix_transform.hpp"

@@ -2,6 +2,113 @@
 #include <string>
 #include "Types.h"
 #include "Text.h"
+#include <tuple>
+#include <cmath>
+#include <typeinfo>
+#include <type_traits>
+#include <tuple>
+#include <utility>
+#include <functional>
+
+template <typename> struct FnArgs;
+
+template <typename R, typename ...Args>
+struct FnArgs<R(Args...)>
+{
+	using type = std::tuple<Args...>;
+};
+
+#define PARAM_TUPLE(func) FnArgs<decltype(func)>::type::tuple()
+#define PARAM_TUPLE_TYPE(func) FnArgs<decltype(func)>::type
+#define PARAM_TUPLE_SIZE(func) std::tuple_size<PARAM_TUPLE_TYPE(func)>::value
+#define PARAM_TUPLE_SIZE_INTERM(func) PARAM_TUPLE_SIZE(func)
+#define NTH_PARAM_DATA(param_vector, n) param_vector[n].data
+#define NTH_PARAM_TYPE(func, n) std::tuple_element<n, PARAM_TUPLE_TYPE(func)>::type
+#define CHEAT_CAST(func,n,params) *reinterpret_cast<NTH_PARAM_TYPE(func,n)*>(NTH_PARAM_DATA(params,n))
+
+#define CONSTRUCT_PARAMS_6(func,params) CHEAT_CAST(func, 0, params), CHEAT_CAST(func, 1, params), CHEAT_CAST(func, 2, params), CHEAT_CAST(func, 3, params), CHEAT_CAST(func, 4, params), CHEAT_CAST(func, 5, params)
+#define CONSTRUCT_PARAMS_5(func,params) CHEAT_CAST(func, 0, params), CHEAT_CAST(func, 1, params), CHEAT_CAST(func, 2, params), CHEAT_CAST(func, 3, params), CHEAT_CAST(func, 4, params)
+#define CONSTRUCT_PARAMS_4(func,params) CHEAT_CAST(func, 0, params), CHEAT_CAST(func, 1, params), CHEAT_CAST(func, 2, params), CHEAT_CAST(func, 3, params)
+#define CONSTRUCT_PARAMS_3(func,params) CHEAT_CAST(func, 0, params), CHEAT_CAST(func, 1, params), CHEAT_CAST(func, 2, params)
+#define CONSTRUCT_PARAMS_2(func,params) CHEAT_CAST(func, 0, params), CHEAT_CAST(func, 1, params)
+#define CONSTRUCT_PARAMS_1(func,params) CHEAT_CAST(func, 0, params)
+
+//#define CONSTRUCT_PARAMS(func,params) CONSTRUCT_PARAMS_6(func,params)
+
+#define VARIABLE 3
+#define PASTER(x,y) x ## _ ## y
+#define EVALUATOR(x,y)  PASTER(x,y)
+#define NAME(fun) EVALUATOR(fun, VARIABLE)
+
+#define CONSTRUCT_PARAMS_AUTO(func,params,numParms)
+#define CONSTRUCT_PARAMS_INTERM(func,params,numParams) CONSTRUCT_PARAMS_##numParams## (func,params)
+#define CONSTRUCT_PARAMS(func,params,numParams) CONSTRUCT_PARAMS_INTERM(func,params,numParams)
+
+#define BEGIN_FUNC_SWITCH(name) \
+auto funcID = funcIDs.find(name); \
+if(funcID == funcIDs.end()) { assert(0); } \
+switch(funcID->second) {
+
+#define CHECK_CONSOLE_CALLABLE(id,func,numParams) \
+case(id):{ \
+auto task = MAKE_TASK(func)(CONSTRUCT_PARAMS_##numParams##(func,params,PARAM_TUPLE_SIZE(func))); \
+pvoidary pFunc; \
+void* pVoid; \
+std::tie(pFunc, pVoid) = task; \
+pFunc(pVoid); \
+delete std::get<1>(task); break; }
+
+#define END_FUNC_SWITCH }
+
+#define REGISTER_CONSOLE_CALLABLE(id,funcName,numParams) funcIDs.insert(std::make_pair(String32(funcName),id));
+
+template<typename T>
+struct function_traits;
+
+template<typename R, typename ...Args>
+struct function_traits<std::function<R(Args...)>>
+{
+	static const size_t nargs = sizeof...(Args);
+
+	typedef R result_type;
+
+	template <size_t i>
+	struct arg
+	{
+		typedef typename std::tuple_element<i, std::tuple<Args...>>::type type;
+	};
+};
+
+template<int...> struct seq {};
+template<int Min, int Max, int... s> struct make_seq :make_seq<Min, Max - 1, Max - 1, s...> {};
+template<int Min, int... s> struct make_seq<Min, Min, s...> {
+	typedef seq<s...> type;
+};
+template<int Max, int Min = 0>
+using MakeSeq = typename make_seq<Min, Max>::type;
+
+
+template<typename Func, Func f, typename Tuple, int... s>
+void do_call(seq<s...>, Tuple&& tup) {
+	f(std::get<s>(tup)...);
+}
+
+typedef void(*pvoidary)(void*);
+
+template<typename FuncType, FuncType Func, typename... Args>
+std::tuple<pvoidary, std::tuple<Args...>*> make_task(Args&&... args) {
+	typedef std::tuple<Args...> pack;
+	pack* pvoid = new pack(std::forward<Args>(args)...);
+	return std::make_tuple(
+		[](void* pdata)->void {
+		pack* ppack = reinterpret_cast<pack*>(pdata);
+		do_call<FuncType, Func>(MakeSeq<sizeof...(Args)>(), *ppack);
+	},
+		pvoid
+		);
+}
+
+#define MAKE_TASK( FUNC ) make_task< typename std::decay<decltype(FUNC)>::type, FUNC >
 
 class Console
 {
@@ -9,116 +116,280 @@ public:
 	Console() {}
 	~Console() {}
 
-	void commandEnter(std::string pCommand)
-	{
+	enum Type { Err, Int, Flt, Str, Vec };
 
+	struct CNumber
+	{
+		union
+		{
+			s32 integer;
+			float floating;
+		};
+		Type type;
+
+		void negate()
+		{
+			switch (type)
+			{
+			case Int:
+				integer = -integer;
+				break;
+			case Flt:
+				floating = -floating;
+				break;
+			}
+		}
+	};
+
+	static void registerConsoleFuncs();
+
+	static CNumber interpretNumber(char** ccp)
+	{
+		char* cc = *ccp;
+		CNumber ret; ret.type = Int;
+		u8 len = 0;
+		u8 len2 = 0;
+		u8* lenP = &len;
+		u8 nums[32];
+
+		char curChar = *cc;
+
+		for (;;)
+		{
+			if (*cc == ' ' || *cc == '\n' || *cc == '\0' || *cc == ',' || *cc == ')')
+				break;
+
+			if (*cc == '.')
+			{
+				if (ret.type == Flt)
+				{
+					ret.type = Err;
+					return ret;
+				}
+				ret.type = Flt;
+				len2 = len;
+				lenP = &len2;
+				++*ccp;
+				cc = *ccp;
+				continue;
+			}
+
+			if (!isNum(*cc))
+			{
+				ret.type = Err; return ret;
+			}
+
+			nums[*lenP] = *cc - 48;
+			++*lenP;
+
+			++*ccp;
+			cc = *ccp;
+
+			if (len + len2 == 32)
+			{
+				ret.type = Err; return ret;
+			}
+		}
+
+		len2 -= len;
+
+		switch (ret.type)
+		{
+		case Err:
+			return ret;
+		case Int:
+			ret.integer = 0;
+			for (u8 i = 0; i < len; ++i)
+			{
+				ret.integer += u32(nums[i]) * u32(std::pow(10, len - i - 1));
+			}
+			return ret;
+		case Flt:
+			ret.floating = 0;
+			for (u8 i = 0; i < len; ++i)
+			{
+				ret.floating += float(nums[i]) * float(std::pow(10, len - i - 1));
+			}
+			for (u8 i = 0; i < len2; ++i)
+			{
+				ret.floating += float(nums[len + i]) / float(std::pow(10.f, i + 1));
+			}
+			return ret;
+		}
 
 	}
 
-
-
-private:
-
-	//float* getMatrix()
-
-	//
-
-	//Func Reg CALL command
-	//Params { NUM_PARAMS, PARAM_ARRAY (Param types), FUNC_POINTER }
-	//
-	//
-	//
-
-	class Command
+	struct CVector
 	{
-	public:
-		Command() {}
-		~Command() {}
+		CVector() {}
+		union
+		{
+			glm::fvec4 fvec4;
+			glm::fvec3 fvec3;
+			glm::fvec2 fvec2;
 
-		enum CommandType { Call, Set, Get };
+			glm::ivec4 ivec4;
+			glm::ivec3 ivec3;
+			glm::ivec2 ivec2;
+		};
+		Type type;
+		u8 length;
+
+		void negate()
+		{
+			switch (type)
+			{
+			case Int:
+				ivec4 = -ivec4;
+				break;
+			case Flt:
+				fvec4 = -fvec4;
+				break;
+			}
+		}
 	};
 
-	class CType
+	static CVector interpretVector(char** ccp)
 	{
-		enum Type { Int, Float, String, Vector, List, Array };
+		char* cc = *ccp;
+		CVector ret; ret.type = Err;
+		CNumber nums[4];
+		u8 curNum = 0;
+
+		char curChar = *cc;
+
+		for (;;)
+		{
+			++*ccp;
+			curChar = *(*ccp);
+			cc = *ccp;
+			if (*cc == ' ')
+			{
+				continue;
+			}
+
+			if (*cc == ')')
+			{
+				break;
+			}
+
+			if (*cc == ',')
+			{
+				if (++curNum == 4)
+				{
+					ret.type = Err; return ret;
+				}
+			}
+
+			if (*cc == '-')
+			{
+				++*ccp;
+				nums[curNum] = interpretNumber(ccp);
+				nums[curNum].negate();
+				switch (nums[curNum].type)
+				{
+				case Err:
+					ret.type = Err; return ret;
+				case Int:
+					ret.ivec4[curNum] = nums[curNum].integer; break;
+				case Flt:
+					ret.fvec4[curNum] = nums[curNum].floating; break;
+				default:
+					ret.type = nums[curNum].type == nums[0].type ? nums[curNum].type : Err;
+				}
+				++curNum;
+				if (*cc == ',')
+					if (curNum == 4) {
+						ret.type = Err; return ret;
+					}
+				if (*cc == ')')
+					break;
+				else
+					continue;
+			}
+
+			if (!isNum(*cc))
+			{
+				ret.type = Err; return ret;
+			}
+
+			nums[curNum] = interpretNumber(ccp);
+			cc = *ccp;
+			switch (nums[curNum].type)
+			{
+			case Err:
+				ret.type = Err; return ret;
+			case Int:
+				ret.ivec4[curNum] = nums[curNum].integer; break;
+			case Flt:
+				ret.fvec4[curNum] = nums[curNum].floating; break;
+			default:
+				ret.type = nums[curNum].type == nums[0].type ? nums[curNum].type : Err;
+			}
+			++curNum;
+			if (*cc == ',')
+				if (curNum == 4) { ret.type = Err; return ret; }
+			if (*cc == ')')
+				break;
+		}
+
+		ret.length = curNum;
+		return ret;
+	}
+
+	static String32 interpretString(char** ccp)
+	{
+		String32 ret;
+		char cc;
+		for (;;)
+		{
+			++*ccp;
+			cc = *(*ccp);
+			if (cc == '\"' || cc == '\0')
+			{
+				break;
+			}
+			ret.append(cc);
+		}
+		return ret;
+	}
+
+	struct CParam
+	{
+		CParam() : type(Err) {}
+		CParam(CParam& pPar) : type(pPar.type), str(pPar.str) {}
+		CParam(CNumber* pNum) : num(pNum) { type = pNum->type; }
+		CParam(CVector* pVec) : vec(pVec) { type = Vec; }
+		CParam(String32* pStr) : str(pStr), type(Str) {}
+		union
+		{
+			void* data;
+			String32* str;
+			CVector* vec;
+			CNumber* num;
+		};
 		Type type;
 	};
 
-	class CallCommand : public Command
+	static void submitCommand(String512& command);
+
+private:
+
+	static std::map<String32, u32> funcIDs;
+
+	static bool isNum(char c)
 	{
-	public:
-
-		struct CallParameter
-		{
-			enum Type { Int, Float, String };
-			template<typename T>
-			CallParameter(Type pType, T pValue) { type = pType; value = reinterpret_cast<u64>(pValue); }
-			Type type;
-			u64 value;
-		};
-
-		//u32 NUM_PARAMS , Parameter* PARAMS
-		u32 numParams;
-		CallParameter* params;
-
-
-		void execute()
-		{
-
-		}
-	};
-
-	class GetCommand : public Command
-	{
-	public:
-
-		struct GetReturn
-		{
-
-			template<typename T>
-			GetReturn(CType pType, T pValue, u64 pArraySize = 0) { type = pType; value = reinterpret_cast<u64>(pValue); arraySize = pArraySize; }
-			CType type;
-			u64 value;
-			u64 arraySize;
-		};
-	};
-
-	Command* interpretCommand()
-	{
-
+		return c > 47 && c < 58;
 	}
 
-	void print(std::string pString)
+	static bool isAlpha(char c)
 	{
-		if (nextLine == maxLines)
-		{
-			moveLines(1);
-		}
-		lines[nextLine].setString(pString);
+		return (c > 64 && c < 91) || (c > 96 && c < 123);
 	}
 
-	void moveLines(u32 pNumLines)
+	static bool isPrintable(char c)
 	{
-		if (pNumLines == 0)
-		{
-			return;
-		}
-
-		if (lastLine - pNumLines < 0)
-		{
-			//CLEAR ALL LINES
-		}
-
-		for (int i = lastLine - pNumLines; i >= 0; --i)
-		{
-			lines[i].setString(lines[i + pNumLines].getString());
-		}
+		return (c > 31 && c < 127);
 	}
-
-	u32 lastLine;
-	u32 nextLine;
-
-	static const u32 maxLines = 32;
-	Text lines[maxLines];
 
 };

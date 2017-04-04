@@ -15,6 +15,8 @@ public:
 	~UIWindow();
 
 	void draw();
+	void update();
+	void mouseDown();
 	const GLTexture2D& getTexture() { return renderTarget.textureAttachments[0]; }
 
 	void setTitle(std::string pTitle);
@@ -42,8 +44,8 @@ public:
 			windowArea.left + windowArea.width,parentWindow->getSizeY() - windowArea.top - windowArea.height,  1.0f, 0.0f,//BR
 			windowArea.left, parentWindow->getSizeY() - windowArea.top - windowArea.height,  0.0f, 0.0f,//BL
 
-			borderWidth,windowArea.height - borderWidth - 20.f ,0,1,
-			windowArea.width - borderWidth, windowArea.height - borderWidth - 20.f,1,1,
+			borderWidth,windowArea.height - borderWidth - titleWidth ,0,1,
+			windowArea.width - borderWidth, windowArea.height - borderWidth - titleWidth,1,1,
 			windowArea.width - borderWidth, borderWidth,1,0,
 			borderWidth,borderWidth,0,0
 
@@ -77,11 +79,10 @@ public:
 
 	//private:
 
-	glm::ivec2 position;
-
 	UIRect windowArea;
 	UIRect elementArea;
 	int borderWidth;
+	const int titleWidth = 20;
 
 	Framebuffer renderTarget;
 

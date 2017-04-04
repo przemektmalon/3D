@@ -1,20 +1,21 @@
 #pragma once
 #include "Shader.h"
 
-class TextShader : public Shader
+class TextShader : public ShaderProgram
 {
 public:
 	TextShader() { initialise(); }
 
 	void initialise()
 	{
-		load("res/shader/text", "res/shader/text");
+		load("text", VertFrag);
+		compile();
 		use();
-		fontLoc = glGetUniformLocation(program, "font");
-		projLoc = glGetUniformLocation(program, "proj");
-		viewLoc = glGetUniformLocation(program, "view");
-		modelLoc = glGetUniformLocation(program, "model");
-		colourLoc = glGetUniformLocation(program, "colour");
+		fontLoc = glGetUniformLocation(GLID, "font");
+		projLoc = glGetUniformLocation(GLID, "proj");
+		viewLoc = glGetUniformLocation(GLID, "view");
+		modelLoc = glGetUniformLocation(GLID, "model");
+		colourLoc = glGetUniformLocation(GLID, "colour");
 		setFontBinding(12);
 		stop();
 	}

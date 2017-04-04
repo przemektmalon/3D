@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include "ShaderPreprocessor.h"
+#include "StackStrings.h"
 
 class ComputeShader : public ShaderPreprocessor
 {
@@ -11,15 +12,15 @@ public:
 	ComputeShader() {}
 	~ComputeShader() { glDeleteProgram(program); }
 
-	GLuint load(std::string pPathComp, bool preprocess = false)
+	GLuint load(StackString& pCompPath, bool preprocess = false)
 	{
-		std::string compPath = pPathComp + ".comp";
+		pCompPath += String32(".comp");
 
-		std::ifstream compStream(compPath, std::ifstream::in);
+		std::ifstream compStream(pCompPath.getString(), std::ifstream::in);
 
 		if (compStream.fail())
 		{
-			std::cout << "Failed loading compute shader: " << compPath << std::endl;
+			std::cout << "Failed loading compute shader: " << std::string(pCompPath.getString()) << std::endl;
 			return 0;
 		}
 
@@ -33,7 +34,9 @@ public:
 
 		if (preprocess)
 		{
-			setVarVal("exposure\0", "0.1f\0");
+			String32 e = String32("exposure");
+			String1024 v = String1024("1.f");
+			setVarVal(e, v);
 			glCharComp = preProcess(&compContent[0], compContent.size());
 		}
 
@@ -51,7 +54,7 @@ public:
 		err = glGetError();
 		if (isCompiled == GL_FALSE)
 		{
-			std::cout << "Failed to compile compute shader: " << pPathComp << std::endl;
+			//std::cout << "Failed to compile compute shader: " << pPathComp << std::endl;
 		}
 
 		compStream.close();
@@ -66,7 +69,7 @@ public:
 		glGetProgramiv(shaderProgram, GL_LINK_STATUS, &isCompiled);
 		if (isCompiled == GL_FALSE)
 		{
-			std::cout << "Failed to link compute shader: " << pPathComp << std::endl;
+			//std::cout << "Failed to link compute shader: " << std::string(pCompPath.getString()) << std::endl;
 
 			GLint logLength = 0;
 			glGetProgramiv(shaderProgram, GL_INFO_LOG_LENGTH, &logLength);
@@ -90,7 +93,7 @@ public:
 			return 0;
 		}
 
-		std::cout << "Compute shader program " << pPathComp << " loaded and compiled successfully" << std::endl;
+		//std::cout << "Compute shader program " << std::string(pCompPath.getString()) << " loaded and compiled successfully" << std::endl;
 
 		program = shaderProgram;
 

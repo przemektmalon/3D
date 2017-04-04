@@ -38,8 +38,9 @@ public:
 	}
 	void setString(std::string pStr) { string = pStr; updateVBO(); }
 	void setPosition(glm::fvec2 pPos) { position = pPos; updateVBO(); }
+	glm::fvec2 getPosition() { return position; }
 	void setColour(glm::fvec3 pCol) { colour = pCol; }
-
+	glm::fvec3 getColour() { return colour; }
 	std::string getString() { return string; }
 
 	void init()
@@ -58,11 +59,11 @@ public:
 		glBindVertexArray(vao);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-		auto posAttrib = glGetAttribLocation(shader->operator()(), "position");
+		auto posAttrib = glGetAttribLocation(shader->getGLID(), "position");
 		glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), 0);
 		glEnableVertexAttribArray(posAttrib);
 
-		auto texAttrib = glGetAttribLocation(shader->operator()(), "texCoord");
+		auto texAttrib = glGetAttribLocation(shader->getGLID(), "texCoord");
 		glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
 		glEnableVertexAttribArray(texAttrib);
 

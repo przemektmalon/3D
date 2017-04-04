@@ -6,6 +6,8 @@
 #include "Font.h"
 #include "UILabel.h"
 #include "Text.h"
+#include "AssetManager.h"
+#include "Mouse.h"
 
 UIWindow::UIWindow(UIRect pWindowArea, int pBorderWidth, const Window* pParentWindow) : parentWindow(pParentWindow), title(new UILabel()), borderWidth(pBorderWidth)
 {
@@ -102,15 +104,38 @@ void UIWindow::draw()
 	//glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
+void UIWindow::update()
+{
+	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
+	{
+		(*itr)->update();
+	}
+}
+
+void UIWindow::mouseDown()
+{
+	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
+	{
+		glm::ivec2 mPos = Engine::window.mouse.getScreenPosition() - glm::ivec2(windowArea.left, windowArea.top) + borderWidth + glm::ivec2(0, titleWidth);
+		glm::ivec2 topLeft = (*itr)->getTopLeft();
+		glm::ivec2 size = (*itr)->getSize();
+
+		if (mPos.x > topLeft.x && mPos.x < topLeft.x + size.x && mPos.y > topLeft.y && mPos.y < topLeft.y + size.y)
+		{
+			(*itr)->mouseDown();
+		}
+	}
+}
+
 void UIWindow::setTitle(std::string pTitle)
 {
-	Font* font = new Font();//TODO: GET FROM RES MANAGER
-	font->load("res/fonts/clear-sans/ClearSans-Regular.ttf");
-	font->loadGlyphs(14);
+	//Font* font = new Font();//TODO: GET FROM RES MANAGER
+	//font->load("res/fonts/clear-sans/ClearSans-Regular.ttf");
+	//font->loadGlyphs(14);
 
 	//title->text.init();
 	title->setParentWindow(this);
-	title->text.setFont(font);
+	title->text.setFont(&Engine::assets.getFont("clearsans"));
 	title->text.setCharSize(14);
 	title->text.setColour(glm::fvec3(1.f, 1.f, 1.f));
 	title->text.setWindowSize(glm::ivec2(windowArea.width, windowArea.height));

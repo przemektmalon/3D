@@ -8,6 +8,8 @@
 
 #include "UIWindow.h"
 
+
+
 #include <ft2build.h>
 #include FT_FREETYPE_H;
 
@@ -18,7 +20,8 @@ class Camera;
 class Time;
 class MasterRenderer;
 class QPC;
-class ResourceManager;
+class AssetManager;
+class World;
 
 class Engine
 {
@@ -36,10 +39,14 @@ public:
 	static u64 h2;
 	static u64 h3;
 
+	static World* world;
+
 	static GLTexture2DMip t1;
 	static GLTexture2DMip t2;
 	static GLTexture2DMip t3;
 	static GLTexture2DMip t4;
+
+	static float programTime;
 
 	static Shader s;
 	static Shader gPassShader;
@@ -63,13 +70,13 @@ public:
 	static glm::ivec2 lastM;
 	static UIM uim;
 
-	static u32 selectedID;
+	static s32 selectedID;
 
 	static UIWindow* uiw;
 	static bool windowClicked;
 	static glm::ivec2 clickedPos;
 
-	static ResourceManager resMan;
+	static AssetManager assets;
 
 	//private:
 

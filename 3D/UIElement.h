@@ -1,5 +1,6 @@
 #pragma once
 #include "UIUtil.h"
+#include "glm\common.hpp"
 
 class UIWindow;
 
@@ -12,7 +13,12 @@ public:
 	virtual ~UIElement();
 
 	virtual void draw() = 0;
+	virtual void update() {}
+	virtual void mouseDown() {}
 	const UIVariable& getVar(u32& pVarCount) { return elementVar; }
+
+	virtual glm::ivec2 getTopLeft() { return glm::ivec2(0, 0); }
+	virtual glm::ivec2 getSize() { return glm::ivec2(0, 0); }
 
 	void setParentWindow(UIWindow* pWindow)
 	{

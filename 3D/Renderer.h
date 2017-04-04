@@ -6,7 +6,7 @@
 #include "GBufferShader.h"
 #include "Framebuffer.h"
 #include "Text.h"
-#include "SSBO.h"
+#include "BufferObjects.h"
 #include <chrono>
 #include <time.h>
 #include "Lights.h"
@@ -14,6 +14,14 @@
 #include "Sampler.h"
 
 #define NUM_VALID_RESOLUTIONS 8
+
+typedef struct {
+	u32 count;
+	u32 instanceCount;
+	u32 first;
+	//u32 baseInstance;
+	float radius;
+} GLCMD;
 
 class MasterRenderer
 {
@@ -78,10 +86,7 @@ public:
 		T bot, left, width, height;
 	};
 
-
-
-
-	std::vector<MeshInstance> ents;
+	//std::vector<MeshInstance> ents;
 
 	struct MeshUseMeta
 	{
@@ -90,40 +95,26 @@ public:
 		MeshRenderMeta renderMeta;
 	};
 
-	struct MeshGPUMeta
-	{
-		MeshGPUMeta() {}
-		union
-		{
-			glm::uvec4 cmds;
-			struct
-			{
-				glm::uvec3 cmdss;
-				float radius;
-			};
-		};
-		glm::uvec4 texHandleMatID;
-	};
-
-	static const u32 maxObjects = 65536;
-	MeshGPUMeta meta[maxObjects];
+	//static const u32 maxObjects = 65536;
+	//MeshGPUMeta meta[maxObjects];
 
 	//std::vector<GLuint> 
 
 	u32 drawCount;
 
-
 	ComputeShader frustCullShader;
 
-	GLuint objectMetaBuffer;
-	GLuint boundsBuffer;
-	GLuint texHandleBuffer;
-	GLuint drawIndirectBuffer;
-	GLuint distsBuffer;
-	GLuint transformBuffer;
-	GLuint instanceBuffer;
 
-	std::unordered_map<Mesh*, std::vector<glm::fmat4>> entities;
+
+	//GLuint objectMetaBuffer;
+	//GLuint boundsBuffer;
+	//GLuint texHandleBuffer;
+	//GLuint drawIndirectBuffer;
+	//GLuint distsBuffer;
+	//GLuint transformBuffer;
+	//GLuint instanceBuffer;
+
+	//std::unordered_map<Mesh*, std::vector<glm::fmat4>> entities;
 	std::vector<PointLightData> pointLights;
 	std::vector<SpotLightData> spotLights;
 	std::vector<DirectLightData> directLights;
@@ -131,6 +122,7 @@ public:
 	Rect<int> viewport;
 
 	Window* window;
+	World* world;
 
 	DefaultFramebuffer fboDefault;
 	Framebuffer fboSSAOBlur;
@@ -151,8 +143,8 @@ public:
 	GBufferShader gBufferShader;
 	SAOShader ssaoShader;
 	DeferredTileCullComputeShader tileCullShader;
-	Shader blurShader;
 
+	Shader blurShader;
 	Shader shadowShader;
 	Framebuffer fboLight;
 	float shadScale;
