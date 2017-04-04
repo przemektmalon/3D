@@ -126,6 +126,8 @@ public:
 		glUniform1i(glGetUniformLocation(Engine::s(), "gPosition"), 0);
 		glUniform1i(glGetUniformLocation(Engine::s(), "gNormal"), 1);
 		glUniform1i(glGetUniformLocation(Engine::s(), "gAlbedoSpec"), 2);
+		glUniform1i(glGetUniformLocation(Engine::s(), "gDepth"), 3);
+		glUniform1i(glGetUniformLocation(Engine::s(), "ssaoTex"), 4);
 
 		Engine::s.stop();
 	}
@@ -171,12 +173,14 @@ public:
 
 		glGenTextures(3, texAttachGBuffer);
 
-		for (int i = 0; i < 2; ++i)
-		{
-			glBindTexture(GL_TEXTURE_2D, texAttachGBuffer[i]);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, int(viewport.width * frameScale), int(viewport.height * frameScale), 0, GL_RGB, GL_FLOAT, NULL);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, texAttachGBuffer[i], 0);
-		}
+
+		glBindTexture(GL_TEXTURE_2D, texAttachGBuffer[0]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, int(viewport.width * frameScale), int(viewport.height * frameScale), 0, GL_RGBA, GL_FLOAT, NULL);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texAttachGBuffer[0], 0);
+
+		glBindTexture(GL_TEXTURE_2D, texAttachGBuffer[1]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, int(viewport.width * frameScale), int(viewport.height * frameScale), 0, GL_RGB, GL_FLOAT, NULL);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, texAttachGBuffer[1], 0);
 
 		glBindTexture(GL_TEXTURE_2D, texAttachGBuffer[2]);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, int(viewport.width * frameScale), int(viewport.height * frameScale), 0, GL_RGBA, GL_FLOAT, NULL);
@@ -193,6 +197,75 @@ public:
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 			std::cout << "Error: Framebuffer is not complete!" << std::endl;
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+		ssaoShader.load("res/shader/Standard", "res/shader/ssao"); ssaoShader.use();
+		auto pos = glGetUniformLocation(ssaoShader(), "gPositionDepth");
+		glUniform1i(pos, 0);
+		glUniform1i(glGetUniformLocation(ssaoShader(), "gNormal"), 1);
+		glUniform1i(glGetUniformLocation(ssaoShader(), "texNoise"), 2);
+		glUniform1i(glGetUniformLocation(ssaoShader(), "gDepth"), 3);
+
+		glGenFramebuffers(1, &fboSSAO);
+		glBindFramebuffer(GL_FRAMEBUFFER, fboSSAO);
+
+		glGenTextures(1, &texAttachSSAO);
+
+		glBindTexture(GL_TEXTURE_2D, texAttachSSAO);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, viewport.width, viewport.height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texAttachSSAO, 0);
+
+		GLuint aattachments[1] = { GL_COLOR_ATTACHMENT0 };
+		glDrawBuffers(1, aattachments);
+
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+			std::cout << "Error: Framebuffer is not complete!" << std::endl;
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		std::uniform_real_distribution<GLfloat> randomFloats(0.0, 1.0); // random floats between 0.0 - 1.0
+		std::default_random_engine generator;
+		std::vector<glm::vec3> ssaoKernel;
+		for (GLuint i = 0; i < 64; ++i)
+		{
+			glm::vec3 sample(
+				randomFloats(generator) * 2.0 - 1.0,
+				randomFloats(generator) * 2.0 - 1.0,
+				randomFloats(generator)
+			);
+			sample = glm::normalize(sample);
+			sample *= randomFloats(generator);
+			GLfloat scale = GLfloat(i) / 64.0;
+			scale = glm::mix(0.1f, 1.0f, scale * scale);
+			sample *= scale;
+			ssaoKernel.push_back(sample);
+		}
+
+		std::vector<glm::vec3> ssaoNoise;
+		for (GLuint i = 0; i < 256; i++)
+		{
+			glm::vec3 noise(
+				randomFloats(generator) * 2.0 - 1.0,
+				randomFloats(generator) * 2.0 - 1.0,
+				0.0f);
+			noise = glm::normalize(noise);
+			ssaoNoise.push_back(noise);
+		}
+
+		ssaoShader.use();
+
+		for (int i = 0; i < 64; ++i)
+		{
+			auto x = glGetUniformLocation(ssaoShader(), ("samples[" + std::to_string(i) + "]").c_str());
+			glUniform3fv(x, 1, &ssaoKernel[i][0]);
+		}
+
+		glGenTextures(1, &SSAONoiseTex);
+		glBindTexture(GL_TEXTURE_2D, SSAONoiseTex);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, 4, 4, 0, GL_RGB, GL_FLOAT, &ssaoNoise[0]);
+
+		//glGenTextures(1, &ssaoTex);
+		//glBindTexture(GL_TEXTURE_2D, ssaoTex);
+
 	}
 
 	inline void initialiseScreenFramebuffer()
@@ -200,10 +273,10 @@ public:
 		glGenFramebuffers(1, &fboScreen);
 		glBindFramebuffer(GL_FRAMEBUFFER, fboScreen);
 
-		glGenTextures(3, texAttachScreen);
+		glGenTextures(4, texAttachScreen);
 		glBindTexture(GL_TEXTURE_2D, texAttachScreen[0]);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, viewport.width, viewport.height, 0, GL_RGB, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, viewport.width, viewport.height, 0, GL_RGBA, GL_FLOAT, NULL);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texAttachScreen[0], 0);
 
 		glBindTexture(GL_TEXTURE_2D, texAttachScreen[1]);
@@ -216,10 +289,68 @@ public:
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, viewport.width, viewport.height, 0, GL_RGBA, GL_FLOAT, NULL);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, texAttachScreen[2], 0);
 
-		glGenRenderbuffers(1, &rboDepthStencilScreen);
-		glBindRenderbuffer(GL_RENDERBUFFER, rboDepthStencilScreen);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, viewport.width, viewport.height);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rboDepthStencilScreen);
+		glBindTexture(GL_TEXTURE_2D, texAttachScreen[3]);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, viewport.width, viewport.height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texAttachScreen[3], 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, texAttachScreen[3], 0);
+
+		/*GLuint status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		switch (status) {
+		case GL_FRAMEBUFFER_COMPLETE:
+		std::cout << "A" << std::endl;
+		break;
+
+		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+		//throw FramebufferIncompleteException("An attachment could not be bound to frame buffer object!");
+		std::cout << "A" << std::endl;
+		break;
+
+		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+		//throw FramebufferIncompleteException("Attachments are missing! At least one image (texture) must be bound to the frame buffer object!");
+		std::cout << "A" << std::endl;
+		break;
+
+		case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT:
+		//throw FramebufferIncompleteException("The dimensions of the buffers attached to the currently used frame buffer object do not match!");
+		std::cout << "A" << std::endl;
+		break;
+
+		case GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT:
+		//throw FramebufferIncompleteException("The formats of the currently used frame buffer object are not supported or do not fit together!");
+		std::cout << "A" << std::endl;
+		break;
+
+		case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+		//throw FramebufferIncompleteException("A Draw buffer is incomplete or undefinied. All draw buffers must specify attachment points that have images attached.");
+		std::cout << "A" << std::endl;
+		break;
+
+		case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+		//throw FramebufferIncompleteException("A Read buffer is incomplete or undefinied. All read buffers must specify attachment points that have images attached.");
+		std::cout << "A" << std::endl;
+		break;
+
+		case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+		//throw FramebufferIncompleteException("All images must have the same number of multisample samples.");
+		std::cout << "A" << std::endl;
+		break;
+
+		case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+		//throw FramebufferIncompleteException("If a layered image is attached to one attachment, then all attachments must be layered attachments. The attached layers do not have to have the same number of layers, nor do the layers have to come from the same kind of texture.");
+		std::cout << "A" << std::endl;
+		break;
+
+		case GL_FRAMEBUFFER_UNSUPPORTED:
+		//throw FramebufferIncompleteException("Attempt to use an unsupported format combinaton!");
+		std::cout << "A" << std::endl;
+		break;
+
+		default:
+		//throw FramebufferIncompleteException("Unknown error while attempting to create frame buffer object!");
+		std::cout << "A" << std::endl;
+		break;
+		}*/
 
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 			std::cout << "Error: Framebuffer is not complete!" << std::endl;
@@ -245,6 +376,8 @@ public:
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 			std::cout << "Error: Framebuffer is not complete!" << std::endl;
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		blurShader.load("res/shader/Standard", "res/shader/boxBlur");
 	}
 
 	inline void initialiseSkybox()
@@ -267,7 +400,7 @@ public:
 		int width, height;
 		unsigned char* image;
 
-		std::string skyboxPath = "res/skybox/morning/";
+		std::string skyboxPath = "res/skybox/sky/";
 
 		std::vector<std::string> faces;
 
@@ -275,8 +408,8 @@ public:
 		faces.push_back(skyboxPath + "left.png");
 		faces.push_back(skyboxPath + "top.png");
 		faces.push_back(skyboxPath + "bottom.png");
-		faces.push_back(skyboxPath + "back.png");
 		faces.push_back(skyboxPath + "front.png");
+		faces.push_back(skyboxPath + "back.png");
 
 		glActiveTexture(GL_TEXTURE5);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
@@ -315,9 +448,9 @@ public:
 
 		Engine::s.use();
 
-		SpotLight spot = SpotLight(glm::fvec3(200, 200, 200), glm::fvec3(0, -0.2, 0.f), glm::fvec3(0.f, 0.f, 100.f), 45, 50, 0.00001, 0.00003);
-		SpotLight spot2 = SpotLight(glm::fvec3(150, 200, 150), glm::fvec3(0, -0.2, 0.f), glm::fvec3(0.f, 100.f, 0.f), 45, 50, 0.00001, 0.00003);
-		SpotLight spot3 = SpotLight(glm::fvec3(150, 200, 250), glm::fvec3(0, -0.2, 0.f), glm::fvec3(100.f, 0.f, 0.f), 45, 50, 0.00001, 0.00003);
+		SpotLight spot = SpotLight(glm::fvec3(200, 200, 200), glm::fvec3(0, -0.2, 0.f), glm::fvec3(10.f, 10.f, 10.f), 1, 50, 0.00001, 0.00003);
+		SpotLight spot2 = SpotLight(glm::fvec3(150, 200, 150), glm::fvec3(0, -0.2, 0.f), glm::fvec3(0.f, 50.f, 0.f), 10, 11, 0.00001, 0.00003);
+		SpotLight spot3 = SpotLight(glm::fvec3(150, 200, 250), glm::fvec3(0, -0.2, 0.f), glm::fvec3(50.f, 0.f, 0.f), 10, 11, 0.00001, 0.00003);
 
 		spotLights.push_back(spot);
 		spotLights.push_back(spot2);
@@ -338,10 +471,6 @@ public:
 
 		glUniform3fv(glGetUniformLocation(Engine::s(), "directLights[0].direction"), 1, &dir.direction[0]);
 		glUniform3fv(glGetUniformLocation(Engine::s(), "directLights[0].colour"), 1, &dir.colour[0]);
-
-		float xx = 0b1'01111100'01000000000000000000000;
-
-		std::cout << xx << std::endl;
 
 		for (int i = 0; i < nr; ++i)
 		{
@@ -378,8 +507,9 @@ public:
 
 		glUseProgram(gBufferShader());
 		auto ploc = glGetUniformLocation(gBufferShader(), "proj");
-		auto mloc = glGetUniformLocation(gBufferShader(), "model");
-		glUniformMatrix4fv(ploc, 1, GL_FALSE, glm::value_ptr(cam.projView));
+		auto vloc = glGetUniformLocation(gBufferShader(), "view");
+		glUniformMatrix4fv(ploc, 1, GL_FALSE, glm::value_ptr(cam.proj));
+		glUniformMatrix4fv(vloc, 1, GL_FALSE, glm::value_ptr(cam.view));
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
@@ -405,37 +535,91 @@ public:
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		}
 
+
 		glBindVertexArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboScreen);
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, fboGBuffer);
 
-		glReadBuffer(GL_COLOR_ATTACHMENT0);
+		glReadBuffer(GL_DEPTH_STENCIL_ATTACHMENT);
+		glDrawBuffer(GL_DEPTH_STENCIL_ATTACHMENT);
+		glBlitFramebuffer(0, 0, window->getSizeX(), window->getSizeY(), 0, 0, window->getSizeX(), window->getSizeY(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_CULL_FACE);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, fboSSAO);
+		ssaoShader.use();
+
+		glBindVertexArray(vaoQuad);
+
 		glDrawBuffer(GL_COLOR_ATTACHMENT0);
-		glBlitFramebuffer(0, 0, window->getSizeX(), window->getSizeY(), 0, 0, window->getSizeX(), window->getSizeY(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		glUniformMatrix4fv(glGetUniformLocation(ssaoShader(), "projection"), 1, GL_FALSE, glm::value_ptr(cam.proj));
+		glUniformMatrix4fv(glGetUniformLocation(ssaoShader(), "view"), 1, GL_FALSE, glm::value_ptr(cam.view));
 
-		glReadBuffer(GL_COLOR_ATTACHMENT1);
-		glDrawBuffer(GL_COLOR_ATTACHMENT1);
-		glBlitFramebuffer(0, 0, window->getSizeX(), window->getSizeY(), 0, 0, window->getSizeX(), window->getSizeY(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
-		glReadBuffer(GL_COLOR_ATTACHMENT2);
-		glDrawBuffer(GL_COLOR_ATTACHMENT2);
-		glBlitFramebuffer(0, 0, window->getSizeX(), window->getSizeY(), 0, 0, window->getSizeX(), window->getSizeY(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texAttachGBuffer[0]);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, texAttachGBuffer[1]);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, SSAONoiseTex);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, texAttachScreen[3]);
 
-		//glReadBuffer(GL_DEPTH_STENCIL_ATTACHMENT);
-		//glDrawBuffer(GL_DEPTH_STENCIL_ATTACHMENT);
-		//glBlitFramebuffer(0, 0, window->getSizeX(), window->getSizeY(), 0, 0, window->getSizeX(), window->getSizeY(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 
-		//TODO: POST PROCESSING ON fboScreen
+		blurShader.use();
 
-		glUseProgram(Engine::s());
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texAttachSSAO);
+
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboScreen);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, fboGBuffer);
+
+		//glReadBuffer(GL_COLOR_ATTACHMENT0);
+		//glDrawBuffer(GL_COLOR_ATTACHMENT0);
+		//glBlitFramebuffer(0, 0, window->getSizeX(), window->getSizeY(), 0, 0, window->getSizeX(), window->getSizeY(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+		//glReadBuffer(GL_COLOR_ATTACHMENT1);
+		//glDrawBuffer(GL_COLOR_ATTACHMENT1);
+		//glBlitFramebuffer(0, 0, window->getSizeX(), window->getSizeY(), 0, 0, window->getSizeX(), window->getSizeY(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+		//glReadBuffer(GL_COLOR_ATTACHMENT2);
+		//glDrawBuffer(GL_COLOR_ATTACHMENT2);
+		//glBlitFramebuffer(0, 0, window->getSizeX(), window->getSizeY(), 0, 0, window->getSizeX(), window->getSizeY(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+
+		//TODO: POST PROCESSING ON fboScreen*/
+
+		/*glBindFramebuffer(GL_FRAMEBUFFER, fboSSAO);
+		ssaoShader.use();
+
+		glDrawBuffer(GL_COLOR_ATTACHMENT0);
+		glUniformMatrix4fv(glGetUniformLocation(ssaoShader(), "projection"), 1, GL_FALSE, glm::value_ptr(cam.proj));
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texAttachScreen[0]);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, texAttachScreen[1]);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, SSAONoiseTex);
+
+		glDrawArrays(GL_TRIANGLES, 0, 6);*/
+
+		/*glUseProgram(Engine::s());
 		glBindFramebuffer(GL_FRAMEBUFFER, fboPostLighting);
 		glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
-		spotLights[0].position = cam.pos;
-		spotLights[0].direction = cam.getDirectionVector();
+		spotLights[0].position = cam.pos - glm::fvec3(0, 20, 0);
+		spotLights[0].direction = cam.getDirectionVector() + glm::fvec3(0,-0.1,0);
 
+		glUniformMatrix4fv(glGetUniformLocation(Engine::s(), "proj"), 1, GL_FALSE, glm::value_ptr(cam.proj));
+		glUniformMatrix4fv(glGetUniformLocation(Engine::s(), "view"), 1, GL_FALSE, glm::value_ptr(cam.view));
 		glUniform3fv(glGetUniformLocation(Engine::s(), "spotLights[0].position"), 1, &spotLights[0].position[0]);
 		glUniform3fv(glGetUniformLocation(Engine::s(), "spotLights[0].direction"), 1, &spotLights[0].direction[0]);
 
@@ -445,25 +629,42 @@ public:
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_CULL_FACE);
 
-		glBindVertexArray(vaoQuad);
+		glBindVertexArray(vaoQuad);*/
 
+		//glActiveTexture(GL_TEXTURE0);
+		//glBindTexture(GL_TEXTURE_2D, texAttachScreen[0]);
+		//glActiveTexture(GL_TEXTURE1);
+		//glBindTexture(GL_TEXTURE_2D, texAttachScreen[1]);
+		//glActiveTexture(GL_TEXTURE2);
+		//glBindTexture(GL_TEXTURE_2D, texAttachScreen[2]);
+		//glActiveTexture(GL_TEXTURE3);
+		//glBindTexture(GL_TEXTURE_2D, texAttachScreen[3]);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texAttachScreen[0]);
+
+		//glBindTexture(GL_TEXTURE_2D, texAttachSSAO);
+		glBindTexture(GL_TEXTURE_2D, texAttachGBuffer[0]);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, texAttachScreen[1]);
+		glBindTexture(GL_TEXTURE_2D, texAttachGBuffer[1]);
 		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, texAttachScreen[2]);
+		glBindTexture(GL_TEXTURE_2D, texAttachGBuffer[2]);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, texAttachGBuffer[3]);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, texAttachSSAO);
 
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
-		glBindVertexArray(0);
+		//glBindVertexArray(0);
+
+
 
 		//RENDER SKYBOX *********************************************************************
 
 		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, fboPostLighting);
+		//glBindFramebuffer(GL_READ_FRAMEBUFFER, fboPostLighting);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, fboSSAO);
 
 		glReadBuffer(GL_COLOR_ATTACHMENT0);
 		glDrawBuffer(GL_BACK);
@@ -476,15 +677,13 @@ public:
 		glDrawBuffer(GL_DEPTH_ATTACHMENT);
 		glBlitFramebuffer(0, 0, window->getSizeX(), window->getSizeY(), 0, 0, window->getSizeX(), window->getSizeY(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
-		glUseProgram(skyboxShader());
-
 		glDrawBuffer(GL_BACK);
 
 		glDepthFunc(GL_LEQUAL);
 		glEnable(GL_DEPTH_TEST);
 		glDisable(GL_CULL_FACE);
 		glm::mat4 view = cam.rotation;
-		glm::mat4 projection = cam.proj; // glm::infinitePerspective(cam.fov, cam.aspect, 1.f);
+		glm::mat4 projection = cam.proj;
 		glUseProgram(skyboxShader());
 		glUniformMatrix4fv(glGetUniformLocation(skyboxShader(), "view"), 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(glGetUniformLocation(skyboxShader(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
@@ -526,11 +725,16 @@ public:
 
 	Window* window;
 	int MSAALevel;
+	GLuint SSAONoiseTex;
+	//GLuint ssaoTex;
+
+	GLuint fboSSAO, texAttachSSAO;
+
 	GLuint fboGBuffer, fboScreen, fboPostLighting;
 	GLuint texAttachGBuffer[3];
-	GLuint texAttachScreen[3];
+	GLuint texAttachScreen[5];
 	GLuint texAttachPostLighting;
-	GLuint rboDepthStencilGBuffer, rboDepthStencilScreen, rboDepthStencilPostLighting;
+	GLuint rboDepthStencilGBuffer/*, rboDepthStencilScreen*/, rboDepthStencilPostLighting;
 	GLuint vaoQuad;
 	GLuint vboQuad;
 	Shader toScreenShader; //TODO: SPECIFIC SHADERS
@@ -540,4 +744,6 @@ public:
 	GLuint vaoSkybox, vboSkybox;
 
 	Shader gBufferShader;
+	Shader ssaoShader;
+	Shader blurShader;
 };

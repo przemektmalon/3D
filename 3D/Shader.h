@@ -5,7 +5,10 @@
 #include <sstream>
 #include "GL\glew.h"
 #include <vector>
-#include "Include.h"
+#include <glm\glm.hpp>
+#include "glm\gtc\type_ptr.hpp"
+#include "glm\gtc\matrix_transform.hpp"
+#include "glm\gtx\matrix_transform_2d.hpp"
 
 class Shader
 {

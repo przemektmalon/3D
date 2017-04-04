@@ -137,10 +137,11 @@ void Engine::mainLoop()
 
 	GLuint sampler;
 	glGenSamplers(1, &sampler);
-	glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+	glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 	glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glSamplerParameteri(sampler, GL_TEXTURE_COMPARE_MODE, GL_NONE);
 	glBindSampler(0, sampler);
 	glBindSampler(1, sampler);
 	glBindSampler(2, sampler);
@@ -148,13 +149,13 @@ void Engine::mainLoop()
 
 	GLuint postSampler;
 	glGenSamplers(1, &postSampler);
-	glSamplerParameteri(postSampler, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-	glSamplerParameteri(postSampler, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-
+	glSamplerParameteri(postSampler, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glSamplerParameteri(postSampler, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glSamplerParameteri(postSampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glSamplerParameteri(postSampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	glBindSampler(4, postSampler);
+	glBindSampler(6, postSampler);
 
 	GLuint cubemapSampler;
 	glGenSamplers(1, &cubemapSampler);
@@ -282,7 +283,7 @@ void Engine::mainLoop()
 		//SDL_GetMouseFocus() == window.sdlWindow && 
 
 
-		const float moveSpeed = 80;
+		const float moveSpeed = 800;
 
 		auto keyboardState = SDL_GetKeyboardState(NULL);
 
@@ -307,7 +308,10 @@ void Engine::mainLoop()
 		exposure = max(0.f, exposure);
 		s.use();
 		glUniform1f(expval, exposure);
+		r.skyboxShader.use();
+		glUniform1f(expval, exposure);
 		s.stop();
+
 
 		cam.update(dt);
 
