@@ -14,6 +14,7 @@ public:
 		projLoc = glGetUniformLocation(program, "proj");
 		viewLoc = glGetUniformLocation(program, "view");
 		modelLoc = glGetUniformLocation(program, "model");
+		colourLoc = glGetUniformLocation(program, "colour");
 		setFontBinding(12);
 		stop();
 	}
@@ -42,9 +43,16 @@ public:
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 	}
 
+	void setColour(glm::fvec3& colour)
+	{
+		use();
+		glUniform3fv(colourLoc, 1, &colour[0]);
+	}
+
 private:
 	int fontLoc;
 	int projLoc;
 	int viewLoc;
 	int modelLoc;
+	int colourLoc;
 };

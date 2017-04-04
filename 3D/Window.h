@@ -1,123 +1,161 @@
-#pragma once
-#include "SDL.h"
-#include "Types.h"
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <GL\glew.h>
-#include <glm\glm.hpp>
-#include "glm\gtc\type_ptr.hpp"
-#include "glm\gtc\matrix_transform.hpp"
-#include "glm\gtx\matrix_transform_2d.hpp"
-#include <time.h>
+/*#pragma once
+#include "Engine.h"
 
-class Window
+float randRange(float min, float max)
 {
-public:
-	Window() : windowCreated(false) {}
-	~Window() {}
+return min + float(Engine::rand()) / float(std::mt19937_64::max()/(max - min));
+}
 
-	void createWindow()
-	{
-		if (windowCreated)
-			return;
+float randFloat()
+{
+return float(Engine::rand()) / float(std::mt19937_64::max());
+}
 
-		windowCreated = true;
+void saveTexToFile(GLuint texture, std::string targetPath)
+{
+int w, h;
+int miplevel = 0;
+//glActiveTexture(GL_TEXTURE12);
+//glBindTexture(GL_TEXTURE_2D, texture);
+//glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &w);
+//glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &h);
+w = 160;
+h = 160;
 
-		if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-			std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
-			return;
-		}
+u32 sourcePixelSize = 1;
+const u32 targetPixelSize = 3;
 
-		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
+u32 targetImageSize = h * w * targetPixelSize;
+u32 sourceImageSize = h * w * sourcePixelSize;
 
-		bool fullscreen = true;
-		sizeX = 1280; sizeY = 720;
-		int posx = 960 - (sizeX / 2), posy = 540 - (sizeY / 2);
-		if (fullscreen)
-		{
-			sizeX = 1920; sizeY = 1080;
-			posx = 0; posy = 0;
-		}
+u32 targetRowSize = w * targetPixelSize;
+u32 sourceRowSize = w * sourcePixelSize;
 
-		sdlWindow = SDL_CreateWindow("Engine!", posx, posy, sizeX, sizeY, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS | (SDL_WINDOW_FULLSCREEN && fullscreen));
-		if (sdlWindow == nullptr) {
-			std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
-			SDL_Quit();
-			return;
-		}
+u8* screenshot = new u8[sourceImageSize];
+u8* flipped = new u8[targetImageSize];
 
-		glContext = SDL_GL_CreateContext(sdlWindow);
-		SDL_GL_MakeCurrent(sdlWindow, glContext);
+while (glGetError());
 
-		std::cout << "GL context created" << std::endl;
+std::string filepath = "res/screenshot/" + targetPath + ".bmp";
+glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_UNSIGNED_BYTE, screenshot);
 
-		GLint maj, min;
-		glGetIntegerv(GL_MAJOR_VERSION, &maj);
-		glGetIntegerv(GL_MINOR_VERSION, &min);
+auto err = glGetError();
 
-		std::cout << "GL version " << maj << "." << min << std::endl;
+for (int y = 0; y < h; ++y)
+{
+for (int x = 0; x < w; ++x)
+{
+//u32 sourceOffset = sourceImageSize - sourceRowSize - (y * sourceRowSize) + (x * sourcePixelSize);
+//u32 targetOffset = y * targetRowSize + (x * targetPixelSize);
+u32 sourceOffset = (y * sourceRowSize) + (x * sourcePixelSize);
+u32 targetOffset = (y * targetRowSize) + (x * targetPixelSize);
+flipped[targetOffset] = screenshot[sourceOffset];
+flipped[targetOffset + 1] = screenshot[sourceOffset];
+flipped[targetOffset + 2] = screenshot[sourceOffset];
+//printf("%i", screenshot[sourceOffset]);
+}
+}
 
-		auto glsl = glGetString(GL_SHADING_LANGUAGE_VERSION);
-		std::cout << "GLSL version " << glsl << std::endl;
+SDL_Surface * surface = SDL_CreateRGBSurfaceFrom(flipped, w, h, 8 * targetPixelSize, w * targetPixelSize, 0, 0, 0, 0);
+SDL_SaveBMP(surface, filepath.c_str());
+SDL_FreeSurface(surface);
+delete[] screenshot;
+delete[] flipped;
+}*/
 
-		std::cout << "Screen Resolution: " << sizeX << "x" << sizeY << std::endl;
-	}
+#pragma once
+#include "Engine.h"
 
-	inline void swapBuffers()
-	{
-		SDL_GL_SwapWindow(sdlWindow);
-	}
+//#undef max
+//#undef min
 
-	void screenshot()
-	{
-		time_t now = time(0);
-		tm  tstruct;
-		char buf[80];
-		localtime_s(&tstruct, &now);
-		strftime(buf, sizeof(buf), "%F_%H;%M;%S", &tstruct);
-		auto fileName = std::string("Screenshot_") + std::string(buf);
-		screenshot(fileName);
-	}
+#ifndef RANDS
+#define RANDS
 
-	void screenshot(std::string fileName)
-	{
-		u32 imageSize = getSizeX() * getSizeY() * 3;
-		u32 rowSize = getSizeX() * 3;
-		u8* screenshot = new u8[imageSize];
-		u8* flipped = new u8[imageSize];
+/*float randRange(float min, float max)
+{
+//return min + float(Engine::rand()) / float(std::mt19937_64::max() / (max - min));
+return 0.1;
+}
 
-		std::string filepath = "res/screenshot/" + fileName + ".bmp";
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-		glReadBuffer(GL_BACK);
-		glReadPixels(0, 0, getSizeX(), getSizeY(), GL_BGR, GL_UNSIGNED_BYTE, screenshot);
+float randFloat()
+{
+//return float(Engine::rand()) / float(std::mt19937_64::max());
+return 0.1;
+}*/
 
-		for (int y = 0; y < getSizeY(); ++y)
-		{
-			for (int x = 0; x < getSizeX(); ++x)
-			{
-				u32 incOffset = imageSize - rowSize - (y * rowSize) + (x * 3);
-				flipped[y * rowSize + (x * 3)] = screenshot[incOffset];
-				flipped[y * rowSize + (x * 3) + 1] = screenshot[incOffset + 1];
-				flipped[y * rowSize + (x * 3) + 2] = screenshot[incOffset + 2];
-			}
-		}
+#endif
 
-		SDL_Surface * surface = SDL_CreateRGBSurfaceFrom(flipped, getSizeX(), getSizeY(), 8 * 3, getSizeX() * 3, 0, 0, 0, 0);
-		SDL_SaveBMP(surface, filepath.c_str());
-		SDL_FreeSurface(surface);
-		delete[] screenshot;
-		delete[] flipped;
-	}
+//#define max(a,b)            (((a) > (b)) ? (a) : (b))
+//#define min(a,b)            (((a) < (b)) ? (a) : (b))
 
-	inline u32 getSizeX() { return sizeX; }
-	inline u32 getSizeY() { return sizeY; }
-	inline glm::ivec2 getSize() { return glm::ivec2(sizeX, sizeY); }
+/*void saveTexToFile(GLuint texture, int width, int height, GLenum texFormat, GLenum texType, std::string fileName, GLenum pixelAlignment = 0)
+{
+const int w = width, h = height;
+texture = 0;
+u32 sourcePixelSize;
+switch (texFormat)
+{
+case(GL_RED) :
+sourcePixelSize = 1;
+break;
+case(GL_RGB) :
+sourcePixelSize = 3;
+break;
+case(GL_RGBA) :
+sourcePixelSize = 4;
+break;
+}
+const u32 targetPixelSize = 3;
 
-	//private:
+if (pixelAlignment == 0)
+{
+switch (texFormat)
+{
+case(GL_RED) :
+glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+break;
+case(GL_RGB) :
+glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+break;
+case(GL_RGBA) :
+glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+break;
+}
+}
+else
+glPixelStorei(GL_UNPACK_ALIGNMENT, pixelAlignment);
 
-	bool windowCreated;
-	u32 sizeX, sizeY;
-	SDL_Window* sdlWindow;
-	SDL_GLContext glContext;
-};
+u32 targetImageSize = h * w * targetPixelSize;
+u32 sourceImageSize = h * w * sourcePixelSize;
+
+u32 targetRowSize = w * targetPixelSize;
+u32 sourceRowSize = w * sourcePixelSize;
+
+u8* screenshot = new u8[sourceImageSize];
+u8* flipped = new u8[targetImageSize];
+
+std::string filepath = "res/screenshot/" + fileName + ".bmp";
+glBindTextureUnit(0, texture);
+glGetTexImage(GL_TEXTURE_2D, 0, texFormat, texType, screenshot);
+
+for (int y = 0; y < h; ++y)
+{
+for (int x = 0; x < w; ++x)
+{
+u32 sourceOffset = (y * sourceRowSize) + (x * sourcePixelSize);
+u32 targetOffset = (y * targetRowSize) + (x * targetPixelSize);
+flipped[targetOffset] = screenshot[sourceOffset];
+flipped[targetOffset + 1] = screenshot[sourceOffset + (sourcePixelSize == 1 ? 0 : 1)];
+flipped[targetOffset + 2] = screenshot[sourceOffset + (sourcePixelSize == 1 ? 0 : 2)];
+//flipped[targetOffset + 1] = screenshot[sourceOffset];
+//flipped[targetOffset + 2] = screenshot[sourceOffset];
+}
+}
+
+/*SDL_Surface * surface = SDL_CreateRGBSurfaceFrom(flipped, w, h, 8 * targetPixelSize, w * targetPixelSize, 0, 0, 0, 0);
+SDL_SaveBMP(surface, filepath.c_str());
+SDL_FreeSurface(surface);
+delete[] screenshot;
+delete[] flipped;
+}*/

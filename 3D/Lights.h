@@ -4,7 +4,7 @@
 //Minimum light constant. 
 //Higher Constant == LOWER MINUMUM LIGHT
 //Lower Constant == HIGHER MINIMUM LIGHT
-#define MIN_LIGHT_CONSTANT 700.f
+#define MIN_LIGHT_CONSTANT 7000.f
 
 struct PointLightData
 {
@@ -56,7 +56,7 @@ public:
 struct SpotLightData
 {
 	SpotLightData() {}
-	SpotLightData(glm::fvec3 pos, glm::fvec3 dir, glm::fvec3 col, float inner, float outer = 0.f, float lin = 0.0001f, float quad = 0.0003f) : position(pos), direction(dir), colour(col), linear(lin), quadratic(quad), innerSpread(inner), outerSpread(outer) {
+	SpotLightData(glm::fvec3 pos, glm::fvec3 dir, glm::fvec3 col, float inner, float outer = 0.f, float lin = 0.0001f, float quad = 0.0003f) : textureHandle(0), position(pos), direction(dir), colour(col), linear(lin), quadratic(quad), innerSpread(inner), outerSpread(outer) {
 		if (outer < inner) { outer = inner; }
 	}
 	~SpotLightData() {}
@@ -97,8 +97,7 @@ struct SpotLightData
 		{
 			float linear;
 			float quadratic;
-			float D3;
-			float D4;
+			GLuint64 textureHandle;
 		};
 		glm::fvec4 linQuad;
 	};
@@ -220,6 +219,9 @@ public:
 	SSBO spotLightsBuffer;
 
 	std::vector<PointLightData> pointLights;
+	std::vector<PointLightData> staticPointLights;
+	std::vector<GLTextureCube> staticPointLightsShadowTex;
 	std::vector<SpotLightData> spotLights;
+	std::vector<SpotLightData> staticSpotLights;
 	std::vector<DirectLightData> directLights;
 };

@@ -13,8 +13,8 @@
 class Shader
 {
 public:
-	Shader() {}
-	~Shader() { glDeleteProgram(program); }
+	Shader() : program(0) { }
+	~Shader() { if (program != 0) glDeleteProgram(program); }
 
 	GLuint load(std::string pPathVert, std::string pPathFrag)
 	{

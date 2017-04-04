@@ -14,6 +14,12 @@ public:
 	Transform() : translation(glm::fvec3(0, 0, 0)), roll(0), pitch(0), yaw(0), origin(glm::fvec3(0.f, 0.f, 0.f)), scalem(glm::fvec3(1.f, 1.f, 1.f)), needUpdate(true) {}
 	~Transform() {}
 
+	void setTransformMat(glm::fmat4 pT)
+	{
+		transform = pT;
+		needUpdate = false;
+	}
+
 	inline glm::fmat4 getTransformMat()
 	{
 		if (needUpdate)

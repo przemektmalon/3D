@@ -118,12 +118,17 @@
     <ClInclude Include="Engine.h" />
     <ClInclude Include="FontStore.h" />
     <ClInclude Include="Include.h" />
+    <ClInclude Include="Keyboard.h" />
     <ClInclude Include="Lights.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="Mouse.h" />
     <ClInclude Include="QPC.h" />
+    <ClInclude Include="Rect.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="ResourceManager.h" />
+    <ClInclude Include="Sampler.h" />
     <ClInclude Include="SceneGraph.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="SSBO.h" />
@@ -132,11 +137,27 @@
     <ClInclude Include="Time.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="Types.h" />
+    <ClInclude Include="UIButton.h" />
+    <ClInclude Include="UIElement.h" />
+    <ClInclude Include="UILabel.h" />
+    <ClInclude Include="UISlider.h" />
+    <ClInclude Include="UISwitchButton.h" />
+    <ClInclude Include="UIUtil.h" />
+    <ClInclude Include="UIWindow.h" />
+    <ClInclude Include="UserInputManager.h" />
     <ClInclude Include="Util.h" />
     <ClInclude Include="Window.h" />
+    <ClInclude Include="World.h" />
+    <ClInclude Include="WorldResource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="Font.cpp" />
+    <ClCompile Include="Mouse.cpp" />
+    <ClCompile Include="ResourceManager.cpp" />
+    <ClCompile Include="UIWindow.cpp" />
+    <ClCompile Include="UserInputManager.cpp" />
+    <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
