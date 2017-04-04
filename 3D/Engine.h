@@ -1,5 +1,6 @@
 #pragma once
 #include "Window.h"
+#include "Shader.h"
 
 class Engine
 {
@@ -10,7 +11,9 @@ public:
 	static void start();
 	static void mainLoop();
 
-private:
+	static Shader s;
+
+	//private:
 
 	static Window window;
 

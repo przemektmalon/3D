@@ -3,6 +3,7 @@
 #include <string>
 #include <fstream>
 #include "Shader.h"
+#include "Transform.h"
 
 struct ObjectData
 {
@@ -142,29 +143,29 @@ public:
 		std::cout << data.numVert << std::endl;
 		std::cout << data.numTris << std::endl;
 
-		//glGenVertexArrays(1, &vao);
-		//glBindVertexArray(vao);
+		glUseProgram(Engine::s());
 
-		//glGenBuffers(1, &vbo);
-		//glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		//glBufferData(vbo, intData.size, glvertices, GL_STATIC_DRAW);
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
 
-		//Shader shaderProgram; shaderProgram.load("min2");
+		glGenBuffers(1, &vbo);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(GL_ARRAY_BUFFER, intData.size * sizeof(GLfloat), intData.interlacedData, GL_STATIC_DRAW);
 
-		//auto posAttrib = glGetAttribLocation(shaderProgram(), "p");
-		//glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
-		//glEnableVertexAttribArray(posAttrib);
+		auto posAttrib = glGetAttribLocation(Engine::s(), "p");
+		glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
+		glEnableVertexAttribArray(posAttrib);
 
-		//auto texAttrib = glGetAttribLocation(shaderProgram(), "t");
-		//glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
-		//glEnableVertexAttribArray(texAttrib);
+		auto texAttrib = glGetAttribLocation(Engine::s(), "t");
+		glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(texAttrib);
 
-		//auto norAttrib = glGetAttribLocation(shaderProgram(), "n");
-		//glVertexAttribPointer(norAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(5 * sizeof(GLfloat)));
-		//glEnableVertexAttribArray(norAttrib);
+		auto norAttrib = glGetAttribLocation(Engine::s(), "n");
+		glVertexAttribPointer(norAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(5 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(norAttrib);
 
-		//glBindBuffer(GL_ARRAY_BUFFER, 0);
-		//glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
 	}
 
 	void loadBinary(std::string binPath)
@@ -179,19 +180,29 @@ public:
 		data.numVert = size / 8;
 		data.numTris = data.numVert / 3;
 
-		//for (int i = 0; i < intData.size; i += 8)
-		//{
-		//	printf("%f,%f,%f\n", intData.interlacedData[i], intData.interlacedData[i + 1], intData.interlacedData[i + 2]);
-		//	if (intData.interlacedData[i] < -10 || intData.interlacedData[i] > 10)
-		//	{
-		//		std::cout << i << std::endl;
-		//		return;
-		//	}
-		//}
+		glUseProgram(Engine::s());
 
-		std::cout << intData.size << std::endl;
-		std::cout << data.numVert << std::endl;
-		std::cout << data.numTris << std::endl;
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+
+		glGenBuffers(1, &vbo);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(GL_ARRAY_BUFFER, intData.size * sizeof(GLfloat), intData.interlacedData, GL_STATIC_DRAW);
+
+		auto posAttrib = glGetAttribLocation(Engine::s(), "p");
+		glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
+		glEnableVertexAttribArray(posAttrib);
+
+		auto texAttrib = glGetAttribLocation(Engine::s(), "t");
+		glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(texAttrib);
+
+		auto norAttrib = glGetAttribLocation(Engine::s(), "n");
+		glVertexAttribPointer(norAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(5 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(norAttrib);
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
 	}
 
 	void saveBinary(std::string binPath)
@@ -207,6 +218,9 @@ public:
 		glBindVertexArray(vao);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
+		auto modelLoc = glGetUniformLocation(Engine::s(), "model");
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform.getTransformMat()));
+
 		glDrawArrays(GL_TRIANGLES, 0, data.numVert);
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -218,6 +232,7 @@ public:
 	ObjectData data;
 	InterlacedObjectData intData;
 
+	Transform transform;
 	GLuint vbo;
 	GLuint vao;
 };

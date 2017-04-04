@@ -40,5 +40,7 @@ public:
 	Texture diffuseTex;
 	Texture specularTex;
 	Texture emissionTex;
+	Texture bumpMap;
+	Texture normalMap;
 	float shininess;
 };

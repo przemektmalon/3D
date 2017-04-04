@@ -5,6 +5,7 @@
 #include <string>
 #include <sstream>
 #include <GL\glew.h>
+#include "Include.h"
 
 class Window
 {
@@ -24,12 +25,19 @@ public:
 			return;
 		}
 
-		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 16);
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
+		//SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 1);
 
-		sizeX = 1280; sizeY = 720;
+		bool fullscreen = true;
+		sizeX = 800; sizeY = 600;
+		int posx = 960 - (sizeX / 2), posy = 540 - (sizeY / 2);
+		if (fullscreen)
+		{
+			sizeX = 1920; sizeY = 1080;
+			posx = 0; posy = 0;
+		}
 
-		sdlWindow = SDL_CreateWindow("Engine!", 300, 300, sizeX, sizeY, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+		sdlWindow = SDL_CreateWindow("Engine!", posx, posy, sizeX, sizeY, SDL_WINDOW_OPENGL | (SDL_WINDOW_RESIZABLE & !fullscreen) | (SDL_WINDOW_FULLSCREEN && fullscreen));
 		if (sdlWindow == nullptr) {
 			std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
 			SDL_Quit();
@@ -57,6 +65,10 @@ public:
 	{
 		SDL_GL_SwapWindow(sdlWindow);
 	}
+
+	inline u32 getSizeX() { return sizeX; }
+	inline u32 getSizeY() { return sizeY; }
+	inline glm::ivec2 getSize() { return glm::ivec2(sizeX, sizeY); }
 
 	//private:
 

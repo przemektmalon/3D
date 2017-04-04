@@ -5,17 +5,18 @@
 #include <sstream>
 #include "GL\glew.h"
 #include <vector>
+#include "Include.h"
 
 class Shader
 {
 public:
 	Shader() {}
-	~Shader() { glDeleteProgram(program); }
+	~Shader() { /*glDeleteProgram(program);*/ }
 
-	GLuint load(std::string pPath)
+	GLuint load(std::string pPathVert, std::string pPathFrag)
 	{
-		std::string vertPath = pPath + ".vert";
-		std::string fragPath = pPath + ".frag";
+		std::string vertPath = pPathVert + ".vert";
+		std::string fragPath = pPathFrag + ".frag";
 
 		std::ifstream vertStream(vertPath, std::ifstream::in);
 		std::ifstream fragStream(fragPath, std::ifstream::in);
@@ -54,7 +55,7 @@ public:
 		err = glGetError();
 		if (isCompiled == GL_FALSE)
 		{
-			std::cout << "Failed to compile fragment shader: " << pPath << std::endl;
+			std::cout << "Failed to compile fragment shader: " << pPathFrag << std::endl;
 		}
 
 		glCompileShader(vertexShader);
@@ -62,7 +63,7 @@ public:
 		glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &isCompiled);
 		if (isCompiled == GL_FALSE)
 		{
-			std::cout << "Failed to compile fragment shader: " << pPath << std::endl;
+			std::cout << "Failed to compile vertex shader: " << pPathVert << std::endl;
 		}
 
 		fragStream.close();
@@ -81,7 +82,7 @@ public:
 		glGetProgramiv(shaderProgram, GL_LINK_STATUS, &isCompiled);
 		if (isCompiled == GL_FALSE)
 		{
-			std::cout << "Failed to link shader: " << pPath << std::endl;
+			std::cout << "Failed to link shader: " << pPathFrag << " + " << pPathVert << std::endl;
 
 			GLint maxLength = 0;
 			glGetProgramiv(shaderProgram, GL_INFO_LOG_LENGTH, &maxLength);
@@ -91,7 +92,7 @@ public:
 
 			for (int i = 0; i < errorLog.size(); ++i)
 			{
-				//std::cout << char(errorLog.data()[i]);
+				std::cout << char(errorLog.data()[i]);
 			}
 
 			glDeleteProgram(shaderProgram);
@@ -101,7 +102,7 @@ public:
 			return 0;
 		}
 
-		std::cout << "Shader program " << pPath << " loaded and linked successfully" << std::endl;
+		std::cout << "Shader program " << pPathFrag << " + " << pPathVert << " loaded and linked successfully" << std::endl;
 
 		program = shaderProgram;
 
@@ -116,4 +117,64 @@ public:
 private:
 
 	GLuint program;
+};
+
+class StandardShader : public Shader
+{
+public:
+	StandardShader() {
+		load("Standard", "Standard");
+
+	}
+	~StandardShader() {}
+
+	enum Uniform
+	{
+		viewPos = 0,
+		diffuse = 1,
+		specular = 2,
+		emit = 3,
+		emitStrength = 4,
+		shininess = 5,
+		proj = 6,
+		model = 7
+	};
+
+	void setViewPos(glm::fvec3 pos)
+	{
+		glUniform3f(Uniform::viewPos, pos.x, pos.y, pos.z);
+	}
+
+	void setDiffuse(GLuint texUnit)
+	{
+		glUniform1i(Uniform::diffuse, texUnit);
+	}
+	void setSpecular(GLuint texUnit)
+	{
+		glUniform1i(Uniform::specular, texUnit);
+	}
+	void setEmit(GLuint texUnit)
+	{
+		glUniform1i(Uniform::emit, texUnit);
+	}
+
+	void setEmitStrength(float str)
+	{
+		glUniform1f(Uniform::emitStrength, str);
+	}
+
+	void setShininess(float shin)
+	{
+		glUniform1f(Uniform::shininess, shin);
+	}
+
+	void setProjMatrix(glm::fmat4 proj)
+	{
+		glUniformMatrix4fv(Uniform::proj, 1, GL_FALSE, glm::value_ptr(proj));
+	}
+
+	void setModelMatric(glm::fmat4 model)
+	{
+		glUniformMatrix4fv(Uniform::model, 1, GL_FALSE, glm::value_ptr(model));
+	}
 };
