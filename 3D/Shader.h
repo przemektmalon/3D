@@ -9,14 +9,15 @@
 #include "glm\gtc\type_ptr.hpp"
 #include "glm\gtc\matrix_transform.hpp"
 #include "glm\gtx\matrix_transform_2d.hpp"
+#include "ShaderPreprocessor.h"
 
-class Shader
+class Shader : public ShaderPreprocessor
 {
 public:
 	Shader() : program(0) { }
 	~Shader() { if (program != 0) glDeleteProgram(program); }
 
-	GLuint load(std::string pPathVert, std::string pPathFrag)
+	GLuint load(std::string pPathVert, std::string pPathFrag, bool preprocess = false)
 	{
 		std::string vertPath = pPathVert + ".vert";
 		std::string fragPath = pPathFrag + ".frag";

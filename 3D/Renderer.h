@@ -80,6 +80,7 @@ public:
 
 
 
+
 	std::vector<MeshInstance> ents;
 
 	struct MeshUseMeta
@@ -89,7 +90,38 @@ public:
 		MeshRenderMeta renderMeta;
 	};
 
-	//std::vector<MeshRenderMeta> meshes;
+	struct MeshGPUMeta
+	{
+		MeshGPUMeta() {}
+		union
+		{
+			glm::uvec4 cmds;
+			struct
+			{
+				glm::uvec3 cmdss;
+				float radius;
+			};
+		};
+		glm::uvec4 texHandleMatID;
+	};
+
+	static const u32 maxObjects = 65536;
+	MeshGPUMeta meta[maxObjects];
+
+	//std::vector<GLuint> 
+
+	u32 drawCount;
+
+
+	ComputeShader frustCullShader;
+
+	GLuint objectMetaBuffer;
+	GLuint boundsBuffer;
+	GLuint texHandleBuffer;
+	GLuint drawIndirectBuffer;
+	GLuint distsBuffer;
+	GLuint transformBuffer;
+	GLuint instanceBuffer;
 
 	std::unordered_map<Mesh*, std::vector<glm::fmat4>> entities;
 	std::vector<PointLightData> pointLights;

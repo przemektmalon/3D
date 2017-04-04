@@ -119,7 +119,7 @@ public:
 	void update(Time& dt)
 	{
 		targetPitch = glm::clamp(targetPitch, -float(PI) / 2.f, float(PI) / 2.f);
-		float weightFactor = 1.f;
+		float weightFactor = 1.15f;
 		pitch = ler(pitch, targetPitch, weightFactor);
 		yaw = ler(yaw, targetYaw, weightFactor);
 

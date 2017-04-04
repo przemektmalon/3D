@@ -10,7 +10,7 @@ public:
 
 	void initialise()
 	{
-		load("res/shader/tileCull");
+		load("res/shader/tileCull", true);
 		use();
 		viewPosLoc = glGetUniformLocation(program, "viewPos");
 		viewRaysLoc = glGetUniformLocation(program, "viewRays");
@@ -20,7 +20,7 @@ public:
 		pointLightCountLoc = glGetUniformLocation(program, "pointLightCount");
 		spotLightCountLoc = glGetUniformLocation(program, "spotLightCount");
 		selectedIDLoc = glGetUniformLocation(program, "selectedID");
-		setExposure(11.f);
+		//setExposure(11.f);
 		stop();
 	}
 

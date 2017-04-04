@@ -3,14 +3,15 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include "ShaderPreprocessor.h"
 
-class ComputeShader
+class ComputeShader : public ShaderPreprocessor
 {
 public:
 	ComputeShader() {}
 	~ComputeShader() { glDeleteProgram(program); }
 
-	GLuint load(std::string pPathComp)
+	GLuint load(std::string pPathComp, bool preprocess = false)
 	{
 		std::string compPath = pPathComp + ".comp";
 
@@ -28,9 +29,20 @@ public:
 
 		GLint compShader = glCreateShader(GL_COMPUTE_SHADER);
 
-		const GLchar* const glCharComp = compContent.c_str();
+		GLchar* glCharComp = &compContent[0];
+
+		if (preprocess)
+		{
+			setVarVal("exposure\0", "0.1f\0");
+			glCharComp = preProcess(&compContent[0], compContent.size());
+		}
 
 		glShaderSource(compShader, 1, &glCharComp, NULL);
+
+		if (preprocess)
+		{
+			delete[] glCharComp;
+		}
 
 		auto err = glGetError();
 		glCompileShader(compShader);
@@ -60,7 +72,10 @@ public:
 			glGetProgramiv(shaderProgram, GL_INFO_LOG_LENGTH, &logLength);
 
 			//std::vector<GLchar> errorLog(maxLength);
-			GLchar* errorLog = new GLchar[logLength];
+			//GLchar* errorLog = new GLchar[logLength];
+			//glGetProgramInfoLog(shaderProgram, logLength, &logLength, &errorLog[0]);
+
+			std::vector<GLchar> errorLog(logLength);
 			glGetProgramInfoLog(shaderProgram, logLength, &logLength, &errorLog[0]);
 
 			for (int i = 0; i < logLength; ++i)

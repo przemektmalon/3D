@@ -21,7 +21,7 @@ public:
 	u32 registerMesh(const char* pPath, const char* pName)
 	{
 		meshNames.insert(std::make_pair(pName, ++lastMeshID));
-		meshList.insert(std::make_pair(lastMeshID, MeshMeta(pPath, pName)));
+		meshList.insert(std::make_pair(lastMeshID, MeshCPUMeta(pPath, pName)));
 		return lastMeshID;
 	}
 
@@ -31,7 +31,7 @@ public:
 	u32 loadCubeTex(u32 pID);
 	u32 loadMesh(u32 pID)
 	{
-		MeshMeta& meta = meshList.at(pID);
+		MeshCPUMeta& meta = meshList.at(pID);
 		meta.renderMeta = meshManager.loadMesh(meta.loadMeta.path);
 		return pID;
 	}
@@ -40,7 +40,7 @@ public:
 	GLTexture2D* get2DTex(std::string pName);
 	GLTexture2DMip get2DMipTex(std::string pName);
 	GLTextureCube getCubeTex(std::string pName);
-	MeshMeta& getMesh(std::string pName)
+	MeshCPUMeta& getMesh(std::string pName)
 	{
 		return meshList.at(meshNames.at(pName));
 	}
@@ -49,7 +49,7 @@ public:
 	GLTexture2D* get2DTex(u32 pID);
 	GLTexture2DMip get2DMipTex(u32 pID);
 	GLTextureCube getCubeTex(u32 pID);
-	MeshMeta& getMesh(u32 pID)
+	MeshCPUMeta& getMesh(u32 pID)
 	{
 		return meshList.at(pID);
 	}
@@ -61,6 +61,6 @@ private:
 
 
 	std::map<std::string, u32> meshNames;
-	std::map<u32, MeshMeta> meshList;
+	std::map<u32, MeshCPUMeta> meshList;
 	u32 lastMeshID = 0xa0000000;
 };

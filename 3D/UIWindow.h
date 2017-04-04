@@ -75,7 +75,7 @@ public:
 		updateWindowVBO();
 	}
 
-private:
+	//private:
 
 	glm::ivec2 position;
 

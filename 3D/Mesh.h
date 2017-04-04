@@ -289,9 +289,15 @@ struct MeshRenderMeta
 	u32 batchIndex;
 };
 
-struct MeshMeta
+struct MeshInstanceMeta
 {
-	MeshMeta(const char* pPath, const char* pName)
+	MeshRenderMeta renderMeta;
+	glm::fmat4 transform;
+};
+
+struct MeshCPUMeta
+{
+	MeshCPUMeta(const char* pPath, const char* pName)
 	{
 		strcpy_s(loadMeta.path, pPath);
 		strcpy_s(loadMeta.name, pName);
@@ -316,13 +322,14 @@ public:
 		intData.interlacedData = (new float[size]);
 		ifs.read((char*)intData.interlacedData, sizeof(GLfloat) * size);
 		intData.size = size;
+
 		//data.numVert = size / 8;
 		//data.numTris = data.numVert / 3;
 
-		return pushMeshToBatch(intData.interlacedData, intData.size * sizeof(float), intData.size / (8));
+		return pushMeshToBatch(intData.interlacedData, size, intData.size * sizeof(float), intData.size / (8));
 	}
 
-	MeshRenderMeta pushMeshToBatch(float* pData, s32 pMeshSize, s32 pVertCount)
+	MeshRenderMeta pushMeshToBatch(float* pData, s32 pDataSizeInBytes, s32 pMeshSize, s32 pVertCount)
 	{
 		u32 batchID = 0;
 		for (auto itr = solidBatches.begin(); itr != solidBatches.end(); ++itr)
@@ -342,6 +349,8 @@ public:
 				//itr->firsts[itr->length] = itr->firsts[itr->length - 1] + itr->counts[itr->length - 1];
 				itr->firsts[itr->length] = prevFirst + prevCount;
 				itr->counts[itr->length] = pVertCount;
+				itr->data[itr->length] = pData;
+				itr->dataSizeInBytes[itr->length] = pDataSizeInBytes;
 
 				//TODO: MAPPING ?
 				glBindBuffer(GL_ARRAY_BUFFER, solidBatches[batchID].vboID);
@@ -351,6 +360,7 @@ public:
 				MeshRenderMeta ret;
 				ret.batchID = batchID;
 				ret.batchIndex = itr->length;
+
 
 				++itr->length;
 
@@ -403,6 +413,9 @@ private:
 		GLint firsts[MAX_BATCH_COUNT];
 		GLsizei counts[MAX_BATCH_COUNT];
 		GLsizei length;
+
+		GLfloat* data[MAX_BATCH_COUNT];
+		GLint dataSizeInBytes[MAX_BATCH_COUNT];
 
 		GLuint vboID;
 		GLuint vaoID;

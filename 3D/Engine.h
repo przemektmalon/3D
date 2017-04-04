@@ -32,6 +32,15 @@ public:
 	static void stop();
 	static void select(glm::ivec2 mPos);
 
+	static u64 h1;
+	static u64 h2;
+	static u64 h3;
+
+	static GLTexture2DMip t1;
+	static GLTexture2DMip t2;
+	static GLTexture2DMip t3;
+	static GLTexture2DMip t4;
+
 	static Shader s;
 	static Shader gPassShader;
 	static Shader testShader;

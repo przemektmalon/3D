@@ -50,6 +50,13 @@ UIWindow* Engine::uiw;
 bool Engine::windowClicked = false;
 glm::ivec2 Engine::clickedPos;
 ResourceManager Engine::resMan;
+u64 Engine::h1;
+u64 Engine::h2;
+u64 Engine::h3;
+GLTexture2DMip Engine::t1;
+GLTexture2DMip Engine::t2;
+GLTexture2DMip Engine::t3;
+GLTexture2DMip Engine::t4;
 
 /*int main(int argc, char *argv[])
 {
@@ -112,7 +119,7 @@ void Engine::start(HINSTANCE pHInstance)
 		ws |= (WS_OVERLAPPED | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX);
 	}
 
-	window.createWindow(instance, "Engine", 0, 0, 1920, 1080, ws);
+	window.createWindow(instance, "Engine", 0, 0, 1280, 720, ws);
 	mainLoop();
 }
 
@@ -233,6 +240,9 @@ void Engine::mainLoop()
 {
 	glewExperimental = GL_TRUE;
 	glewInit();
+	wglewInit();
+
+	wglSwapIntervalEXT(0);
 
 	uim.mapToKeyDown(VK_ESCAPE, escapePress);
 	uim.mapToKeyDown('P', setRes);
@@ -317,31 +327,121 @@ void Engine::mainLoop()
 	resMan.init();
 
 	char b1[] = "res/model/box.bin";
-	char b1n[] = "box";
+	char b1n[] = "egg";
 
-	char b2[] = "res/model/box2.bin";
-	char b2n[] = "box2";
+	char b2[] = "res/model/pf.bin";
+	char b2n[] = "pf";
 
-	char b3[] = "res/model/box3.bin";
-	char b3n[] = "box3";
+	char b3[] = "res/model/oo.bin";
+	char b3n[] = "oo";
 
 	auto a = resMan.registerMesh(b1, b1n);
-	auto b = resMan.registerMesh(b2, b2n);
-	auto c = resMan.registerMesh(b3, b3n);
+	//auto b = resMan.registerMesh(b2, b2n);
+	//auto c = resMan.registerMesh(b3, b3n);
 
 	resMan.loadMesh(a);
-	resMan.loadMesh(b);
-	resMan.loadMesh(c);
+	//resMan.loadMesh(b);
+	//resMan.loadMesh(c);
 
-	GLTexture2DMip t1;
-	GLTexture2DMip t2;
-	GLTexture2DMip t3;
-	GLTexture2DMip t4;
+	//t1.createFromFile("res/sp.jpg");
+	//t2.createFromFile("res/pf.jpg");
+	//t3.createFromFile("res/oo.jpg");
+	//t4.createFromFile("res/gB.jpg");
 
-	t1.createFromFile("res/tex/g.jpg");
-	t2.createFromFile("res/tex/gS.jpg");
-	t3.createFromFile("res/tex/gN.jpg");
-	t4.createFromFile("res/tex/gB.jpg");
+	t1.createFromFile("res/g.jpg");
+	t2.createFromFile("res/gN.jpg");
+	t3.createFromFile("res/gD.jpg");
+	t4.createFromFile("res/gB.jpg");
+
+	const MeshManager& mm = Engine::resMan.meshManager;
+
+	typedef struct {
+		u32 count;
+		u32 instanceCount;
+		u32 first;
+		//u32 baseInstance;
+		float radius;
+	} CMD;
+
+	const u32 maxObjects = 65536;
+
+	CMD* cmds = new CMD[maxObjects];
+
+	auto eggMesh = resMan.getMesh("egg");
+	auto bid = eggMesh.renderMeta.batchID;
+	auto bi = eggMesh.renderMeta.batchIndex;
+	auto data = mm.solidBatches.at(bid).data[bi];
+	auto dataSizeInBytes = mm.solidBatches.at(bid).dataSizeInBytes[bi];
+	auto numVerts = dataSizeInBytes / (sizeof(float) * 3);
+
+
+	float maxX, minX, maxY, minY, maxZ, minZ;
+
+	maxX = FLT_MIN;
+	minX = FLT_MAX;
+
+	maxY = FLT_MIN;
+	minY = FLT_MAX;
+
+	maxZ = FLT_MIN;
+	minZ = FLT_MAX;
+
+	for (int i = 0; i < numVerts; i += 3)
+	{
+		glm::fvec3 vert;
+		vert.x = data[i];
+		vert.y = data[i + 1];
+		vert.z = data[i + 2];
+		maxX = vert.x > maxX ? vert.x : maxX;
+		maxY = vert.y > maxY ? vert.y : maxY;
+		maxZ = vert.z > maxZ ? vert.z : maxZ;
+
+		minX = vert.x < minX ? vert.x : minX;
+		minY = vert.y < minY ? vert.y : minY;
+		minZ = vert.z < minZ ? vert.z : minZ;
+	}
+
+	glm::fvec3 origin((maxX + minX) / 2, (maxY + minY) / 2, (maxZ + minZ) / 2);
+
+	float maxDist = 0;
+
+	for (int i = 0; i < numVerts; i += 8)
+	{
+		glm::fvec3 vert;
+		vert.x = data[i];
+		vert.y = data[i + 1];
+		vert.z = data[i + 2];
+
+		float dist = glm::length(vert);
+		maxDist = dist > maxDist ? dist : maxDist;
+	}
+
+	for (int i = 0; i < maxObjects; ++i)
+	{
+		cmds[i].count = mm.solidBatches[0].counts[0];
+		cmds[i].instanceCount = 1;
+		cmds[i].first = mm.solidBatches[0].firsts[0];
+		cmds[i].radius = maxDist;
+	}
+
+	for (int i = 0; i < maxObjects; ++i)
+	{
+		r->meta[i].cmds[0] = cmds[i].count;
+		r->meta[i].cmds[1] = cmds[i].instanceCount;
+		r->meta[i].cmds[2] = cmds[i].first;
+		r->meta[i].radius = cmds[i].radius;
+		//r->meta[i].posRad = glm::fvec4(400 * (i % 30), 0, 400 * std::floor(i / 30), 1.f);
+	}
+
+
+
+	glCreateBuffers(1, &r->drawIndirectBuffer);
+	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, r->drawIndirectBuffer);
+	glBufferData(GL_DRAW_INDIRECT_BUFFER, sizeof(CMD) * maxObjects, 0, GL_STATIC_READ);
+	//glBufferSubData(GL_DRAW_INDIRECT_BUFFER, 0, sizeof(CMD) * 3, cmds);
+	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
+
+
 
 	/*std::string fileName("wd.jpg");
 	int width, height;
@@ -647,7 +747,7 @@ void Engine::processFrame()
 		uiw->setWindowPosition(window.mouse.getWindowPosition(&window) - clickedPos);
 	}
 
-	const float moveSpeed = 400;
+	const float moveSpeed = 3000;
 
 	auto keyboardState = window.keyboard.keyState;
 
@@ -667,45 +767,49 @@ void Engine::processFrame()
 
 	cam.targetPos.y -= moveSpeed * dt.getSeconds() * float(window.keyboard.isKeyPressed('F'));
 
+	static float exposure = 1.f;
+
 	if (window.keyboard.isKeyPressed('I'))
 	{
-		r->defaultSampler.setTextureAnisotropy(1);
+		exposure += 10 * dt.getSeconds();
+		exposure = std::max(0.f, exposure);
+		//r->defaultSampler.setTextureAnisotropy(1);
+		r->tileCullShader.use();
+		r->tileCullShader.setExposure(exposure);
 	}
 	if (window.keyboard.isKeyPressed('U'))
 	{
-		r->defaultSampler.setTextureAnisotropy(16);
+		exposure -= 10 * dt.getSeconds();
+		exposure = std::max(0.f, exposure);
+		//r->defaultSampler.setTextureAnisotropy(16);
+		r->tileCullShader.use();
+		r->tileCullShader.setExposure(exposure);
 	}
 
-	/*exposure += float(keyboardState['X']) * dt.getSeconds();
-	exposure -= float(keyboardState['Z']) * dt.getSeconds();
-	exposure = max(0.f, exposure);
-	s.use();
-	glUniform1f(expval, exposure);
-	glUniform1f(expval, exposure);
-	s.stop();*/
+
 
 	r->ssaoShader.setIntensity(r->ssaoShader.intensity + (float(keyboardState['B']) * 5 * dt.getSeconds()));
 	r->ssaoShader.setIntensity(r->ssaoShader.intensity - (float(keyboardState['V']) * 5 * dt.getSeconds()));
-	r->ssaoShader.intensity = max(0.f, r->ssaoShader.intensity);
+	r->ssaoShader.intensity = std::max(0.f, r->ssaoShader.intensity);
 
 	r->ssaoShader.setRadius(r->ssaoShader.radius + (float(keyboardState['H']) * 5 * dt.getSeconds()));
 	r->ssaoShader.setRadius(r->ssaoShader.radius - (float(keyboardState['G']) * 5 * dt.getSeconds()));
-	r->ssaoShader.radius = max(0.f, r->ssaoShader.radius);
+	r->ssaoShader.radius = std::max(0.f, r->ssaoShader.radius);
 
 	cam.update(dt);
-
-	int textureID = 0, specularMap = 1, marble = 2;
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, textureID);
-
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, specularMap);
-
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, marble);
 
 	r->render();
 
 	dt.setMicroSeconds(qpc.getElapsedTime());
+
+	static float cc;
+
+	cc += dt.getSecondsf();
+
+	if (cc > (1.f / 60.f))
+	{
+		((UILabel*)(uiw->elements[0]))->text.setString(std::string("FPS: " + std::to_string(1.0 / dt.getSeconds()) + '\n' + "Dt: " + std::to_string(dt.getMilliSeconds()) + '\n' + "Draw Count: " + std::to_string(r->drawCount)).c_str());
+		cc = 0;
+	}
 }
+
