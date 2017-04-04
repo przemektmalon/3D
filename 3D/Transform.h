@@ -34,6 +34,11 @@ public:
 		return glm::inverse(transform);
 	}
 
+	inline Transform& combine(Transform& other)
+	{
+		translation += other.getTranslation();
+		scalem *= other.getScale();
+	}
 
 	inline Transform& setTranslation(glm::fvec3 p) { translation = p; needUpdate = true; return *this; }
 	inline Transform& translate(glm::fvec3 p) {
@@ -157,3 +162,115 @@ private:
 //	Transform transform;
 //
 //};
+
+class Transform2D
+{
+public:
+	Transform2D() : translation(glm::fvec2(0, 0)), rotation(0), origin(glm::fvec2(0.f, 0.f)), scalem(glm::fvec2(1.f, 1.f)), needUpdate(true) {}
+	~Transform2D() {}
+
+	inline glm::fmat3 getTransform()
+	{
+		if (needUpdate)
+		{
+			updateMatrix();
+		}
+
+		return transform;
+	}
+
+	inline glm::fmat4 getGLTransform()
+	{
+		if (needUpdate)
+		{
+			updateMatrix();
+		}
+
+		return glTransform;
+	}
+
+	inline glm::fmat3 getInverseTransform()
+	{
+		if (needUpdate)
+		{
+			updateMatrix();
+		}
+
+		return glm::inverse(transform);
+	}
+
+	inline glm::fmat4 getInverseGLTransform()
+	{
+		if (needUpdate)
+		{
+			updateMatrix();
+		}
+
+		return glm::inverse(glTransform);
+	}
+
+	inline Transform2D& setTranslation(glm::fvec2 p) { translation = p; needUpdate = true; return *this; }
+	inline Transform2D& translate(glm::fvec2 p) { translation += p; needUpdate = true; return *this; }
+	inline glm::fvec2 getTranslation() { return translation; }
+
+	inline Transform2D& setRotation(float p) { rotation = p; needUpdate = true; return *this; }
+	inline Transform2D& rotate(float p) { rotation += p; needUpdate = true; return *this; }
+	inline float getRotation() { return rotation; }
+
+	inline Transform2D& setScale(glm::fvec2 p) { scalem = p; needUpdate = true; return *this; }
+	inline Transform2D& scale(glm::fvec2 p) { scalem *= p; needUpdate = true; return *this; }
+	inline Transform2D& scale(float p) { scalem = scalem * p; needUpdate = true; return *this; }
+	inline glm::fvec2 getScale() { return scalem; }
+
+	inline Transform2D& setOrigin(glm::fvec2 p) { origin = p; return *this; }
+	inline glm::fvec2 getOrigin() { return origin; }
+
+	inline void saveToStream(std::ofstream& ofs)
+	{
+		ofs.write((char*)&translation, sizeof(translation));
+		ofs.write((char*)&origin, sizeof(origin));
+		ofs.write((char*)&rotation, sizeof(rotation));
+		ofs.write((char*)&scalem, sizeof(scalem));
+	}
+
+	inline void loadFromStream(std::ifstream& ifs)
+	{
+		needUpdate = true;
+
+		ifs.read((char*)&translation, sizeof(translation));
+		ifs.read((char*)&origin, sizeof(origin));
+		ifs.read((char*)&rotation, sizeof(rotation));
+		ifs.read((char*)&scalem, sizeof(scalem));
+	}
+
+private:
+
+	inline void updateMatrix()
+	{
+		needUpdate = false;
+
+		glm::fmat3 ttranslate = glm::translate(glm::fmat3(), glm::fvec2(translation.x - origin.x, translation.y - origin.y));
+		glm::fmat3 sscale = glm::scale(glm::fmat3(), glm::fvec2(scalem.x, scalem.y));
+		glm::fmat3 rrotate = glm::rotate(glm::fmat3(), rotation);
+		glm::fmat3 tttranslate = glm::translate(glm::fmat3(), glm::fvec2(origin.x, origin.y));
+
+		transform = ttranslate * rrotate * sscale * tttranslate;
+
+		glTransform[0].x = transform[0].x;
+		glTransform[0].y = transform[0].y;
+		glTransform[1].x = transform[1].x;
+		glTransform[1].y = transform[1].y;
+
+		glTransform[3].x = transform[2].x;
+		glTransform[3].y = transform[2].y;
+	}
+
+	glm::fvec2 translation;
+	glm::fvec2 origin;
+	float rotation;
+	glm::fvec2 scalem;
+
+	bool needUpdate;
+	glm::fmat3 transform;
+	glm::fmat4 glTransform;
+};

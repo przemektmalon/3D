@@ -14,7 +14,7 @@ class Shader
 {
 public:
 	Shader() {}
-	~Shader() { /*glDeleteProgram(program);*/ }
+	~Shader() { glDeleteProgram(program); }
 
 	GLuint load(std::string pPathVert, std::string pPathFrag)
 	{
@@ -112,6 +112,8 @@ public:
 		return shaderProgram;
 	}
 
+	virtual void initialise() {}
+
 	GLint operator()()
 	{
 		return program;
@@ -120,7 +122,7 @@ public:
 	void use() { glUseProgram(program); }
 	void stop() { glUseProgram(0); }
 
-private:
+protected:
 
 	GLuint program;
 };

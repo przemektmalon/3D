@@ -87,27 +87,27 @@ public:
 			}
 			else if (type == "f")
 			{
-				//std::string xstr, ystr, zstr;
-				//std::getline(ifs, xstr, '/');
-				//std::getline(ifs, ystr, '/');
-				//std::getline(ifs, zstr, ' ');
-				//data.indices.push_back(abs(std::stoi(xstr)));
-				//data.indices.push_back(abs(std::stoi(ystr)));
-				//data.indices.push_back(abs(std::stoi(zstr)));
-				//std::getline(ifs, xstr, '/');
-				//std::getline(ifs, ystr, '/');
-				//std::getline(ifs, zstr, ' ');
-				//data.indices.push_back(abs(std::stoi(xstr)));
-				//data.indices.push_back(abs(std::stoi(ystr)));
-				//data.indices.push_back(abs(std::stoi(zstr)));
-				//std::getline(ifs, xstr, '/');
-				//std::getline(ifs, ystr, '/');
-				//std::getline(ifs, zstr, '\n');
-				//data.indices.push_back(abs(std::stoi(xstr)));
-				//data.indices.push_back(abs(std::stoi(ystr)));
-				//data.indices.push_back(abs(std::stoi(zstr)));
-
 				std::string xstr, ystr, zstr;
+				std::getline(ifs, xstr, '/');
+				std::getline(ifs, ystr, '/');
+				std::getline(ifs, zstr, ' ');
+				data.indices.push_back(abs(std::stoi(xstr)));
+				data.indices.push_back(abs(std::stoi(ystr)));
+				data.indices.push_back(abs(std::stoi(zstr)));
+				std::getline(ifs, xstr, '/');
+				std::getline(ifs, ystr, '/');
+				std::getline(ifs, zstr, ' ');
+				data.indices.push_back(abs(std::stoi(xstr)));
+				data.indices.push_back(abs(std::stoi(ystr)));
+				data.indices.push_back(abs(std::stoi(zstr)));
+				std::getline(ifs, xstr, '/');
+				std::getline(ifs, ystr, '/');
+				std::getline(ifs, zstr, '\n');
+				data.indices.push_back(abs(std::stoi(xstr)));
+				data.indices.push_back(abs(std::stoi(ystr)));
+				data.indices.push_back(abs(std::stoi(zstr)));
+
+				/*std::string xstr, ystr, zstr;
 				std::getline(ifs, xstr, '/');
 				std::getline(ifs, ystr, '/');
 				std::getline(ifs, zstr, ' ');
@@ -125,7 +125,7 @@ public:
 				std::getline(ifs, zstr, '\n');
 				data.indices.push_back(abs(std::stoi(xstr)));
 				data.indices.push_back(0);
-				data.indices.push_back(abs(std::stoi(zstr)));
+				data.indices.push_back(abs(std::stoi(zstr)));*/
 			}
 			else
 			{
@@ -149,8 +149,8 @@ public:
 			glvertices[++count] = data.verts[index + 2];
 
 			index = 2 * (*(itr + 1) - 1);
-			glvertices[++count] = 0;// data.texCoords[index];
-			glvertices[++count] = 0;// data.texCoords[index + 1];
+			glvertices[++count] = data.texCoords[index];
+			glvertices[++count] = data.texCoords[index + 1];
 
 			index = 3 * (*(itr + 2) - 1);
 			glvertices[++count] = data.normals[index];

@@ -2,98 +2,21 @@
 #include <unordered_map>
 #include "Mesh.h"
 #include "Transform.h"
+#include "SAOShader.h"
+#include "GBufferShader.h"
+#include "Framebuffer.h"
+#include "Text.h"
 
-GLfloat skyboxVertices[] = {
-	// Positions          
-	-10.0f,  10.0f, -10.0f,
-	-10.0f, -10.0f, -10.0f,
-	10.0f, -10.0f, -10.0f,
-	10.0f, -10.0f, -10.0f,
-	10.0f,  10.0f, -10.0f,
-	-10.0f,  10.0f, -10.0f,
-
-	-10.0f, -10.0f,  10.0f,
-	-10.0f, -10.0f, -10.0f,
-	-10.0f,  10.0f, -10.0f,
-	-10.0f,  10.0f, -10.0f,
-	-10.0f,  10.0f,  10.0f,
-	-10.0f, -10.0f,  10.0f,
-
-	10.0f, -10.0f, -10.0f,
-	10.0f, -10.0f,  10.0f,
-	10.0f,  10.0f,  10.0f,
-	10.0f,  10.0f,  10.0f,
-	10.0f,  10.0f, -10.0f,
-	10.0f, -10.0f, -10.0f,
-
-	-10.0f, -10.0f,  10.0f,
-	-10.0f,  10.0f,  10.0f,
-	10.0f,  10.0f,  10.0f,
-	10.0f,  10.0f,  10.0f,
-	10.0f, -10.0f,  10.0f,
-	-10.0f, -10.0f,  10.0f,
-
-	-10.0f,  10.0f, -10.0f,
-	10.0f,  10.0f, -10.0f,
-	10.0f,  10.0f,  10.0f,
-	10.0f,  10.0f,  10.0f,
-	-10.0f,  10.0f,  10.0f,
-	-10.0f,  10.0f, -10.0f,
-
-	-10.0f, -10.0f, -10.0f,
-	-10.0f, -10.0f,  10.0f,
-	10.0f, -10.0f, -10.0f,
-	10.0f, -10.0f, -10.0f,
-	-10.0f, -10.0f,  10.0f,
-	10.0f, -10.0f,  10.0f
-};
-
-struct PointLight
-{
-public:
-	PointLight() {}
-	PointLight(glm::fvec3 pos, glm::fvec3 col, float lin = 0.0001f, float quad = 0.0003f) : position(pos), colour(col), linear(lin), quadratic(quad) {}
-	~PointLight() {}
-
-	glm::fvec3 position, colour;
-	float linear, quadratic;
-};
-
-struct SpotLight
-{
-	SpotLight() {}
-	SpotLight(glm::fvec3 pos, glm::fvec3 dir, glm::fvec3 col, float inner, float outer = 0.f, float lin = 0.0001f, float quad = 0.0003f) : position(pos), direction(dir), colour(col), linear(lin), quadratic(quad), innerSpread(inner), outerSpread(outer) {
-		if (outer = 0.f) { outer = inner; }
-	}
-	~SpotLight() {}
-
-	glm::fvec3 position, direction, colour;
-	float linear, quadratic, innerSpread, outerSpread;
-};
-
-struct DirectLight
-{
-	DirectLight() {}
-	DirectLight(glm::fvec3 dir, glm::fvec3 col) : direction(dir), colour(col) {}
-	~DirectLight() {}
-
-	glm::fvec3 direction, colour;
-};
+#include "Lights.h"
 
 class MasterRenderer
 {
 public:
-	MasterRenderer() {}
+	MasterRenderer() : ssaoPower(1.f), ssaoScale(1.f), shadScale(1.f) {}
 	~MasterRenderer() {}
-
-
 
 	inline void initialiseScreenQuad()
 	{
-
-		//float bot, left, top, right;
-		//bot = ()
-
 		const GLfloat quadVertices[] = {
 			-1.0f,  1.0f,  0.0f, 1.0f,
 			1.0f,  1.0f,  1.0f, 1.0f,
@@ -125,9 +48,11 @@ public:
 
 		glUniform1i(glGetUniformLocation(Engine::s(), "gPosition"), 0);
 		glUniform1i(glGetUniformLocation(Engine::s(), "gNormal"), 1);
-		glUniform1i(glGetUniformLocation(Engine::s(), "gAlbedoSpec"), 2);
-		glUniform1i(glGetUniformLocation(Engine::s(), "gDepth"), 3);
-		glUniform1i(glGetUniformLocation(Engine::s(), "ssaoTex"), 4);
+		auto ccc = glGetUniformLocation(Engine::s(), "gAlbedoSpec");
+		glUniform1i(ccc, 2);
+		//glUniform1i(glGetUniformLocation(Engine::s(), "gDepth"), 3);
+		glUniform1i(glGetUniformLocation(Engine::s(), "ssaoTex"), 3);
+		glUniform1i(glGetUniformLocation(Engine::s(), "shadow"), 8);
 
 		Engine::s.stop();
 	}
@@ -166,222 +91,92 @@ public:
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		*/
 
-		gBufferShader.load("res/shader/gBufferPass", "res/shader/gBufferPass");
-
-		glGenFramebuffers(1, &fboGBuffer);
-		glBindFramebuffer(GL_FRAMEBUFFER, fboGBuffer);
-
-		glGenTextures(3, texAttachGBuffer);
 
 
-		glBindTexture(GL_TEXTURE_2D, texAttachGBuffer[0]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, int(viewport.width * frameScale), int(viewport.height * frameScale), 0, GL_RGBA, GL_FLOAT, NULL);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texAttachGBuffer[0], 0);
+		//glm::fvec4 projInfo(-2.f / (viewport.width * cam.proj[0][0]), -2.f / (viewport.height*cam.proj[1][1]), (1.f - cam.proj[0][2]) / cam.proj[0][0], (1.f + cam.proj[1][2]) / cam.proj[1][1]);
+		//glUniform4fv(glGetUniformLocation(ssaoShader(), "projInfo"), 1, glm::value_ptr(projInfo));
 
-		glBindTexture(GL_TEXTURE_2D, texAttachGBuffer[1]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, int(viewport.width * frameScale), int(viewport.height * frameScale), 0, GL_RGB, GL_FLOAT, NULL);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, texAttachGBuffer[1], 0);
 
-		glBindTexture(GL_TEXTURE_2D, texAttachGBuffer[2]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, int(viewport.width * frameScale), int(viewport.height * frameScale), 0, GL_RGBA, GL_FLOAT, NULL);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, texAttachGBuffer[2], 0);
+		//gBufferShader.load("res/shader/gBufferPass", "res/shader/gBufferPass");
+
+		fboGBuffer.setResolution(glm::fvec2(window->getSize()) * frameScale);
+		fboGBuffer.attachTexture(GL_RGB32F, GL_RGB, GL_FLOAT, GL_COLOR_ATTACHMENT0);
+		fboGBuffer.attachTexture(GL_RGB32F, GL_RGB, GL_FLOAT, GL_COLOR_ATTACHMENT1);
+		fboGBuffer.attachTexture(GL_RGBA32F, GL_RGBA, GL_FLOAT, GL_COLOR_ATTACHMENT2);
+		fboGBuffer.attachTexture(GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_FLOAT, GL_DEPTH_ATTACHMENT);
+		fboGBuffer.checkStatus();
 
 		GLuint attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
 		glDrawBuffers(3, attachments);
 
-		glGenRenderbuffers(1, &rboDepthStencilGBuffer);
-		glBindRenderbuffer(GL_RENDERBUFFER, rboDepthStencilGBuffer);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, int(viewport.width * frameScale), int(viewport.height * frameScale));
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rboDepthStencilGBuffer);
+		fboSSAO.setResolution(glm::fvec2(window->getSize()) * frameScale);
+		fboSSAO.attachTexture(GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT0, glm::fvec2(ssaoScale));
+		fboSSAO.checkStatus();
 
-		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-			std::cout << "Error: Framebuffer is not complete!" << std::endl;
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		fboSSAOBlur.setResolution(glm::fvec2(window->getSize()) * frameScale);
+		fboSSAOBlur.attachTexture(GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT0, glm::fvec2(ssaoScale));
+		fboSSAOBlur.checkStatus();
 
-
-		ssaoShader.load("res/shader/Standard", "res/shader/ssao"); ssaoShader.use();
-		auto pos = glGetUniformLocation(ssaoShader(), "gPositionDepth");
-		glUniform1i(pos, 0);
-		glUniform1i(glGetUniformLocation(ssaoShader(), "gNormal"), 1);
-		glUniform1i(glGetUniformLocation(ssaoShader(), "texNoise"), 2);
-		glUniform1i(glGetUniformLocation(ssaoShader(), "gDepth"), 3);
-
-		glGenFramebuffers(1, &fboSSAO);
-		glBindFramebuffer(GL_FRAMEBUFFER, fboSSAO);
-
-		glGenTextures(1, &texAttachSSAO);
-
-		glBindTexture(GL_TEXTURE_2D, texAttachSSAO);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, viewport.width, viewport.height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texAttachSSAO, 0);
-
-		GLuint aattachments[1] = { GL_COLOR_ATTACHMENT0 };
-		glDrawBuffers(1, aattachments);
-
-		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-			std::cout << "Error: Framebuffer is not complete!" << std::endl;
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		std::uniform_real_distribution<GLfloat> randomFloats(0.0, 1.0); // random floats between 0.0 - 1.0
-		std::default_random_engine generator;
-		std::vector<glm::vec3> ssaoKernel;
-		for (GLuint i = 0; i < 64; ++i)
-		{
-			glm::vec3 sample(
-				randomFloats(generator) * 2.0 - 1.0,
-				randomFloats(generator) * 2.0 - 1.0,
-				randomFloats(generator)
-			);
-			sample = glm::normalize(sample);
-			sample *= randomFloats(generator);
-			GLfloat scale = GLfloat(i) / 64.0;
-			scale = glm::mix(0.1f, 1.0f, scale * scale);
-			sample *= scale;
-			ssaoKernel.push_back(sample);
-		}
-
-		std::vector<glm::vec3> ssaoNoise;
-		for (GLuint i = 0; i < 256; i++)
-		{
-			glm::vec3 noise(
-				randomFloats(generator) * 2.0 - 1.0,
-				randomFloats(generator) * 2.0 - 1.0,
-				0.0f);
-			noise = glm::normalize(noise);
-			ssaoNoise.push_back(noise);
-		}
-
-		ssaoShader.use();
-
-		for (int i = 0; i < 64; ++i)
-		{
-			auto x = glGetUniformLocation(ssaoShader(), ("samples[" + std::to_string(i) + "]").c_str());
-			glUniform3fv(x, 1, &ssaoKernel[i][0]);
-		}
-
-		glGenTextures(1, &SSAONoiseTex);
-		glBindTexture(GL_TEXTURE_2D, SSAONoiseTex);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, 4, 4, 0, GL_RGB, GL_FLOAT, &ssaoNoise[0]);
-
-		//glGenTextures(1, &ssaoTex);
-		//glBindTexture(GL_TEXTURE_2D, ssaoTex);
-
+		blurShader.load("res/shader/Standard", "res/shader/bilatBlur"); blurShader.use();
+		auto locc = glGetUniformLocation(blurShader(), "source");
+		glUniform1i(locc, 0);
+		blurShader.stop();
 	}
 
 	inline void initialiseScreenFramebuffer()
 	{
-		glGenFramebuffers(1, &fboScreen);
-		glBindFramebuffer(GL_FRAMEBUFFER, fboScreen);
-
-		glGenTextures(4, texAttachScreen);
-		glBindTexture(GL_TEXTURE_2D, texAttachScreen[0]);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, viewport.width, viewport.height, 0, GL_RGBA, GL_FLOAT, NULL);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texAttachScreen[0], 0);
-
-		glBindTexture(GL_TEXTURE_2D, texAttachScreen[1]);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, viewport.width, viewport.height, 0, GL_RGB, GL_FLOAT, NULL);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, texAttachScreen[1], 0);
-
-		glBindTexture(GL_TEXTURE_2D, texAttachScreen[2]);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, viewport.width, viewport.height, 0, GL_RGBA, GL_FLOAT, NULL);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, texAttachScreen[2], 0);
-
-		glBindTexture(GL_TEXTURE_2D, texAttachScreen[3]);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, viewport.width, viewport.height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texAttachScreen[3], 0);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, texAttachScreen[3], 0);
-
-		/*GLuint status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-		switch (status) {
-		case GL_FRAMEBUFFER_COMPLETE:
-		std::cout << "A" << std::endl;
-		break;
-
-		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-		//throw FramebufferIncompleteException("An attachment could not be bound to frame buffer object!");
-		std::cout << "A" << std::endl;
-		break;
-
-		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-		//throw FramebufferIncompleteException("Attachments are missing! At least one image (texture) must be bound to the frame buffer object!");
-		std::cout << "A" << std::endl;
-		break;
-
-		case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT:
-		//throw FramebufferIncompleteException("The dimensions of the buffers attached to the currently used frame buffer object do not match!");
-		std::cout << "A" << std::endl;
-		break;
-
-		case GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT:
-		//throw FramebufferIncompleteException("The formats of the currently used frame buffer object are not supported or do not fit together!");
-		std::cout << "A" << std::endl;
-		break;
-
-		case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-		//throw FramebufferIncompleteException("A Draw buffer is incomplete or undefinied. All draw buffers must specify attachment points that have images attached.");
-		std::cout << "A" << std::endl;
-		break;
-
-		case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
-		//throw FramebufferIncompleteException("A Read buffer is incomplete or undefinied. All read buffers must specify attachment points that have images attached.");
-		std::cout << "A" << std::endl;
-		break;
-
-		case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
-		//throw FramebufferIncompleteException("All images must have the same number of multisample samples.");
-		std::cout << "A" << std::endl;
-		break;
-
-		case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
-		//throw FramebufferIncompleteException("If a layered image is attached to one attachment, then all attachments must be layered attachments. The attached layers do not have to have the same number of layers, nor do the layers have to come from the same kind of texture.");
-		std::cout << "A" << std::endl;
-		break;
-
-		case GL_FRAMEBUFFER_UNSUPPORTED:
-		//throw FramebufferIncompleteException("Attempt to use an unsupported format combinaton!");
-		std::cout << "A" << std::endl;
-		break;
-
-		default:
-		//throw FramebufferIncompleteException("Unknown error while attempting to create frame buffer object!");
-		std::cout << "A" << std::endl;
-		break;
-		}*/
-
-		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-			std::cout << "Error: Framebuffer is not complete!" << std::endl;
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	}
-
-	inline void initialisePostLightingFramebuffer()
-	{
-		glGenFramebuffers(1, &fboPostLighting);
-		glBindFramebuffer(GL_FRAMEBUFFER, fboPostLighting);
-
-		glGenTextures(1, &texAttachPostLighting);
-		glBindTexture(GL_TEXTURE_2D, texAttachPostLighting);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, viewport.width, viewport.height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texAttachPostLighting, 0);
-
-		glGenRenderbuffers(1, &rboDepthStencilPostLighting);
-		glBindRenderbuffer(GL_RENDERBUFFER, rboDepthStencilPostLighting);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, viewport.width, viewport.height);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rboDepthStencilPostLighting);
-
-		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-			std::cout << "Error: Framebuffer is not complete!" << std::endl;
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		blurShader.load("res/shader/Standard", "res/shader/boxBlur");
+		fboScreen.setResolution(glm::fvec2(window->getSize()) * frameScale);
+		fboScreen.attachTexture(GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT0);
+		fboScreen.checkStatus();
 	}
 
 	inline void initialiseSkybox()
 	{
+		GLfloat skyboxVertices[] = {
+			// Positions          
+			-10.0f,  10.0f, -10.0f,
+			-10.0f, -10.0f, -10.0f,
+			10.0f, -10.0f, -10.0f,
+			10.0f, -10.0f, -10.0f,
+			10.0f,  10.0f, -10.0f,
+			-10.0f,  10.0f, -10.0f,
+
+			-10.0f, -10.0f,  10.0f,
+			-10.0f, -10.0f, -10.0f,
+			-10.0f,  10.0f, -10.0f,
+			-10.0f,  10.0f, -10.0f,
+			-10.0f,  10.0f,  10.0f,
+			-10.0f, -10.0f,  10.0f,
+
+			10.0f, -10.0f, -10.0f,
+			10.0f, -10.0f,  10.0f,
+			10.0f,  10.0f,  10.0f,
+			10.0f,  10.0f,  10.0f,
+			10.0f,  10.0f, -10.0f,
+			10.0f, -10.0f, -10.0f,
+
+			-10.0f, -10.0f,  10.0f,
+			-10.0f,  10.0f,  10.0f,
+			10.0f,  10.0f,  10.0f,
+			10.0f,  10.0f,  10.0f,
+			10.0f, -10.0f,  10.0f,
+			-10.0f, -10.0f,  10.0f,
+
+			-10.0f,  10.0f, -10.0f,
+			10.0f,  10.0f, -10.0f,
+			10.0f,  10.0f,  10.0f,
+			10.0f,  10.0f,  10.0f,
+			-10.0f,  10.0f,  10.0f,
+			-10.0f,  10.0f, -10.0f,
+
+			-10.0f, -10.0f, -10.0f,
+			-10.0f, -10.0f,  10.0f,
+			10.0f, -10.0f, -10.0f,
+			10.0f, -10.0f, -10.0f,
+			-10.0f, -10.0f,  10.0f,
+			10.0f, -10.0f,  10.0f
+		};
+
 		skyboxShader.load("res/shader/skybox", "res/shader/skybox"); glUseProgram(skyboxShader());
 
 		glGenVertexArrays(1, &vaoSkybox);
@@ -431,9 +226,10 @@ public:
 			PointLight light;
 			light.position = glm::fvec3(float(Engine::rand() % 1000) - 500, float(Engine::rand() % 400), float(Engine::rand() % 500) - 100);
 			light.colour = glm::fvec3((Engine::rand() % 70) + 200, (Engine::rand() % 70) + 200, (Engine::rand() % 700) + 200);
-			light.colour = glm::normalize(light.colour); light.colour *= glm::fvec3(1.f);
-			light.linear = 0.00001f;
+			light.colour = glm::normalize(light.colour); light.colour *= glm::fvec3(0.2f);
+			light.linear = 0.0001f;
 			light.quadratic = 0.000011f;
+			light.colour = glm::fvec3(0.1, 0.2, 0.5);
 			pointLights.push_back(light);
 		}
 
@@ -448,9 +244,9 @@ public:
 
 		Engine::s.use();
 
-		SpotLight spot = SpotLight(glm::fvec3(200, 200, 200), glm::fvec3(0, -0.2, 0.f), glm::fvec3(10.f, 10.f, 10.f), 1, 50, 0.00001, 0.00003);
-		SpotLight spot2 = SpotLight(glm::fvec3(150, 200, 150), glm::fvec3(0, -0.2, 0.f), glm::fvec3(0.f, 50.f, 0.f), 10, 11, 0.00001, 0.00003);
-		SpotLight spot3 = SpotLight(glm::fvec3(150, 200, 250), glm::fvec3(0, -0.2, 0.f), glm::fvec3(50.f, 0.f, 0.f), 10, 11, 0.00001, 0.00003);
+		SpotLight spot = SpotLight(glm::fvec3(200, 200, 200), glm::fvec3(-PI / 4 - 0.3, -0.2, 0.f), glm::fvec3(0.f, 0.f, 5.f), 10, 30, 0.00001, 0.00003);
+		SpotLight spot2 = SpotLight(glm::fvec3(150, 200, 150), glm::fvec3(-PI / 4, -0.2, 0.f), glm::fvec3(0.f, 5.f, 0.f), 10, 30, 0.00001, 0.00003);
+		SpotLight spot3 = SpotLight(glm::fvec3(150, 200, 250), glm::fvec3(-PI / 4, -0.2, 0.f), glm::fvec3(5.f, 0.f, 0.f), 10, 30, 0.00001, 0.00003);
 
 		spotLights.push_back(spot);
 		spotLights.push_back(spot2);
@@ -467,7 +263,11 @@ public:
 			glUniform1f(glGetUniformLocation(Engine::s(), ("spotLights[" + std::to_string(i) + "].quadratic").c_str()), spotLights[i].quadratic);
 		}
 
-		DirectLight dir = DirectLight(glm::fvec3(-0.1, -1, -0.1), glm::fvec3(1.f, 1.f, 0.75f));
+		glm::fvec3 ddir(-2, -2, -4);
+		ddir = glm::normalize(ddir);
+
+		//glm::fvec3 ddir = glm::fvec3(glm::fvec4(1.f, -1.f, -1.f, 1.f));
+		DirectLight dir = DirectLight(ddir, glm::fvec3(1.f, 1.f, 1.25f));
 
 		glUniform3fv(glGetUniformLocation(Engine::s(), "directLights[0].direction"), 1, &dir.direction[0]);
 		glUniform3fv(glGetUniformLocation(Engine::s(), "directLights[0].colour"), 1, &dir.colour[0]);
@@ -479,6 +279,19 @@ public:
 			glUniform1f(glGetUniformLocation(Engine::s(), ("pointLights[" + std::to_string(i) + "].linear").c_str()), pointLights[i].linear);
 			glUniform1f(glGetUniformLocation(Engine::s(), ("pointLights[" + std::to_string(i) + "].quadratic").c_str()), pointLights[i].quadratic);
 		}
+
+		shadowShader.load("res/shader/shadowPass", "res/shader/shadowPass"); shadowShader.use();
+
+		auto posAttrib = glGetAttribLocation(shadowShader(), "p");
+		glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
+		glEnableVertexAttribArray(posAttrib);
+
+		fboLight.setResolution(glm::fvec2(shadRes) * frameScale * shadScale);
+		//fboLight.attachTexture(GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT0, glm::fvec2(ssaoScale));
+		fboLight.attachTexture(GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_FLOAT, GL_DEPTH_ATTACHMENT);
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
+		fboLight.checkStatus();
 	}
 
 	void initialiseRenderer(int Msaalev, Window* pwin)
@@ -487,29 +300,33 @@ public:
 		MSAALevel = Msaalev;
 		viewport.bot = 0; viewport.left = 0; viewport.width = window->getSizeX(); viewport.height = window->getSizeY();
 		frameScale = 1.f;
+		renderResolution.x = viewport.width * frameScale;
+		renderResolution.y = viewport.height * frameScale;
 
 		initialiseLights();
 		initialiseScreenQuad();
 		initialiseGBuffer();
 		initialiseScreenFramebuffer();
-		initialisePostLightingFramebuffer();
 		initialiseSkybox();
+	}
+
+	void setActiveCam(Camera& cam)
+	{
+		ssaoShader.setProj(cam.proj, glm::ivec2(viewport.width, viewport.height));
 	}
 
 	void render(Camera& cam)
 	{
-		glViewport(viewport.left, viewport.left, viewport.width, viewport.height);
-		glBindFramebuffer(GL_FRAMEBUFFER, fboGBuffer);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		// *********************************************************** G-BUFFER PASS *********************************************************** //
 
+		glViewport(0, 0, renderResolution.x, renderResolution.y);
 
+		fboGBuffer.bind();
+		fboGBuffer.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glUseProgram(gBufferShader());
-		auto ploc = glGetUniformLocation(gBufferShader(), "proj");
-		auto vloc = glGetUniformLocation(gBufferShader(), "view");
-		glUniformMatrix4fv(ploc, 1, GL_FALSE, glm::value_ptr(cam.proj));
-		glUniformMatrix4fv(vloc, 1, GL_FALSE, glm::value_ptr(cam.view));
+		gBufferShader.use();
+		gBufferShader.setProj(cam.proj);
+		gBufferShader.setView(cam.view);
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
@@ -518,6 +335,64 @@ public:
 		{
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		}
+
+		int i = 0;
+		for (auto itr = entities.begin(); itr != entities.end(); ++itr)
+		{
+
+			if (i == 4)
+			{
+				glBindTextureUnit(0, 1);
+				glBindTextureUnit(1, 1);
+			}
+			else
+			{
+				glBindTextureUnit(0, 3);
+				glBindTextureUnit(1, 3);
+			}
+			glBindVertexArray(itr->first->vao);
+			glBindBuffer(GL_ARRAY_BUFFER, itr->first->vbo);
+			for (auto itr2 = itr->second.begin(); itr2 != itr->second.end(); ++itr2)
+			{
+				if (i == 0)
+				{
+					*itr2 = glm::rotate(*itr2, 0.05f, glm::fvec3(1.f, 1.f, 1.f));
+				}
+				glUniformMatrix4fv(2, 1, GL_FALSE, glm::value_ptr(*itr2));
+				glDrawArrays(GL_TRIANGLES, 0, itr->first->data.numVert);
+			}
+			++i;
+		}
+
+		if (Engine::wf)
+		{
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		}
+
+		glBindVertexArray(0);
+
+		// *********************************************************** G-BUFFER PASS *********************************************************** //
+
+		glViewport(0, 0, shadRes.x*shadScale, shadRes.y*shadScale);
+
+		fboLight.bind();
+		fboLight.clear(GL_DEPTH_BUFFER_BIT);
+
+		glm::fmat4 projj = glm::ortho(-shadRes.x / 2.f, shadRes.x / 2.f, -shadRes.y / 2.f, shadRes.y / 2.f, 100.f, 1000.f);
+		//glm::fmat4 vview = glm::fmat4(0.937299, 0.219367, -0.2708289, 0, 0, 0.77707, 0.629414141, 0.0, 0.348525763, -0.589949369, 0.728347123, 0.0, -269.99057, -119.16075, -277.979919, 1.00);
+
+		glm::fvec3 ppos(100, 100, 200);
+
+		glm::fmat4 translate = glm::fmat4(1.0f);
+		translate = glm::translate(translate, -ppos);
+
+		glm::fmat4 vview = glm::lookAt(ppos, glm::fvec3(0), glm::fvec3(0, 1, 0));
+
+		shadowShader.use();
+		glUniformMatrix4fv(1, 1, GL_FALSE, glm::value_ptr(projj));
+		glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(vview));
+
+		glEnable(GL_DEPTH_TEST);
 
 		for (auto itr = entities.begin(); itr != entities.end(); ++itr)
 		{
@@ -530,152 +405,114 @@ public:
 			}
 		}
 
-		if (Engine::wf)
-		{
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		}
-
-
 		glBindVertexArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+		// *********************************************************** SSAO PASS *********************************************************** //
 
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboScreen);
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, fboGBuffer);
+		glViewport(0, 0, renderResolution.x * ssaoScale, renderResolution.y * ssaoScale);
 
-		glReadBuffer(GL_DEPTH_STENCIL_ATTACHMENT);
-		glDrawBuffer(GL_DEPTH_STENCIL_ATTACHMENT);
-		glBlitFramebuffer(0, 0, window->getSizeX(), window->getSizeY(), 0, 0, window->getSizeX(), window->getSizeY(), GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+		fboSSAO.bind();
+		fboSSAO.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_CULL_FACE);
+		glCullFace(GL_FRONT);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, fboSSAO);
 		ssaoShader.use();
-
 		glBindVertexArray(vaoQuad);
-
-		glDrawBuffer(GL_COLOR_ATTACHMENT0);
-		glUniformMatrix4fv(glGetUniformLocation(ssaoShader(), "projection"), 1, GL_FALSE, glm::value_ptr(cam.proj));
-		glUniformMatrix4fv(glGetUniformLocation(ssaoShader(), "view"), 1, GL_FALSE, glm::value_ptr(cam.view));
-
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texAttachGBuffer[0]);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, texAttachGBuffer[1]);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, SSAONoiseTex);
-		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, texAttachScreen[3]);
-
+		fboGBuffer.textureAttachments[3].bind(0);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		// *********************************************************** SSAO PASS *********************************************************** //
+
+		// *********************************************************** BLUR PASS *********************************************************** //
+
+		fboSSAOBlur.bind();
+		fboSSAOBlur.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		blurShader.use();
 
+		glm::ivec2 axis(1, 0);
+		glUniform2iv(glGetUniformLocation(blurShader(), "axis"), 1, glm::value_ptr(axis));
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texAttachSSAO);
-
+		glBindTexture(GL_TEXTURE_2D, fboSSAO.textureAttachments[0].getGLID());
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboScreen);
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, fboGBuffer);
+		fboSSAO.bindDraw();
+		//glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+		fboSSAOBlur.bindRead();
+		glBlitFramebuffer(0, 0, float(viewport.width) * frameScale * ssaoScale, float(viewport.height) * frameScale * ssaoScale, 0, 0, float(viewport.width) * frameScale * ssaoScale, float(viewport.height) * frameScale * ssaoScale, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
-		//glReadBuffer(GL_COLOR_ATTACHMENT0);
-		//glDrawBuffer(GL_COLOR_ATTACHMENT0);
-		//glBlitFramebuffer(0, 0, window->getSizeX(), window->getSizeY(), 0, 0, window->getSizeX(), window->getSizeY(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		fboSSAOBlur.bind();
+		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		//glReadBuffer(GL_COLOR_ATTACHMENT1);
-		//glDrawBuffer(GL_COLOR_ATTACHMENT1);
-		//glBlitFramebuffer(0, 0, window->getSizeX(), window->getSizeY(), 0, 0, window->getSizeX(), window->getSizeY(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		axis = glm::ivec2(0, 1);
+		glUniform2iv(glGetUniformLocation(blurShader(), "axis"), 1, glm::value_ptr(axis));
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 
-		//glReadBuffer(GL_COLOR_ATTACHMENT2);
-		//glDrawBuffer(GL_COLOR_ATTACHMENT2);
-		//glBlitFramebuffer(0, 0, window->getSizeX(), window->getSizeY(), 0, 0, window->getSizeX(), window->getSizeY(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		fboSSAO.bindDraw();
+		//glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+		fboSSAOBlur.bindRead();
+		glBlitFramebuffer(0, 0, float(viewport.width) * frameScale * ssaoScale, float(viewport.height) * frameScale * ssaoScale, 0, 0, float(viewport.width) * frameScale * ssaoScale, float(viewport.height) * frameScale * ssaoScale, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
+		// *********************************************************** BLUR PASS *********************************************************** //
 
-		//TODO: POST PROCESSING ON fboScreen*/
+		// *********************************************************** LIGHTING PASS *********************************************************** //
 
-		/*glBindFramebuffer(GL_FRAMEBUFFER, fboSSAO);
-		ssaoShader.use();
+		glViewport(0, 0, renderResolution.x, renderResolution.y);
+		fboScreen.bindDraw();
 
-		glDrawBuffer(GL_COLOR_ATTACHMENT0);
-		glUniformMatrix4fv(glGetUniformLocation(ssaoShader(), "projection"), 1, GL_FALSE, glm::value_ptr(cam.proj));
+		//TODO: POST PROCESSING ON fboScreen
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texAttachScreen[0]);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, texAttachScreen[1]);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, SSAONoiseTex);
-
-		glDrawArrays(GL_TRIANGLES, 0, 6);*/
-
-		/*glUseProgram(Engine::s());
-		glBindFramebuffer(GL_FRAMEBUFFER, fboPostLighting);
-		glDrawBuffer(GL_COLOR_ATTACHMENT0);
+		glUseProgram(Engine::s());
+		fboScreen.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		spotLights[0].position = cam.pos - glm::fvec3(0, 20, 0);
-		spotLights[0].direction = cam.getDirectionVector() + glm::fvec3(0,-0.1,0);
+		spotLights[0].direction = cam.getDirectionVector() + glm::fvec3(0, -0.1, 0);
+
+		auto shadLoc = glGetUniformLocation(Engine::s(), "lightMat");
+		auto lightMat = projj * vview;
+		glUniformMatrix4fv(shadLoc, 1, GL_FALSE, glm::value_ptr(lightMat));
 
 		glUniformMatrix4fv(glGetUniformLocation(Engine::s(), "proj"), 1, GL_FALSE, glm::value_ptr(cam.proj));
 		glUniformMatrix4fv(glGetUniformLocation(Engine::s(), "view"), 1, GL_FALSE, glm::value_ptr(cam.view));
-		glUniform3fv(glGetUniformLocation(Engine::s(), "spotLights[0].position"), 1, &spotLights[0].position[0]);
-		glUniform3fv(glGetUniformLocation(Engine::s(), "spotLights[0].direction"), 1, &spotLights[0].direction[0]);
+		//glUniform3fv(glGetUniformLocation(Engine::s(), "spotLights[0].position"), 1, &spotLights[0].position[0]);
+		//glUniform3fv(glGetUniformLocation(Engine::s(), "spotLights[0].direction"), 1, &spotLights[0].direction[0]);
 
 		auto posloc = glGetUniformLocation(Engine::s(), "viewPos");
 		glUniform3f(posloc, cam.pos.x, cam.pos.y, cam.pos.z);
 
 		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_CULL_FACE);
+		//glDisable(GL_CULL_FACE);
 
-		glBindVertexArray(vaoQuad);*/
+		glBindVertexArray(vaoQuad);
 
-		//glActiveTexture(GL_TEXTURE0);
-		//glBindTexture(GL_TEXTURE_2D, texAttachScreen[0]);
-		//glActiveTexture(GL_TEXTURE1);
-		//glBindTexture(GL_TEXTURE_2D, texAttachScreen[1]);
-		//glActiveTexture(GL_TEXTURE2);
-		//glBindTexture(GL_TEXTURE_2D, texAttachScreen[2]);
-		//glActiveTexture(GL_TEXTURE3);
-		//glBindTexture(GL_TEXTURE_2D, texAttachScreen[3]);
-		glActiveTexture(GL_TEXTURE0);
-
-		//glBindTexture(GL_TEXTURE_2D, texAttachSSAO);
-		glBindTexture(GL_TEXTURE_2D, texAttachGBuffer[0]);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, texAttachGBuffer[1]);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, texAttachGBuffer[2]);
-		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, texAttachGBuffer[3]);
-		glActiveTexture(GL_TEXTURE4);
-		glBindTexture(GL_TEXTURE_2D, texAttachSSAO);
+		fboGBuffer.textureAttachments[0].bind(0);
+		fboGBuffer.textureAttachments[1].bind(1);
+		fboGBuffer.textureAttachments[2].bind(2);
+		fboSSAOBlur.textureAttachments[0].bind(3);
+		fboLight.textureAttachments[0].bind(8);
 
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
-		//glBindVertexArray(0);
+		// *********************************************************** LIGHTING PASS *********************************************************** //
 
+		// *********************************************************** SKYBOX PASS *********************************************************** //
 
+		glCullFace(GL_BACK);
 
-		//RENDER SKYBOX *********************************************************************
-
-		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-		//glBindFramebuffer(GL_READ_FRAMEBUFFER, fboPostLighting);
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, fboSSAO);
+		fboDefault.bindDraw();
+		fboScreen.bindRead();
 
 		glReadBuffer(GL_COLOR_ATTACHMENT0);
 		glDrawBuffer(GL_BACK);
-		glBlitFramebuffer(0, 0, window->getSizeX(), window->getSizeY(), 0, 0, window->getSizeX(), window->getSizeY(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		glBlitFramebuffer(0, 0, renderResolution.x, renderResolution.y, 0, 0, viewport.width, viewport.height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, fboGBuffer);
+		fboDefault.bindDraw();
+		fboGBuffer.bindRead();
 
-		glReadBuffer(GL_DEPTH_STENCIL_ATTACHMENT);
-		glDrawBuffer(GL_DEPTH_ATTACHMENT);
-		glBlitFramebuffer(0, 0, window->getSizeX(), window->getSizeY(), 0, 0, window->getSizeX(), window->getSizeY(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		//glReadBuffer(GL_COLOR_ATTACHMENT10);
+		//glDrawBuffer(GL_FRONT);
+		glBlitFramebuffer(0, 0, renderResolution.x, renderResolution.y, 0, 0, viewport.width, viewport.height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
 		glDrawBuffer(GL_BACK);
 
@@ -699,7 +536,19 @@ public:
 
 		glDepthFunc(GL_LESS);
 
-		//RENDER SKYBOX *********************************************************************
+		// *********************************************************** SKYBOX PASS *********************************************************** //
+
+		//glEnable(GL_BLEND);
+		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//fboDefault.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, glm::fvec4(0.5,0.5,0.5,0.5));
+		//glDisable(GL_DEPTH_TEST);
+		//Engine::t.shader->setProj(Engine::defaultOrthoCam.proj);
+		//Engine::t.shader->setProj(cam.proj);
+		//Engine::t.shader->setView(cam.view);
+		//Engine::t.shader->setView(glm::fmat4(1));
+		//Engine::t.shader->setModel(glm::fmat4(1));
+		//Engine::t.draw();
+		//glDisable(GL_BLEND);
 
 		window->swapBuffers();
 	}
@@ -722,28 +571,34 @@ public:
 
 	Rect<int> viewport;
 	float frameScale;
+	float ssaoScale;
+	glm::ivec2 renderResolution;
 
+	float ssaoPower;
 	Window* window;
 	int MSAALevel;
 	GLuint SSAONoiseTex;
-	//GLuint ssaoTex;
 
-	GLuint fboSSAO, texAttachSSAO;
 
-	GLuint fboGBuffer, fboScreen, fboPostLighting;
-	GLuint texAttachGBuffer[3];
-	GLuint texAttachScreen[5];
-	GLuint texAttachPostLighting;
-	GLuint rboDepthStencilGBuffer/*, rboDepthStencilScreen*/, rboDepthStencilPostLighting;
+	Framebuffer fboSSAOBlur;
+	Framebuffer fboSSAO;
+	Framebuffer fboGBuffer;
+	Framebuffer fboScreen;
+	DefaultFramebuffer fboDefault;
+
 	GLuint vaoQuad;
 	GLuint vboQuad;
-	Shader toScreenShader; //TODO: SPECIFIC SHADERS
 
 	Shader skyboxShader;
 	GLuint skyboxTex;
 	GLuint vaoSkybox, vboSkybox;
 
-	Shader gBufferShader;
-	Shader ssaoShader;
+	GBufferShader gBufferShader;
+	SAOShader ssaoShader;
 	Shader blurShader;
+
+	Shader shadowShader;
+	Framebuffer fboLight;
+	float shadScale;
+	const glm::ivec2 shadRes = glm::ivec2(1000, 500);
 };

@@ -27,9 +27,10 @@ public:
 
 		//glBindBufferBase(GL_UNIFORM_BUFFER, uboBlockIndex, ubo);
 
-		fov = float(PI) / 2.5f;
-		aspect = float(Engine::window.getSizeX()) / float(Engine::window.getSizeY());
-		proj = glm::perspective(fov, aspect, 1.f, 10000.f);
+		//fov = float(PI) / 2.5f;
+		//aspect = float(Engine::window.getSizeX()) / float(Engine::window.getSizeY());
+		//proj = glm::perspective(fov, aspect, 5.f, 10000.f);
+		//proj = glm::infinitePerspective(fov, aspect, 5.f);
 
 		yaw = 0; pitch = 0; roll = 0;
 		targetYaw = 0; targetPitch = 0; targetRoll = 0;
@@ -37,6 +38,19 @@ public:
 		targetPos = glm::fvec3(0, 0, 0);
 	}
 	~Camera() {}
+
+	void initialiseProj(float pAspect, float pFOV = float(PI) / 2.5f, float pNear = 5.f, float pFar = 10000.f)
+	{
+		fov = pFOV;
+		aspect = pAspect;
+		proj = glm::perspective(fov, aspect, pNear, pFar);
+	}
+
+	void initaliseOrtho(int sizeX, int sizeY, float pNear = 0.99f, float pFar = 100.f)
+	{
+		//proj = glm::ortho(-float(sizeX / 2), float(sizeX / 2), -float(sizeY / 2), float(sizeY / 2), pNear, pFar);
+		proj = glm::ortho(0.f, float(sizeX), 0.f, float(sizeY), pNear, pFar);
+	}
 
 	float ler(float a, float b, float N)
 	{

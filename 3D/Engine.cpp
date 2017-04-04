@@ -9,9 +9,16 @@
 #include "Camera.h"
 #include "Renderer.h"
 #include <chrono>
+#include "Font.h"
+#include "Text.h"
+#include "FontStore.h"
 
 #define MODEL_PATH std::string("res/model/")
 
+FT_Library Engine::ftLib;
+FontStore Engine::fontStore;
+Camera Engine::defaultOrthoCam;
+Text Engine::t;
 Window Engine::window;
 Shader Engine::s;
 Shader Engine::gPassShader;
@@ -59,6 +66,19 @@ void Engine::mainLoop()
 
 	rand.seed(rand.default_seed);
 
+	FT_Init_FreeType(&ftLib);
+	fontStore.initialise();
+
+	//Font font;
+	//font.load(size, "gor.ttf", fc);
+
+	//t.init();
+	//t.setFont(&font);
+	//t.setCharSize(size);
+	//t.setString("Hello!");
+
+	glActiveTexture(GL_TEXTURE0);
+
 	s.load("res/shader/Standard", "res/shader/Standard"); glUseProgram(s());
 	gPassShader.load("res/shader/gBufferPass", "res/shader/gBufferPass");
 
@@ -75,6 +95,11 @@ void Engine::mainLoop()
 
 	Mesh buddha(MODEL_PATH + "buddha.bin");
 	Mesh dragon(MODEL_PATH + "DRG.bin");
+	Mesh ballpyr(MODEL_PATH + "ballpyr.bin");
+	Mesh table;
+	table.load(MODEL_PATH + "table.obj");
+	//ballpyr.load(MODEL_PATH + "ballpyr.obj");
+	//ballpyr.saveBinary(MODEL_PATH + "ballpyr.bin");
 	Mesh floor;
 	floor.load(MODEL_PATH + "PLANE.obj");
 	Mesh surf;
@@ -84,7 +109,7 @@ void Engine::mainLoop()
 
 	glViewport(0, 0, window.getSizeX(), window.getSizeY());
 
-	std::string fileName("marble.png");
+	std::string fileName("wd.jpg");
 	int width, height;
 	GLuint textureID;
 	glGenTextures(1, &textureID);
@@ -94,7 +119,8 @@ void Engine::mainLoop()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
 	SOIL_free_image_data(image);
 
-	fileName = std::string("marble.png");
+
+	fileName = std::string("wd.jpg");
 	GLuint specularMap;
 	glGenTextures(1, &specularMap);
 	glBindTexture(GL_TEXTURE_2D, specularMap);
@@ -103,7 +129,7 @@ void Engine::mainLoop()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
 	SOIL_free_image_data(image);
 
-	fileName = std::string("marble.png");
+	fileName = std::string("m.png");
 	GLuint marble;
 	glGenTextures(1, &marble);
 	glBindTexture(GL_TEXTURE_2D, marble);
@@ -113,19 +139,19 @@ void Engine::mainLoop()
 	SOIL_free_image_data(image);
 
 	std::vector<glm::fmat4> inst;
-	for (int i = 0; i < 2; ++i)
+	for (int i = 0; i < 1; ++i)
 	{
-		auto in = glm::translate(glm::fmat4(), glm::fvec3(i * 150, 0, 0));
-		in = glm::scale(in, glm::fvec3(10.f));
-		//in = glm::rotate(in, i * float(PI) / 5.f, glm::fvec3(0.5, 0.5, 0));
+		auto in = glm::translate(glm::fmat4(), glm::fvec3(i * 150, 30, 0));
+		in = glm::scale(in, glm::fvec3(4.f));
+		in = glm::rotate(in, float(PI) / 5.f, glm::fvec3(0, 1.f, 0));
 		inst.push_back(in);
 	}
 	MasterRenderer r;
 	r.entities.insert(std::make_pair(&buddha, inst));
 	std::vector<glm::fmat4> inst2;
-	for (int i = 0; i < 2; ++i)
+	for (int i = 0; i < 1; ++i)
 	{
-		auto in = glm::translate(glm::fmat4(), glm::fvec3(i * 100, -45, -150));
+		auto in = glm::translate(glm::fmat4(), glm::fvec3(40, -45, -150));
 		in = glm::scale(in, glm::fvec3(10.f));
 		in = glm::rotate(in, float(PI) / 4.f, glm::fvec3(0, 1, 0));
 		inst2.push_back(in);
@@ -134,6 +160,12 @@ void Engine::mainLoop()
 	std::vector<glm::fmat4> inst3;
 	inst3.push_back(glm::scale(glm::translate(glm::fmat4(), glm::fvec3(1000, -88, 500)), glm::fvec3(100)));
 	r.entities.insert(std::make_pair(&surf, inst3));
+	std::vector<glm::fmat4> inst4;
+	inst4.push_back(glm::scale(glm::translate(glm::fmat4(), glm::fvec3(-30, -5, 70)), glm::fvec3(0.8)));
+	r.entities.insert(std::make_pair(&ballpyr, inst4));
+	std::vector<glm::fmat4> inst5;
+	inst5.push_back(glm::rotate(glm::scale(glm::translate(glm::fmat4(), glm::fvec3(0, -88, 0)), glm::fvec3(50)), glm::radians(-32.f), glm::fvec3(0, 1, 0)));
+	r.entities.insert(std::make_pair(&table, inst5));
 
 	GLuint sampler;
 	glGenSamplers(1, &sampler);
@@ -167,37 +199,44 @@ void Engine::mainLoop()
 
 	glBindSampler(5, cubemapSampler);
 
+	GLuint textSampler;
+	glCreateSamplers(1, &textSampler);
+	glSamplerParameteri(textSampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glSamplerParameteri(textSampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glSamplerParameteri(textSampler, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glSamplerParameteri(textSampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glSamplerParameteri(textSampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glBindSampler(12, textSampler);
+
+	GLuint shadowSampler;
+	glCreateSamplers(1, &shadowSampler);
+	glSamplerParameteri(shadowSampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glSamplerParameteri(shadowSampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	GLfloat borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+	glSamplerParameterfv(shadowSampler, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+	glBindSampler(8, shadowSampler);
+
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, textureID);
 
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, specularMap);
-
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, marble);
-
-	auto aa = glGetUniformLocation(s(), "viewPos");
-	auto ab = glGetUniformLocation(s(), "material.diffuse");
-	auto ac = glGetUniformLocation(s(), "material.specular");
-	auto ad = glGetUniformLocation(s(), "material.emit");
-	auto ae = glGetUniformLocation(s(), "material.emitStrength");
-	auto af = glGetUniformLocation(s(), "material.shininess");
-	auto ag = glGetUniformLocation(s(), "proj");
-
-	glUniform1i(ab, 0);
-	glUniform1i(ac, 1);
-	glUniform1i(ad, 2);
-	glUniform1f(ae, 0.3f);
-	glUniform1f(af, 32.0f);
-	auto projLoc = glGetUniformLocation(s(), "proj");
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glActiveTexture(GL_TEXTURE0);
 
 	r.initialiseRenderer(1, &window);
+
+	defaultOrthoCam.initaliseOrtho(window.getSizeX(), window.getSizeY());
+
 
 	Time dt;
 	QPC qpc;
 
 	s64 tot = 0;
 	Camera cam;
+	cam.initialiseProj(float(window.getSizeX()) / float(window.getSizeY()));
+
 	glm::ivec2 lastM;
 	SDL_Event ev;
 	bool quit = false;
@@ -206,6 +245,10 @@ void Engine::mainLoop()
 	auto expval = glGetUniformLocation(s(), "exposure");
 	float exposure = 1.f;
 
+	r.setActiveCam(cam);
+
+	std::string stringg;
+
 	while (!quit)
 	{
 		qpc.start();
@@ -213,6 +256,14 @@ void Engine::mainLoop()
 		{
 			if (ev.type == SDL_KEYDOWN)
 			{
+				if (ev.key.keysym.sym == SDLK_BACKSPACE)
+				{
+					if (stringg.size() > 0)
+					{
+						stringg.assign(stringg.begin(), stringg.end() - 1);
+						//t.setString(stringg);
+					}
+				}
 				if (ev.key.keysym.sym == SDLK_ESCAPE)
 				{
 					quit = true;
@@ -279,9 +330,13 @@ void Engine::mainLoop()
 					SDL_ShowCursor(0);
 				}
 			}
+			if (ev.type == SDL_TEXTINPUT)
+			{
+				stringg += ev.text.text[0];
+				//t.setString(stringg);
+			}
 		}
 		//SDL_GetMouseFocus() == window.sdlWindow && 
-
 
 		const float moveSpeed = 800;
 
@@ -308,10 +363,16 @@ void Engine::mainLoop()
 		exposure = max(0.f, exposure);
 		s.use();
 		glUniform1f(expval, exposure);
-		r.skyboxShader.use();
 		glUniform1f(expval, exposure);
 		s.stop();
 
+		r.ssaoShader.setIntensity(r.ssaoShader.intensity + (float(keyboardState[SDL_SCANCODE_B]) * 5 * dt.getSeconds()));
+		r.ssaoShader.setIntensity(r.ssaoShader.intensity - (float(keyboardState[SDL_SCANCODE_V]) * 5 * dt.getSeconds()));
+		r.ssaoShader.intensity = max(0.f, r.ssaoShader.intensity);
+
+		r.ssaoShader.setRadius(r.ssaoShader.radius + (float(keyboardState[SDL_SCANCODE_H]) * 5 * dt.getSeconds()));
+		r.ssaoShader.setRadius(r.ssaoShader.radius - (float(keyboardState[SDL_SCANCODE_G]) * 5 * dt.getSeconds()));
+		r.ssaoShader.radius = max(0.f, r.ssaoShader.radius);
 
 		cam.update(dt);
 

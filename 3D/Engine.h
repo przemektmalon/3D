@@ -1,7 +1,16 @@
 #pragma once
 #include "Window.h"
 #include "Shader.h"
+//#include "Text.h"
 #include <random>
+
+#include <ft2build.h>
+#include FT_FREETYPE_H;
+
+
+class FontStore;
+class Text;
+class Camera;
 
 class Engine
 {
@@ -17,6 +26,13 @@ public:
 
 	static bool wf;
 	static std::mt19937_64 rand;
+
+	static Text t;
+
+	static Camera defaultOrthoCam;
+	static FontStore fontStore;
+
+	static FT_Library ftLib;
 
 	//private:
 

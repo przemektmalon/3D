@@ -9,6 +9,7 @@
 #include "glm\gtc\type_ptr.hpp"
 #include "glm\gtc\matrix_transform.hpp"
 #include "glm\gtx\matrix_transform_2d.hpp"
+#include <time.h>
 
 class Window
 {
@@ -68,14 +69,27 @@ public:
 		SDL_GL_SwapWindow(sdlWindow);
 	}
 
-	void screenshot(std::string filename = std::string("screenshot"))
+	void screenshot(std::string fileName = std::string("___AUTO_GENERATE_NAME___"))
 	{
+		if (fileName == std::string("___AUTO_GENERATE_NAME___"))
+		{
+			time_t now = time(0);
+			tm  tstruct;
+			char buf[80];
+			localtime_s(&tstruct, &now);
+			strftime(buf, sizeof(buf), "%F_%H;%M;%S", &tstruct);
+
+			fileName = std::string("Screenshot_") + std::string(buf);
+		}
+
 		u32 imageSize = getSizeX() * getSizeY() * 3;
 		u32 rowSize = getSizeX() * 3;
 		u8* screenshot = new u8[imageSize];
 		u8* flipped = new u8[imageSize];
 
-		std::string filepath = "res/screenshot/" + filename + ".bmp";
+		std::string filepath = "res/screenshot/" + fileName + ".bmp";
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+		glReadBuffer(GL_BACK);
 		glReadPixels(0, 0, getSizeX(), getSizeY(), GL_BGR, GL_UNSIGNED_BYTE, screenshot);
 
 		for (int y = 0; y < getSizeY(); ++y)

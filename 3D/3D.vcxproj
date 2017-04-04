@@ -111,13 +111,22 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="ComputeShader.h" />
+    <ClInclude Include="ConfigParser.h" />
     <ClInclude Include="Engine.h" />
+    <ClInclude Include="FontStore.h" />
     <ClInclude Include="Include.h" />
+    <ClInclude Include="Lights.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Model.h" />
     <ClInclude Include="QPC.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="SceneGraph.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="SSBO.h" />
+    <ClInclude Include="Text.h" />
+    <ClInclude Include="TextShader.h" />
     <ClInclude Include="Time.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="Types.h" />
