@@ -1,5 +1,4 @@
 #pragma once
-//#include "SDL.h"
 #include "Types.h"
 #include <iostream>
 #include <string>
@@ -13,7 +12,6 @@
 #include "glm\gtx\matrix_transform_2d.hpp"
 #include <time.h>
 #include <Windows.h>
-#include "resource.h"
 #include <SDKDDKVer.h>
 #include "SOIL.h"
 
@@ -58,18 +56,19 @@ public:
 	void createGLContext();
 
 	bool hasFocus(){
-		return windowHasFocus;}
+		return windowHasFocus; }
 
 	void escapePressed(){
-		PostMessage(windowHandle, WM_CLOSE, 0, 0);}
+		PostMessage(windowHandle, WM_CLOSE, 0, 0); }
 
 	void setResolution(glm::ivec2 pRes){
 		desiredClientArea = pRes;
-		forceClientAreaToDesired();}
+		forceClientAreaToDesired();
+		orthoProj = glm::ortho(0.f, (float)pRes.x, 0.f, (float)pRes.y, -1.f, 100.f); }
 
 	RECT getClientArea(){
 		RECT wr2;
-		auto er2 = GetClientRect(windowHandle, &wr2); return wr2;}
+		auto er2 = GetClientRect(windowHandle, &wr2); return wr2; }
 
 	void forceClientAreaToDesired();
 	bool isMouseInClientArea();
@@ -88,11 +87,14 @@ public:
 	inline s32 getPosX() const { return posX; }
 	inline s32 getPosY() const { return posY; }
 	inline glm::ivec2 getSize() const { return glm::ivec2(actualClientArea); }
+	inline glm::fmat4 getOrthoProj() const { return orthoProj; }
 
 //private:
 
 	bool windowCreated;
 	
+	glm::fmat4 orthoProj;
+
 	glm::ivec2 desiredClientArea;
 	glm::ivec2 actualClientArea;
 	s32 posX, posY;

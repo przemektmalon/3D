@@ -51,6 +51,11 @@ switch(funcID->second) {
 
 #define CHECK_CONSOLE_CALLABLE(id,func,numParams) \
 case(id):{ \
+if(params.size() > numParams) \
+	{ postMessage(String64("Too many arguments passed. Taking required amount")); } \
+if(params.size() < numParams) { \
+	std::string str("Not enough arguments passed. "); str += std::to_string(numParams) + std::string(" arguments expected. ") + std::to_string(params.size()) + std::string(" were passed."); \
+	postMessage(String128(str.c_str())); return; } \
 auto task = MAKE_TASK(func)(CONSTRUCT_PARAMS_##numParams##(func,params,PARAM_TUPLE_SIZE(func))); \
 pvoidary pFunc; \
 void* pVoid; \
@@ -112,6 +117,7 @@ std::tuple<pvoidary, std::tuple<Args...>*> make_task(Args&&... args) {
 
 class Console
 {
+	friend class Engine;
 public:
 	Console() {}
 	~Console() {}
@@ -368,11 +374,93 @@ public:
 		Type type;
 	};
 
-	static void submitCommand(String512& command);
+	void submitCommand(StringGeneric& command);
+	void postMessage(StringGeneric& post)
+	{
+		std::vector<String<HEAP>*> lines;
+
+		int beg = 0;
+		for (auto i = 0; i < post.getLength(); ++i)
+		{
+			if (post.getString()[i] == '\n')
+			{
+				lines.push_back(new String<HEAP>(post.getString() + (beg == 0 ? beg : beg + 1), post.getString() + i));
+				beg = i;
+			}
+			if (i == post.getLength() - 1)
+			{
+				lines.push_back(new String<HEAP>(post.getString() + (beg == 0 ? beg : beg + 1), post.getString() + i + 1));
+			}
+		}
+
+		for (auto itr = lines.begin(); itr != lines.end(); ++itr)
+		{
+			auto newPost = new Text2D();
+			newPost->init();
+			newPost->setFont(cmd.getFont());
+			newPost->setCharSize(25);
+			newPost->setString(String<5>(">>> "));
+			newPost->getString().append(*(*itr));
+			consoleHistory.push_back(newPost);
+		}
+
+		for (auto itr = lines.begin(); itr != lines.end(); ++itr)
+		{
+			delete *itr;
+		}
+
+		repositionText();
+	}
+	void textInput(KeyCode code);
+	
+	void repositionText()
+	{
+		s32 i = consoleHistory.size();
+		for (auto itr = consoleHistory.begin(); itr != consoleHistory.end(); ++itr)
+		{
+			(*itr)->setPosition(glm::fvec2(10, 5 + heightFromBottom + (i)*((*itr)->getCharSize()+1)));
+			--i;
+		}
+		cmd.setPosition(glm::fvec2(10, heightFromBottom));
+	}
+
+	void draw()
+	{
+		if (stateFlags == 0)
+			return;
+
+		for (auto itr = consoleHistory.begin(); itr != consoleHistory.end(); ++itr)
+		{
+			(*itr)->shader->setProj(Engine::window.getOrthoProj());
+			(*itr)->shader->setModel(glm::fmat4());
+			(*itr)->shader->setView(glm::fmat4());
+			(*itr)->shader->setFontBinding(12);
+			(*itr)->draw();
+		}
+		cmd.shader->setProj(Engine::window.getOrthoProj());
+		cmd.shader->setModel(glm::fmat4());
+		cmd.shader->setView(glm::fmat4());
+		cmd.shader->setFontBinding(12);
+		cmd.draw();
+	}
+
+	void init();
+
+	void toggle()
+	{
+		stateFlags = stateFlags == 1 ? 0 : 1;
+	}
 
 private:
 
 	static std::map<String32, u32> funcIDs;
+
+	std::vector<Text2D*> consoleHistory;
+	std::vector<String<HEAP>> cmdHistory;
+	Text2D cmd;
+	u32 cursor;
+	s32 stateFlags; // 0 == closed, 1 == open, others ?
+	const float heightFromBottom = 200.f;
 
 	static bool isNum(char c)
 	{

@@ -96,9 +96,16 @@ public:
 	String(const char* str) : HeapGeneric(0) 
 	{ 
 		length = StringGeneric::determineLength(str);
-		capacity = length * 1.5;
+		capacity = length * 1.5; ///TODO: better value ?
 		string = new char[capacity];
 		setToChars(str); 
+	}
+	String(const char* start, const char* end) : HeapGeneric(0)
+	{
+		length = end - start;
+		capacity = length * 1.5; ///TODO: better value ?
+		string = new char[capacity];
+		setToChars(start,end);
 	}
 	String(StringGeneric& str) : HeapGeneric(0) 
 	{

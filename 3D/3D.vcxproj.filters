@@ -51,9 +51,6 @@
     <ClCompile Include="ConfigParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Overlays.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -90,9 +87,6 @@
     <ClCompile Include="UIRectangleShape.cpp">
       <Filter>Source Files\UIElements</Filter>
     </ClCompile>
-    <ClCompile Include="StringGenerics.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Asset.cpp">
       <Filter>Source Files\Assets</Filter>
     </ClCompile>
@@ -119,6 +113,9 @@
     </ClCompile>
     <ClCompile Include="GPUMeshManager.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StringGenerics.cpp">
+      <Filter>Source Files\String</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

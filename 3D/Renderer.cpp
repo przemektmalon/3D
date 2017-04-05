@@ -10,6 +10,8 @@
 #include "Text.h"
 #include "GPUMeshManager.h"
 
+#include "Console.h"
+
 #include "UIRectangleShape.h"
 #include "UIConsole.h"
 #include "UIButton.h"
@@ -458,8 +460,8 @@ void MasterRenderer::initialiseRenderer(Window * pwin, Camera & cam)
 	//glDepthRangedNV(1.f, -1.f);
 	th.createFromStream(GL_RGBA32F, rC.renderResolution.x, rC.renderResolution.y, GL_RGBA, GL_FLOAT, NULL);
 
-	console = new UIConsole();
-	console->initOGL();
+	//console = new UIConsole();
+	//console->initOGL();
 }
 
 void MasterRenderer::initialiseShaders()
@@ -829,10 +831,7 @@ void MasterRenderer::render()
 	glEnable(GL_BLEND);
 	Engine::uiw->draw();
 
-	if (Engine::consoleOpen)
-	{
-		console->draw();
-	}
+	Engine::console.draw();
 	
 	window->swapBuffers();
 }

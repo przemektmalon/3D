@@ -56,10 +56,12 @@ public:
 	void setString(std::string pStr) { string.setToChars(pStr.c_str()); update(); }
 	void setString(StringGeneric& pStr) { string.overwrite(pStr); update(); }
 	void setPosition(glm::fvec2 pPos) { position = pPos; update(); }
+	u8 getCharSize() { return charSize;}
 	glm::fvec2 getPosition() { return position; }
 	void setColour(glm::fvec3 pCol) { colour = pCol; }
 	glm::fvec3 getColour() { return colour; }
 	String<HEAP>& getString() { return string; }
+	Font* getFont() { return font; }
 
 	void setStyle(TextStyle& pStyle)
 	{
@@ -239,6 +241,11 @@ public:
 		return boundingBox;
 	}
 
+	void forceUpdate()
+	{
+		update();
+	}
+
 private:
 
 	bool updateOrigin()
@@ -319,8 +326,9 @@ private:
 
 	void updateVBO()
 	{
+		boundingBox.zero(); vboSize = 0;
 		if (charSize == 0) { return; }
-		if (string.getLength() == 0) { return; }
+		if (string.getLength() == 0) {  return; }
 		if (font == nullptr) { return; }
 
 		int vboNumQuad = string.getLength();
@@ -330,7 +338,6 @@ private:
 
 		int vboSizeFloats = vboNumVert * sizeOfVert;
 		int vboSizeChar = vboNumVert * sizeOfVert * sizeof(float);
-
 		float* vertData = new float[vboSizeFloats];
 
 		auto glyphs = font->requestGlyphs(charSize, this); // glyphContainers[0];

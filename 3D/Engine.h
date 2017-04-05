@@ -20,6 +20,7 @@ class MasterRenderer;
 class QPC;
 class AssetManager;
 class World;
+class Console;
 
 class Engine
 {
@@ -46,6 +47,7 @@ public:
 	static FT_Library ftLib;
 	static s64 startTime;
 
+	static Console console;
 	static bool movingLight;
 	static Camera cam;
 	static Time dt;

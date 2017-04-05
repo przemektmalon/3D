@@ -71,7 +71,7 @@ StringGeneric & StringGeneric::shrinkBy(u32 pShrinkBy)
 {
 	length -= pShrinkBy;
 	getString()[length] = '\0';
-	return  *this;
+	return *this;
 }
 
 StringGeneric & StringGeneric::append(char chr)
@@ -116,7 +116,8 @@ void StringGeneric::clear(char chr)
 		getString()[i] = chr;
 		++i;
 	}
-	length = 0;
+	if(chr == '\0')
+		length = 0;
 }
 
 void StringGeneric::clear(StringGeneric && clearMask)
@@ -312,6 +313,28 @@ StringGeneric & StringGeneric::replaceWhere(StringGeneric & whereStr, StringGene
 	}
 	return *this;
 }
+
+StringGeneric & StringGeneric::removeAt(u32 i, u32 num)
+{
+	if (i > getLength() - 1)
+		return *this;
+
+	if (i + num > getLength())
+		num = getLength() - i;
+
+	for (int in = i; in < i + num; ++in)
+	{
+		getString()[in] = '\0';
+	}
+
+	moveSegmentBackward(i + num, num, getLength() - i - num, '\0');
+
+	length -= num;
+
+	return *this;
+}
+
+//ABCDE
 
 s32 StringGeneric::find(char c)
 {
@@ -558,7 +581,6 @@ StringGeneric & HeapGeneric::append(char chr)
 		autoExpand();
 	//replaceAt(getLength(), str);
 	insertAt(length, String<1>(chr));
-	++length;;
 	return *this;
 }
 

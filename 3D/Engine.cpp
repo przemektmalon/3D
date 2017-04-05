@@ -12,11 +12,9 @@
 #include <chrono>
 #include "Font.h"
 #include "Text.h"
-#include "FontStore.h"
 #include <windows.h>
 #include <strsafe.h>
 #include <functional>
-#include "resource.h"
 #include "AssetManager.h"
 
 #define MODEL_PATH std::string("res/model/")
@@ -31,6 +29,9 @@
 #include "ModelInfo.h"
 
 #include "MeshUtility.h"
+
+#include "Console.h"
+
 
 FT_Library Engine::ftLib;
 //FontStore Engine::fontStore;
@@ -64,6 +65,7 @@ Logger Engine::logger;
 Window Engine::window;
 bool Engine::consoleOpen;
 Log Engine::log;
+Console Engine::console;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -98,16 +100,15 @@ void toggleWF()
 	Engine::r->rC.wireFrame = !Engine::r->rC.wireFrame;
 }
 
-#include "Console.h"
 
 void Engine::start(HINSTANCE pHInstance)
 {
 	//TESTING CONSOLE
 	Console::registerConsoleFuncs();
 
-	Console::submitCommand(String512("FUNCNAME (1,5,6) (2.3 2.4) 5 \"STRING\" 10000.0002 9999"));
-	Console::submitCommand(String512("FUNC 5"));
-	Console::submitCommand(String512("FOO 1 5.0"));
+	//console.submitCommand(String512("FUNCNAME (1,5,6) (2.3 2.4) 5 \"STRING\" 10000.0002 9999"));
+	//console.submitCommand(String512("FUNC 5"));
+	//console.submitCommand(String512("FOO 1 5.0"));
 	//TESTING CONSOLE
 
 	instance = pHInstance;
@@ -285,11 +286,6 @@ void mouseUp()
 	Engine::windowClicked = false;
 }
 
-void toggleConsole()
-{
-	Engine::consoleOpen = !Engine::consoleOpen;
-}
-
 void hotLoadShader()
 {
 	//Engine::r->shaderStore.getShader(String32("gBufferPass"))->reload();
@@ -301,6 +297,11 @@ void killFocus()
 	Engine::window.postMessage(WM_KILLFOCUS, 0, 0);
 }
 
+void toggleConsole()
+{
+	Engine::console.toggle();
+}
+
 void Engine::mainLoop()
 {
 	glewExperimental = GL_TRUE;
@@ -308,6 +309,7 @@ void Engine::mainLoop()
 	//wglewInit();
 
 	Material::initVertexFormats();
+	
 
 	wglSwapIntervalEXT(0);
 
@@ -613,6 +615,8 @@ void Engine::mainLoop()
 	world->updateGLBuffers();
 	r->world = world;
 
+	console.init();
+
 	while (engineState != Quitting) {
 		if (!window.processMessages()) 
 		{
@@ -637,13 +641,17 @@ void Engine::mainLoop()
 				}
 				case(Event::KeyDown):
 				{
-					uim.keyDown(ev.key.code);
+					if (console.stateFlags == 0) //Console closed
+						uim.keyDown(ev.key.code);
+					else						 //Console open
+						console.textInput(ev.key.code.code);
 					uiw->keyDown((KeyEvent&)ev);
 					break;
 				}
 				case(Event::KeyUp):
 				{
-					uim.keyUp(ev.key.code);
+					if(console.stateFlags != 0)
+						uim.keyUp(ev.key.code);
 					uiw->keyUp((KeyEvent&)ev);
 					break;
 				}

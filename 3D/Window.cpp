@@ -75,7 +75,7 @@ void Window::createWindow(HINSTANCE pHInstance, LPCTSTR pWindowName, int pXPos, 
 	actualClientArea.x = ca.right;
 	actualClientArea.y = ca.bottom;
 
-	forceClientAreaToDesired();
+	setResolution(glm::ivec2(pWidth, pHeight));
 	createGLContext();
 
 	ShowWindow(windowHandle, 1);
@@ -399,18 +399,7 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 	}
 	case WM_COMMAND:
 	{
-		switch (LOWORD(wParam))
-		{
-		case ID_LARGE_S:
-			i = 10;
-			break;
-		case ID_SMALL_A:
-			g = 10;
-			break;
-		case ID_F1:
-			a = 10;
-			break;
-		}
+
 		break;
 	}
 	case WM_ACTIVATE:

@@ -2,7 +2,7 @@
 
 GlyphContainer* Font::requestGlyphs(u16 pCharSize, Text * pUser)
 {
-	auto find = useTrack.find(pCharSize);
+		auto find = useTrack.find(pCharSize);
 	if (find == useTrack.end())
 	{
 		auto ret = loadGlyphs(pCharSize);

@@ -105,7 +105,7 @@ public:
 	//std::vector<GLuint> 
 
 	RectangleShape* rectShape;
-	UIConsole* console;
+	//UIConsole* console;
 
 	u32 drawCount;
 

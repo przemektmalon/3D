@@ -76,6 +76,8 @@ public:
 	StringGeneric& replaceWhere(StringGeneric& whereStr, StringGeneric&& repStr);
 	virtual StringGeneric& replaceWhere(StringGeneric& whereStr, StringGeneric& repStr);
 
+	StringGeneric& removeAt(u32 i, u32 num);
+
 	s32 find(char c);
 
 	void take(u32 num, StringGeneric& dst);
