@@ -293,6 +293,12 @@
     <ClInclude Include="GPUMeshManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BilateralBlurShader.h">
+      <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="FrustCullShader.h">
+      <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="3D.rc">

@@ -5,12 +5,16 @@
 class SAOShader : public ShaderProgram
 {
 public:
-	SAOShader() {}
+	SAOShader() 
+	{
+		name.overwrite(String32("ssao"));
+		type = VertFrag;
+	}
 
 	int initialise()
 	{
-		load("ssao", VertFrag);
-		compile();
+		//load("ssao", VertFrag);
+		//compile();
 		use();
 		projScaleLoc = glGetUniformLocation(GLID, "projScale");
 		depthBufferLoc = glGetUniformLocation(GLID, "depthBuffer");
@@ -21,6 +25,7 @@ public:
 		viewLoc = glGetUniformLocation(GLID, "view");
 		projInfoLoc = glGetUniformLocation(GLID, "projInfo");
 
+
 		setRadius(0.36f);
 		setIntensity(2.4f);
 
@@ -29,36 +34,61 @@ public:
 		return 1;
 	}
 
-	void setProj(glm::fmat4 &proj, glm::ivec2 viewport)
+	void setDepthBuffer(u32 pDepthBuffer)
 	{
-		use();
-		float scale = 500.f;
-		glUniform1f(projScaleLoc, scale);
-		glm::fvec4 projInfo(-2.f / (viewport.x * proj[0][0]), -2.f / (viewport.y*proj[1][1]), (1.f - proj[0][2]) / proj[0][0], (1.f + proj[1][2]) / proj[1][1]);
-		glUniform4fv(projInfoLoc, 1, glm::value_ptr(projInfo));
-		//TODO: set projScale
+		depthBuffer = pDepthBuffer;
 	}
 
 	void setRadius(float pRadius)
 	{
-		use();
 		radius = pRadius;
-		glUniform1f(radiusLoc, radius);
-		glUniform1f(intensityDivR6Loc, intensity / std::powf(radius, 6.f));
+		
+	}
+	
+	void setBias(float pBias)
+	{
+		bias = pBias;
 	}
 
 	void setIntensity(float pIntensity)
 	{
-		use();
 		intensity = pIntensity;
-		glUniform1f(intensityDivR6Loc, intensity / std::powf(radius, 6.f));
 	}
 
+	void setNormal(u32 pNormal)
+	{
+		gNormal = pNormal;
+	}
+	
+	void setProj(glm::fmat4 &pProj)
+	{
+		proj = pProj;
+		glm::fvec4 projInfo(-2.f / (viewport.x * proj[0][0]), -2.f / (viewport.y*proj[1][1]), (1.f - proj[0][2]) / proj[0][0], (1.f + proj[1][2]) / proj[1][1]);
+	}
 
-	//Variables
-	float radius;
-	float bias;
-	float intensity;
+	void setView(glm::fmat4& pView)
+	{
+		view = pView;
+	}
+
+	void setViewport(glm::ivec2 pViewport)
+	{
+		viewport = pViewport;
+		glm::fvec4 projInfo(-2.f / (viewport.x * proj[0][0]), -2.f / (viewport.y*proj[1][1]), (1.f - proj[0][2]) / proj[0][0], (1.f + proj[1][2]) / proj[1][1]);
+	}
+
+	void sendUniforms()
+	{
+		glUniform1f(projScaleLoc, projScale);
+		glUniform1i(depthBufferLoc, depthBuffer);
+		glUniform1f(radiusLoc, radius);
+		glUniform1f(biasLoc, bias);
+		glUniform1f(intensityDivR6Loc, intensity / std::powf(radius, 6.f));
+		glUniform1i(gNormalLoc, gNormal);
+		glUniformMatrix2fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		glUniform1f(projScaleLoc, projScale);
+		glUniform4fv(projInfoLoc, 1, glm::value_ptr(projInfo));
+	}
 
 private:
 	//Locations
@@ -70,5 +100,17 @@ private:
 	int gNormalLoc;
 	int viewLoc;
 	int projInfoLoc;
+
+	//Variables
+	float projScale;
+	s32 depthBuffer;
+	float radius;
+	float bias;
+	float intensity;
+	s32 gNormal;
+	glm::fmat4 view;
+	glm::fmat4 proj;
+	glm::ivec2 viewport = glm::ivec2(1,1);
+	glm::fvec4 projInfo = glm::fvec4(1.f,1.f,1.f,1.f);
 
 };

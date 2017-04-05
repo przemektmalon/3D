@@ -407,10 +407,10 @@ void main()
 	
 	//oCol = col2;
 
-	imageStore(outColour, pixel, vec4(vec3(normal),1.f));
+	//imageStore(outColour, pixel, vec4(vec3(normal),1.f));
 
 	//imageStore(outColour, pixel, vec4(skyCol.xyz + vec3(albedoSpec.xyz),1.f));
-	//imageStore(outColour, pixel, vec4(tonemap(exposure * oCol),1.f));
+	imageStore(outColour, pixel, vec4(tonemap(exposure * oCol),1.f));
 	//imageStore(outColour, pixel, vec4(1.f,0.f,1.f,1.f));
 	//imageStore(outColour, pixel, vec4(oCol,1.f));
 	

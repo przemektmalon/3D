@@ -10,6 +10,8 @@
 #include <time.h>
 #include "Lights.h"
 #include "DeferredTileCullComputeShader.h"
+#include "BilateralBlurShader.h"
+#include "FrustCullShader.h"
 #include "Sampler.h"
 #include "ShaderStore.h"
 
@@ -30,7 +32,7 @@ typedef struct {
 class MasterRenderer
 {
 public:
-	MasterRenderer() : shadScale(1.f) 
+	MasterRenderer()// : shadScale(1.f) 
 	{
 		rC.ssaoPower = (1.f);
 		rC.ssaoScale = (1.f);
@@ -59,6 +61,8 @@ public:
 	void destroyFramebufferTextures();
 
 	void setActiveCam(Camera& pCam);
+
+	void cameraProjUpdated();
 
 	void render();
 
@@ -90,8 +94,6 @@ public:
 		T top, left, width, height;
 	};
 
-	//std::vector<MeshInstance> ents;
-
 	struct MeshUseMeta
 	{
 		MeshUseMeta(u32 pID, MeshRenderMeta pMRM) : id(pID), renderMeta(pMRM) {}
@@ -99,19 +101,8 @@ public:
 		MeshRenderMeta renderMeta;
 	};
 
-	//static const u32 maxObjects = 65536;
-	//MeshGPUMeta meta[maxObjects];
-
-	//std::vector<GLuint> 
-
-	RectangleShape* rectShape;
-	//UIConsole* console;
 
 	u32 drawCount;
-
-	ComputeShader frustCullShader;
-
-	ShaderStore shaderStore;
 
 	Rect<int> viewport;
 
@@ -134,23 +125,26 @@ public:
 	GLuint skyboxTex;
 	GLuint vaoSkybox, vboSkybox;
 
-	GBufferShader gBufferShader;
-	SAOShader ssaoShader;
-	DeferredTileCullComputeShader tileCullShader;
-	//ShaderProgram* tileCullShader;
+	//Shaders
+	ShaderStore shaderStore;
 
-	Shader blurShader;
-	Shader shadowShader;
-	Framebuffer fboLight;
-	float shadScale;
-	const glm::ivec2 shadRes = glm::ivec2(1000,1000);
+	GBufferShader gBufferShader;
+	DeferredTileCullComputeShader tileCullShader;
+	BilateralBlurShader bilatBlurShader;
+	FrustCullShader frustCullShader;
+	SAOShader ssaoShader;
+
+	//Shader shadowShader;
+	//Framebuffer fboLight;
+	//float shadScale;
+	//const glm::ivec2 shadRes = glm::ivec2(1000,1000);
 
 	LightManager lightManager;
 	
 	GLTexture2D th;
-	glm::fmat4 lightView;
+	//glm::fmat4 lightView;
 	Camera* activeCam;
-	GLTextureCube sk;
+	//GLTextureCube sk;
 
 	Sampler defaultSampler;
 	Sampler postSampler;

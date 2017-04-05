@@ -4,12 +4,14 @@
 class GBufferShader : public ShaderProgram
 {
 public:
-	GBufferShader() {}
+	GBufferShader() 
+	{
+		name.overwrite(String32("gBufferPass"));
+		type = VertFrag;
+	}
 
 	int initialise()
 	{
-		load("gBufferPass", VertFrag);
-		compile();
 		use();
 		diffuseLoc = glGetUniformLocation(GLID, "diffuse");
 		specularLoc = glGetUniformLocation(GLID, "specular");
@@ -26,43 +28,57 @@ public:
 
 	void setDiffuseBinding(int pBinding)
 	{
-		use();
-		glUniform1i(diffuseLoc, pBinding);
+		diffuse = pBinding;
 	}
 
 	void setSpecularBinding(int pBinding)
 	{
-		use();
-		glUniform1i(specularLoc, pBinding);
+		specular = pBinding;
 	}
 
-	void setProj(glm::fmat4& proj)
+	void setProj(glm::fmat4& pProj)
 	{
-		use();
-		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
+		proj = pProj;
 	}
 
-	void setView(glm::fmat4& view)
+	void setView(glm::fmat4& pView)
 	{
-		use();
+		view = pView;
+	}
+
+	void sendView()
+	{
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	}
 
-	void setModel(glm::fmat4& model)
+	void setModel(glm::fmat4& pModel)
 	{
-		use();
+		model = pModel;
+	}
+
+	void setID(u32 pID)
+	{
+		id = pID;
+	}
+
+	void setCamPos(glm::fvec3& pCamPos)
+	{
+		camPos = pCamPos;
+	}
+
+	void sendCamPos()
+	{
+		glUniform3fv(camPosLoc, 1, glm::value_ptr(camPos));
+	}
+
+	void sendUniforms()
+	{
+		glUniform1i(diffuseLoc, diffuse);
+		glUniform1i(specularLoc, specular);
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-	}
-
-	void setID(u32 id)
-	{
-		use();
 		glUniform1ui(IDLoc, id);
-	}
-
-	void setCamPos(glm::fvec3& camPos)
-	{
-		use();
 		glUniform3fv(camPosLoc, 1, glm::value_ptr(camPos));
 	}
 
@@ -74,4 +90,13 @@ private:
 	int modelLoc;
 	int IDLoc;
 	int camPosLoc;
+
+	int diffuse;
+	int specular;
+	glm::fmat4 proj;
+	glm::fmat4 view;
+	glm::fmat4 model;
+	u32 id;
+	glm::fvec3 camPos;
+
 };

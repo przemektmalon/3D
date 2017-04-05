@@ -22,7 +22,7 @@ public:
 		itr.first->second->load(loc->getName(), loc->getType(), path);
 		itr.first->second->compile();
 		itr.first->second->initialise();
-		return itr.first->second;
+		return loc;
 	}
 
 	ShaderProgram* getShader(const String32& name)

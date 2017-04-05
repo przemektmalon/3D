@@ -733,13 +733,13 @@ void Engine::processGameFrame()
 		//r->tileCullShader.setExposure(exposure);
 	}
 
-	r->ssaoShader.setIntensity(r->ssaoShader.intensity + (float(keyboardState['B']) * 0.1 * dt.getSeconds()));
-	r->ssaoShader.setIntensity(r->ssaoShader.intensity - (float(keyboardState['V']) * 0.1 * dt.getSeconds()));
-	r->ssaoShader.intensity = std::max(0.f, r->ssaoShader.intensity);
+	//r->ssaoShader.setIntensity(r->ssaoShader.intensity + (float(keyboardState['B']) * 0.1 * dt.getSeconds()));
+	//r->ssaoShader.setIntensity(r->ssaoShader.intensity - (float(keyboardState['V']) * 0.1 * dt.getSeconds()));
+	//r->ssaoShader.intensity = std::max(0.f, r->ssaoShader.intensity);
 
-	r->ssaoShader.setRadius(r->ssaoShader.radius + (float(keyboardState['H']) * 0.1 * dt.getSeconds()));
-	r->ssaoShader.setRadius(r->ssaoShader.radius - (float(keyboardState['G']) * 0.1 * dt.getSeconds()));
-	r->ssaoShader.radius = std::max(0.f, r->ssaoShader.radius);
+	//r->ssaoShader.setRadius(r->ssaoShader.radius + (float(keyboardState['H']) * 0.1 * dt.getSeconds()));
+	//r->ssaoShader.setRadius(r->ssaoShader.radius - (float(keyboardState['G']) * 0.1 * dt.getSeconds()));
+	//r->ssaoShader.radius = std::max(0.f, r->ssaoShader.radius);
 
 	cam.update(dt);
 
