@@ -22,51 +22,6 @@ const s32 MasterRenderer::validResolutionsRaw[2][NUM_VALID_RESOLUTIONS] =
 	{ 1080, 900,  864,  768 , 720 , 576 , 540, 480},
 };
 
-GLfloat skyboxVertices[] = {
-	// Positions          
-	-10.0f,  10.0f, -10.0f,
-	-10.0f, -10.0f, -10.0f,
-	10.0f, -10.0f, -10.0f,
-	10.0f, -10.0f, -10.0f,
-	10.0f,  10.0f, -10.0f,
-	-10.0f,  10.0f, -10.0f,
-
-	-10.0f, -10.0f,  10.0f,
-	-10.0f, -10.0f, -10.0f,
-	-10.0f,  10.0f, -10.0f,
-	-10.0f,  10.0f, -10.0f,
-	-10.0f,  10.0f,  10.0f,
-	-10.0f, -10.0f,  10.0f,
-
-	10.0f, -10.0f, -10.0f,
-	10.0f, -10.0f,  10.0f,
-	10.0f,  10.0f,  10.0f,
-	10.0f,  10.0f,  10.0f,
-	10.0f,  10.0f, -10.0f,
-	10.0f, -10.0f, -10.0f,
-
-	-10.0f, -10.0f,  10.0f,
-	-10.0f,  10.0f,  10.0f,
-	10.0f,  10.0f,  10.0f,
-	10.0f,  10.0f,  10.0f,
-	10.0f, -10.0f,  10.0f,
-	-10.0f, -10.0f,  10.0f,
-
-	-10.0f,  10.0f, -10.0f,
-	10.0f,  10.0f, -10.0f,
-	10.0f,  10.0f,  10.0f,
-	10.0f,  10.0f,  10.0f,
-	-10.0f,  10.0f,  10.0f,
-	-10.0f,  10.0f, -10.0f,
-
-	-10.0f, -10.0f, -10.0f,
-	-10.0f, -10.0f,  10.0f,
-	10.0f, -10.0f, -10.0f,
-	10.0f, -10.0f, -10.0f,
-	-10.0f, -10.0f,  10.0f,
-	10.0f, -10.0f,  10.0f
-};
-
 const GLfloat quadVertices[] = {
 	-1.0f,  1.0f,  0.0f, 1.0f,//TL
 	1.0f,  1.0f,  1.0f, 1.0f,//TR
@@ -215,21 +170,6 @@ inline void MasterRenderer::initialiseScreenFramebuffer()
 
 inline void MasterRenderer::initialiseSkybox()
 {
-	
-	skyboxShader.use();
-
-	glGenVertexArrays(1, &vaoSkybox);
-	glBindVertexArray(vaoSkybox);
-
-	glGenBuffers(1, &vboSkybox);
-	glBindBuffer(GL_ARRAY_BUFFER, vboSkybox);
-
-	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), skyboxVertices, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-
-	glUniform1i(glGetUniformLocation(skyboxShader(), "skybox"), 5);
-
 	int width, height;
 	unsigned char* image;
 
@@ -267,11 +207,6 @@ inline void MasterRenderer::initialiseSkybox()
 		SOIL_free_image_data(image);
 	}
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	skyboxShader.stop();
 }
 
 inline void MasterRenderer::initialiseLights()
@@ -406,12 +341,12 @@ inline void MasterRenderer::initialiseSamplers()
 	auto h3 = Engine::assets.get2DTex("gS")->getHandle(defaultSampler.getGLID());
 
 	auto h4 = Engine::assets.get2DTex("oo")->getHandle(defaultSampler.getGLID());
-	//auto h5 = Engine::assets.get2DTex("pf")->getHandle(defaultSampler.getGLID());
-	//auto h6 = Engine::assets.get2DTex("sp")->getHandle(defaultSampler.getGLID());
+	auto h5 = Engine::assets.get2DTex("pf")->getHandle(defaultSampler.getGLID());
+	auto h6 = Engine::assets.get2DTex("sp")->getHandle(defaultSampler.getGLID());
 
 	auto h7 = Engine::assets.get2DTex("ooN")->getHandle(defaultSampler.getGLID());
-	//auto h8 = Engine::assets.get2DTex("pfN")->getHandle(defaultSampler.getGLID());
-	//auto h9 = Engine::assets.get2DTex("spN")->getHandle(defaultSampler.getGLID());
+	auto h8 = Engine::assets.get2DTex("pfN")->getHandle(defaultSampler.getGLID());
+	auto h9 = Engine::assets.get2DTex("spN")->getHandle(defaultSampler.getGLID());
 
 	///TODO: make null texture (return when not found)
 	///TODO: Auto make handles resident!!
@@ -425,12 +360,12 @@ inline void MasterRenderer::initialiseSamplers()
 	glMakeTextureHandleResidentARB(h3);
 
 	glMakeTextureHandleResidentARB(h4);
-	//glMakeTextureHandleResidentARB(h5);
-	//glMakeTextureHandleResidentARB(h6);
+	glMakeTextureHandleResidentARB(h5);
+	glMakeTextureHandleResidentARB(h6);
 
 	glMakeTextureHandleResidentARB(h7);
-	//glMakeTextureHandleResidentARB(h8);
-	//glMakeTextureHandleResidentARB(h9);
+	glMakeTextureHandleResidentARB(h8);
+	glMakeTextureHandleResidentARB(h9);
 }
 
 void MasterRenderer::initialiseRenderer(Window * pwin, Camera & cam)
@@ -778,7 +713,7 @@ void MasterRenderer::render()
 	tileCullShader.sendView();
 	tileCullShader.sendViewPos();
 
-	tileCullShader.sendUniforms();
+	//tileCullShader.sendUniforms();
 
 	lightManager.pointLightsBuffer.bindBase(0);
 	lightManager.spotLightsBuffer.bindBase(1);

@@ -248,20 +248,15 @@ public:
 		}
 	}
 
-	//ObjectData data;
-	//InterlacedObjectData intData;
-	MeshRenderMeta renderMeta;
-	//InterleavedVertexData ivd;
-	//OBJMeshData* objMeshData;
-
 	struct TriangleList
 	{
 		TriangleList() {}
 
 		Material material;
+		float* data;
+
 		s32 numVerts;
 		s32 first;
-		float* data;
 
 		MeshRenderMeta renderMeta;
 
@@ -326,15 +321,30 @@ public:
 	MeshInstance() {}
 	~MeshInstance() {}
 
+	void setTriListMaterial(u32 triListIndex, Material& material)
+	{
+		if (triListIndex > mesh->triangleLists.size() - 1)
+			return;
+
+		if (triListIndex >= overwriteMaterials.size())
+		{
+			for (int i = overwriteMaterials.size(); i <= triListIndex; ++i)
+			{
+				overwriteMaterials.push_back(mesh->triangleLists[i].material);
+			}
+			overwriteMaterials.push_back(material);
+		}
+		else
+		{
+			overwriteMaterials[triListIndex] = material;
+		}
+	}
+
 //private:
 	Mesh* mesh;
 	//u32 instanceID;
-	MeshRenderMeta renderMeta;
 	SGNode* sgNode;
-	//GLTexture2DMip texx;
-	//GLTexture2DMip specTex;
-	//GLTexture2DMip normalTex;
-	//GLTexture2DMip bumpTex;
+	std::vector<Material> overwriteMaterials; //For each tri list
 };
 
 #define MAX_BATCH_COUNT 512

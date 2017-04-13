@@ -419,12 +419,12 @@ void Engine::mainLoop()
 	auto t4p = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/gB.jpg", "gB"); t4p->load();
 
 	auto ooTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/oo.jpg", "oo"); ooTex->load();
-	//auto pfTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/pf.jpg", "pf"); pfTex->load();
-	//auto spTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/sp.jpg", "sp"); spTex->load();
+	auto pfTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/pf.jpg", "pf"); pfTex->load();
+	auto spTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/sp.jpg", "sp"); spTex->load();
 
 	auto ooNTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/ooN.jpg", "ooN"); ooNTex->load();
-	//auto pfNTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/pfN.jpg", "pfN"); pfNTex->load();
-	//auto spNTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/spN.jpg", "spN"); spNTex->load();
+	auto pfNTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/pfN.jpg", "pfN"); pfNTex->load();
+	auto spNTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/spN.jpg", "spN"); spNTex->load();
 
 	//char b3[] = "res/model/oo.bin";
 	//char b3n[] = "oo";
@@ -601,6 +601,23 @@ void Engine::mainLoop()
 	auto i3 = world->addMeshInstance(*ooMesh, world->getWorldRootNode());
 	i3->sgNode->transform.translate(glm::fvec3(0, 20, 0)).scale(10);
 	i3->sgNode->transform.updateMatrix();
+
+	auto i4 = world->addMeshInstance(*ooMesh, world->getWorldRootNode());
+	i4->sgNode->transform.translate(glm::fvec3(0, 40, 0)).scale(10);
+	i4->mesh->triangleListsSorted[0].second[0]->material.albedo[0] = pfTex; ///TODO: This doesnt work beacuse all instances are using the same mesh, which can only have one texture
+																			///Maybe disconnect Material, from triangle list. Allow copying of triangle lists (using same data pointer) with different materials
+																			///
+	i4->sgNode->transform.updateMatrix();
+
+	auto i5 = world->addMeshInstance(*ooMesh, world->getWorldRootNode());
+	i5->sgNode->transform.translate(glm::fvec3(0, 60, 0)).scale(10);
+	i5->mesh->triangleListsSorted[0].second[0]->material.albedo[0] = spTex;
+	i5->sgNode->transform.updateMatrix();
+
+	auto i6 = world->addMeshInstance(*ooMesh, world->getWorldRootNode());
+	i6->sgNode->transform.translate(glm::fvec3(0, 80, 0)).scale(10);
+	i6->mesh->triangleListsSorted[0].second[0]->material.albedo[0] = Engine::assets.get2DTex("oo");
+	i6->sgNode->transform.updateMatrix();
 
 	/*auto i4 = world->addMeshInstance(*pfMesh, world->getWorldRootNode());
 	i4->sgNode->transform.translate(glm::fvec3(0, 20, 0)).scale(10);

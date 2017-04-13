@@ -27,6 +27,7 @@ public:
 		setExposure(11.f);
 		setPointLightCount(100);
 		setSpotLightCount(0);
+		sendUniforms();
 		stop();
 		return 1;
 	}

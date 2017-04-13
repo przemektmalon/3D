@@ -121,9 +121,7 @@ public:
 	GLuint vaoQuadViewRays;
 	GLuint vboQuadViewRays;
 
-	Shader skyboxShader;
 	GLuint skyboxTex;
-	GLuint vaoSkybox, vboSkybox;
 
 	//Shaders
 	ShaderStore shaderStore;

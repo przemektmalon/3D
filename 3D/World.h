@@ -67,6 +67,8 @@ public:
 
 		for (auto itr = instances.begin(); itr != instances.end(); ++itr)
 		{
+			auto numOverwriteMaterials = itr->second.overwriteMaterials.size();
+
 			for (auto itr2 = itr->second.mesh->triangleListsSorted.begin(); itr2 != itr->second.mesh->triangleListsSorted.end(); ++itr2)
 			{	
 				for (auto itr3 = itr2->second.begin(); itr3 != itr2->second.end(); ++itr3)
