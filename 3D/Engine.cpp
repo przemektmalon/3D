@@ -200,6 +200,8 @@ void moveObjXP()
 {
 	if (Engine::selectedID == -1) return;
 	auto i = Engine::world->getMeshInstance(Engine::selectedID);
+	if (!i)
+		return;
 	//i->sgNode->transform.translate(glm::fvec3(0,0,Engine::dt.getSeconds() * 500));
 	i->sgNode->transform.rotate(glm::fvec3(Engine::dt.getSeconds() * 4.5, 0, 0));
 	//i->sgNode->transform.setTranslation(glm::fvec3(std::cos(i->sgNode->transform.getRoll()) * 5, std::sin(i->sgNode->transform.getRoll()) * 5, 0));
@@ -211,6 +213,8 @@ void moveObjXN()
 {
 	if (Engine::selectedID == -1) return;
 	auto i = Engine::world->getMeshInstance(Engine::selectedID);
+	if (!i)
+		return;
 	//i->sgNode->transform.translate(glm::fvec3(0,0,Engine::dt.getSeconds() * -500));
 	i->sgNode->transform.rotate(glm::fvec3(-Engine::dt.getSeconds() * 4.5, 0, 0));
 	//i->sgNode->transform.setTranslation(glm::fvec3(std::cos(i->sgNode->transform.getRoll()) * 5, std::sin(i->sgNode->transform.getRoll()) * 5, 0));
@@ -223,6 +227,8 @@ void moveObjZP()
 {
 	if (Engine::selectedID == -1) return;
 	auto i = Engine::world->getMeshInstance(Engine::selectedID);
+	if (!i)
+		return;
 	//i->sgNode->transform.translate(glm::fvec3(0,0,Engine::dt.getSeconds() * 500));
 	i->sgNode->transform.rotate(glm::fvec3(0, Engine::dt.getSeconds() * 4.5, 0));
 	//i->sgNode->transform.setTranslation(glm::fvec3(std::cos(i->sgNode->transform.getRoll()) * 5, std::sin(i->sgNode->transform.getRoll()) * 5, 0));
@@ -234,6 +240,8 @@ void moveObjZN()
 {
 	if (Engine::selectedID == -1) return;
 	auto i = Engine::world->getMeshInstance(Engine::selectedID);
+	if (!i)
+		return;
 	//i->sgNode->transform.translate(glm::fvec3(0,0,Engine::dt.getSeconds() * 500));
 	i->sgNode->transform.rotate(glm::fvec3(0, Engine::dt.getSeconds() * -4.5, 0));
 	//i->sgNode->transform.setTranslation(glm::fvec3(std::cos(i->sgNode->transform.getRoll()) * 5, std::sin(i->sgNode->transform.getRoll()) * 5, 0));
@@ -245,6 +253,8 @@ void moveObjYP()
 {
 	if (Engine::selectedID == -1) return;
 	auto i = Engine::world->getMeshInstance(Engine::selectedID);
+	if (!i)
+		return;
 	//i->sgNode->transform.translate(glm::fvec3(0,0,Engine::dt.getSeconds() * 500));
 	i->sgNode->transform.rotate(glm::fvec3(0,0,Engine::dt.getSeconds() * 4.5));
 	//i->sgNode->transform.setTranslation(glm::fvec3(std::cos(i->sgNode->transform.getRoll()) * 5, std::sin(i->sgNode->transform.getRoll()) * 5, 0));
@@ -256,6 +266,8 @@ void moveObjYN()
 {
 	if (Engine::selectedID == -1) return;
 	auto i = Engine::world->getMeshInstance(Engine::selectedID);
+	if (!i)
+		return;
 	//i->sgNode->transform.translate(glm::fvec3(0,0,Engine::dt.getSeconds() * 500));
 	i->sgNode->transform.rotate(glm::fvec3(0,0,Engine::dt.getSeconds() * -4.5));
 	//i->sgNode->transform.setTranslation(glm::fvec3(std::cos(i->sgNode->transform.getRoll()) * 5, std::sin(i->sgNode->transform.getRoll()) * 5, 0));
@@ -420,20 +432,20 @@ void Engine::mainLoop()
 
 	auto ooTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/oo.jpg", "oo"); ooTex->load();
 	auto pfTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/pf.jpg", "pf"); pfTex->load();
-	auto spTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/sp.jpg", "sp"); spTex->load();
+	//auto spTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/sp.jpg", "sp"); spTex->load();
 
 	auto ooNTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/ooN.jpg", "ooN"); ooNTex->load();
 	auto pfNTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/pfN.jpg", "pfN"); pfNTex->load();
-	auto spNTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/spN.jpg", "spN"); spNTex->load();
+	//auto spNTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/spN.jpg", "spN"); spNTex->load();
 
 	//char b3[] = "res/model/oo.bin";
 	//char b3n[] = "oo";
 
 	auto a = (Mesh*)assets.prepareAsset(Asset::Mesh, "res/model/box.bin", "box");
 	auto b = (Mesh*)assets.prepareAsset(Asset::Mesh, "res/model/sceneNEW.bin", "ter");
-	//auto c = resMan.registerMesh(b3, b3n);
+	
 
-	auto ooMesh = (Mesh*)assets.prepareAsset(Asset::Mesh, "res/model/oo.bin", "oo");
+	//auto ooMesh = (Mesh*)assets.prepareAsset(Asset::Mesh, "res/model/oo.bin", "oo");
 	//auto pfMesh = (Mesh*)assets.prepareAsset(Asset::Mesh, "res/model/pf.bin", "pf");
 	//auto spMesh = (Mesh*)assets.prepareAsset(Asset::Mesh, "res/model/sp.bin", "sp");
 
@@ -473,9 +485,9 @@ void Engine::mainLoop()
 	mu.setMeshName(si, String<32>("oo"));
 	//mu.exportBinV10(si);
 	//mu.clearStorage();
-	//auto si2 = mu.objToBin(String<128>("res/model/pf.obj"), String<128>("res/model/pf.bin"));
-	//mu.setMeshTexture(si2, 0, Engine::assets.get2DTex("pf"), 0);
-	//mu.setMeshName(si2, String<32>("pf"));
+	auto si2 = mu.objToBin(String<128>("res/model/pf.obj"), String<128>("res/model/pf.bin"));
+	mu.setMeshTexture(si2, 0, Engine::assets.get2DTex("pf"), 0);
+	mu.setMeshName(si2, String<32>("pf"));
 	//mu.exportBinV10(si);
 	//mu.clearStorage();
 	//auto si3 = mu.objToBin(String<128>("res/model/sp.obj"), String<128>("res/model/sp.bin"));
@@ -484,20 +496,24 @@ void Engine::mainLoop()
 	//mu.exportBinV10(si);
 	//mu.clearStorage();
 
-	//mu.addMeshToTriLists(si2, 0, si);
+	mu.addMeshToTriLists(si2, 0, si);
 	//mu.addMeshToTriLists(si3, 0, si);
 
 	mu.exportBinV10(si);
 
 	mu.clearStorage();
 
-	a->load();
-	assets.meshManager.pushMeshToBatch(*a);
-	b->load();
-	assets.meshManager.pushMeshToBatch(*b);
+	auto c = (Mesh*)assets.prepareAsset(Asset::Mesh, "res/model/oo.bin", "paints");
 
-	ooMesh->load();
-	assets.meshManager.pushMeshToBatch(*ooMesh);
+	//a->load();
+	//assets.meshManager.pushMeshToBatch(*a);
+	//b->load();
+	//assets.meshManager.pushMeshToBatch(*b);
+	c->load();
+	assets.meshManager.pushMeshToBatch(*c);
+
+	//ooMesh->load();
+	//assets.meshManager.pushMeshToBatch(*ooMesh);
 	//pfMesh->load();
 	//assets.meshManager.pushMeshToBatch(*pfMesh);
 	//spMesh->load();
@@ -594,11 +610,11 @@ void Engine::mainLoop()
 		//i1->sgNode->transform.updateMatrix();
 	}
 
-	auto i2 = world->addMeshInstance(*b, world->getWorldRootNode());
+	auto i2 = world->addMeshInstance(*c, world->getWorldRootNode());
 	i2->sgNode->transform.translate(glm::fvec3(0, -50, 0));
 	i2->sgNode->transform.updateMatrix();
 
-	auto i3 = world->addMeshInstance(*ooMesh, world->getWorldRootNode());
+	/*auto i3 = world->addMeshInstance(*ooMesh, world->getWorldRootNode());
 	i3->sgNode->transform.translate(glm::fvec3(0, 20, 0)).scale(10);
 	i3->sgNode->transform.updateMatrix();
 
@@ -617,7 +633,7 @@ void Engine::mainLoop()
 	auto i6 = world->addMeshInstance(*ooMesh, world->getWorldRootNode());
 	i6->sgNode->transform.translate(glm::fvec3(0, 80, 0)).scale(10);
 	i6->mesh->triangleListsSorted[0].second[0]->material.albedo[0] = Engine::assets.get2DTex("oo");
-	i6->sgNode->transform.updateMatrix();
+	i6->sgNode->transform.updateMatrix();*/
 
 	/*auto i4 = world->addMeshInstance(*pfMesh, world->getWorldRootNode());
 	i4->sgNode->transform.translate(glm::fvec3(0, 20, 0)).scale(10);

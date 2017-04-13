@@ -23,15 +23,10 @@ public:
 		++objectCount;
 
 		MeshInstance mi;
-		//mi.meshID = meshID;
-		//mi.renderMeta = Engine::resMan.getMesh(meshID).renderMeta;
-		mi.renderMeta = mesh.renderMeta;
 		mi.sgNode = parent->addChild(SGNode());
-		//mi.texx = Engine::assets.get2DTex("g");
 
+		u32 instanceID = numTriLists;
 		numTriLists += mesh.getNumGPUTriLists();
-
-		u32 instanceID = objectCount;
 		mi.mesh = &mesh;
 		instances.insert(std::make_pair(instanceID, mi));
 		return &instances.at(instanceID);
@@ -39,7 +34,16 @@ public:
 
 	MeshInstance* getMeshInstance(u32 pInstanceID)
 	{
-		return &instances.at(pInstanceID);
+		auto find = instances.find(pInstanceID);
+		while (find == instances.end())
+		{
+			--pInstanceID;
+			if (pInstanceID == -1)
+				return nullptr;
+
+			find = instances.find(pInstanceID);
+		}
+		return &find->second;
 	}
 
 	void initialiseGLBuffers(u32 pMaxObjects)

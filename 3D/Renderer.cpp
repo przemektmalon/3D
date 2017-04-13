@@ -142,7 +142,7 @@ inline void MasterRenderer::initialiseGBuffer()
 	fboGBuffer.attachTexture(GL_RG16F, GL_RG, GL_HALF_FLOAT, GL_COLOR_ATTACHMENT0);//NORMAL
 	fboGBuffer.attachTexture(GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT1);//ALBEDO_SPEC
 	fboGBuffer.attachTexture(GL_DEPTH_COMPONENT32F_NV, GL_DEPTH_COMPONENT, GL_FLOAT, GL_DEPTH_ATTACHMENT);
-	fboGBuffer.attachTexture(GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, GL_COLOR_ATTACHMENT2);
+	fboGBuffer.attachTexture(GL_R32I, GL_RED_INTEGER, GL_INT, GL_COLOR_ATTACHMENT2);
 
 	fboGBuffer.checkStatus();
 
@@ -342,11 +342,11 @@ inline void MasterRenderer::initialiseSamplers()
 
 	auto h4 = Engine::assets.get2DTex("oo")->getHandle(defaultSampler.getGLID());
 	auto h5 = Engine::assets.get2DTex("pf")->getHandle(defaultSampler.getGLID());
-	auto h6 = Engine::assets.get2DTex("sp")->getHandle(defaultSampler.getGLID());
+	//auto h6 = Engine::assets.get2DTex("sp")->getHandle(defaultSampler.getGLID());
 
 	auto h7 = Engine::assets.get2DTex("ooN")->getHandle(defaultSampler.getGLID());
 	auto h8 = Engine::assets.get2DTex("pfN")->getHandle(defaultSampler.getGLID());
-	auto h9 = Engine::assets.get2DTex("spN")->getHandle(defaultSampler.getGLID());
+	//auto h9 = Engine::assets.get2DTex("spN")->getHandle(defaultSampler.getGLID());
 
 	///TODO: make null texture (return when not found)
 	///TODO: Auto make handles resident!!
@@ -361,11 +361,11 @@ inline void MasterRenderer::initialiseSamplers()
 
 	glMakeTextureHandleResidentARB(h4);
 	glMakeTextureHandleResidentARB(h5);
-	glMakeTextureHandleResidentARB(h6);
+	//glMakeTextureHandleResidentARB(h6);
 
 	glMakeTextureHandleResidentARB(h7);
 	glMakeTextureHandleResidentARB(h8);
-	glMakeTextureHandleResidentARB(h9);
+	//glMakeTextureHandleResidentARB(h9);
 }
 
 void MasterRenderer::initialiseRenderer(Window * pwin, Camera & cam)
@@ -495,8 +495,8 @@ void MasterRenderer::render()
 		glViewport(0, 0, rC.renderResolution.x, rC.renderResolution.y);
 		fboGBuffer.bind();
 		fboGBuffer.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glm::uvec4 clearC(0, 0, 0, 0);
-		glClearBufferuiv(GL_COLOR, GL_COLOR_ATTACHMENT2, &clearC.x);
+		glm::ivec4 clearC(-1, -1, -1, -1);
+		glClearBufferiv(GL_COLOR, GL_COLOR_ATTACHMENT2, &clearC.x);
 
 		glDepthRangedNV(-1.f, 1.f);
 		glClearDepth(1.f);
@@ -509,8 +509,6 @@ void MasterRenderer::render()
 		{
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		}
-
-		u32 id = 1;
 
 		frustCullShader.use();
 

@@ -118,6 +118,11 @@ public:
 		vf->attribs[2].type = VertexAttrib::flt2;
 		vf->calculateSizeInBytes();
 	}
+
+	static s32 getFormatSize(MaterialID matID)
+	{
+		return vertexFormats[matID].size;
+	}
 };
 
 class OBJMeshData;
@@ -262,16 +267,16 @@ public:
 
 		void copyConstruct(TriangleList& tl)
 		{
-			data = new float[tl.numVerts * tl.material.vertexFormats->size];
+			data = new float[tl.numVerts * Material::vertexFormats[tl.material.matID].size];
 			numVerts = tl.numVerts;
 			material = tl.material;
 			first = tl.first;
-			memcpy(data, tl.data, tl.numVerts * tl.material.vertexFormats->calculateSizeInBytes());
+			memcpy(data, tl.data, tl.numVerts * Material::vertexFormats[tl.material.matID].size);
 		}
 
 		s32 getDataSizeInBytes()
 		{
-			return numVerts * material.vertexFormats[material.matID].size;
+			return numVerts * Material::vertexFormats[material.matID].size;
 		}
 	};
 
@@ -283,7 +288,10 @@ public:
 			///TODO: THIS ISNT THE ONLY MATERIAL THE GPU SHOULD TAKE
 			if (itr->first == PNUU_T_S_N)
 			{
-				ret++;
+				for (auto itr2 = itr->second.begin(); itr2 != itr->second.end(); ++itr2)
+				{
+					++ret;
+				}
 			}
 		}
 		return ret;
