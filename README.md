@@ -5,7 +5,7 @@ Some screenshots on Google Drive: https://drive.google.com/open?id=0B9uuq4IEinJP
 
 # Current features
 
--Deferred HDR rendering using half-z tile light culling through OGL compute shader. Supports normal & specular mapping, and tonemapping. 
+-Deferred HDR rendering using half-z tile light culling through OGL compute shader. Supports normal & specular mapping, and tonemapping.
 -Frustum culling on GPU compute shader
 -Shader hot-loading & preprocessing
 -Ambient Occlusion
