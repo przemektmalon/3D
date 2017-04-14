@@ -54,8 +54,12 @@ public:
 	{
 		auto find = texture2DList.find(pName);
 		if (find == texture2DList.end())
-			return nullptr;//TODO: Error
-
+		{
+			auto findNull = texture2DList.find(String32("null"));
+			if (findNull == texture2DList.end())
+				return nullptr;
+			return &findNull->second;
+		}
 		return &find->second;
 	}
 	GLTexture2D* get2DTex(String<32>&& pName)

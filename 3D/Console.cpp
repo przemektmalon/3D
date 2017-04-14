@@ -38,12 +38,22 @@ void setModelPosition(glm::fvec3 pos)
 	Engine::world->updateGLBuffers();
 }
 
+void listShaders()
+{
+	auto& shaderMap = Engine::r->shaderStore.getShaderMap();
+	for (auto itr = shaderMap.begin(); itr != shaderMap.end(); ++itr)
+	{
+		Engine::console.postMessage(const_cast<String32&>(itr->first));
+	}
+}
+
 void Console::registerConsoleFuncs()
 {
 	REGISTER_CONSOLE_CALLABLE(3, "FUNCNAME", 6);
 	REGISTER_CONSOLE_CALLABLE(2, "FOO", 2);
 	REGISTER_CONSOLE_CALLABLE(1, "FUNC", 1);
 	REGISTER_CONSOLE_CALLABLE(4, "SetModelPos", 1);
+	REGISTER_CONSOLE_CALLABLE(5, "shaders", 0);
 }
 
 void Console::submitCommand(StringGeneric& command)
@@ -71,6 +81,8 @@ void Console::submitCommand(StringGeneric& command)
 
 	std::vector<CParam> params; params.reserve(4);
 
+	bool noParams = false;
+
 	for (;;)
 	{
 		if (*cc == ' ')
@@ -88,9 +100,13 @@ void Console::submitCommand(StringGeneric& command)
 				if (*cc == ' ')
 					break;
 
+				if (*cc == '\0') //Command with no parameters
+				{
+					noParams = true; break;
+				}
+
 				if (!isAlpha(*cc))
-					//assert(0);
-					return; ///TODO: log ?
+					return;
 				else
 					funcName.append(*cc); ++cc;
 			}
@@ -99,47 +115,44 @@ void Console::submitCommand(StringGeneric& command)
 		++cc;
 	}
 
-	for (;;)
+	if (!noParams)
 	{
-		if (*++cc == '\0')
-			break;
-
-		if (*cc == ' ')
-			continue;
-
-		if (*cc == '-') //NUMBER (INT OR FLOAT)
+		for (;;)
 		{
-			if (*++cc == '(')
-				params.push_back(new CVector(interpretVector(&cc)));
-			else
+			if (*++cc == '\0')
+				break;
+
+			if (*cc == ' ')
+				continue;
+
+			if (*cc == '-') //NUMBER (INT OR FLOAT)
+			{
+				if (*++cc == '(')
+					params.push_back(new CVector(interpretVector(&cc)));
+				else
+					params.push_back(new CNumber(interpretNumber(&cc)));
+				continue;
+			}
+
+			if (isNum(*cc)) //NUMBER (INT OR FLOAT)
+			{
 				params.push_back(new CNumber(interpretNumber(&cc)));
-			continue;
-		}
+				continue;
+			}
 
-		if (isNum(*cc)) //NUMBER (INT OR FLOAT)
-		{
-			params.push_back(new CNumber(interpretNumber(&cc)));
-			continue;
-		}
+			if (*cc == '"') //STRING
+			{
+				params.push_back(new String32(interpretString(&cc)));
+				++cc;
+				continue;
+			}
 
-		if (*cc == '"') //STRING
-		{
-			params.push_back(new String32(interpretString(&cc)));
-			++cc;
-			continue;
+			if (*cc == '(') //VECTOR
+			{
+				params.push_back(new CVector(interpretVector(&cc)));
+				continue;
+			}
 		}
-
-		if (*cc == '(') //VECTOR
-		{
-			params.push_back(new CVector(interpretVector(&cc)));
-			continue;
-		}
-	}
-
-	if (params.size() == 0)
-	{
-		postMessage(String32("SOMETHING WENT WRONG!"));
-		return;
 	}
 
 	try {
@@ -148,6 +161,7 @@ void Console::submitCommand(StringGeneric& command)
 			CHECK_CONSOLE_CALLABLE(2, test2, 2);
 			CHECK_CONSOLE_CALLABLE(3, test3, 6);
 			CHECK_CONSOLE_CALLABLE(4, setModelPosition, 1);
+			CHECK_CONSOLE_CALLABLE(5, listShaders, 0);
 		END_FUNC_SWITCH
 	}
 	catch (...)

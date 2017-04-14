@@ -1,0 +1,129 @@
+#version 430 compatibility
+#extension GL_NV_gpu_shader5 : enable
+#extension GL_ARB_compute_shader : enable
+//#extension GL_ARB_compute_variable_group_size : enable
+
+struct MeshMeta
+{
+	//vec4 posRad;
+	uvec4 cmds_radX;//RADIUS IN W-VALUE
+	uvec4 albedoHandleA_RadiusYZ;
+	uvec4 specularA_normalA;
+	uvec4 albedoB_specularB;
+	uvec4 normalB_albedoC;
+	uvec4 specularC_normalC;
+	uvec4 albedoD_specularD;
+	uvec4 normalD_alpha;
+};
+
+uniform uint objectCount;
+layout(std140, binding=0) buffer ObjectBuffer
+{
+	MeshMeta metaIn[];
+};	
+
+layout(std140, binding=1) buffer TextureHandleBuffer
+{
+	uvec4 texHandleOut[];
+};
+
+layout(std140, binding=2) buffer CommandBuffer
+{
+	uvec4 cmdsOut[];
+};
+
+layout(std140, binding=3) buffer RetBuffer
+{
+	uint drawCount;
+};
+
+layout(std140, binding=4) buffer TransformsBuffer
+{
+	mat4 transformsIn[];
+};
+
+layout(std140, binding=5) buffer InstanceBuffer
+{
+	mat4 instancesOut[];
+};
+
+layout(std140, binding=6) buffer InstanceIDBuffer
+{
+	uint id[];
+};
+
+
+//NUM_OBJ == CEIL(OBJ_COUNT / WORK_SIZE) * WORK_SIZE
+#define NUM_OBJ 10240
+#define WORK_SIZE 512
+#define OBJ_PER_GROUP NUM_OBJ / WORK_SIZE
+
+//layout(local_size_variable) in;
+layout(local_size_x=100, local_size_y=1, local_size_z=1) in;
+
+layout(location = 3) uniform mat4 proj;
+layout(location = 4) uniform mat4 view;
+layout(location = 5) uniform mat4 planes;
+layout(location = 6) uniform uint baseID;
+
+#define FAR 1000000.f
+
+shared uint sharedIndex;
+
+void main()
+{
+	if(gl_GlobalInvocationID.x == 0)
+		sharedIndex = 0;
+
+	uint ii = gl_GlobalInvocationID.x;
+
+	mat4 transform = transformsIn[ii];
+	vec4 pos = view * transform * vec4(0.f,0.f,0.f,1.f); ////TODO: EXTRACT FROM MATRIX
+	uvec4 cmds_radX = metaIn[ii].cmds_radX;
+	uvec4 albedoHandleA_RadiusYZ = metaIn[ii].albedoHandleA_RadiusYZ;
+	uvec4 specularA_normalA = metaIn[ii].specularA_normalA;
+	uvec4 albedoB_specularB = metaIn[ii].albedoB_specularB;
+	uvec4 normalB_albedoC = metaIn[ii].normalB_albedoC;
+	uvec4 specularC_normalC = metaIn[ii].specularC_normalC;
+	uvec4 albedoD_specularD = metaIn[ii].albedoD_specularD;
+	uvec4 normalD_alpha = metaIn[ii].normalD_alpha;
+	vec3 radiusVec = vec3(uintBitsToFloat(cmds_radX.w) * transform[0][0],uintBitsToFloat(albedoHandleA_RadiusYZ.z) * transform[1][1],uintBitsToFloat(albedoHandleA_RadiusYZ.w) * transform[2][2]);
+
+	if((transform[0][0] != 0))
+	{
+		uint nextIndex = atomicAdd(sharedIndex, 1);
+		cmdsOut[nextIndex] = cmds_radX;
+		cmdsOut[nextIndex][3] = 0;
+
+		texHandleOut[7*nextIndex+0].xy = albedoHandleA_RadiusYZ.xy;
+		texHandleOut[7*nextIndex+0].zw = specularA_normalA.xy;
+
+		texHandleOut[7*nextIndex+1].xy = specularA_normalA.zw;
+		texHandleOut[7*nextIndex+1].zw = albedoB_specularB.xy;
+
+		texHandleOut[7*nextIndex+2].xy = albedoB_specularB.zw;
+		texHandleOut[7*nextIndex+2].zw = normalB_albedoC.xy;
+
+		texHandleOut[7*nextIndex+3].xy = normalB_albedoC.zw;
+		texHandleOut[7*nextIndex+3].zw = specularC_normalC.xy;
+
+		texHandleOut[7*nextIndex+4].xy = specularC_normalC.zw;
+		texHandleOut[7*nextIndex+4].zw = albedoD_specularD.xy;
+
+		texHandleOut[7*nextIndex+5].xy = albedoD_specularD.zw;
+		texHandleOut[7*nextIndex+5].zw = normalD_alpha.xy;
+
+		texHandleOut[7*nextIndex+6].xy = normalD_alpha.zw;
+		texHandleOut[7*nextIndex+6].zw = uvec2(0,0);
+
+		instancesOut[nextIndex] = transform;
+		id[nextIndex + baseID] = ii+1;
+	}
+
+	barrier();
+
+
+	if(gl_GlobalInvocationID.x == 0)
+		drawCount = sharedIndex;
+	//drawCount = 1;
+}

@@ -32,6 +32,7 @@ struct FnArgs<R(Args...)>
 #define CONSTRUCT_PARAMS_3(func,params) CHEAT_CAST(func, 0, params), CHEAT_CAST(func, 1, params), CHEAT_CAST(func, 2, params)
 #define CONSTRUCT_PARAMS_2(func,params) CHEAT_CAST(func, 0, params), CHEAT_CAST(func, 1, params)
 #define CONSTRUCT_PARAMS_1(func,params) CHEAT_CAST(func, 0, params)
+#define CONSTRUCT_PARAMS_0(func,params)
 
 //#define CONSTRUCT_PARAMS(func,params) CONSTRUCT_PARAMS_6(func,params)
 

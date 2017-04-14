@@ -1,4 +1,5 @@
 #include "Shader.h"
+#include "Engine.h"
 
 const int ShaderProgram::typeSizes[ShaderProgram::UniformTypesCount] = {
 	4, 8, 12, 16,
@@ -295,7 +296,18 @@ void ShaderProgram::compileVertFrag()
 	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &isCompiled);
 	if (isCompiled == GL_FALSE)
 	{
-		//return; //TODO: LOG ERROR
+		GLint maxLength = 0;
+		glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &maxLength);
+
+		std::vector<GLchar> errorLog(maxLength);
+		glGetShaderInfoLog(fragmentShader, maxLength, &maxLength, &errorLog[0]);
+
+		Engine::log.postMessage(errorLog.data());
+		Engine::logger.printLog(Engine::log,String32("ShaderCompileFailed"));
+
+		glDeleteShader(fragmentShader);
+
+		return;
 	}
 
 	glCompileShader(vertexShader);
@@ -303,7 +315,19 @@ void ShaderProgram::compileVertFrag()
 	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &isCompiled);
 	if (isCompiled == GL_FALSE)
 	{
-		//return; //TODO: LOG ERROR
+		GLint maxLength = 0;
+		glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &maxLength);
+
+		std::vector<GLchar> errorLog(maxLength);
+		glGetShaderInfoLog(vertexShader, maxLength, &maxLength, &errorLog[0]);
+
+		Engine::log.postMessage(errorLog.data());
+		Engine::logger.printLog(Engine::log, String32("ShaderCompileFailed"));
+
+		glDeleteShader(fragmentShader);
+		glDeleteShader(vertexShader);
+
+		return;
 	}
 
 	auto shaderProgram = glCreateProgram();
@@ -322,7 +346,7 @@ void ShaderProgram::compileVertFrag()
 	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &isCompiled);
 	if (isCompiled == GL_FALSE)
 	{
-		//TODO: LOG ERROR
+		///TODO: LOG ERROR
 
 		GLint maxLength = 0;
 		glGetProgramiv(shaderProgram, GL_INFO_LOG_LENGTH, &maxLength);
@@ -335,7 +359,6 @@ void ShaderProgram::compileVertFrag()
 
 		}
 
-		//OutputDebugStringA((errorLog.data()));
 
 		glDeleteProgram(shaderProgram);
 
@@ -393,7 +416,22 @@ void ShaderProgram::compileCompute()
 	glGetShaderiv(computeShader, GL_COMPILE_STATUS, &isCompiled);
 	if (isCompiled == GL_FALSE)
 	{
-		return; //TODO: LOG ERROR
+		//TODO: LOG ERROR
+
+		GLint maxLength = 0;
+		glGetShaderiv(computeShader, GL_INFO_LOG_LENGTH, &maxLength);
+
+		std::vector<GLchar> errorLog(maxLength);
+		glGetShaderInfoLog(computeShader, maxLength, &maxLength, &errorLog[0]);
+
+		for (int i = 0; i < errorLog.size(); ++i)
+		{
+			std::cout << char(errorLog[i]);
+		}
+
+		glDeleteShader(computeShader);
+
+		return;
 	}
 
 	auto shaderProgram = glCreateProgram();

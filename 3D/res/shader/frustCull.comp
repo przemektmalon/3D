@@ -56,9 +56,10 @@ layout(std140, binding=6) buffer InstanceIDBuffer
 //layout(local_size_variable) in;
 layout(local_size_x=WORK_SIZE, local_size_y=1, local_size_z=1) in;
 
-layout(location = 3) uniform mat4  proj;
+layout(location = 3) uniform mat4 proj;
 layout(location = 4) uniform mat4 view;
 layout(location = 5) uniform mat4 planes;
+layout(location = 6) uniform uint baseID;
 
 #define FAR 1000000.f
 
@@ -111,66 +112,3 @@ void main()
 	if(gl_GlobalInvocationID.x == 0)
 		drawCount = sharedIndex;
 }
-
-/*void main()
-{
-	
-	uvec3 gid = gl_GlobalInvocationID;
-	sharedIndex = 0;
-	mat4 transform = transforms[gid.x];
-	
-	bool inFrustum = true;
-	vec4 pos = transform * vec4(0.f,0.f,0.f,1.f);
-	uvec4 cmds = meta[gid.x].cmds;
-	
-	float rad = uintBitsToFloat(cmds.w) * transform[0][0];
-	//WARNING: ONLY WORKS WITH UNIFORM SCALE
-
-	for(uint j = 3; (j >= 0) && (inFrustum == true); --j)
-	{
-		float dist = dot(planes[j], view * vec4(pos.xyz,1.f));
-		inFrustum = (inFrustum && (dist >= -rad));
-	}
-
-	if(inFrustum == true)
-	{
-		uint nextIndex = atomicAdd(sharedIndex,1);
-
-		cmdsOut[nextIndex] = cmds;
-		cmdsOut[nextIndex][3] = 0;
-		texHandleOut[nextIndex] = meta[gid.x].texHandle;
-		instancesOut[nextIndex] = transforms[gid.x];
-	}
-
-	barrier();
-
-	if(gid.x == 0)
-	{
-		drawCount = sharedIndex;
-	}
-	//atomicAdd(drawCount, sharedIndex);
-}*/
-
-/*vec4 planes[4];
-
-	mat4 pr = proj;
-
-	if(gid.x == 1)
-	{
-	planes[0] = pr[3] - pr[0];//Right
-	planes[1] = pr[3] + pr[0];//Left
-	planes[2] = pr[3] - pr[1];//Top
-	planes[3] = pr[3] + pr[1];//Bottom
-	//planes[4] = vec4(0.f,0.f,1.f, 1.0);
-	//planes[5] = vec4(0.f,0.f,-1.f,float(FAR));
-
-	//planes[0] *= 1.f / length(planes[0].xyz);
-	//planes[1] *= 1.f / length(planes[1].xyz);
-	//planes[2] *= 1.f / length(planes[2].xyz);
-	//planes[3] *= 1.f / length(planes[3].xyz);
-
-	planes[0] = normalize(planes[0]);
-	planes[1] = normalize(planes[1]);
-	planes[2] = normalize(planes[2]);
-	planes[3] = normalize(planes[3]);
-	}*/

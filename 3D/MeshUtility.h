@@ -46,7 +46,7 @@ public:
 
 	void loadBin(String<128>& pPath, s32 binIndex)
 	{
-		if (binIndex > meshes.size() + 1)
+		if (binIndex > meshes.size() - 1)
 			return;
 
 		auto mesh = meshes[binIndex];
@@ -65,7 +65,7 @@ public:
 
 	void exportBin(s32 binIndex)
 	{
-		if (binIndex > meshes.size() + 1)
+		if (binIndex > meshes.size() - 1)
 			return;
 
 		auto mesh = meshes[binIndex];
@@ -78,7 +78,7 @@ public:
 
 	void exportBinV10(s32 binIndex)
 	{
-		if (binIndex > meshes.size() + 1)
+		if (binIndex > meshes.size() - 1)
 			return;
 
 		auto mesh = meshes[binIndex];
@@ -89,12 +89,25 @@ public:
 		mesh->saveBinV10(mesh->getPath());
 	}
 
-	void binFromObj(s32 objIndex, s32 binIndex)
+	void exportBinV11(s32 binIndex)
 	{
-		if (objIndex > objMeshDatas.size() + 1)
+		if (binIndex > meshes.size() - 1)
 			return;
 
-		if (binIndex > meshes.size() + 1)
+		auto mesh = meshes[binIndex];
+
+		if (mesh == nullptr)
+			return;
+
+		mesh->saveBinV11(mesh->getPath());
+	}
+
+	void binFromObj(s32 objIndex, s32 binIndex)
+	{
+		if (objIndex > objMeshDatas.size() - 1)
+			return;
+
+		if (binIndex > meshes.size() - 1)
 			return;
 
 		auto objMeshData = objMeshDatas[objIndex];
@@ -120,9 +133,24 @@ public:
 		mesh->triangleLists.push_back(list);
 	}
 
+	void setTriListMaterialID(s32 binIndex, s32 triListIndex, MaterialID matID)
+	{
+		if (binIndex > meshes.size() - 1)
+			return;
+
+		auto mesh = meshes[binIndex];
+
+		if (triListIndex > mesh->triangleLists.size() - 1)
+			return;
+
+		auto& triList = mesh->triangleLists[triListIndex];
+
+		triList.material.matID = matID;
+	}
+
 	void unloadObj(s32 objIndex)
 	{
-		if (objIndex > objMeshDatas.size() + 1)
+		if (objIndex > objMeshDatas.size() - 1)
 			return;
 
 		objMeshDatas.erase(objMeshDatas.begin() + objIndex);
@@ -158,8 +186,8 @@ public:
 
 	void printMeshInfo(s32 meshIndex, StringGeneric& pStr)
 	{
-		if (meshIndex > meshes.size() + 1)
-			return;//TODO: Error string
+		if (meshIndex > meshes.size() - 1)
+			return;///TODO: Error string
 
 		Mesh* mesh = meshes[meshIndex];
 
@@ -175,9 +203,31 @@ public:
 		pStr.append(String<32>("  Mesh size is ")).append(sizeStr).append(' ').append('B').append('\n');
 	}
 
-	void setMeshTexture(s32 meshIndex, s32 triListIndex, GLTexture2D* glTexture, s32 matTexIndex)
+	void nullAllMeshTextures(s32 meshIndex, GLTexture2D* nullTex)
 	{
-		if (meshIndex > meshes.size() + 1)
+		if (meshIndex > meshes.size() - 1)
+			return;
+
+		Mesh* mesh = meshes[meshIndex];
+
+		if (mesh == nullptr)
+			return;
+
+		for (auto itr = mesh->triangleLists.begin(); itr != mesh->triangleLists.end(); ++itr)
+		{
+			for (int i = 0; i < 4; ++i)
+			{
+				itr->material.albedo[i] = nullTex;
+				itr->material.specular[i] = nullTex;
+				itr->material.normal[i] = nullTex;
+			}
+			itr->material.alpha = nullTex;
+		}
+	}
+
+	void setMeshAlbedoTexture(s32 meshIndex, s32 triListIndex, GLTexture2D* glTexture, s32 matTexIndex)
+	{
+		if (meshIndex > meshes.size() - 1)
 			return;
 
 		Mesh* mesh = meshes[meshIndex];
@@ -191,6 +241,51 @@ public:
 		mesh->triangleLists[triListIndex].material.albedo[matTexIndex] = glTexture;
 	}
 
+	void setMeshSpecularTexture(s32 meshIndex, s32 triListIndex, GLTexture2D* glTexture, s32 matTexIndex)
+	{
+		if (meshIndex > meshes.size() - 1)
+			return;
+
+		Mesh* mesh = meshes[meshIndex];
+
+		if (mesh == nullptr)
+			return;
+
+		//if (texIndex > textures.size() + 1)
+		//	return;
+
+		mesh->triangleLists[triListIndex].material.specular[matTexIndex] = glTexture;
+	}
+
+	void setMeshNormalTexture(s32 meshIndex, s32 triListIndex, GLTexture2D* glTexture, s32 matTexIndex)
+	{
+		if (meshIndex > meshes.size() - 1)
+			return;
+
+		Mesh* mesh = meshes[meshIndex];
+
+		if (mesh == nullptr)
+			return;
+
+		//if (texIndex > textures.size() + 1)
+		//	return;
+
+		mesh->triangleLists[triListIndex].material.normal[matTexIndex] = glTexture;
+	}
+
+	void setMeshAlphaTexture(s32 meshIndex, s32 triListIndex, GLTexture2D* glTexture)
+	{
+		if (meshIndex > meshes.size() - 1)
+			return;
+
+		Mesh* mesh = meshes[meshIndex];
+
+		if (mesh == nullptr)
+			return;
+
+		mesh->triangleLists[triListIndex].material.alpha = glTexture;
+	}
+
 	void addTriList(InterleavedVertexData& obj, Mesh& model)
 	{
 		Mesh::TriangleList list;
@@ -201,7 +296,7 @@ public:
 
 	void setMeshName(s32 meshIndex, String<32>& pName)
 	{
-		if (meshIndex > meshes.size() + 1)
+		if (meshIndex > meshes.size() - 1)
 			return;
 
 		Mesh* mesh = meshes[meshIndex];
@@ -214,7 +309,7 @@ public:
 
 	void setMeshDiskPath(s32 meshIndex, String<128>& pPath)
 	{
-		if (meshIndex > meshes.size() + 1)
+		if (meshIndex > meshes.size() - 1)
 			return;
 
 		Mesh* mesh = meshes[meshIndex];
@@ -227,10 +322,10 @@ public:
 
 	void addMeshToTriLists(s32 takeMeshIndex, s32 triIndex, s32 addMeshIndex)
 	{
-		if (takeMeshIndex > meshes.size() + 1)
+		if (takeMeshIndex > meshes.size() - 1)
 			return;
 
-		if (addMeshIndex > meshes.size() + 1)
+		if (addMeshIndex > meshes.size() - 1)
 			return;
 
 		Mesh* takeMesh = meshes[takeMeshIndex];

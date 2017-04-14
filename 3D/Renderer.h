@@ -10,8 +10,10 @@
 #include <time.h>
 #include "Lights.h"
 #include "DeferredTileCullComputeShader.h"
+#include "GBufferShaderMultiTex.h"
 #include "BilateralBlurShader.h"
 #include "FrustCullShader.h"
+#include "PrepMultiTexShader.h"
 #include "Sampler.h"
 #include "ShaderStore.h"
 
@@ -29,6 +31,8 @@ typedef struct {
 	float radius;
 } GLCMD;
 
+enum DrawMode { Regular, MultiTextured, DrawModesCount };
+
 class MasterRenderer
 {
 public:
@@ -44,7 +48,7 @@ public:
 	inline void initialiseGBuffer();
 
 	inline void initialiseSSAOBuffer();
-	
+
 	inline void initialiseScreenFramebuffer();
 
 	inline void initialiseSkybox();
@@ -102,7 +106,7 @@ public:
 	};
 
 
-	u32 drawCount;
+	u32 drawCount[DrawModesCount];
 
 	Rect<int> viewport;
 
@@ -127,9 +131,11 @@ public:
 	ShaderStore shaderStore;
 
 	GBufferShader gBufferShader;
+	GBufferShaderMultiTex gBufferShaderMultiTex;
 	DeferredTileCullComputeShader tileCullShader;
 	BilateralBlurShader bilatBlurShader;
 	FrustCullShader frustCullShader;
+	PrepMultiTexShader prepMultiTexShader;
 	SAOShader ssaoShader;
 
 	//Shader shadowShader;

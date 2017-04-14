@@ -5,6 +5,7 @@
 #include "AssetManager.h"
 
 VertexFormat Material::vertexFormats[MATERIALS_COUNT];
+DrawMode Material::drawModes[MATERIALS_COUNT];
 
 void InterleavedVertexData::fromOBJMeshData(OBJMeshData * obj)
 {
@@ -84,7 +85,65 @@ void Mesh::loadBinV10()
 		tl.material.normal[0] = Engine::assets.get2DTex(norName);
 		tl.material.specular[0] = Engine::assets.get2DTex(specName);
 
-		///TODO: Fix dataSize!
+		if (tl.material.matID == PNUU_TT_SS_NN)
+		{
+			tl.material.albedo[0] = Engine::assets.get2DTex("ter");
+			tl.material.normal[0] = Engine::assets.get2DTex("terN");
+			tl.material.specular[0] = Engine::assets.get2DTex("terS");
+		}
+
+		s32 dataSize;
+		ifs.read((char*)&dataSize, sizeof(dataSize));
+		tl.data = new float[dataSize];
+		ifs.read((char*)tl.data, dataSize);
+		tl.first = 0;
+
+		triangleLists.push_back(tl);
+	}
+}
+
+void Mesh::loadBinV11()
+{
+	std::ifstream ifs(diskPath.getString(), std::ios_base::binary);
+	char major, minor;
+	ifs.read(&major, sizeof(major));
+	ifs.read(&minor, sizeof(minor));
+	ifs.read(name.getString(), name.getCapacity());
+	s32 numTriLists;
+	ifs.read((char*)&numTriLists, sizeof(numTriLists));
+	for (auto i = 0; i < numTriLists; ++i)
+	{
+		TriangleList tl;
+		ifs.read((char*)&tl.material.matID, sizeof(tl.material.matID));
+		ifs.read((char*)&tl.numVerts, sizeof(tl.numVerts));
+
+		String<32> texName[4], norName[4], specName[4], alphaName;
+
+		for (int i = 0; i < 4; ++i)
+		{
+			ifs.read(texName[i].getString(), texName[i].getCapacity());
+			texName[i].determineLength();
+			tl.material.albedo[i] = Engine::assets.get2DTex(texName[i]);
+		}
+
+		for (int i = 0; i < 4; ++i)
+		{
+			ifs.read(specName[i].getString(), specName[i].getCapacity());
+			specName[i].determineLength();
+			tl.material.specular[i] = Engine::assets.get2DTex(specName[i]);
+		}
+
+		for (int i = 0; i < 4; ++i)
+		{
+			ifs.read(norName[i].getString(), norName[i].getCapacity());
+			norName[i].determineLength();
+			tl.material.normal[i] = Engine::assets.get2DTex(norName[i]);
+		}
+
+		ifs.read(alphaName.getString(), alphaName.getCapacity());
+		alphaName.determineLength();
+		tl.material.alpha = Engine::assets.get2DTex(alphaName);
+
 		s32 dataSize;
 		ifs.read((char*)&dataSize, sizeof(dataSize));
 		tl.data = new float[dataSize];
@@ -116,4 +175,22 @@ void VertexFormat::defineGLVertexAttribs(GLuint vao)
 	glEnableVertexAttribArray(norAttrib);
 
 	glBindVertexArray(0);
+}
+
+void Material::initDrawModes()
+{
+	drawModes[PNUU_T_S_N] = DrawMode::Regular;
+	drawModes[PNUU_TT_SS_NN] = DrawMode::MultiTextured;
+	drawModes[PNUU_TTT_SSS_NNN] = DrawMode::MultiTextured;
+	//drawModes[PNUU_TT_SS_NN] = DrawMode::MultiTextured;
+}
+
+DrawMode Material::getDrawMode(MaterialID matID)
+{
+	return drawModes[matID];
+}
+
+DrawMode Material::getDrawMode()
+{
+	return drawModes[matID];
 }

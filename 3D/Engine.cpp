@@ -152,10 +152,10 @@ void Engine::select(glm::ivec2 mPos)
 
 	selectedID = idTex[index];
 
-	if (selectedID == 0)
-	{
-		selectedID = -1;
-	}
+	//if (selectedID == 0)
+	//{
+		//selectedID = -1;
+	//}
 
 	//Engine::r->tileCullShader->use();
 	//Engine::r->tileCullShader->setUniform(String64("selectedID"),&selectedID);
@@ -198,7 +198,6 @@ void loadPosition()
 
 void moveObjXP()
 {
-	if (Engine::selectedID == -1) return;
 	auto i = Engine::world->getMeshInstance(Engine::selectedID);
 	if (!i)
 		return;
@@ -211,7 +210,6 @@ void moveObjXP()
 
 void moveObjXN()
 {
-	if (Engine::selectedID == -1) return;
 	auto i = Engine::world->getMeshInstance(Engine::selectedID);
 	if (!i)
 		return;
@@ -225,7 +223,6 @@ void moveObjXN()
 
 void moveObjZP()
 {
-	if (Engine::selectedID == -1) return;
 	auto i = Engine::world->getMeshInstance(Engine::selectedID);
 	if (!i)
 		return;
@@ -238,7 +235,6 @@ void moveObjZP()
 
 void moveObjZN()
 {
-	if (Engine::selectedID == -1) return;
 	auto i = Engine::world->getMeshInstance(Engine::selectedID);
 	if (!i)
 		return;
@@ -251,7 +247,6 @@ void moveObjZN()
 
 void moveObjYP()
 {
-	if (Engine::selectedID == -1) return;
 	auto i = Engine::world->getMeshInstance(Engine::selectedID);
 	if (!i)
 		return;
@@ -264,7 +259,6 @@ void moveObjYP()
 
 void moveObjYN()
 {
-	if (Engine::selectedID == -1) return;
 	auto i = Engine::world->getMeshInstance(Engine::selectedID);
 	if (!i)
 		return;
@@ -321,8 +315,8 @@ void Engine::mainLoop()
 	//wglewInit();
 
 	Material::initVertexFormats();
+	Material::initDrawModes();
 	
-
 	wglSwapIntervalEXT(0);
 
 	uim.mapToKeyDown(VK_ESCAPE, escapePress);
@@ -355,67 +349,7 @@ void Engine::mainLoop()
 
 	startTime = std::chrono::system_clock::now().time_since_epoch().count();
 
-
-	//HeapString ab("A");
-
-	//ab.append("BCDhelloworld");
-	//ab.append("EFGhelloworldHIJK").removeCases("helloworld");
-	//ab.insertAt(4, "4").insertWhere("BCD\0","OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO\0");
-
 	FT_Init_FreeType(&ftLib);
-	//fontStore.initialise();
-
-	//Font font;
-	//font.load(size, "gor.ttf", fc);
-
-	//t.init();
-	//t.setFont(&font);
-	//t.setCharSize(size);
-	//t.setString("Hello!");
-
-	//s.load("res/shader/Standard", "res/shader/Standard");
-	//gPassShader.load("res/shader/gBufferPass", "res/shader/gBufferPass");
-	//testShader.load("res/shader/test", "res/shader/test");
-	//glUseProgram(s());
-	//Mesh m;
-	//m.loadBinary("MONKEY.bin");
-	////m.load("MONKEY2.obj");
-	////m.saveBinary("MONKEY.bin");
-
-	//Mesh m2;
-	//m2.load("GROUND.obj");
-	//m2.transform.setRoll(PI);
-	//m2.transform.setScale(glm::fvec3(10.f));
-	//m2.transform.setTranslation(glm::fvec3(0, -80, 0));
-
-	//Mesh buddha(MODEL_PATH + "buddha.bin");
-	//Mesh dragon(MODEL_PATH + "DRG.bin");
-	//Mesh ballpyr(MODEL_PATH + "ballpyr.bin");
-	//Mesh table;
-	//table.load(MODEL_PATH + "table.obj");
-	//ballpyr.load(MODEL_PATH + "ballpyr.obj");
-	//ballpyr.saveBinary(MODEL_PATH + "ballpyr.bin");
-	//Mesh floor;
-	//floor.load(MODEL_PATH + "Plane.obj");
-	//Mesh surf;
-	//surf.load(MODEL_PATH + "surface.obj");
-
-	//Mesh sp;
-	//sp.load(MODEL_PATH + "sp.obj");
-
-	//Mesh oo;
-	//oo.load(MODEL_PATH + "oo.obj");
-
-	//Mesh pf;
-	//pf.load(MODEL_PATH + "pf.obj");
-
-	//Mesh ter;
-	//ter.load(MODEL_PATH + "newTer.obj");
-
-	//sp.tex = new GLTexture2D();
-	//sp.tex->createFromFile("res/tex/sp.jpg");
-
-	//uSphere.load(MODEL_PATH + "UnitSphere.obj");
 
 	r->initialiseShaders();
 	assets.initMeshBatch();
@@ -425,6 +359,8 @@ void Engine::mainLoop()
 	//t3.createFromFile(SSTR("res/tex/gD.jpg"));
 	//t4.createFromFile(SSTR("res/tex/gB.jpg"));
 
+	auto nullTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2D, "res/tex/null.png", "null"); nullTex->load();
+
 	auto t1p = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/g.jpg", "g"); t1p->load();
 	auto t2p = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/gN.jpg", "gN"); t2p->load();
 	auto t3p = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/gS.jpg", "gS"); t3p->load();
@@ -433,13 +369,23 @@ void Engine::mainLoop()
 	auto ooTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/oo.jpg", "oo"); ooTex->load();
 	auto pfTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/pf.jpg", "pf"); pfTex->load();
 	//auto spTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/sp.jpg", "sp"); spTex->load();
+	auto stoneTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/stone.png", "stone"); 
+	stoneTex->load();
+	auto terTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/ter.png", "ter"); terTex->load();
 
 	auto ooNTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/ooN.jpg", "ooN"); ooNTex->load();
 	auto pfNTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/pfN.jpg", "pfN"); pfNTex->load();
 	//auto spNTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/spN.jpg", "spN"); spNTex->load();
+	auto stoneNTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/stoneN.png", "stoneN"); stoneNTex->load();
+	auto terNTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/terN.png", "terN"); terNTex->load();
 
-	//char b3[] = "res/model/oo.bin";
-	//char b3n[] = "oo";
+	auto alphaTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/alpha.png", "alpha"); alphaTex->load();
+
+
+	auto stone2Tex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/stone2.png", "stone2"); stone2Tex->load();
+	auto grassTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/grass.jpg", "grass"); grassTex->load();
+	auto lavaTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/lava.jpg", "lava"); lavaTex->load();
+	auto dirtTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/dirt.jpg", "dirt"); dirtTex->load();
 
 	auto a = (Mesh*)assets.prepareAsset(Asset::Mesh, "res/model/box.bin", "box");
 	auto b = (Mesh*)assets.prepareAsset(Asset::Mesh, "res/model/sceneNEW.bin", "ter");
@@ -480,14 +426,24 @@ void Engine::mainLoop()
 	String<32> meshName, texName;
 
 	MeshUtility mu;
-	auto si = mu.objToBin(String<128>("res/model/oo.obj"), String<128>("res/model/oo.bin"));
-	mu.setMeshTexture(si, 0, Engine::assets.get2DTex("oo"), 0);
-	mu.setMeshName(si, String<32>("oo"));
+	auto si = mu.objToBin(String<128>("res/model/square.obj"), String<128>("res/model/square.bin"));
+	mu.nullAllMeshTextures(si, nullTex);
+	mu.setMeshAlbedoTexture(si, 0, Engine::assets.get2DTex("dirt"), 0);
+	mu.setMeshAlbedoTexture(si, 0, Engine::assets.get2DTex("lava"), 1);
+	mu.setMeshAlbedoTexture(si, 0, Engine::assets.get2DTex("grass"), 2);
+	mu.setMeshAlbedoTexture(si, 0, Engine::assets.get2DTex("stone"), 3);
+	//mu.setMeshSpecularTexture(si, 0, Engine::assets.get2DTex("stoneS"), 3);
+	//mu.setMeshSpecularTexture(si, 0, Engine::assets.get2DTex("terS"), 1);
+	//mu.setMeshNormalTexture(si, 0, Engine::assets.get2DTex("stoneN"), 3);
+	//mu.setMeshNormalTexture(si, 0, Engine::assets.get2DTex("terN"), 1);
+	mu.setMeshAlphaTexture(si, 0, Engine::assets.get2DTex("alpha"));
+	mu.setTriListMaterialID(si, 0, MaterialID::PNUU_TT_SS_NN);
+	mu.setMeshName(si, String<32>("square"));
 	//mu.exportBinV10(si);
 	//mu.clearStorage();
-	auto si2 = mu.objToBin(String<128>("res/model/pf.obj"), String<128>("res/model/pf.bin"));
-	mu.setMeshTexture(si2, 0, Engine::assets.get2DTex("pf"), 0);
-	mu.setMeshName(si2, String<32>("pf"));
+	//auto si2 = mu.objToBin(String<128>("res/model/pf.obj"), String<128>("res/model/pf.bin"));
+	//mu.setMeshTexture(si2, 0, Engine::assets.get2DTex("pf"), 0);
+	//mu.setMeshName(si2, String<32>("pf"));
 	//mu.exportBinV10(si);
 	//mu.clearStorage();
 	//auto si3 = mu.objToBin(String<128>("res/model/sp.obj"), String<128>("res/model/sp.bin"));
@@ -496,14 +452,16 @@ void Engine::mainLoop()
 	//mu.exportBinV10(si);
 	//mu.clearStorage();
 
-	mu.addMeshToTriLists(si2, 0, si);
+	//mu.addMeshToTriLists(si2, 0, si);
 	//mu.addMeshToTriLists(si3, 0, si);
 
-	mu.exportBinV10(si);
+	mu.exportBinV11(si);
 
 	mu.clearStorage();
 
 	auto c = (Mesh*)assets.prepareAsset(Asset::Mesh, "res/model/oo.bin", "paints");
+	auto d = (Mesh*)assets.prepareAsset(Asset::Mesh, "res/model/square.bin", "square");
+
 
 	//a->load();
 	//assets.meshManager.pushMeshToBatch(*a);
@@ -511,6 +469,10 @@ void Engine::mainLoop()
 	//assets.meshManager.pushMeshToBatch(*b);
 	c->load();
 	assets.meshManager.pushMeshToBatch(*c);
+
+	d->loadBinV11();
+	d->sortTriangleLists();
+	assets.meshManager.pushMeshToBatch(*d);
 
 	//ooMesh->load();
 	//assets.meshManager.pushMeshToBatch(*ooMesh);
@@ -597,7 +559,7 @@ void Engine::mainLoop()
 	createModelInfoWindow(uiw);
 
 	world = new World();
-	world->initialiseGLBuffers(1000);
+	world->initialiseGLBuffers();
 
 	auto prevNode = world->getWorldRootNode();
 
@@ -613,6 +575,10 @@ void Engine::mainLoop()
 	auto i2 = world->addMeshInstance(*c, world->getWorldRootNode());
 	i2->sgNode->transform.translate(glm::fvec3(0, -50, 0));
 	i2->sgNode->transform.updateMatrix();
+
+	auto i3 = world->addMeshInstance(*d, world->getWorldRootNode());
+	i3->sgNode->transform.translate(glm::fvec3(0, 10, 0)).scale(1.f);
+	i3->sgNode->transform.updateMatrix();
 
 	/*auto i3 = world->addMeshInstance(*ooMesh, world->getWorldRootNode());
 	i3->sgNode->transform.translate(glm::fvec3(0, 20, 0)).scale(10);

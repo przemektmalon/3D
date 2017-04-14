@@ -34,6 +34,11 @@ public:
 			return find->second;
 	}
 
+	std::map<String32, ShaderProgram*>& getShaderMap()
+	{
+		return shaders;
+	}
+
 private:
 
 	std::map<String32, ShaderProgram*> shaders;

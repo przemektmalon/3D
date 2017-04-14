@@ -80,7 +80,6 @@ public:
 	}
 
 	void defineGLVertexAttribs(GLuint vao);
-
 };
 
 enum MaterialID
@@ -94,6 +93,8 @@ enum MaterialID
 	MATERIALS_COUNT
 };
 
+enum DrawMode;
+
 class Material
 {
 public:
@@ -104,7 +105,9 @@ public:
 	GLTexture2D* albedo[4];
 	GLTexture2D* specular[4];
 	GLTexture2D* normal[4];
+	GLTexture2D* alpha;
 
+	static DrawMode drawModes[MATERIALS_COUNT];
 	static VertexFormat vertexFormats[MATERIALS_COUNT];
 	static void initVertexFormats()
 	{
@@ -117,9 +120,29 @@ public:
 		vf->attribs[2].name.setToChars("t");
 		vf->attribs[2].type = VertexAttrib::flt2;
 		vf->calculateSizeInBytes();
+
+		vf = vertexFormats + PNUU_TT_SS_NN;
+		vf->numAttribs = 3;
+		vf->attribs[0].name.setToChars("p");
+		vf->attribs[0].type = VertexAttrib::flt3;
+		vf->attribs[1].name.setToChars("n");
+		vf->attribs[1].type = VertexAttrib::flt3;
+		vf->attribs[2].name.setToChars("t");
+		vf->attribs[2].type = VertexAttrib::flt2;
+		vf->calculateSizeInBytes();
 	}
+	static void initDrawModes();
+
+	static DrawMode getDrawMode(MaterialID matID);
+
+	DrawMode getDrawMode();
 
 	static s32 getFormatSize(MaterialID matID)
+	{
+		return vertexFormats[matID].size;
+	}
+
+	s32 getFormatSize()
 	{
 		return vertexFormats[matID].size;
 	}
@@ -202,6 +225,11 @@ public:
 		ofs.write((char*)intData.interlacedData, intData.size * sizeof(float));*/
 	}
 
+	void save(StringGeneric& binPath)
+	{
+		saveBinV11(binPath);
+	}
+
 	void saveBinV10(StringGeneric& binPath)
 	{
 		std::ofstream ofs(binPath.getString(), std::ios_base::binary);
@@ -224,6 +252,40 @@ public:
 		}
 	}
 
+	void saveBinV11(StringGeneric& binPath)
+	{
+		std::ofstream ofs(binPath.getString(), std::ios_base::binary);
+		char major = 1; char minor = 0;
+		ofs.write(&major, sizeof(major));
+		ofs.write(&minor, sizeof(minor));
+		ofs.write(getName().getString(), getName().getCapacity());
+		auto numTriLists = triangleLists.size();
+		ofs.write((char*)&(numTriLists), sizeof(numTriLists));
+
+		for (auto i = 0; i < triangleLists.size(); ++i)
+		{
+			TriangleList* tl = &triangleLists[i];
+			ofs.write((char*)&tl->material.matID, sizeof(tl->material.matID));
+			ofs.write((char*)&tl->numVerts, sizeof(tl->numVerts));
+			ofs.write(tl->material.albedo[0]->getName().getString(), tl->material.albedo[0]->getName().getCapacity());
+			ofs.write(tl->material.albedo[1]->getName().getString(), tl->material.albedo[1]->getName().getCapacity());
+			ofs.write(tl->material.albedo[2]->getName().getString(), tl->material.albedo[2]->getName().getCapacity());
+			ofs.write(tl->material.albedo[3]->getName().getString(), tl->material.albedo[3]->getName().getCapacity());
+			ofs.write(tl->material.specular[0]->getName().getString(), tl->material.specular[0]->getName().getCapacity());
+			ofs.write(tl->material.specular[1]->getName().getString(), tl->material.specular[1]->getName().getCapacity());
+			ofs.write(tl->material.specular[2]->getName().getString(), tl->material.specular[2]->getName().getCapacity());
+			ofs.write(tl->material.specular[3]->getName().getString(), tl->material.specular[3]->getName().getCapacity());
+			ofs.write(tl->material.normal[0]->getName().getString(), tl->material.normal[0]->getName().getCapacity());
+			ofs.write(tl->material.normal[1]->getName().getString(), tl->material.normal[1]->getName().getCapacity());
+			ofs.write(tl->material.normal[2]->getName().getString(), tl->material.normal[2]->getName().getCapacity());
+			ofs.write(tl->material.normal[3]->getName().getString(), tl->material.normal[3]->getName().getCapacity());
+			ofs.write(tl->material.alpha->getName().getString(), tl->material.alpha->getName().getCapacity());
+			auto size = tl->getDataSizeInBytes();
+			ofs.write((char*)&size, sizeof(size));
+			ofs.write((char*)tl->data, size);
+		}
+	}
+
 	void load()
 	{
 		loadBinV10();
@@ -231,6 +293,7 @@ public:
 	}
 
 	void loadBinV10();
+	void loadBinV11();
 
 	void sortTriangleLists()
 	{
@@ -239,7 +302,7 @@ public:
 			bool added = false;
 			for (auto itr2 = triangleListsSorted.begin(); itr2 != triangleListsSorted.end(); ++itr2)
 			{
-				if (itr2->first == itr->material.matID)
+				if (itr2->first == Material::getDrawMode(itr->material.matID))
 				{
 					itr2->second.push_back(&(*itr));
 					added = true;
@@ -248,7 +311,7 @@ public:
 			}
 			if (!added)
 			{
-				triangleListsSorted.push_back(std::make_pair(itr->material.matID, std::vector<Mesh::TriangleList*>(1, &(*itr))));
+				triangleListsSorted.push_back(std::make_pair(Material::getDrawMode(itr->material.matID), std::vector<Mesh::TriangleList*>(1, &(*itr))));
 			}
 		}
 	}
@@ -280,13 +343,12 @@ public:
 		}
 	};
 
-	u32 getNumGPUTriLists()
+	u32 getNumTriLists(DrawMode pDrawMode)
 	{
 		u32 ret = 0;
 		for (auto itr = triangleListsSorted.begin(); itr != triangleListsSorted.end(); ++itr)
 		{
-			///TODO: THIS ISNT THE ONLY MATERIAL THE GPU SHOULD TAKE
-			if (itr->first == PNUU_T_S_N)
+			if(itr->first == pDrawMode)
 			{
 				for (auto itr2 = itr->second.begin(); itr2 != itr->second.end(); ++itr2)
 				{
@@ -300,28 +362,68 @@ public:
 //private:
 
 	std::vector<TriangleList> triangleLists;
-	std::vector<std::pair<MaterialID, std::vector<TriangleList*>>> triangleListsSorted;
+	std::vector<std::pair<DrawMode, std::vector<TriangleList*>>> triangleListsSorted;
 	std::vector<String<32>> listTextureNames;
 
 	AABounds3D bounds;
 	float radius;
 };
 
-struct MeshGPUMeta
+struct MeshGPUMetaRegular
 {
-	MeshGPUMeta() {}
+	MeshGPUMetaRegular() {}
 	union
 	{
+		/*
+		typedef struct 
+		{
+			uint  count;
+			uint  instanceCount;
+			uint  first;
+			uint  baseInstance;
+		} DrawArraysIndirectCommand;
+		*/
 		glm::uvec4 cmds;
 		struct
 		{
 			glm::uvec3 cmdss;
-			float radius;
+			float radiusX;
 		};
 	};
-	glm::uvec4 texHandleMatID;
-	glm::uvec4 normalBumpMap;
+	glm::uvec4 albedoHandle_RadiusYZ;
+	glm::uvec4 normal_bump_Handles;
 };
+
+struct MeshGPUMetaMultiTextured
+{
+	MeshGPUMetaMultiTextured() {}
+	union
+	{
+		/*
+		typedef struct
+		{
+		uint  count;
+		uint  instanceCount;
+		uint  first;
+		uint  baseInstance;
+		} DrawArraysIndirectCommand;
+		*/
+		glm::uvec4 cmds;
+		struct
+		{
+			glm::uvec3 cmdss;
+			float radiusX;
+		};
+	};
+	glm::uvec4 albedoHandleA_RadiusYZ;
+	glm::uvec4 specularA_normalA;
+	glm::uvec4 albedoB_specularB;
+	glm::uvec4 normalB_albedoC;
+	glm::uvec4 specularC_normalC;
+	glm::uvec4 albedoD_specularD;
+	glm::uvec4 normalD_alpha;
+};
+
 
 class MeshInstance
 {

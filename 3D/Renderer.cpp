@@ -348,7 +348,14 @@ inline void MasterRenderer::initialiseSamplers()
 	auto h8 = Engine::assets.get2DTex("pfN")->getHandle(defaultSampler.getGLID());
 	//auto h9 = Engine::assets.get2DTex("spN")->getHandle(defaultSampler.getGLID());
 
-	///TODO: make null texture (return when not found)
+	auto h10 = Engine::assets.get2DTex("stone")->getHandle(defaultSampler.getGLID());
+	auto h11 = Engine::assets.get2DTex("ter")->getHandle(defaultSampler.getGLID());
+
+	auto h12 = Engine::assets.get2DTex("stoneN")->getHandle(defaultSampler.getGLID());
+	auto h13 = Engine::assets.get2DTex("terN")->getHandle(defaultSampler.getGLID());
+
+	auto h14 = Engine::assets.get2DTex("alpha")->getHandle(defaultSampler.getGLID());
+
 	///TODO: Auto make handles resident!!
 
 	//Engine::h1 = glGetTextureSamplerHandleARB(Engine::t1.getGLID(), defaultSampler.getGLID());
@@ -366,6 +373,13 @@ inline void MasterRenderer::initialiseSamplers()
 	glMakeTextureHandleResidentARB(h7);
 	glMakeTextureHandleResidentARB(h8);
 	//glMakeTextureHandleResidentARB(h9);
+
+	glMakeTextureHandleResidentARB(h10);
+	glMakeTextureHandleResidentARB(h11);
+	glMakeTextureHandleResidentARB(h12);
+	glMakeTextureHandleResidentARB(h13);
+
+	glMakeTextureHandleResidentARB(h14);
 }
 
 void MasterRenderer::initialiseRenderer(Window * pwin, Camera & cam)
@@ -404,7 +418,8 @@ void MasterRenderer::initialiseShaders()
 	shaderStore.loadShader(&bilatBlurShader);
 	shaderStore.loadShader(&frustCullShader);
 	shaderStore.loadShader(&ssaoShader);
-	//ssaoShader.initialise();
+	shaderStore.loadShader(&gBufferShaderMultiTex);
+	shaderStore.loadShader(&prepMultiTexShader);
 	
 	shaderStore.loadShader(ShaderProgram::VertFrag, String32("Shape2DShader"));
 	shaderStore.loadShader(ShaderProgram::VertFrag, String32("Standard"));
@@ -473,6 +488,7 @@ void MasterRenderer::setActiveCam(Camera & pCam)
 void MasterRenderer::cameraProjUpdated()
 {
 	gBufferShader.setProj(activeCam->proj);
+	gBufferShaderMultiTex.setProj(activeCam->proj);
 	ssaoShader.setProj(activeCam->proj);
 	ssaoShader.setViewport(glm::ivec2(viewport.width, viewport.height));
 	frustCullShader.setProj(activeCam->proj);
@@ -501,7 +517,8 @@ void MasterRenderer::render()
 		glDepthRangedNV(-1.f, 1.f);
 		glClearDepth(1.f);
 		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
+		//glEnable(GL_CULL_FACE);
+		glDisable(GL_CULL_FACE);
 		glDisable(GL_BLEND);
 		glCullFace(GL_BACK);
 
@@ -528,17 +545,39 @@ void MasterRenderer::render()
 		frustCullShader.setPlanes(glm::fmat4(p[0], p[1], p[2], p[3]));
 		frustCullShader.sendPlanes();
 
-		world->objectMetaBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 0);
-		world->texHandleBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 1);
-		world->drawIndirectBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 2);
-		world->drawCountBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 3);
-		world->instanceTransformsBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 4);
-		world->visibleTransformsBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 5);
+		world->objectMetaBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 0);
+		world->texHandleBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 1);
+		world->drawIndirectBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 2);
+		world->drawCountBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 3);
+		world->instanceTransformsBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 4);
+		world->visibleTransformsBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 5);
 		world->instanceIDBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 6);
 
 		glDispatchCompute(1, 1, 1);
 
-		world->drawCountBuffer.getBufferSubData(0, sizeof(drawCount), &drawCount);
+		world->drawCountBuffer[Regular].getBufferSubData(0, sizeof(drawCount[Regular]), &drawCount[Regular]);
+
+		prepMultiTexShader.use();
+
+		prepMultiTexShader.setView(activeCam->view);
+		prepMultiTexShader.sendView();
+
+		world->objectMetaBuffer[MultiTextured].bindBase(GL_SHADER_STORAGE_BUFFER, 0);
+		world->texHandleBuffer[MultiTextured].bindBase(GL_SHADER_STORAGE_BUFFER, 1);
+		world->drawIndirectBuffer[MultiTextured].bindBase(GL_SHADER_STORAGE_BUFFER, 2);
+		world->drawCountBuffer[MultiTextured].bindBase(GL_SHADER_STORAGE_BUFFER, 3);
+		world->instanceTransformsBuffer[MultiTextured].bindBase(GL_SHADER_STORAGE_BUFFER, 4);
+		world->visibleTransformsBuffer[MultiTextured].bindBase(GL_SHADER_STORAGE_BUFFER, 5);
+		world->instanceIDBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 6);
+
+		prepMultiTexShader.setBaseID(drawCount[Regular]);
+
+		prepMultiTexShader.sendUniforms();
+
+		glDispatchCompute(1, 1, 1);
+
+		world->drawCountBuffer[MultiTextured].getBufferSubData(0, sizeof(drawCount[MultiTextured]), &drawCount[MultiTextured]);
+
 	}
 
 	//GBuffer pass
@@ -555,25 +594,46 @@ void MasterRenderer::render()
 
 		const GPUMeshManager& mm = Engine::assets.meshManager;
 
-		glBindVertexArray(mm.solidBatches.find(PNUU_T_S_N)->second.vaoID);
+		glBindVertexArray(mm.solidBatches.find(Regular)->second.vaoID);
 
-		world->texHandleBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 3);
-		world->visibleTransformsBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 4);
-		world->drawIndirectBuffer.bind(GL_DRAW_INDIRECT_BUFFER);
+		world->texHandleBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 3);
+		world->visibleTransformsBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 4);
+		world->drawIndirectBuffer[Regular].bind(GL_DRAW_INDIRECT_BUFFER);
 		world->instanceIDBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 6);
 
-		//glDrawArrays(GL_TRIANGLES, 0, 18);
-
-		glMultiDrawArraysIndirect(GL_TRIANGLES, 0, drawCount, 0);
+		glMultiDrawArraysIndirect(GL_TRIANGLES, 0, drawCount[Regular], 0);
 		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
+
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+		gBufferShaderMultiTex.use();
+
+		gBufferShaderMultiTex.setView(activeCam->view);
+		gBufferShaderMultiTex.setCamPos(activeCam->pos);
+
+		gBufferShaderMultiTex.sendView();
+		gBufferShaderMultiTex.sendCamPos();
+
+		gBufferShaderMultiTex.sendUniforms();
+
+		glBindVertexArray(mm.solidBatches.find(MultiTextured)->second.vaoID);
+
+		world->texHandleBuffer[MultiTextured].bindBase(GL_SHADER_STORAGE_BUFFER, 3);
+		world->visibleTransformsBuffer[MultiTextured].bindBase(GL_SHADER_STORAGE_BUFFER, 4);
+		world->drawIndirectBuffer[MultiTextured].bind(GL_DRAW_INDIRECT_BUFFER);
+		world->instanceIDBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 6);
+
+		glMultiDrawArraysIndirect(GL_TRIANGLES, 0, drawCount[MultiTextured], 0);
+		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
+
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 		if (rC.wireFrame)
 		{
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		}
-
-		glBindVertexArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 	
 	// *********************************************************** G-BUFFER PASS *********************************************************** //

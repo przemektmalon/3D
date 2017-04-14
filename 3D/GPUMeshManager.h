@@ -45,7 +45,7 @@ public:
 				auto ins = solidBatches.insert(std::make_pair(itr->first, MeshBatch()));
 				batchPtr = &ins.first->second;
 
-				auto program = Engine::r->shaderStore.getShader(String<32>("gBufferPass"));
+				auto program = Engine::r->shaderStore.getShader(String<32>("gBufferPassMultiTex"));
 
 				program->use();
 
@@ -171,6 +171,6 @@ public:
 
 	//std::vector<SolidMeshBatch> solidBatches;
 
-	std::map<MaterialID, MeshBatch> solidBatches;
+	std::map<DrawMode, MeshBatch> solidBatches;
 
 };

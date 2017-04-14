@@ -38,6 +38,24 @@ public:
 		}
 	}
 
+	void postMessage(char* str)
+	{
+		if (timeStamp)
+		{
+			String<50> time;
+			time.append("@", 1);
+			getTimeStr(time, ':');
+			time.append(" - ", 3);
+			content.append(time);
+			content.append(str, String<0>::determineLength(str));
+			content.append("\n", 1);
+		}
+		else
+		{
+
+		}
+	}
+
 	void setName(String<128>& pName)
 	{
 		name.overwrite(pName);

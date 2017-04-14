@@ -1,15 +1,15 @@
 #pragma once
 #include "Shader.h"
 
-class FrustCullShader : public ShaderProgram
+class PrepMultiTexShader : public ShaderProgram
 {
 public:
-	FrustCullShader()
+	PrepMultiTexShader()
 	{
-		name.overwrite(String32("frustCull"));
+		name.overwrite(String32("prepMultiTex"));
 		type = Compute;
 	}
-	~FrustCullShader() {}
+	~PrepMultiTexShader() {}
 
 	int initialise()
 	{

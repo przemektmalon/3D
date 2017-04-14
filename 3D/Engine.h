@@ -2,7 +2,6 @@
 
 #include "Window.h"
 #include "Shader.h"
-//#include "Text.h"
 #include <random>
 #include "UserInputManager.h"
 #include "Logger.h"
