@@ -110,14 +110,14 @@ vec3 perturb_normal( vec3 N, vec3 V, vec2 texcoord)
 
 void main()
 {
-	//const float FCHalf = (1.0/log(FAR*C + 1)) * 0.5;
-	const float FCHalf = 1.0 / log2(FAR + 1.0);
-	
-	vec2 texCoord = TexCoord;
+    //const float FCHalf = (1.0/log(FAR*C + 1)) * 0.5;
+    const float FCHalf = 1.0 / log2(FAR + 1.0);
+    
+    vec2 texCoord = TexCoord;
 
-	vec3 viewVec = ViewVec;
+    vec3 viewVec = ViewVec;
 
-	gl_FragDepth = log2(logz) * FCHalf;
+    gl_FragDepth = log2(logz) * FCHalf;
 
     texHandlesA = texHandle[7*DrawID + 0]; //rg == albedoA, ba == specA
     texHandlesB = texHandle[7*DrawID + 1]; //rg == normalA, ba == albedoB
@@ -125,9 +125,9 @@ void main()
     texHandlesD = texHandle[7*DrawID + 3]; //rg == albedoC, ba == specC
     texHandlesE = texHandle[7*DrawID + 4]; //rg == normalC, ba == albedoD
     texHandlesF = texHandle[7*DrawID + 5]; //rg == specD, ba == normalD
-    texHandlesG = texHandle[7*DrawID + 6]; //rg == alpha, ba == UNUSED
+    texHandlesG = texHandle[7*DrawID + 6]; //rg == alpha, ba == alphaTexScale
 
-    alpha = texture(sampler2D(texHandlesG.rg), TexCoord).rgb;
+    alpha = texture(sampler2D(texHandlesG.rg), TexCoord * uintBitsToFloat(texHandlesG.a)).rgb;
 
     //numBlends = int(texHandlesA.r != 0) + int(texHandlesB.b != 0) + int(texHandlesD.r != 0) + int(texHandlesE.r != 0);
 
@@ -149,8 +149,6 @@ void main()
     albedoSpec.a += texture(sampler2D(texHandlesD.ba), TexCoord).r * alpha.g;
     albedoSpec.a += texture(sampler2D(texHandlesF.rg), TexCoord).r * alpha.b;
     
-    //albedoSpec.rgba = vec4(0.f,1.f,1.f,1.f);
-
     gAlbedoSpec = albedoSpec;
 
     gID = id[DrawID];

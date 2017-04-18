@@ -17,6 +17,26 @@ public:
 
 	Asset* prepareAsset(Asset::Type pType, String<128>& pPath, String<32>& pName);
 
+	GLTexture2D* prepareMipTexture(String<128>&& pPath, String<32>&& pName)
+	{
+		return (GLTexture2D*)prepareAsset(Asset::Type::Texture2DMip, pPath, pName);
+	}
+
+	GLTexture2D* prepareTexture(String<128>&& pPath, String<32>&& pName)
+	{
+		return (GLTexture2D*)prepareAsset(Asset::Type::Texture2D, pPath, pName);
+	}
+
+	Font* prepareFont(String<128>&& pPath, String<32>&& pName)
+	{
+		return (Font*)prepareAsset(Asset::Type::Font, pPath, pName);
+	}
+
+	Mesh* prepareMesh(String<128>&& pPath, String<32>&& pName)
+	{
+		return (Mesh*)prepareAsset(Asset::Type::Mesh, pPath, pName);
+	}
+
 	Asset* prepareAsset(Asset::Type pType, String<128>&& pPath, String<32>&& pName)
 	{
 		return prepareAsset(pType, pPath, pName);

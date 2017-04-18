@@ -106,6 +106,7 @@ public:
 	GLTexture2D* specular[4];
 	GLTexture2D* normal[4];
 	GLTexture2D* alpha;
+	float alphaScale;
 
 	static DrawMode drawModes[MATERIALS_COUNT];
 	static VertexFormat vertexFormats[MATERIALS_COUNT];
@@ -280,6 +281,7 @@ public:
 			ofs.write(tl->material.normal[2]->getName().getString(), tl->material.normal[2]->getName().getCapacity());
 			ofs.write(tl->material.normal[3]->getName().getString(), tl->material.normal[3]->getName().getCapacity());
 			ofs.write(tl->material.alpha->getName().getString(), tl->material.alpha->getName().getCapacity());
+			ofs.write((char*)&tl->material.alphaScale, sizeof(float));
 			auto size = tl->getDataSizeInBytes();
 			ofs.write((char*)&size, sizeof(size));
 			ofs.write((char*)tl->data, size);
@@ -340,6 +342,11 @@ public:
 		s32 getDataSizeInBytes()
 		{
 			return numVerts * Material::vertexFormats[material.matID].size;
+		}
+
+		s32 getDataSizeInFloats()
+		{
+			return numVerts * (Material::vertexFormats[material.matID].size / 4);
 		}
 	};
 
@@ -412,7 +419,7 @@ struct MeshGPUMetaMultiTextured
 		struct
 		{
 			glm::uvec3 cmdss;
-			float radiusX;
+			float alphaScale;
 		};
 	};
 	glm::uvec4 albedoHandleA_RadiusYZ;

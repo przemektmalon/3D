@@ -235,9 +235,6 @@ public:
 		if (mesh == nullptr)
 			return;
 
-		//if (texIndex > textures.size() + 1)
-		//	return;
-
 		mesh->triangleLists[triListIndex].material.albedo[matTexIndex] = glTexture;
 	}
 
@@ -251,9 +248,6 @@ public:
 		if (mesh == nullptr)
 			return;
 
-		//if (texIndex > textures.size() + 1)
-		//	return;
-
 		mesh->triangleLists[triListIndex].material.specular[matTexIndex] = glTexture;
 	}
 
@@ -266,9 +260,6 @@ public:
 
 		if (mesh == nullptr)
 			return;
-
-		//if (texIndex > textures.size() + 1)
-		//	return;
 
 		mesh->triangleLists[triListIndex].material.normal[matTexIndex] = glTexture;
 	}
@@ -354,6 +345,43 @@ public:
 		return binInd;
 	}
 
+	void scaleTexCoords(s32 meshIndex, float scale)
+	{
+		auto mesh = validateMesh(meshIndex);
+		if (!mesh)
+			return;
+
+		for (auto itr = mesh->triangleLists.begin(); itr != mesh->triangleLists.end(); ++itr)
+		{
+			auto d = itr->data;
+			for (int i = 0; i < itr->getDataSizeInFloats(); i += 8)
+			{
+				d[i + 3] *= scale;
+				d[i + 4] *= scale;
+			}
+		}
+	}
+
+	void scaleAlphaTexCoords(s32 meshIndex, float scale)
+	{
+		auto mesh = validateMesh(meshIndex);
+		if (!mesh)
+			return;
+
+		for (auto itr = mesh->triangleLists.begin(); itr != mesh->triangleLists.end(); ++itr)
+		{
+			itr->material.alphaScale = scale;
+		}
+	}
+
+	Mesh* validateMesh(s32 meshIndex)
+	{
+		if (meshIndex > meshes.size() - 1)
+			return nullptr;
+
+		return meshes[meshIndex];
+	}
+
 	void clearStorage()
 	{
 		for (int i = 0; i < meshes.size(); ++i)
@@ -369,16 +397,6 @@ public:
 		objMeshDatas.clear();
 	}
 
-	/*void clearTextures()
-	{
-		for (int i = 0; i < textures.size(); ++i)
-		{
-			delete textures[i];
-		}
-		textures.clear();
-	}*/
-
 	std::vector<Mesh*> meshes;
 	std::vector<OBJMeshData*> objMeshDatas;
-	//std::vector<GLTexture2D*> textures;
 };

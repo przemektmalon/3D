@@ -356,6 +356,17 @@ inline void MasterRenderer::initialiseSamplers()
 
 	auto h14 = Engine::assets.get2DTex("alpha")->getHandle(defaultSampler.getGLID());
 
+	auto makeHandleResident = [&](char* name) -> void {
+		auto handle = Engine::assets.get2DTex(name)->getHandle(defaultSampler.getGLID());
+		glMakeTextureHandleResidentARB(handle);
+	};
+
+
+	makeHandleResident("stone2");
+	makeHandleResident("grass");
+	makeHandleResident("lava");
+	makeHandleResident("dirt");
+
 	///TODO: Auto make handles resident!!
 
 	//Engine::h1 = glGetTextureSamplerHandleARB(Engine::t1.getGLID(), defaultSampler.getGLID());

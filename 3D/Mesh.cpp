@@ -144,6 +144,8 @@ void Mesh::loadBinV11()
 		alphaName.determineLength();
 		tl.material.alpha = Engine::assets.get2DTex(alphaName);
 
+		ifs.read((char*)&tl.material.alphaScale, sizeof(float));
+
 		s32 dataSize;
 		ifs.read((char*)&dataSize, sizeof(dataSize));
 		tl.data = new float[dataSize];

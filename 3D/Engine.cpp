@@ -73,25 +73,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 #include <io.h>
 #include <fcntl.h>
 #include <windows.h>
+#include "cmder.h"
 
-int WinMain(__in HINSTANCE hInstance, __in_opt HINSTANCE hPrevInstance, __in_opt LPSTR lpCmdLine, __in int nShowCmd)
+int main()
+{
+	Engine::start(GetModuleHandle(NULL));
+	return 0;
+}
+
+/*int WinMain(__in HINSTANCE hInstance, __in_opt HINSTANCE hPrevInstance, __in_opt LPSTR lpCmdLine, __in int nShowCmd)
 {
 	Engine::start(hInstance);
 
 	//HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDR_ACCELERATOR1));
 
 	return 0;
-}
-
-static int count = 0;
+}*/
 
 void setRes()
 {
-	--count;
-	if (count < 0)
-		count = NUM_VALID_RESOLUTIONS - 1;
-	Engine::r->setResolution(count);
-	Engine::window.setResolution(MasterRenderer::getValidResolution(count));
+	static int curRes = 0;
+	--curRes;
+	if (curRes < 0)
+		curRes = NUM_VALID_RESOLUTIONS - 1;
+	Engine::r->setResolution(curRes);
+	Engine::window.setResolution(MasterRenderer::getValidResolution(curRes));
 	Engine::uiw->updateWindowVBO();
 }
 
@@ -165,17 +171,6 @@ void Engine::select(glm::ivec2 mPos)
 	delete[] idTex;
 }
 
-void specifyScreenVertexAttributes(GLuint shaderProgram)
-{
-	GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
-	glEnableVertexAttribArray(posAttrib);
-	glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
-
-	GLint texAttrib = glGetAttribLocation(shaderProgram, "texcoord");
-	glEnableVertexAttribArray(texAttrib);
-	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
-}
-
 void savePosition()
 {
 	std::ofstream fstr("pos.dat");
@@ -194,7 +189,6 @@ void loadPosition()
 	fstr.read((char*)&Engine::cam.targetPos, sizeof(glm::fvec2));
 	fstr.close();
 }
-
 
 void moveObjXP()
 {
@@ -340,8 +334,8 @@ void Engine::mainLoop()
 	uim.mapToKeyDown('K', printlog);
 	uim.mapToKeyDown('Q', killFocus);
 
-	uim.mapToMouseDown(0,mouseDown);
-	uim.mapToMouseUp(0,mouseUp);
+	uim.mapToMouseDown(0, mouseDown);
+	uim.mapToMouseUp(0, mouseUp);
 
 	r = new MasterRenderer();
 
@@ -352,48 +346,36 @@ void Engine::mainLoop()
 	FT_Init_FreeType(&ftLib);
 
 	r->initialiseShaders();
-	assets.initMeshBatch();
+	//assets.initMeshBatch();
 
-	//t1.createFromFile(SSTR("res/tex/g.jpg"));
-	//t2.createFromFile(SSTR("res/tex/gN.jpg"));
-	//t3.createFromFile(SSTR("res/tex/gD.jpg"));
-	//t4.createFromFile(SSTR("res/tex/gB.jpg"));
+	auto nullTex = assets.prepareTexture("res/tex/null.png", "null"); nullTex->load();
 
-	auto nullTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2D, "res/tex/null.png", "null"); nullTex->load();
+	auto t1p = assets.prepareMipTexture("res/tex/g.jpg", "g"); t1p->load();
+	auto t2p = assets.prepareMipTexture("res/tex/gN.jpg", "gN"); t2p->load();
+	auto t3p = assets.prepareMipTexture("res/tex/gS.jpg", "gS"); t3p->load();
+	auto t4p = assets.prepareMipTexture("res/tex/gB.jpg", "gB"); t4p->load();
 
-	auto t1p = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/g.jpg", "g"); t1p->load();
-	auto t2p = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/gN.jpg", "gN"); t2p->load();
-	auto t3p = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/gS.jpg", "gS"); t3p->load();
-	auto t4p = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/gB.jpg", "gB"); t4p->load();
-
-	auto ooTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/oo.jpg", "oo"); ooTex->load();
-	auto pfTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/pf.jpg", "pf"); pfTex->load();
+	auto ooTex = assets.prepareMipTexture("res/tex/oo.jpg", "oo"); ooTex->load();
+	auto pfTex = assets.prepareMipTexture("res/tex/pf.jpg", "pf"); pfTex->load();
 	//auto spTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/sp.jpg", "sp"); spTex->load();
-	auto stoneTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/stone.png", "stone"); 
-	stoneTex->load();
-	auto terTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/ter.png", "ter"); terTex->load();
+	auto stoneTex = assets.prepareMipTexture("res/tex/stone.png", "stone"); stoneTex->load();
+	auto terTex = assets.prepareMipTexture("res/tex/ter.png", "ter"); terTex->load();
 
-	auto ooNTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/ooN.jpg", "ooN"); ooNTex->load();
-	auto pfNTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/pfN.jpg", "pfN"); pfNTex->load();
-	//auto spNTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/spN.jpg", "spN"); spNTex->load();
-	auto stoneNTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/stoneN.png", "stoneN"); stoneNTex->load();
-	auto terNTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/terN.png", "terN"); terNTex->load();
+	auto stoneNTex = assets.prepareMipTexture("res/tex/stoneN.png", "stoneN"); stoneNTex->load();
+	auto terNTex = assets.prepareMipTexture("res/tex/terN.png", "terN"); terNTex->load();
 
-	auto alphaTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/alpha.png", "alpha"); alphaTex->load();
+	auto alphaTex = (GLTexture2D*)assets.prepareMipTexture("res/tex/alpha.png", "alpha"); alphaTex->load();
 
+	auto stone2Tex = assets.prepareMipTexture("res/tex/stone2.jpg", "stone2"); stone2Tex->load();
+	auto grassTex = assets.prepareMipTexture("res/tex/grass.png", "grass"); grassTex->load();
+	auto lavaTex = assets.prepareMipTexture("res/tex/lava.png", "lava"); lavaTex->load();
+	auto dirtTex = assets.prepareMipTexture("res/tex/dirt.jpg", "dirt"); dirtTex->load();
 
-	auto stone2Tex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/stone2.png", "stone2"); stone2Tex->load();
-	auto grassTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/grass.jpg", "grass"); grassTex->load();
-	auto lavaTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/lava.jpg", "lava"); lavaTex->load();
-	auto dirtTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/dirt.jpg", "dirt"); dirtTex->load();
-
-	auto a = (Mesh*)assets.prepareAsset(Asset::Mesh, "res/model/box.bin", "box");
-	auto b = (Mesh*)assets.prepareAsset(Asset::Mesh, "res/model/sceneNEW.bin", "ter");
+	auto a = assets.prepareMesh("res/model/box.bin", "box");
+	auto b = assets.prepareMesh("res/model/sceneNEW.bin", "ter");
 	
-
-	//auto ooMesh = (Mesh*)assets.prepareAsset(Asset::Mesh, "res/model/oo.bin", "oo");
-	//auto pfMesh = (Mesh*)assets.prepareAsset(Asset::Mesh, "res/model/pf.bin", "pf");
-	//auto spMesh = (Mesh*)assets.prepareAsset(Asset::Mesh, "res/model/sp.bin", "sp");
+	assets.prepareFont("res/fonts/clear-sans/ClearSans-Regular.ttf", "clearsans")->load();
+	assets.prepareFont("res/fonts/clear-sans/ClearSans-Bold.ttf", "clearsansb")->load();
 
 	///TODO: Automate mesh utulity through world_object definition files
 	///These should contain paths to triangle lists (.OBJ), texture names for each tri-list, world_object mesh name
@@ -439,6 +421,8 @@ void Engine::mainLoop()
 	mu.setMeshAlphaTexture(si, 0, Engine::assets.get2DTex("alpha"));
 	mu.setTriListMaterialID(si, 0, MaterialID::PNUU_TT_SS_NN);
 	mu.setMeshName(si, String<32>("square"));
+	mu.scaleAlphaTexCoords(si, 1.f / 50.f);
+	mu.scaleTexCoords(si, 50.f);
 	//mu.exportBinV10(si);
 	//mu.clearStorage();
 	//auto si2 = mu.objToBin(String<128>("res/model/pf.obj"), String<128>("res/model/pf.bin"));
@@ -483,69 +467,6 @@ void Engine::mainLoop()
 	
 	const GPUMeshManager& mm = Engine::assets.meshManager;
 
-	/*const u32 maxObjects = 65536;
-
-	GLCMD* cmds = new GLCMD[maxObjects];
-
-	auto eggMesh = assets.getMesh("egg");
-	auto bid = eggMesh->renderMeta.batchID;
-	auto bi = eggMesh->renderMeta.batchIndex;
-	auto data = mm.solidBatches.at(bid).data[bi];
-	auto dataSizeInBytes = mm.solidBatches.at(bid).dataSizeInBytes[bi];
-	auto numVerts = dataSizeInBytes / (sizeof(float) * 3);*/
-
-	/*float maxX, minX, maxY, minY, maxZ, minZ;
-
-	maxX = FLT_MIN;
-	minX = FLT_MAX;
-	
-	maxY = FLT_MIN;
-	minY = FLT_MAX;
-
-	maxZ = FLT_MIN;
-	minZ = FLT_MAX;
-
-	for (int i = 0; i < numVerts; i += 3)
-	{
-		glm::fvec3 vert;
-		vert.x = data[i];
-		vert.y = data[i+1];
-		vert.z = data[i+2];
-		maxX = vert.x > maxX ? vert.x : maxX;
-		maxY = vert.y > maxY ? vert.y : maxY;
-		maxZ = vert.z > maxZ ? vert.z : maxZ;
-
-		minX = vert.x < minX ? vert.x : minX;
-		minY = vert.y < minY ? vert.y : minY;
-		minZ = vert.z < minZ ? vert.z : minZ;
-	}
-
-	glm::fvec3 origin((maxX + minX) / 2, (maxY + minY) / 2, (maxZ + minZ) / 2);
-
-	float maxDist = 0;
-
-	for (int i = 0; i < numVerts; i += 8)
-	{
-		glm::fvec3 vert;
-		vert.x = data[i];
-		vert.y = data[i + 1];
-		vert.z = data[i + 2];
-
-		float dist = glm::length(vert);
-		maxDist = dist > maxDist ? dist : maxDist;
-	}
-
-	for (int i = 0; i < maxObjects; ++i)
-	{
-		cmds[i].count = mm.solidBatches[0].counts[0];
-		cmds[i].instanceCount = 1;
-		cmds[i].first = mm.solidBatches[0].firsts[0];
-		cmds[i].radius = maxDist;
-	}*/
-
-	assets.prepareAsset(Asset::Type::Font, "res/fonts/clear-sans/ClearSans-Regular.ttf", "clearsans")->load();
-	assets.prepareAsset(Asset::Type::Font, "res/fonts/clear-sans/ClearSans-Bold.ttf", "clearsansb")->load();
-
 	cam.initialiseProj(float(window.getSizeX()) / float(window.getSizeY()));
 	cam.calculateViewRays();
 	r->initialiseRenderer(&window, cam);
@@ -563,21 +484,12 @@ void Engine::mainLoop()
 
 	auto prevNode = world->getWorldRootNode();
 
-	//for (int i = 0; i < 100; ++i)
-	{
-		//auto i1 = world->addMeshInstance(*a, prevNode);
-		//prevNode = i1->sgNode;
-		//i1->sgNode->transform.translate(glm::fvec3((i%100) * 500, 0, std::floor(float(i) / 100) * 500)).scale(100);
-		//i1->sgNode->transform.translate(glm::fvec3(5, 0, 0));
-		//i1->sgNode->transform.updateMatrix();
-	}
-
 	auto i2 = world->addMeshInstance(*c, world->getWorldRootNode());
 	i2->sgNode->transform.translate(glm::fvec3(0, -50, 0));
 	i2->sgNode->transform.updateMatrix();
 
 	auto i3 = world->addMeshInstance(*d, world->getWorldRootNode());
-	i3->sgNode->transform.translate(glm::fvec3(0, 10, 0)).scale(1.f);
+	i3->sgNode->transform.translate(glm::fvec3(0, 10, 0)).scale(50.f);
 	i3->sgNode->transform.updateMatrix();
 
 	/*auto i3 = world->addMeshInstance(*ooMesh, world->getWorldRootNode());

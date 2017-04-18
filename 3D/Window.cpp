@@ -80,11 +80,7 @@ void Window::createWindow(HINSTANCE pHInstance, LPCTSTR pWindowName, int pXPos, 
 
 	ShowWindow(windowHandle, 1);
 
-
-
 	std::cout << "Screen Resolution: " << desiredClientArea.x << "x" << desiredClientArea.y << std::endl;
-
-
 
 	//SWAP INTERVAL VSYNC
 }
@@ -199,6 +195,7 @@ void Window::screenshot(StringGeneric& fileName)
 
 	//String128 filepath = String128("res/screenshot/");
 	fileName.append(String128(".bmp"));
+	fileName.append('\0');
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	glReadBuffer(GL_BACK);
 	glReadPixels(0, 0, getSizeX(), getSizeY(), GL_BGR, GL_UNSIGNED_BYTE, screenshot);
@@ -245,9 +242,9 @@ void Window::screenshot()
 	tm  tstruct;
 	char buf[80];
 	localtime_s(&tstruct, &now);
-	OutputDebugString("SCREENSHOT");
+	//OutputDebugString("SCREENSHOT");
 	strftime(buf, sizeof(buf), "%F_%H;%M;%S", &tstruct);
-	String128 fileName = String128("Screenshot_").append(String64(buf));
+	String128 fileName = String128("res/screenshot/Screenshot_").append(String64(buf));
 	screenshot(fileName);
 }
 

@@ -74,8 +74,6 @@ public:
 	GlyphContainer* requestGlyphs(u16 pCharSize, Text* pUser);
 	void releaseGlyphs(u16 pCharSize, Text* pUser);
 
-protected:
-
 	void load()
 	{
 		if (ftFace == nullptr)

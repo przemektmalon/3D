@@ -198,7 +198,8 @@ public:
 
 					metaMultiTextured[i].albedoHandleA_RadiusYZ.b = bptr->radii[bindex].y;
 					metaMultiTextured[i].albedoHandleA_RadiusYZ.a = bptr->radii[bindex].z;
-					metaMultiTextured[i].radiusX = bptr->radii[bindex].x;
+					//metaMultiTextured[i].alphaScale = (*itr3)->material.alphaScale;
+					metaMultiTextured[i].alphaScale = 1.f / 50.f;
 
 					instanceTransformsMultiTextured[i] = itr->second.sgNode->transform.getTransformMat();
 
