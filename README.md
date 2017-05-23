@@ -30,7 +30,7 @@ Some screenshots on Google Drive: https://drive.google.com/open?id=0B9uuq4IEinJP
 
 -Dynamic lighting (spot, point, directional)
 
--Shadows for spot and directional lights (point light shadows soon)
+-Shadows for point, spot and directional lights.
 
 -Some basic UI elements (window, labels, buttons)
 
@@ -40,6 +40,7 @@ Some screenshots on Google Drive: https://drive.google.com/open?id=0B9uuq4IEinJP
 
 -Modern OpenGL approach
 
+-Automatic asset loading from external .txt asset list.
 
 # Planned features
 
