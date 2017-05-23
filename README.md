@@ -24,6 +24,8 @@ Some screenshots on Google Drive: https://drive.google.com/open?id=0B9uuq4IEinJP
 
 -Mouse object selection
 
+-Mesh utilities tool. For importing and exporting wavefront and binary mesh files, joining triangle lists, setting textures.
+
 -Scene graph/hierarchical tranformations
 
 -Dynamic lighting (spot, point, directional)
