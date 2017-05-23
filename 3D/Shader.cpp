@@ -25,8 +25,8 @@ const String16 ShaderProgram::typeGLSLNames[ShaderProgram::UniformTypesCount] = 
 	"sampler2D"
 };
 
-ShaderProgram::ShaderProgram() : vertexPath(), fragmentPath() {}
-ShaderProgram::ShaderProgram(const ShaderProgram& program) : vertexPath(), fragmentPath() {}
+ShaderProgram::ShaderProgram() : geomPath(), vertexPath(), fragmentPath() {}
+ShaderProgram::ShaderProgram(const ShaderProgram& program) : geomPath(), vertexPath(), fragmentPath() {}
 
 ShaderProgram::~ShaderProgram() {}
 
@@ -47,6 +47,9 @@ void ShaderProgram::load(String32 && pName, ShaderType pType, String128 & pShade
 	case VertFrag:
 		loadVertFrag(pName, pShaderLocationPath);
 		break;
+	case VertGeomFrag:
+		loadVertGeomFrag(pName, pShaderLocationPath);
+		break;
 	case Compute:
 		loadCompute(pName, pShaderLocationPath);
 		break;
@@ -63,6 +66,9 @@ void ShaderProgram::load(String32 & pName, ShaderType pType, String128 & pShader
 	case VertFrag:
 		loadVertFrag(pName, pShaderLocationPath);
 		break;
+	case VertGeomFrag:
+		loadVertGeomFrag(pName, pShaderLocationPath);
+		break;
 	case Compute:
 		loadCompute(pName, pShaderLocationPath);
 		break;
@@ -76,10 +82,18 @@ void ShaderProgram::compile()
 	case VertFrag:
 		compileVertFrag();
 		break;
+	case VertGeomFrag:
+		compileVertGeomFrag();
+		break;
 	case Compute:
 		compileCompute();
 		break;
 	}
+}
+
+void ShaderProgram::setUniform(char* pUniformName, const void * pUniformData, s32 pFlags)
+{
+	setUniform(String64(pUniformName), pUniformData, pFlags);
 }
 
 void ShaderProgram::setUniform(String64 & pUniformName, const void * pUniformData, s32 pFlags)
@@ -374,6 +388,191 @@ void ShaderProgram::compileVertFrag()
 	extractUniforms(fragmentContent);
 
 	return;
+}
+
+void ShaderProgram::loadVertGeomFrag(String32 & pName, String128 & pShaderLocationPath)
+{
+	String128 shaderPath; shaderPath.overwrite(pShaderLocationPath);
+
+	geomPath.overwrite(shaderPath);
+	geomPath.append(pName);
+	geomPath.append(String8(".geom"));
+
+	vertexPath.overwrite(geomPath);
+	vertexPath.shrinkBy(5);
+	vertexPath.append(String8(".vert"));
+
+	fragmentPath.overwrite(vertexPath);
+	fragmentPath.shrinkBy(5);
+	fragmentPath.append(String8(".frag"));
+
+	std::ifstream geomStream(geomPath.getString(), std::ifstream::in | std::ifstream::ate);
+	std::ifstream vertStream(vertexPath.getString(), std::ifstream::in | std::ifstream::ate);
+	std::ifstream fragStream(fragmentPath.getString(), std::ifstream::in | std::ifstream::ate);
+
+	if (geomStream.fail())
+		return;
+
+	if (vertStream.fail())
+	{
+		return; //TODO: LOG ERROR
+	}
+
+	if (fragStream.fail())
+	{
+		return; //TODO: LOG ERROR
+	}
+
+	geomSize = 1 + geomStream.tellg();
+	vertexSize = 1 + vertStream.tellg();
+	fragmentSize = 1 + fragStream.tellg();
+
+	geomContent = new char[geomSize];
+	vertexContent = new char[vertexSize];
+	fragmentContent = new char[fragmentSize];
+
+	geomContent[geomSize - 1] = '\0';
+	vertexContent[vertexSize - 1] = '\0';
+	fragmentContent[fragmentSize - 1] = '\0';
+
+	geomStream.seekg(0);
+	vertStream.seekg(0);
+	fragStream.seekg(0);
+
+	geomStream.read(geomContent, geomSize - 1);
+	vertStream.read(vertexContent, vertexSize - 1);
+	fragStream.read(fragmentContent, fragmentSize - 1);
+
+	geomStream.close();
+	vertStream.close();
+	fragStream.close();
+
+	extractPreprocessorVars(geomContent);
+	extractPreprocessorVars(vertexContent);
+	extractPreprocessorVars(fragmentContent);
+}
+
+void ShaderProgram::compileVertGeomFrag()
+{
+	GLchar* glCharGeom = geomContent;
+	GLchar* glCharVert = vertexContent;
+	GLchar* glCharFrag = fragmentContent;
+
+	glCharGeom = preprocess(geomContent, geomSize);
+	glCharVert = preprocess(vertexContent, vertexSize);
+	glCharFrag = preprocess(fragmentContent, fragmentSize);
+
+	GLint geomShader = glCreateShader(GL_GEOMETRY_SHADER);
+	GLint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	GLint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+
+	glShaderSource(geomShader, 1, &glCharGeom, NULL);
+	glShaderSource(vertexShader, 1, &glCharVert, NULL);
+	glShaderSource(fragmentShader, 1, &glCharFrag, NULL);
+
+	glCompileShader(fragmentShader);
+	GLint isCompiled = GL_FALSE;
+	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &isCompiled);
+	if (isCompiled == GL_FALSE)
+	{
+		GLint maxLength = 0;
+		glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &maxLength);
+
+		std::vector<GLchar> errorLog(maxLength);
+		glGetShaderInfoLog(fragmentShader, maxLength, &maxLength, &errorLog[0]);
+
+		Engine::log.postMessage(errorLog.data());
+		Engine::logger.printLog(Engine::log, String32("ShaderCompileFailed"));
+
+		glDeleteShader(fragmentShader);
+
+		return;
+	}
+
+	glCompileShader(vertexShader);
+	isCompiled = GL_FALSE;
+	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &isCompiled);
+	if (isCompiled == GL_FALSE)
+	{
+		GLint maxLength = 0;
+		glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &maxLength);
+
+		std::vector<GLchar> errorLog(maxLength);
+		glGetShaderInfoLog(vertexShader, maxLength, &maxLength, &errorLog[0]);
+
+		Engine::log.postMessage(errorLog.data());
+		Engine::logger.printLog(Engine::log, String32("ShaderCompileFailed"));
+
+		glDeleteShader(fragmentShader);
+		glDeleteShader(vertexShader);
+
+		return;
+	}
+
+	glCompileShader(geomShader);
+	isCompiled = GL_FALSE;
+	glGetShaderiv(geomShader, GL_COMPILE_STATUS, &isCompiled);
+	if (isCompiled == GL_FALSE)
+	{
+		GLint maxLength = 0;
+		glGetShaderiv(geomShader, GL_INFO_LOG_LENGTH, &maxLength);
+
+		std::vector<GLchar> errorLog(maxLength);
+		glGetShaderInfoLog(geomShader, maxLength, &maxLength, &errorLog[0]);
+
+		Engine::log.postMessage(errorLog.data());
+		Engine::logger.printLog(Engine::log, String32("ShaderCompileFailed"));
+
+		glDeleteShader(fragmentShader);
+		glDeleteShader(vertexShader);
+		glDeleteShader(geomShader);
+
+		return;
+	}
+
+	auto shaderProgram = glCreateProgram();
+
+	glAttachShader(shaderProgram, vertexShader);
+	glAttachShader(shaderProgram, fragmentShader);
+	glAttachShader(shaderProgram, geomShader);
+
+	glLinkProgram(shaderProgram);
+
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
+	glDeleteShader(geomShader);
+
+	isCompiled = GL_FALSE;
+	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &isCompiled);
+	if (isCompiled == GL_FALSE)
+	{
+		///TODO: LOG ERROR
+
+		GLint maxLength = 0;
+		glGetProgramiv(shaderProgram, GL_INFO_LOG_LENGTH, &maxLength);
+
+		std::vector<GLchar> errorLog(maxLength);
+		glGetProgramInfoLog(shaderProgram, maxLength, &maxLength, &errorLog[0]);
+
+		for (int i = 0; i < errorLog.size(); ++i)
+		{
+
+		}
+
+
+		glDeleteProgram(shaderProgram);
+
+		shaderProgram = 0;
+
+		return;
+	}
+
+	GLID = shaderProgram;
+
+	use();
+	extractUniforms(vertexContent);
+	extractUniforms(fragmentContent);
+	extractUniforms(geomContent);
 }
 
 void ShaderProgram::loadCompute(String32 & pName, String128 & pShaderLocationPath)

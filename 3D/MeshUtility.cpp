@@ -7,6 +7,7 @@
 #include <ios>
 #include "MeshUtility.h"
 #include "C:/Programming/Libs/GLM/glm/common.hpp"
+#include "Engine.h"
 
 const int VertexAttrib::typeSizes[VertexAttrib::AttribTypesCount] = {
 	8, 12, 16,
@@ -153,17 +154,79 @@ void OBJMeshData::load(StringGeneric & pPath)
 		std::cout << "Error loading " << pPath.getString() << std::endl;
 	}
 
+	path.overwrite(pPath);
+
+	String128 mtlPath; mtlPath.overwrite(pPath); mtlPath.shrinkBy(4); mtlPath.append(".mtl",5);
+
+	std::ifstream mtl(mtlPath.getString());
+
+	if (mtl.is_open())
+	{
+		std::string line;
+
+		while (!mtl.eof())
+		{
+			std::getline(mtl, line);
+			if (line.substr(0, 6) == "newmtl")
+			{
+				std::string materialName;
+				materialName = line.substr(7);
+
+				while (true)
+				{
+					std::getline(mtl, line);
+					std::istringstream iss(line);
+					if (iss.str().length() < 2)
+						break;
+					if (iss.str()[0] == '\n')
+						break;
+					std::getline(iss, line, ' ');
+					if (line == "map_Kd")
+					{
+						std::getline(iss, line);
+						std::string texName;
+						int i = line.length() - 4;
+						int j = 0;
+						while (true)
+						{
+							if (line[i] == '\\')
+								break;
+							--i; ++j;
+						}
+						texName = line.substr(i + 1, j - 1);
+						materials.insert(std::make_pair(String64(materialName.c_str()), String32(texName.c_str())));
+					}
+				}
+			}
+		}
+	}
+
+	Group* currentGroup = nullptr;
+
 	vData.data[0] = new std::vector<glm::fvec3>;
 	vData.data[1] = new std::vector<glm::fvec3>;
 	vData.data[2] = new std::vector<glm::fvec2>;
-
 	vData.format.size = 8;
 
 	while (!ifs.eof())
 	{
 		std::string type;
 		std::getline(ifs, type, ' ');
-		if (type == "v")
+		if (type == "o")
+		{
+			std::string groupName;
+			std::getline(ifs, groupName, '_');
+			groups.push_back(Group(String64(groupName.c_str())));
+			currentGroup = &groups.back();
+			std::getline(ifs, groupName);
+		}
+		else if (type == "usemtl")
+		{
+			std::string materialName;
+			std::getline(ifs, materialName);
+			currentGroup->materialName.setToChars(materialName.c_str());
+		}
+		else if (type == "v")
 		{
 			std::string xstr, ystr, zstr;
 			std::getline(ifs, xstr, ' ');
@@ -218,21 +281,21 @@ void OBJMeshData::load(StringGeneric & pPath)
 			std::getline(ifs, xstr, '/');
 			std::getline(ifs, ystr, '/');
 			std::getline(ifs, zstr, ' ');
-			indices.push_back(abs(std::stoi(xstr)));
-			indices.push_back(abs(std::stoi(ystr)));
-			indices.push_back(abs(std::stoi(zstr)));
+			currentGroup->indices.push_back(abs(std::stoi(xstr)));
+			currentGroup->indices.push_back(abs(std::stoi(ystr)));
+			currentGroup->indices.push_back(abs(std::stoi(zstr)));
 			std::getline(ifs, xstr, '/');
 			std::getline(ifs, ystr, '/');
 			std::getline(ifs, zstr, ' ');
-			indices.push_back(abs(std::stoi(xstr)));
-			indices.push_back(abs(std::stoi(ystr)));
-			indices.push_back(abs(std::stoi(zstr)));
+			currentGroup->indices.push_back(abs(std::stoi(xstr)));
+			currentGroup->indices.push_back(abs(std::stoi(ystr)));
+			currentGroup->indices.push_back(abs(std::stoi(zstr)));
 			std::getline(ifs, xstr, '/');
 			std::getline(ifs, ystr, '/');
 			std::getline(ifs, zstr, '\n');
-			indices.push_back(abs(std::stoi(xstr)));
-			indices.push_back(abs(std::stoi(ystr)));
-			indices.push_back(abs(std::stoi(zstr)));
+			currentGroup->indices.push_back(abs(std::stoi(xstr)));
+			currentGroup->indices.push_back(abs(std::stoi(ystr)));
+			currentGroup->indices.push_back(abs(std::stoi(zstr)));
 
 			/*std::string xstr, ystr, zstr;
 			std::getline(ifs, xstr, '/');
@@ -259,73 +322,6 @@ void OBJMeshData::load(StringGeneric & pPath)
 			std::getline(ifs, type, '\n');
 		}
 	}
-
-	//data.numVert = data.indices.size() / 3;
-	//data.numTris = data.numVert / 3;
-
-	/*int numVert = data.numVert;
-	int vertSize = 8;
-	float* glvertices = new float[numVert * vertSize];
-
-	int count = -1;
-	for (auto itr = data.indices.begin(); itr != data.indices.end(); itr += 3)
-	{
-		int index = 3 * (*(itr)-1);
-		glvertices[++count] = data.verts[index];
-		glvertices[++count] = data.verts[index + 1];
-		glvertices[++count] = data.verts[index + 2];
-
-		index = 2 * (*(itr + 1) - 1);
-		glvertices[++count] = data.texCoords[index];
-		glvertices[++count] = data.texCoords[index + 1];
-
-		index = 3 * (*(itr + 2) - 1);
-		glvertices[++count] = data.normals[index];
-		glvertices[++count] = data.normals[index + 1];
-		glvertices[++count] = data.normals[index + 2];
-	}*/
-
-	//auto glVertsSize = numVert * vertSize;
-
-	//std::cout << glVertsSize << std::endl;
-	//std::cout << data.numVert << std::endl;
-	//std::cout << data.numTris << std::endl;
-
-
-	/*char* path = pPath.getString();
-	int pathLength = 0;
-
-	while (*path != '\0')
-	{
-		pathLength++;
-		path++;
-	}
-	pathLength++;
-
-	char* binPathName = new char[pathLength];
-	path = pPath.getString();
-	for (int i = 0; i < pathLength - 5; ++i)
-	{
-		binPathName[i] = path[i];
-		if (binPathName[i] == '\\')
-			binPathName[i] = '/';
-	}
-
-	binPathName[pathLength - 5] = '.';
-	binPathName[pathLength - 4] = 'b';
-	binPathName[pathLength - 3] = 'i';
-	binPathName[pathLength - 2] = 'n';
-	binPathName[pathLength - 1] = '\0';
-
-	for (int i = 0; i < pathLength; ++i)
-	{
-		std::cout << binPathName[i];
-	}*/
-
-	//std::ofstream ofs(binPathName, std::ios_base::binary);
-	//ofs.write((char*)&glVertsSize, sizeof(glVertsSize));
-	//ofs.write((char*)glvertices, glVertsSize * sizeof(float));
-	//ofs.close();
 }
 
 void MeshUtility::loadOBJ(String<128>& pPath, s32 objIndex)
@@ -345,4 +341,67 @@ void MeshUtility::loadOBJ(String<128>& pPath, s32 objIndex)
 	}
 
 	objMeshData->load(pPath);
+}
+
+void MeshUtility::binFromObj(s32 objIndex, s32 binIndex)
+{
+	if (objIndex > objMeshDatas.size() - 1)
+		return;
+
+	if (binIndex > meshes.size() - 1)
+		return;
+
+	auto objMeshData = objMeshDatas[objIndex];
+	auto mesh = meshes[binIndex];
+
+	InterleavedVertexData ivd;
+	ivd.fromOBJMeshData(objMeshData);
+
+	//mesh->ivd = ivd;
+	//mesh->intData.interlacedData = ivd.data;
+	//mesh->intData.size = ivd.size;
+	mesh->size = 0;
+	//mesh->diskPath.overwrite(String<128>("PATH"));
+	//mesh->name.overwrite(String<32>("NAME"));
+
+	for (auto itr = ivd.materialGroups.begin(); itr != ivd.materialGroups.end(); ++itr)
+	{
+		u32 totalSizeInFloats = 0;
+		u32 totalNumVerts = 0;
+		for (auto itr2 = itr->second.begin(); itr2 != itr->second.end(); ++itr2)
+		{
+			totalSizeInFloats += itr2->size;
+			totalNumVerts += itr2->size / itr2->format.size;
+		}
+		Mesh::TriangleList list;
+		list.material.matID = PNUU_T_S_N;
+		list.data = new float[totalSizeInFloats];
+		list.first = 0;
+		list.numVerts = totalNumVerts;
+		s32 prevSize = 0;
+		for (auto itr2 = itr->second.begin(); itr2 != itr->second.end(); ++itr2)
+		{
+			memcpy(list.data + prevSize, itr2->data, itr2->getDataSizeInBytes());
+			prevSize = itr2->getDataSizeInBytes();
+		}
+		
+		list.material.nullTextures(Engine::assets.get2DTex("null"));
+		if (itr->second.front().textureName.getLength() != 0)
+		{
+			list.material.albedo[0] = Engine::assets.get2DTex(itr->second.front().textureName);
+			String32 normName; normName.overwrite(itr->second.front().textureName);
+			normName.append('N');
+			list.material.normal[0] = Engine::assets.get2DTex(normName);
+		}
+
+		mesh->triangleLists.push_back(list);
+	}
+
+
+
+	mesh->name.overwrite(objMeshData->name);
+	String128 diskPath("res/model/");
+	diskPath.append(mesh->getName());
+	diskPath.append(".bin");
+	mesh->diskPath.overwrite(diskPath);
 }

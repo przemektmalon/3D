@@ -18,7 +18,7 @@
 class ShaderProgram
 {
 public:
-	enum ShaderType { VertFrag, Compute };
+	enum ShaderType { VertFrag, VertGeomFrag, Compute };
 
 private:
 	enum UniformType {
@@ -107,6 +107,7 @@ public:
 		glUseProgram(0);
 	}
 
+	void setUniform(char* pUniformName, const void* pUniformData, s32 pFlags = 0);
 	void setUniform(String64& pUniformName, const void* pUniformData, s32 pFlags = 0);
 
 	void setVarVal(String32& var, String1024& val);
@@ -122,6 +123,10 @@ private:
 	void loadVertFrag(String32& pName, String128& pShaderLocationPath);
 
 	void compileVertFrag();
+
+	void loadVertGeomFrag(String32& pName, String128& pShaderLocationPath);
+
+	void compileVertGeomFrag();
 
 	void loadCompute(String32& pName, String128& pShaderLocationPath);
 
@@ -218,6 +223,7 @@ private:
 
 	union {
 		struct {
+			String128 geomPath;
 			String128 vertexPath;
 			String128 fragmentPath;
 		};
@@ -226,6 +232,7 @@ private:
 
 	union {
 		struct {
+			char* geomContent;
 			char* vertexContent;
 			char* fragmentContent;
 		};
@@ -234,6 +241,7 @@ private:
 
 	union {
 		struct {
+			u32 geomSize;
 			u32 vertexSize;
 			u32 fragmentSize;
 		};

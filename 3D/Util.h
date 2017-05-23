@@ -44,7 +44,7 @@ void saveTexToFile(GLuint texture, std::string targetPath)
 
 	while (glGetError());
 
-	std::string filepath = "res/screenshot/" + targetPath + ".bmp";
+	std::string filepath = "screenshot/" + targetPath + ".bmp";
 	glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_UNSIGNED_BYTE, screenshot);
 
 	auto err = glGetError();
@@ -143,7 +143,7 @@ float randFloat()
 	u8* screenshot = new u8[sourceImageSize];
 	u8* flipped = new u8[targetImageSize];
 
-	std::string filepath = "res/screenshot/" + fileName + ".bmp";
+	std::string filepath = "screenshot/" + fileName + ".bmp";
 	glBindTextureUnit(0, texture);
 	glGetTexImage(GL_TEXTURE_2D, 0, texFormat, texType, screenshot);
 

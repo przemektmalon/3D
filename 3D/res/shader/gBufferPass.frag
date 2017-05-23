@@ -90,29 +90,12 @@ vec3 perturb_normal( vec3 N, vec3 V, vec2 texcoord)
 
 void main()
 {
-	//const float FCHalf = (1.0/log(FAR*C + 1)) * 0.5;
 	const float FCHalf = 1.0 / log2(FAR + 1.0);
 	
 	vec2 texCoord = TexCoord;
 
 	vec3 viewVec = ViewVec;
 
-	//mat3 TBN = transpose(cotangent_frame(normalize(Normal), normalize(-viewVec), texCoord));
-	//vec3 viewDir = normalize((TBN * WorldPos) - (TBN * camPos));
-
-
-	//texCoord = ParallaxMapping(vec2(vec3(texCoord,1.f)), viewVec);
-
-	//texCoord = ParallaxMapping(texCoord, normalize((cotangent_frame(Normal, -normalize(viewVec), texCoord)) * (-viewVec)));
-	//texCoord = ParallaxMapping(texCoord, normalize(-viewVec));
-	//if(texCoord.x > 1.0 || texCoord.y > 1.0 || texCoord.x < 0.0 || texCoord.y < 0.0)
-    	//discard;
-
-	//vec4 clipPos = gl_FragCoord;
-	//float depth = (2.f*log(C*clipPos.w + 1.f) / log(C*Far + 1.f) - 1.f) * clipPos.w;
-	//gl_FragDepth = depth;
-	//gl_FragDepth = log(logz)*FC; 
-	//gl_FragDepth = logz;
 	gl_FragDepth = log2(logz) * FCHalf;
 
     vec3 mappedNormal = perturb_normal(normalize(Normal), normalize(viewVec), texCoord);

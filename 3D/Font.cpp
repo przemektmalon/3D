@@ -100,6 +100,7 @@ void GlyphContainer::load(u16 pCharSize, FT_Face pFace)
 		xOffset += sizes[i].x + 1;
 	}
 
+	height = pFace->height;
 	maxYSize += lineYSize;
 	maxXSize = lineXSize > maxXSize ? lineXSize : maxXSize;
 	glyphs.createFromStream(GL_RED, maxXSize, maxYSize, GL_RGB, GL_UNSIGNED_BYTE, NULL, 0, 1);

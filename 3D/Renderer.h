@@ -14,9 +14,10 @@
 #include "BilateralBlurShader.h"
 #include "FrustCullShader.h"
 #include "PrepMultiTexShader.h"
+#include "PointShadowPassShader.h"
+#include "SpotShadowPassShader.h"
 #include "Sampler.h"
 #include "ShaderStore.h"
-
 
 #define NUM_VALID_RESOLUTIONS 8
 
@@ -31,15 +32,16 @@ typedef struct {
 	float radius;
 } GLCMD;
 
-enum DrawMode { Regular, MultiTextured, DrawModesCount };
+enum DrawMode { Regular, MultiTextured, Water, Reflective, Shadow, DrawModesCount };
+///TODO: Maybe add different vertex format draw modes: no-normal, etc
 
 class MasterRenderer
 {
 public:
 	MasterRenderer()// : shadScale(1.f) 
 	{
-		rC.ssaoPower = (1.f);
-		rC.ssaoScale = (1.f);
+		config.ssaoPower = (1.f);
+		config.ssaoScale = (1.f);
 	}
 	~MasterRenderer() {}
 
@@ -74,13 +76,13 @@ public:
 
 	void setResolution(int resIndex)
 	{
-		rC.renderResolution = glm::fvec2(validResolutionsRaw[0][resIndex], validResolutionsRaw[1][resIndex]) * rC.frameScale;
+		config.renderResolution = glm::fvec2(validResolutionsRaw[0][resIndex], validResolutionsRaw[1][resIndex]) * config.frameScale;
 		reInitialiseFramebuffers();
 	}
 
 	void setFrameScale(float pFrameScale)
 	{
-		rC.frameScale = pFrameScale;
+		config.frameScale = pFrameScale;
 	}
 
 	static const s32 validResolutionsRaw[2][NUM_VALID_RESOLUTIONS];
@@ -118,6 +120,10 @@ public:
 	Framebuffer fboSSAO;
 	Framebuffer fboGBuffer;
 	Framebuffer fboScreen;
+
+	s32 shadowResolutions[4] = { 256,512,1024,2048 };
+
+	Framebuffer fboLight[4];
 	
 	GLuint vaoQuad;
 	GLuint vboQuad;
@@ -126,6 +132,9 @@ public:
 	GLuint vboQuadViewRays;
 
 	GLuint skyboxTex;
+	GLTextureCube shadow;
+
+	GLBufferObject shadowMatrixBuffer;
 
 	//Shaders
 	ShaderStore shaderStore;
@@ -137,6 +146,8 @@ public:
 	FrustCullShader frustCullShader;
 	PrepMultiTexShader prepMultiTexShader;
 	SAOShader ssaoShader;
+	SpotShadowPassShader spotShadowPassShader;
+	PointShadowPassShader pointShadowPassShader;
 
 	//Shader shadowShader;
 	//Framebuffer fboLight;
@@ -154,6 +165,8 @@ public:
 	Sampler postSampler;
 	Sampler cubeSampler;
 	Sampler textSampler;
+	Sampler shadowSampler;
+	Sampler shadowCubeSampler;
 
 	struct RenderConfig
 	{
@@ -161,7 +174,8 @@ public:
 		float frameScale;
 		float ssaoPower;
 		float ssaoScale;
-		bool wireFrame;
+		bool drawWireFrame;
+		bool drawTextBounds;
 		//FOG
 		//AA level
 		//Tonemap settings (exposure + curve parameters)
@@ -169,5 +183,5 @@ public:
 		//DoF
 		//Vignetting
 		//draw AABB
-	} rC;
+	} config;
 };

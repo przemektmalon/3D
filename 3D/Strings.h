@@ -2,7 +2,7 @@
 #include "StringGenerics.h"
 
 #define FORCE_LAST_CHAR_NULL 1
-#define INCLUDE_NULL_IN_LENGTH 1
+#define INCLUDE_NULL_IN_CAPACITY 1
 #define HEAP 0
 
 template<int size>
@@ -11,7 +11,7 @@ class String : public StringGeneric
 public:
 #if FORCE_LAST_CHAR_NULL
 
-#if INCLUDE_NULL_IN_LENGTH
+#if INCLUDE_NULL_IN_CAPACITY
 	String() : StringGeneric(size - 1)
 	{
 		clear('\0');
@@ -20,8 +20,8 @@ public:
 	String(char* str) : StringGeneric(size - 1) { setToChars(str); }
 	String(const char* str) : StringGeneric(size - 1) { setToChars(str); }
 	String(StringGeneric& str) : StringGeneric(size - 1) { overwrite(str); }
-	String(const char chr) : StringGeneric(size - 1) { string[0] = chr; }
-#else //INCLUDE_NULL_IN_LENGTH
+	String(const char chr) : StringGeneric(size - 1) { string[0] = chr; length = 1; }
+#else //INCLUDE_NULL_IN_CAPACITY
 	String() : StringGeneric(size)
 	{
 		clear('\0');
@@ -30,17 +30,17 @@ public:
 	String(const char* str) : StringGeneric(size) { setToChars(str); }
 	String(StringGeneric& str) : StringGeneric(size) { overwrite(str); }
 	String(const char chr) : StringGeneric(size) { string[0] = chr; }
-#endif //INCLUDE_NULL_IN_LENGTH
+#endif //INCLUDE_NULL_IN_CAPACITY
 
 	char* getString() { return string; }
 
 private:
 
-#if INCLUDE_NULL_IN_LENGTH
+#if INCLUDE_NULL_IN_CAPACITY
 	char string[size - 1];
-#else //INCLUDE_NULL_IN_LENGTH
+#else //INCLUDE_NULL_IN_CAPACITY
 	char string[size];
-#endif //INCLUDE_NULL_IN_LENGTH
+#endif //INCLUDE_NULL_IN_CAPACITY
 
 
 	const char lastNull = '\0';

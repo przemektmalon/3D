@@ -16,6 +16,7 @@
 #include "UIConsole.h"
 #include "UIButton.h"
 
+
 const s32 MasterRenderer::validResolutionsRaw[2][NUM_VALID_RESOLUTIONS] =
 {
 	{ 1920, 1600, 1536, 1366, 1280, 1024, 960, 848},
@@ -138,7 +139,7 @@ inline void MasterRenderer::initialiseScreenQuad()
 
 inline void MasterRenderer::initialiseGBuffer()
 {
-	fboGBuffer.setResolution(rC.renderResolution);
+	fboGBuffer.setResolution(config.renderResolution);
 	fboGBuffer.attachTexture(GL_RG16F, GL_RG, GL_HALF_FLOAT, GL_COLOR_ATTACHMENT0);//NORMAL
 	fboGBuffer.attachTexture(GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT1);//ALBEDO_SPEC
 	fboGBuffer.attachTexture(GL_DEPTH_COMPONENT32F_NV, GL_DEPTH_COMPONENT, GL_FLOAT, GL_DEPTH_ATTACHMENT);
@@ -152,18 +153,18 @@ inline void MasterRenderer::initialiseGBuffer()
 
 inline void MasterRenderer::initialiseSSAOBuffer()
 {
-	fboSSAO.setResolution(rC.renderResolution);
-	fboSSAO.attachTexture(GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT0, glm::fvec2(rC.ssaoScale));
+	fboSSAO.setResolution(config.renderResolution);
+	fboSSAO.attachTexture(GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT0, glm::fvec2(config.ssaoScale));
 	fboSSAO.checkStatus();
 
-	fboSSAOBlur.setResolution(rC.renderResolution);
-	fboSSAOBlur.attachTexture(GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT0, glm::fvec2(rC.ssaoScale));
+	fboSSAOBlur.setResolution(config.renderResolution);
+	fboSSAOBlur.attachTexture(GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT0, glm::fvec2(config.ssaoScale));
 	fboSSAOBlur.checkStatus();
 }
 
 inline void MasterRenderer::initialiseScreenFramebuffer()
 {
-	fboScreen.setResolution(rC.renderResolution);
+	fboScreen.setResolution(config.renderResolution);
 	fboScreen.attachTexture(GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT0);
 	fboScreen.checkStatus();
 }
@@ -211,59 +212,57 @@ inline void MasterRenderer::initialiseSkybox()
 
 inline void MasterRenderer::initialiseLights()
 {
-	const int nr = 100;
+	const int nr = 0;
 	for (int i = 0; i < nr; ++i)
 	{
-		PointLightData light;
-		light.position = glm::fvec3(float(Engine::rand() % 5000) - 10, float(Engine::rand() % 2) + 200, float(Engine::rand() % 2) + 1);
-		//light.position = glm::fvec3(0.8, 0.1, 0.4);
-		light.colour = glm::fvec3((Engine::rand() % 70) + 200, (Engine::rand() % 70) + 200, (Engine::rand() % 70) + 200);
-		light.colour = glm::normalize(light.colour);  light.colour *= glm::fvec3(5.2f);
-		light.linear = 0.0001f;
-		light.quadratic = 0.0003f;
-		light.updateRadius();
-		lightManager.addPointLight(light);
+		auto& add = lightManager.addPointLight();
+		add.setColour(glm::fvec3(2.f, 0.f, 2.f));
+		add.setLinear(0.001f);
+		add.setQuadratic(0.001f);
+		add.setPosition(glm::fvec3(100.f, 100.f, 100.f));
+		add.updateRadius();
+		add.initTexture(shadowCubeSampler);
 	}
 
 	//TODO: LAST NULL LIGHT FOR TILE CULLING OVERRUN
 
 	lightManager.updateAllPointLights();
 
-	const int nr2 = 0;
+	const int nr2 = 10;
 	for (int i = 0; i < nr2; ++i)
 	{
-		SpotLightData l;
-		l.position = glm::fvec3(float(Engine::rand() % 2000) - 1000, float(Engine::rand() % 50) + 350, float(Engine::rand() % 2000) - 1000);
+		auto& add = lightManager.addSpotLight();
 		auto cc = Engine::rand() % 3;
+		glm::fvec3 col(0.f);
 		switch (cc)
 		{
-		case(0) :
-			l.colour = glm::fvec3(10, 0, 0);
+		case 0:
+			col.x = 0.1;
 			break;
-		case(1) :
-			l.colour = glm::fvec3(0, 10, 0);
+		case 1:
+			col.y = 0.1;
 			break;
-		case(2) :
-			l.colour = glm::fvec3(0, 0, 10);
+		case 2:
+			col.z = 0.1;
 			break;
 		}
-		l.colour = glm::fvec3(10, 10, 10);
-		l.direction = glm::fvec3(-0.50, -1.0, 0.1);
-		l.innerSpread = glm::cos(PI / 4.f);
-		l.outerSpread = glm::cos(PI / 4.f);
-		l.linear = 0.0001;
-		l.quadratic = 0.0001;
-		l.updateRadius();
-		lightManager.addSpotLight(l);
+		add.setColour(col);
+		add.setInnerSpread(glm::radians(10.f));
+		add.setOuterSpread(glm::radians(30.f));
+		add.setLinear(0.0001);
+		add.setQuadratic(0.0001);
+		add.setPosition(glm::fvec3(100.f, 100.f, 100.f));
+		add.updateRadius();
+		add.initTexture(shadowSampler);
 	}
 
 	lightManager.updateAllSpotLights();
 
 	tileCullShader.use();
-	tileCullShader.setPointLightCount(lightManager.pointLights.size());
+	tileCullShader.setPointLightCount(lightManager.pointLightsGPUData.size());
 	tileCullShader.setSpotLightCount(lightManager.spotLights.size());
 
-	int plc = lightManager.pointLights.size();
+	int plc = lightManager.pointLightsGPUData.size();
 	int slc = lightManager.spotLights.size();
 	//tileCullShader->use();
 	//tileCullShader->setUniform(String64("pointLightCount"), &plc);
@@ -283,20 +282,48 @@ inline void MasterRenderer::initialiseLights()
 	//glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
 	//glEnableVertexAttribArray(posAttrib);
 
-	//fboLight.setResolution(glm::fvec2(shadRes) * frameScale * shadScale);
+	for (int i = 0; i < 4; ++i)
+	{
+		//fboLight[i].setResolution(glm::ivec2(shadowResolutions[i], shadowResolutions[i]));
+		//fboLight[i].attachTexture(GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_FLOAT, GL_DEPTH_ATTACHMENT);
+		//fboLight[i].checkStatus();
+	}
+
+	
 	//fboLight.attachTexture(GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT0, glm::fvec2(ssaoScale));
-	//fboLight.attachTexture(GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_FLOAT, GL_DEPTH_ATTACHMENT);
+	
 	//fboLight.attachTexture(GL_R32F, GL_RED, GL_FLOAT, GL_COLOR_ATTACHMENT0);
 	//GLuint attachments[1] = { GL_COLOR_ATTACHMENT0 };
 	//glDrawBuffers(1, attachments);
 	//glDrawBuffer(GL_NONE);
 	//glReadBuffer(GL_NONE);
-	//fboLight.checkStatus();
+
+	for (auto itr = lightManager.pointLights.begin(); itr != lightManager.pointLights.end(); ++itr)
+	{
+		auto handle = itr->shadowTex.getHandle(cubeSampler.getGLID());
+		glMakeTextureHandleResidentARB(handle);
+	}
+
+	//shadow.createFromStream(1024, 1024, GL_DEPTH_COMPONENT32F_NV, GL_DEPTH_COMPONENT, GL_FLOAT);
+
+	fboLight[0].bind();
+	//fboLight[0].setResolution(glm::ivec2(512, 512));
+	
+	//fboLight[0].attachTexture(GL_DEPTH_COMPONENT32F_NV, GL_DEPTH_COMPONENT, GL_FLOAT, GL_DEPTH_ATTACHMENT);
+	//fboLight[0].attachTexture(GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_FLOAT, GL_DEPTH_ATTACHMENT);
+	//fboLight[0].attachTexture(GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT0);
+	
+	
+	//fboLight[0].attachCubeTexture(GL_DEPTH_ATTACHMENT, shadow.getGLID());
+	//fboLight[0].checkStatus();
+	//glDrawBuffer(GL_COLOR_ATTACHMENT0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	//fboLight[0].checkStatus();
 }
 
 inline void MasterRenderer::initialiseSamplers()
 {
-	
 	defaultSampler.initialiseDefaults();
 	defaultSampler.setTextureWrapS(GL_REPEAT);
 	defaultSampler.setTextureWrapT(GL_REPEAT);
@@ -336,61 +363,28 @@ inline void MasterRenderer::initialiseSamplers()
 	textSampler.setTextureMagFilter(GL_LINEAR);
 	textSampler.bind(12);
 
-	auto h1 = Engine::assets.get2DTex("g")->getHandle(defaultSampler.getGLID());
-	auto h2 = Engine::assets.get2DTex("gN")->getHandle(defaultSampler.getGLID());
-	auto h3 = Engine::assets.get2DTex("gS")->getHandle(defaultSampler.getGLID());
+	shadowSampler.setTextureWrapS(GL_CLAMP_TO_BORDER);
+	shadowSampler.setTextureWrapT(GL_CLAMP_TO_BORDER);
+	shadowSampler.setTextureBorderColour(1.f, 1.f, 1.f, 1.f);
+	shadowSampler.bind(14);
 
-	auto h4 = Engine::assets.get2DTex("oo")->getHandle(defaultSampler.getGLID());
-	auto h5 = Engine::assets.get2DTex("pf")->getHandle(defaultSampler.getGLID());
-	//auto h6 = Engine::assets.get2DTex("sp")->getHandle(defaultSampler.getGLID());
+	shadowCubeSampler.setTextureMagFilter(GL_NEAREST);
+	shadowCubeSampler.setTextureMinFilter(GL_NEAREST);
+	shadowCubeSampler.setTextureWrapS(GL_CLAMP_TO_EDGE);
+	shadowCubeSampler.setTextureWrapT(GL_CLAMP_TO_EDGE);
+	shadowCubeSampler.setTextureWrapR(GL_CLAMP_TO_EDGE);
+	shadowCubeSampler.bind(15);
 
-	auto h7 = Engine::assets.get2DTex("ooN")->getHandle(defaultSampler.getGLID());
-	auto h8 = Engine::assets.get2DTex("pfN")->getHandle(defaultSampler.getGLID());
-	//auto h9 = Engine::assets.get2DTex("spN")->getHandle(defaultSampler.getGLID());
-
-	auto h10 = Engine::assets.get2DTex("stone")->getHandle(defaultSampler.getGLID());
-	auto h11 = Engine::assets.get2DTex("ter")->getHandle(defaultSampler.getGLID());
-
-	auto h12 = Engine::assets.get2DTex("stoneN")->getHandle(defaultSampler.getGLID());
-	auto h13 = Engine::assets.get2DTex("terN")->getHandle(defaultSampler.getGLID());
-
-	auto h14 = Engine::assets.get2DTex("alpha")->getHandle(defaultSampler.getGLID());
-
-	auto makeHandleResident = [&](char* name) -> void {
-		auto handle = Engine::assets.get2DTex(name)->getHandle(defaultSampler.getGLID());
+	auto makeHandleResident = [&](GLTexture2D& tex) -> void {
+		auto handle = tex.getHandle(defaultSampler.getGLID());
 		glMakeTextureHandleResidentARB(handle);
 	};
 
-
-	makeHandleResident("stone2");
-	makeHandleResident("grass");
-	makeHandleResident("lava");
-	makeHandleResident("dirt");
-
-	///TODO: Auto make handles resident!!
-
-	//Engine::h1 = glGetTextureSamplerHandleARB(Engine::t1.getGLID(), defaultSampler.getGLID());
-	//Engine::h2 = glGetTextureSamplerHandleARB(Engine::t2.getGLID(), defaultSampler.getGLID());
-	//Engine::h3 = glGetTextureSamplerHandleARB(Engine::t3.getGLID(), defaultSampler.getGLID());
-
-	glMakeTextureHandleResidentARB(h1);
-	glMakeTextureHandleResidentARB(h2);
-	glMakeTextureHandleResidentARB(h3);
-
-	glMakeTextureHandleResidentARB(h4);
-	glMakeTextureHandleResidentARB(h5);
-	//glMakeTextureHandleResidentARB(h6);
-
-	glMakeTextureHandleResidentARB(h7);
-	glMakeTextureHandleResidentARB(h8);
-	//glMakeTextureHandleResidentARB(h9);
-
-	glMakeTextureHandleResidentARB(h10);
-	glMakeTextureHandleResidentARB(h11);
-	glMakeTextureHandleResidentARB(h12);
-	glMakeTextureHandleResidentARB(h13);
-
-	glMakeTextureHandleResidentARB(h14);
+	///TODO: not all maps will use all textures in the texture store, keep track of what needs and what doesnt need to be resident
+	for (auto itr = Engine::assets.getTextureList().begin(); itr != Engine::assets.getTextureList().end(); ++itr)
+	{
+		makeHandleResident(itr->second);
+	}
 }
 
 void MasterRenderer::initialiseRenderer(Window * pwin, Camera & cam)
@@ -398,9 +392,9 @@ void MasterRenderer::initialiseRenderer(Window * pwin, Camera & cam)
 	window = pwin;
 	//MSAALevel = Msaalev;
 	viewport.top = 0; viewport.left = 0; viewport.width = window->getSizeX(); viewport.height = window->getSizeY();
-	rC.frameScale = 1.f;
-	rC.renderResolution.x = viewport.width * rC.frameScale;
-	rC.renderResolution.y = viewport.height * rC.frameScale;
+	config.frameScale = 1.f;
+	config.renderResolution.x = viewport.width * config.frameScale;
+	config.renderResolution.y = viewport.height * config.frameScale;
 
 	initialiseSamplers();
 	//initialiseShaders();
@@ -416,7 +410,7 @@ void MasterRenderer::initialiseRenderer(Window * pwin, Camera & cam)
 	fboGBuffer.setClearDepth(0.f);
 	//fboLight.setClearDepth(0.f);
 	//glDepthRangedNV(1.f, -1.f);
-	th.createFromStream(GL_RGBA32F, rC.renderResolution.x, rC.renderResolution.y, GL_RGBA, GL_FLOAT, NULL);
+	th.createFromStream(GL_RGBA32F, config.renderResolution.x, config.renderResolution.y, GL_RGBA, GL_FLOAT, NULL);
 
 	//console = new UIConsole();
 	//console->initOGL();
@@ -431,6 +425,8 @@ void MasterRenderer::initialiseShaders()
 	shaderStore.loadShader(&ssaoShader);
 	shaderStore.loadShader(&gBufferShaderMultiTex);
 	shaderStore.loadShader(&prepMultiTexShader);
+	shaderStore.loadShader(&spotShadowPassShader);
+	shaderStore.loadShader(&pointShadowPassShader);
 	
 	shaderStore.loadShader(ShaderProgram::VertFrag, String32("Shape2DShader"));
 	shaderStore.loadShader(ShaderProgram::VertFrag, String32("Standard"));
@@ -449,7 +445,7 @@ void MasterRenderer::reInitialiseFramebuffers()
 	destroyFramebufferTextures();
 	initialiseFramebuffers();
 	th.release();
-	th.createFromStream(GL_RGBA32F, rC.renderResolution.x, rC.renderResolution.y, GL_RGBA, GL_FLOAT, NULL);
+	th.createFromStream(GL_RGBA32F, config.renderResolution.x, config.renderResolution.y, GL_RGBA, GL_FLOAT, NULL);
 }
 
 void MasterRenderer::destroyFramebufferTextures()
@@ -509,35 +505,28 @@ void MasterRenderer::render()
 {
 	// *********************************************************** G-BUFFER PASS *********************************************************** //
 
-	const int nr = 100;
-	for (int i = 0; i < nr; ++i)
+	for (int i = 0; i < lightManager.spotLights.size(); ++i)
 	{
-		lightManager.pointLights[i].position.z = 1000.f * std::sin(Engine::programTime * 2.f) + 50.f;
+		lightManager.spotLightsGPUData[i].position = glm::fvec3(std::cos(Engine::programTime*0.05*(i+1))*100.f, 50.f, std::sin(Engine::programTime*0.05*(i+1))*100.f);
+		lightManager.spotLightsGPUData[i].direction = -glm::normalize(lightManager.spotLightsGPUData[i].position);
+		lightManager.spotLights[i].updateProj();
+		lightManager.spotLights[i].updateView();
+		lightManager.spotLights[i].updateProjView();
+	}
+
+	for (int i = 0; i < lightManager.pointLights.size(); ++i)
+	{
+		lightManager.pointLightsGPUData[i].position.z = 100.f * std::sin(Engine::programTime * 0.8f);
+		lightManager.pointLights[i].updateProj();
+		lightManager.pointLights[i].updateView();
+		lightManager.pointLights[i].updateProjView();
 	}
 
 	lightManager.updateAllPointLights();
+	lightManager.updateAllSpotLights();
 
 	//Frustum cull pass
 	{
-		glViewport(0, 0, rC.renderResolution.x, rC.renderResolution.y);
-		fboGBuffer.bind();
-		fboGBuffer.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glm::ivec4 clearC(-1, -1, -1, -1);
-		glClearBufferiv(GL_COLOR, GL_COLOR_ATTACHMENT2, &clearC.x);
-
-		glDepthRangedNV(-1.f, 1.f);
-		glClearDepth(1.f);
-		glEnable(GL_DEPTH_TEST);
-		//glEnable(GL_CULL_FACE);
-		glDisable(GL_CULL_FACE);
-		glDisable(GL_BLEND);
-		glCullFace(GL_BACK);
-
-		if (rC.wireFrame)
-		{
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		}
-
 		frustCullShader.use();
 
 		auto pr = glm::transpose(activeCam->proj);
@@ -588,11 +577,29 @@ void MasterRenderer::render()
 		glDispatchCompute(1, 1, 1);
 
 		world->drawCountBuffer[MultiTextured].getBufferSubData(0, sizeof(drawCount[MultiTextured]), &drawCount[MultiTextured]);
-
 	}
+
+	const GPUMeshManager& mm = Engine::assets.meshManager;
 
 	//GBuffer pass
 	{
+		glViewport(0, 0, config.renderResolution.x, config.renderResolution.y);
+		fboGBuffer.bind();
+
+		glDepthRangedNV(-1.f, 1.f);
+
+		fboGBuffer.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glm::ivec4 clearC(-1, -1, -1, -1);
+		glClearBufferiv(GL_COLOR, GL_COLOR_ATTACHMENT2, &clearC.x);
+
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		//glDisable(GL_CULL_FACE);
+		glDisable(GL_BLEND);
+		glCullFace(GL_BACK);
+
+		glPolygonMode(GL_FRONT_AND_BACK, config.drawWireFrame ? GL_LINE : GL_FILL);
+
 		gBufferShader.use();
 
 		gBufferShader.setView(activeCam->view);
@@ -602,8 +609,6 @@ void MasterRenderer::render()
 		gBufferShader.sendCamPos();
 
 		gBufferShader.sendUniforms();
-
-		const GPUMeshManager& mm = Engine::assets.meshManager;
 
 		glBindVertexArray(mm.solidBatches.find(Regular)->second.vaoID);
 
@@ -641,61 +646,84 @@ void MasterRenderer::render()
 		glBindVertexArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-		if (rC.wireFrame)
-		{
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		}
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	
 	}
 	
 	// *********************************************************** G-BUFFER PASS *********************************************************** //
 
-	/*glViewport(0, 0, shadRes.x*shadScale, shadRes.y*shadScale);
+	// *********************************************************** SHADOW PASS *********************************************************** //
 
-	//fboDefault.bind();
-	//fboDefault.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	fboLight.bind();
-	fboLight.clear(GL_DEPTH_BUFFER_BIT);
+	pointShadowPassShader.use();
 
-	//glm::fmat4 projj = glm::ortho(-shadRes.x/2.f, shadRes.x/2.f, -shadRes.y/2.f, shadRes.y/2.f, 10.f, 1000.f);
-	glm::fmat4 projj = glm::perspective(float(PI) / 8.f, 1.f, 10.f, 1000.f);
-	//glm::fmat4 vview = glm::fmat4(0.937299, 0.219367, -0.2708289, 0, 0, 0.77707, 0.629414141, 0.0, 0.348525763, -0.589949369, 0.728347123, 0.0, -269.99057, -119.16075, -277.979919, 1.00);
-
-	/*if (Engine::movingLight)
-	{
-	auto l = lightManager.getSpotLight(0);
-	l->position = activeCam->pos - glm::fvec3(0, 10, 0);
-	l->direction = activeCam->getDirectionVector();
-	lightManager.updateSpotLight(0);
-	lightView = glm::translate(activeCam->view, glm::fvec3(0, 10, 0));
-	}*/
-
-	/*//glm::fmat4 vview = glm::lookAt(ppos, LPOS - glm::fvec3(0, 0, 1), glm::fvec3(0, 1, 0));
-	glm::fmat4 vview = lightView;
-
-	shadowShader.use();
-	glUniformMatrix4fv(1, 1, GL_FALSE, glm::value_ptr(projj));
-	glUniformMatrix4fv(3, 1, GL_FALSE, glm::value_ptr(vview));
-
+	glDepthRange(0.f, 1.f);
+	//glDepthRangedNV(-1.f, 1.f);
 	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+	glDisable(GL_BLEND);
 
-	for (auto itr = entities.begin(); itr != entities.end(); ++itr)
+	for (auto itr = lightManager.pointLights.begin(); itr != lightManager.pointLights.end(); ++itr)
 	{
-		glBindVertexArray(itr->first->vao);
-		glBindBuffer(GL_ARRAY_BUFFER, itr->first->vbo);
-		for (auto itr2 = itr->second.begin(); itr2 != itr->second.end(); ++itr2)
-		{
-			glUniformMatrix4fv(2, 1, GL_FALSE, glm::value_ptr(*itr2));
-			glDrawArrays(GL_TRIANGLES, 0, itr->first->data.numVert);
-		}
+		glViewport(0, 0, itr->shadowTex.getWidth(), itr->shadowTex.getHeight());
+
+		fboLight[0].bind();
+		fboLight[0].attachForeignCubeTexture(&itr->shadowTex, GL_DEPTH_ATTACHMENT);
+		fboLight[0].checkStatus();
+
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+		shadowMatrixBuffer.bufferData(sizeof(glm::fmat4) * 6, &itr->gpuData->projView[0][0], GL_STREAM_READ);
+		shadowMatrixBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 2);
+
+		pointShadowPassShader.setFarPlane(itr->gpuData->radius);
+		pointShadowPassShader.setLightPos(itr->gpuData->position);
+		pointShadowPassShader.sendUniforms();
+
+		glBindVertexArray(mm.solidBatches.find(Shadow)->second.vaoID);
+		world->drawIndirectBuffer[Shadow].bind(GL_DRAW_INDIRECT_BUFFER);
+		world->visibleTransformsBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 1);
+
+		glMultiDrawArraysIndirect(GL_TRIANGLES, 0, drawCount[Regular], 0);
+		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
+
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
-	glBindVertexArray(0);*/
+	spotShadowPassShader.use();
+
+	for (auto itr = lightManager.spotLights.begin(); itr != lightManager.spotLights.end(); ++itr)
+	{
+		glViewport(0, 0, itr->shadowTex.getWidth(), itr->shadowTex.getHeight());
+		//glViewport(0, 0, 512, 512);
+
+		fboLight[0].bind();
+		fboLight[0].attachForeignTexture(&itr->shadowTex, GL_DEPTH_ATTACHMENT);
+		fboLight[0].checkStatus();
+
+		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+		spotShadowPassShader.setProj(itr->proj);
+		spotShadowPassShader.setView(itr->view);
+		spotShadowPassShader.sendUniforms();
+
+		glBindVertexArray(mm.solidBatches.find(Shadow)->second.vaoID);
+		world->drawIndirectBuffer[Shadow].bind(GL_DRAW_INDIRECT_BUFFER);
+		world->visibleTransformsBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 4);
+
+		glMultiDrawArraysIndirect(GL_TRIANGLES, 0, drawCount[Regular], 0);
+		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
+
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
+
+	// *********************************************************** SHADOW PASS *********************************************************** //
 
 	// *********************************************************** SSAO PASS *********************************************************** //
 	
 	//SSAO pass
 	{
-		glViewport(0, 0, rC.renderResolution.x * rC.ssaoScale, rC.renderResolution.y * rC.ssaoScale);
+		glViewport(0, 0, config.renderResolution.x * config.ssaoScale, config.renderResolution.y * config.ssaoScale);
 
 		//fboDefault.bind();
 		//fboDefault.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -733,7 +761,7 @@ void MasterRenderer::render()
 	fboSSAO.bindDraw();
 	//glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	fboSSAOBlur.bindRead();
-	glBlitFramebuffer(0, 0, rC.renderResolution.x * rC.ssaoScale, rC.renderResolution.y * rC.ssaoScale, 0, 0, rC.renderResolution.x * rC.ssaoScale, rC.renderResolution.y * rC.ssaoScale, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	glBlitFramebuffer(0, 0, config.renderResolution.x * config.ssaoScale, config.renderResolution.y * config.ssaoScale, 0, 0, config.renderResolution.x * config.ssaoScale, config.renderResolution.y * config.ssaoScale, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
 	fboSSAOBlur.bind();
 	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -746,11 +774,13 @@ void MasterRenderer::render()
 	fboSSAO.bindDraw();
 	//glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	fboSSAOBlur.bindRead();
-	glBlitFramebuffer(0, 0, rC.renderResolution.x * rC.ssaoScale, rC.renderResolution.y * rC.ssaoScale, 0, 0, rC.renderResolution.x * rC.ssaoScale, rC.renderResolution.y * rC.ssaoScale, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	glBlitFramebuffer(0, 0, config.renderResolution.x * config.ssaoScale, config.renderResolution.y * config.ssaoScale, 0, 0, config.renderResolution.x * config.ssaoScale, config.renderResolution.y * config.ssaoScale, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
 	// *********************************************************** BLUR PASS *********************************************************** //
 
 	tileCullShader.use();
+
+	//glUniformMatrix4fv(20, 1, GL_FALSE, &lightManager.spotLightsGPUData[0].projView[0][0]);
 
 	glBindTextureUnit(2, th.getGLID());
 	glBindImageTexture(2, th.getGLID(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
@@ -760,13 +790,15 @@ void MasterRenderer::render()
 
 	fboGBuffer.textureAttachments[0].bindImage(3, GL_READ_ONLY);
 	fboGBuffer.textureAttachments[1].bindImage(4, GL_READ_ONLY);
-	//fboGBuffer.textureAttachments[2].bindImage(5, GL_READ_ONLY);
 	fboGBuffer.textureAttachments[2].bind(5);
 	fboGBuffer.textureAttachments[3].bindImage(7, GL_READ_ONLY);
 	fboSSAO.textureAttachments[0].bindImage(6, GL_READ_ONLY);
+	//fboLight[0].textureAttachments[0].bind(14);
+	//lightManager.spotLights[0].shadowTex.bind(14);
 	glActiveTexture(GL_TEXTURE15);
-	//glBindTexture(GL_TEXTURE_CUBE_MAP, sk.getGLID());
 	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
+	
+	//glBindTexture(GL_TEXTURE_CUBE_MAP, shadow.getGLID());
 
 	glm::fvec4 vrays;
 	vrays.x = activeCam->viewRays2[2].x;
@@ -782,12 +814,12 @@ void MasterRenderer::render()
 	tileCullShader.sendView();
 	tileCullShader.sendViewPos();
 
-	//tileCullShader.sendUniforms();
+	tileCullShader.sendUniforms();
 
 	lightManager.pointLightsBuffer.bindBase(0);
 	lightManager.spotLightsBuffer.bindBase(1);
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
-	glDispatchCompute(std::ceilf(rC.renderResolution.x / 16.f), std::ceilf(float(rC.renderResolution.y) / 16.f), 1);
+	glDispatchCompute(std::ceilf(config.renderResolution.x / 16.f), std::ceilf(float(config.renderResolution.y) / 16.f), 1);
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 	lightManager.pointLightsBuffer.unbind();
 	lightManager.spotLightsBuffer.unbind();
@@ -817,8 +849,9 @@ void MasterRenderer::render()
 
 void MasterRenderer::bakeStaticLights()
 {
-	for (auto itr = lightManager.staticPointLights.begin(); itr != lightManager.staticPointLights.end(); ++itr)
-	{
-
-	}
+	//for (auto itr = lightManager.staticPointLightsGPUData.begin(); itr != lightManager.staticPointLightsGPUData.end(); ++itr)
+	//{
+	//}
 }
+
+

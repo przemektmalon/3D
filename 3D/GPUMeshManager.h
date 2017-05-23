@@ -57,9 +57,7 @@ public:
 				glBufferData(GL_ARRAY_BUFFER, MAX_BATCH_SIZE, NULL, GL_STATIC_DRAW);
 
 				batchPtr->length = 0;
-				//nextBatch.firsts[0] = 0;
-				//nextBatch.counts[0] = 0;
-
+				
 				auto posAttrib = glGetAttribLocation(program->getGLID(), "p");
 				glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
 				glEnableVertexAttribArray(posAttrib);
@@ -112,65 +110,114 @@ public:
 				size += batch.dataSizeInBytes[batch.length];
 				++batch.length;
 			}
+
+			///TODO: Shadow vaos etc!
+
+			//if (pMesh.castsShadows)
+			if(itr->first == Regular)
+			{
+				auto find2 = solidBatches.find(DrawMode::Shadow);
+				if (find2 == solidBatches.end())
+				{
+					auto ins = solidBatches.insert(std::make_pair(DrawMode::Shadow, MeshBatch()));
+					batchPtr = &ins.first->second;
+
+					auto program = &Engine::r->spotShadowPassShader;
+					program->use();
+
+					glGenVertexArrays(1, &batchPtr->vaoID);
+					glBindVertexArray(batchPtr->vaoID);
+					glGenBuffers(1, &batchPtr->vboID);
+					glBindBuffer(GL_ARRAY_BUFFER, batchPtr->vboID);
+
+					glBufferData(GL_ARRAY_BUFFER, MAX_BATCH_SIZE, NULL, GL_STATIC_DRAW);
+
+					batchPtr->length = 0;
+
+					auto posAttrib = glGetAttribLocation(program->getGLID(), "p");
+					glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
+					glEnableVertexAttribArray(posAttrib);
+
+					glBindBuffer(GL_ARRAY_BUFFER, 0);
+					glBindVertexArray(0);
+				}
+				else
+				{
+					batchPtr = &find2->second;
+				}
+
+				auto& shadowBatch = *batchPtr;
+
+				GLsizei sizea = 0;
+				for (int i = 0; i < shadowBatch.length; ++i)
+				{
+					sizea += shadowBatch.dataSizeInBytes[i];
+				}
+
+				for (auto itr2 = itr->second.begin(); itr2 != itr->second.end(); ++itr2)
+				{
+					int posSize = (*itr2)->numVerts * 3;
+
+					float* posData = new float[posSize];
+
+					for (int i = 0; i < (*itr2)->numVerts; ++i)
+					{
+						posData[(3 * i) + 0] = (*itr2)->data[(i * 8) + 0];
+						posData[(3 * i) + 1] = (*itr2)->data[(i * 8) + 1];
+						posData[(3 * i) + 2] = (*itr2)->data[(i * 8) + 2];
+					}
+
+					auto prevFirst = shadowBatch.length == 0 ? 0 : shadowBatch.firsts[shadowBatch.length - 1];
+					auto prevCount = shadowBatch.length == 0 ? 0 : shadowBatch.counts[shadowBatch.length - 1];
+
+					shadowBatch.firsts[shadowBatch.length] = prevFirst + prevCount;
+					shadowBatch.counts[shadowBatch.length] = (*itr2)->numVerts;
+					shadowBatch.data[shadowBatch.length] = posData;
+					//shadowBatch.data[shadowBatch.length] = (*itr2)->data;
+					shadowBatch.dataSizeInBytes[shadowBatch.length] = posSize * sizeof(float);
+					//shadowBatch.dataSizeInBytes[shadowBatch.length] = (*itr2)->getDataSizeInBytes();
+					shadowBatch.radii[shadowBatch.length] = glm::fvec3(100.f);
+
+					glBindBuffer(GL_ARRAY_BUFFER, shadowBatch.vboID);
+
+					glBufferSubData(GL_ARRAY_BUFFER, sizea, shadowBatch.dataSizeInBytes[shadowBatch.length], shadowBatch.data[shadowBatch.length]);
+
+					glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+					(*itr2)->shadowRenderMeta.batchPtr = &shadowBatch;
+					(*itr2)->shadowRenderMeta.batchIndex = shadowBatch.length;
+
+					sizea += shadowBatch.dataSizeInBytes[shadowBatch.length];
+					++shadowBatch.length;
+
+					/*auto prevFirst = shadowBatch.length == 0 ? 0 : shadowBatch.firsts[shadowBatch.length - 1];
+					auto prevCount = shadowBatch.length == 0 ? 0 : shadowBatch.counts[shadowBatch.length - 1];
+
+					shadowBatch.firsts[shadowBatch.length] = prevFirst + prevCount;
+					shadowBatch.counts[shadowBatch.length] = (*itr2)->numVerts;
+					shadowBatch.data[shadowBatch.length] = (*itr2)->data;
+					shadowBatch.dataSizeInBytes[shadowBatch.length] = (*itr2)->getDataSizeInBytes();
+					shadowBatch.radii[shadowBatch.length] = glm::fvec3(100.f);
+
+					glBindBuffer(GL_ARRAY_BUFFER, shadowBatch.vboID);
+
+					glBufferSubData(GL_ARRAY_BUFFER, sizea, shadowBatch.dataSizeInBytes[shadowBatch.length], shadowBatch.data[shadowBatch.length]);
+
+					glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+					(*itr2)->shadowRenderMeta.batchPtr = &shadowBatch;
+					(*itr2)->shadowRenderMeta.batchIndex = shadowBatch.length;
+
+					sizea += shadowBatch.dataSizeInBytes[shadowBatch.length];
+					++shadowBatch.length;*/
+
+					delete[] posData;
+				}
+			}
 		}
-
-		/*u32 batchID = 0;
-		for (auto itr = solidBatches.begin(); itr != solidBatches.end(); ++itr)
-		{
-		GLsizei size = 0;
-		for (int i = 0; i < itr->length; ++i)
-		{
-		size += itr->counts[i] * 8 * sizeof(float);
-		}
-
-		GLsizei spaceLeft = MAX_BATCH_SIZE - size;
-
-		if (size < spaceLeft)
-		{
-		auto prevFirst = itr->length == 0 ? 0 : itr->firsts[itr->length-1];
-		auto prevCount = itr->length == 0 ? 0 : itr->counts[itr->length-1];
-		//itr->firsts[itr->length] = itr->firsts[itr->length - 1] + itr->counts[itr->length - 1];
-		itr->firsts[itr->length] = prevFirst + prevCount;
-		itr->counts[itr->length] = pMesh.triangleLists[0].numVerts;
-		itr->data[itr->length] = pMesh.triangleLists[0].data;
-		itr->dataSizeInBytes[itr->length] = pMesh.triangleLists[0].getDataSizeInBytes();
-		itr->radii[itr->length] = glm::fvec3(1000.f); //TODO: CALCULATE REAL RADIUS
-
-		///TODO: MAPPING ?
-		///TODO: Handle multiple triangle lists
-		glBindBuffer(GL_ARRAY_BUFFER, solidBatches[batchID].vboID);
-
-		s32 dataSize = 0;
-
-		for (int i = 0; i < pMesh.triangleLists.size(); ++i)
-		{
-		glBufferSubData(GL_ARRAY_BUFFER, size, dataSize, pMesh.triangleLists[0].data);
-		dataSize += pMesh.triangleLists[i].getDataSizeInBytes();
-		}
-
-		//auto dataSize = pMesh.triangleLists[0].getDataSizeInBytes();
-
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-		MeshRenderMeta ret;
-		ret.batchID = batchID;
-		ret.batchIndex = itr->length;
-		pMesh.renderMeta = ret;
-		pMesh.triangleLists[0].first = itr->firsts[itr->length];
-
-		++itr->length;
-
-		return ret;
-		}
-		++batchID;
-		}
-		assert(0);*/
 	}
 
 	void newBatch();
 
-	//std::vector<SolidMeshBatch> solidBatches;
-
 	std::map<DrawMode, MeshBatch> solidBatches;
-
 };

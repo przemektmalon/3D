@@ -57,6 +57,7 @@ public:
 	void setString(StringGeneric& pStr) { string.overwrite(pStr); update(); }
 	void setPosition(glm::fvec2 pPos) { position = pPos; update(); }
 	u8 getCharSize() { return charSize;}
+	u16 getHeight() { if (!glyphContainer) { return 0; } return glyphContainer->getHeight(); }
 	glm::fvec2 getPosition() { return position; }
 	void setColour(glm::fvec3 pCol) { colour = pCol; }
 	glm::fvec3 getColour() { return colour; }
@@ -140,16 +141,18 @@ public:
 		font->requestGlyphs(charSize,this)->bind();
 		glDrawArrays(GL_QUADS, 0, vboSize);
 
-		/*glBindVertexArray(vaoBBox);
+		if (Engine::r->config.drawTextBounds)
+		{
+			glBindVertexArray(vaoBBox);
 
-		glm::fvec4 c(1.f, 0.f, 1.f, 1.f);
-		auto s = Engine::r->shaderStore.getShader(String32("Shape2DShader"));
-		s->use();
-		s->setUniform(String64("colour"), &c);
-		s->sendUniforms();
-		
+			glm::fvec4 c(1.f, 0.f, 1.f, 1.f);
+			auto s = Engine::r->shaderStore.getShader(String32("Shape2DShader"));
+			s->use();
+			s->setUniform(String64("colour"), &c);
+			s->sendUniforms();
 
-		glDrawArrays(GL_LINE_LOOP, 0, 4);*/
+			glDrawArrays(GL_LINE_LOOP, 0, 4);
+		}
 
 		glBindVertexArray(0);
 	}
@@ -192,12 +195,12 @@ public:
 		}
 		case TopLeft:
 		{
-			setTextOrigin(0, boundingBox.height);
+			setTextOrigin(0, getHeight());
 			break;
 		}
 		case TopRight:
 		{
-			setTextOrigin(boundingBox.width, boundingBox.height);
+			setTextOrigin(boundingBox.width, getHeight());
 			break;
 		}
 		case BotRight:
@@ -207,7 +210,7 @@ public:
 		}
 		case TopMiddle:
 		{
-			setTextOrigin(boundingBox.width / 2.f, boundingBox.height);
+			setTextOrigin(boundingBox.width / 2.f, getHeight());
 			break;
 		}
 		case BotMiddle:
@@ -217,17 +220,17 @@ public:
 		}
 		case MiddleLeft:
 		{
-			setTextOrigin(0, boundingBox.height / 2.f);
+			setTextOrigin(0, getHeight() / 2.f);
 			break;
 		}
 		case MiddleRight:
 		{
-			setTextOrigin(boundingBox.width, boundingBox.height / 2.f);
+			setTextOrigin(boundingBox.width, getHeight() / 2.f);
 			break;
 		}
 		case MiddleMiddle:
 		{
-			setTextOrigin(boundingBox.width / 2.f, boundingBox.height / 2.f);
+			setTextOrigin(boundingBox.width / 2.f, getHeight() / 2.f);
 			break;
 		}
 		}
@@ -427,14 +430,14 @@ private:
 
 		//updateOrigin();
 
-		/*const auto bb = boundingBox;
+		const auto bb = boundingBox;
 
 		float bbDataTmp[] = { bb.left, bb.top, 0.f, 0.f,0.f,
 								bb.left + bb.width, bb.top, 0.f,0.f,0.f,
 								bb.left + bb.width, bb.top + bb.height,0.f,0.f,0.f,
 								bb.left,bb.top + bb.height,0.f,0.f,0.f };
 
-		glNamedBufferData(vboBBox, sizeof(bbDataTmp), bbDataTmp, GL_STATIC_DRAW);*/
+		glNamedBufferData(vboBBox, sizeof(bbDataTmp), bbDataTmp, GL_STATIC_DRAW);
 
 
 

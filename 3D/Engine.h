@@ -20,6 +20,7 @@ class QPC;
 class AssetManager;
 class World;
 class Console;
+class MeshUtility;
 
 class Engine
 {
@@ -62,6 +63,7 @@ public:
 	static bool windowClicked;
 	static glm::ivec2 clickedPos;
 	static Log log;
+	static MeshUtility mu;
 
 	static AssetManager assets;
 

@@ -17,15 +17,11 @@ public:
 	inline void bufferData(GLsizeiptr pSize, void* pData, GLenum pUsage)
 	{
 		sizeInBytes = pSize;
-		//glBindBuffer(GL_SHADER_STORAGE_BUFFER, GLID);
-		//glBufferData(GL_SHADER_STORAGE_BUFFER, pSize, pData, pUsage);
 		glNamedBufferData(GLID, pSize, pData, pUsage);
 	}
 
 	inline void* mapRange(GLintptr pOffset, GLsizeiptr pLength, GLbitfield pAccess)
 	{
-		//glBindBuffer(GL_SHADER_STORAGE_BUFFER, GLID);
-		//return glMapBufferRange(GL_SHADER_STORAGE_BUFFER, pOffset, pLength, pAccess);
 		return glMapNamedBufferRange(GLID, pOffset, pLength, pAccess);
 	}
 
@@ -36,8 +32,6 @@ public:
 
 	inline void unmap()
 	{
-		//glBindBuffer(GL_SHADER_STORAGE_BUFFER, GLID);
-		//glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 		glUnmapNamedBuffer(GLID);
 	}
 
@@ -73,7 +67,6 @@ class SSBO : public GLBufferObject
 public:
 	SSBO() : GLBufferObject()
 	{
-		//glBindBuffer(GL_SHADER_STORAGE_BUFFER, GLID);
 	}
 	~SSBO() 
 	{
@@ -82,22 +75,16 @@ public:
 	inline void bufferData(GLsizeiptr pSize, void* pData, GLenum pUsage)
 	{
 		sizeInBytes = pSize;
-		//glBindBuffer(GL_SHADER_STORAGE_BUFFER, GLID);
-		//glBufferData(GL_SHADER_STORAGE_BUFFER, pSize, pData, pUsage);
 		glNamedBufferData(GLID, pSize, pData, pUsage);
 	}
 
 	inline void* mapRange(GLintptr pOffset, GLsizeiptr pLength, GLbitfield pAccess)
 	{
-		//glBindBuffer(GL_SHADER_STORAGE_BUFFER, GLID);
-		//return glMapBufferRange(GL_SHADER_STORAGE_BUFFER, pOffset, pLength, pAccess);
 		return glMapNamedBufferRange(GLID, pOffset, pLength, pAccess);
 	}
 
 	inline void unmap()
 	{
-		//glBindBuffer(GL_SHADER_STORAGE_BUFFER, GLID);
-		//glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 		glUnmapNamedBuffer(GLID);
 	}
 

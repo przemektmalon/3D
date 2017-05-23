@@ -75,6 +75,22 @@ public:
 		return attachment.getGLID();
 	}
 
+	bool attachForeignTexture(GLTexture2D* pTexture, GLenum pAttachment)
+	{
+		bind();
+		pTexture->bind();
+		glFramebufferTexture2D(GL_FRAMEBUFFER, pAttachment, GL_TEXTURE_2D, pTexture->getGLID(), 0);
+		return true; ///TODO: or flase if error occurred, i.e. incomplete attachment texture
+	}
+
+	bool attachForeignCubeTexture(GLTextureCube* pTexture, GLenum pAttachment)
+	{
+		bind();
+		pTexture->bind();
+		glFramebufferTexture(GL_FRAMEBUFFER, pAttachment, pTexture->getGLID(), 0);
+		return true;
+	}
+
 	int attachRenderbuffer(GLint pInternalFormat, GLenum pAttachment, glm::fvec2 scale = glm::fvec2(1.f, 1.f))
 	{
 		bind();

@@ -12,6 +12,10 @@
 
 #include "Bounds3D.h"
 
+#include <vector>
+
+#include "File.h"
+
 struct ObjectData
 {
 	std::vector<float> verts;
@@ -98,7 +102,7 @@ enum DrawMode;
 class Material
 {
 public:
-	Material() {}
+	Material();
 
 	MaterialID matID;
 
@@ -147,6 +151,17 @@ public:
 	{
 		return vertexFormats[matID].size;
 	}
+
+	void nullTextures(GLTexture2D* nullTex)
+	{
+		for (int i = 0; i < 4; ++i)
+		{
+			albedo[i] = nullTex;
+			specular[i] = nullTex;
+			normal[i] = nullTex;
+		}
+		alpha = nullTex;
+	}
 };
 
 class OBJMeshData;
@@ -154,23 +169,52 @@ class OBJMeshData;
 class InterleavedVertexData
 {
 public:
-	InterleavedVertexData() : data(nullptr) {}
+	InterleavedVertexData() {}
 	~InterleavedVertexData()
 	{
-		if (data != nullptr)
+		for (auto itr = materialGroups.begin(); itr != materialGroups.end(); ++itr)
 		{
-			delete[] data;
+			for (auto itr2 = itr->second.begin(); itr2 != itr->second.end(); ++itr2)
+			{
+				if (itr2->data != nullptr)
+				{
+					delete[] itr2->data;
+				}
+			}
 		}
 	}
 
 	void fromOBJMeshData(OBJMeshData* obj);
 
-	s32 getDataSizeInBytes() { return size * sizeof(float); }
+	s32 getDataSizeInBytes() 
+	{ 
+		s32 ret = 0;
+		for (auto itr = materialGroups.begin(); itr != materialGroups.end(); ++itr)
+		{
+			for (auto itr2 = itr->second.begin(); itr2 != itr->second.end(); ++itr2)
+			{
+				ret += itr2->size;
+			}
+		}
+		return ret * sizeof(float);
+	}
 
-	VertexFormat format;
-	float* data;
-	s32 size;
+	struct Group
+	{
+		Group() : data(nullptr), size(0) {}
+		String32 textureName;
+		VertexFormat format;
+		float* data;
+		s32 size;
 
+		s32 getDataSizeInBytes()
+		{
+			return size * sizeof(float);
+		}
+
+	};
+
+	std::map<String64,std::list<Group>> materialGroups;
 };
 
 class MeshBatch;
@@ -205,30 +249,9 @@ public:
 		}
 	}
 
-	void loadBinary()
-	{
-		/*std::ifstream ifs(diskPath.getString(), std::ios_base::binary);
-		s32 size;
-		float* glVerts;
-		ifs.read((char*)&size, sizeof(size));
-		intData.interlacedData = (new float[size]);
-		ifs.read((char*)intData.interlacedData, sizeof(GLfloat) * size);
-		intData.size = size;
-		data.numVert = size / 8;
-		data.numTris = data.numVert / 3;*/
-	}
-
-	void saveBinary(StringGeneric& binPath)
-	{
-		/*std::ofstream ofs(binPath.getString(), std::ios_base::binary);
-		ofs.write((char*)&intData.size, sizeof(intData.size));
-		std::cout << intData.size << std::endl;
-		ofs.write((char*)intData.interlacedData, intData.size * sizeof(float));*/
-	}
-
 	void save(StringGeneric& binPath)
 	{
-		saveBinV11(binPath);
+		saveBinV12(binPath);
 	}
 
 	void saveBinV10(StringGeneric& binPath)
@@ -288,14 +311,88 @@ public:
 		}
 	}
 
+	void saveBinV12(StringGeneric& binPath)
+	{
+		//New method using my File class, much cleaner!
+		File file;
+		if (!file.create(binPath))
+		{
+			Engine::log.postMessage("A mesh was not named before saving");
+		}
+		file.write(char(1));
+		file.write(char(2));
+		file.writeStr(getName());
+		file.write(triangleLists.size());
+		
+		for (auto i = 0; i < triangleLists.size(); ++i)
+		{
+			TriangleList* tl = &triangleLists[i];
+			file.write(tl->material.matID);
+			file.write(tl->numVerts);
+			file.writeStr(tl->material.albedo[0]->getName());
+			file.writeStr(tl->material.albedo[1]->getName());
+			file.writeStr(tl->material.albedo[2]->getName());
+			file.writeStr(tl->material.albedo[3]->getName());
+			file.writeStr(tl->material.specular[0]->getName());
+			file.writeStr(tl->material.specular[1]->getName());
+			file.writeStr(tl->material.specular[2]->getName());
+			file.writeStr(tl->material.specular[3]->getName());
+			file.writeStr(tl->material.normal[0]->getName());
+			file.writeStr(tl->material.normal[1]->getName());
+			file.writeStr(tl->material.normal[2]->getName());
+			file.writeStr(tl->material.normal[3]->getName());
+			file.writeStr(tl->material.alpha->getName());
+			file.write(tl->material.alphaScale);
+			file.write(tl->getDataSizeInBytes());
+			file.write(tl->data, tl->getDataSizeInBytes());
+		}
+
+		file.write(castsShadows);
+		file.close();
+
+		/*std::ofstream ofs(binPath.getString(), std::ios_base::binary);
+		char major = 1; char minor = 0;
+		ofs.write(&major, sizeof(major));
+		ofs.write(&minor, sizeof(minor));
+		ofs.write(getName().getString(), getName().getCapacity());
+		auto numTriLists = triangleLists.size();
+		ofs.write((char*)&(numTriLists), sizeof(numTriLists));
+
+		for (auto i = 0; i < triangleLists.size(); ++i)
+		{
+			TriangleList* tl = &triangleLists[i];
+			ofs.write((char*)&tl->material.matID, sizeof(tl->material.matID));
+			ofs.write((char*)&tl->numVerts, sizeof(tl->numVerts));
+			ofs.write(tl->material.albedo[0]->getName().getString(), tl->material.albedo[0]->getName().getCapacity());
+			ofs.write(tl->material.albedo[1]->getName().getString(), tl->material.albedo[1]->getName().getCapacity());
+			ofs.write(tl->material.albedo[2]->getName().getString(), tl->material.albedo[2]->getName().getCapacity());
+			ofs.write(tl->material.albedo[3]->getName().getString(), tl->material.albedo[3]->getName().getCapacity());
+			ofs.write(tl->material.specular[0]->getName().getString(), tl->material.specular[0]->getName().getCapacity());
+			ofs.write(tl->material.specular[1]->getName().getString(), tl->material.specular[1]->getName().getCapacity());
+			ofs.write(tl->material.specular[2]->getName().getString(), tl->material.specular[2]->getName().getCapacity());
+			ofs.write(tl->material.specular[3]->getName().getString(), tl->material.specular[3]->getName().getCapacity());
+			ofs.write(tl->material.normal[0]->getName().getString(), tl->material.normal[0]->getName().getCapacity());
+			ofs.write(tl->material.normal[1]->getName().getString(), tl->material.normal[1]->getName().getCapacity());
+			ofs.write(tl->material.normal[2]->getName().getString(), tl->material.normal[2]->getName().getCapacity());
+			ofs.write(tl->material.normal[3]->getName().getString(), tl->material.normal[3]->getName().getCapacity());
+			ofs.write(tl->material.alpha->getName().getString(), tl->material.alpha->getName().getCapacity());
+			ofs.write((char*)&tl->material.alphaScale, sizeof(float));
+			auto size = tl->getDataSizeInBytes();
+			ofs.write((char*)&size, sizeof(size));
+			ofs.write((char*)tl->data, size);
+		}
+
+		ofs.write((char*)&castsShadows, sizeof(bool));*/
+	}
+
 	void load()
 	{
-		loadBinV10();
-		sortTriangleLists();
+		loadBinV11();
 	}
 
 	void loadBinV10();
 	void loadBinV11();
+	void loadBinV12();
 
 	void sortTriangleLists()
 	{
@@ -329,6 +426,7 @@ public:
 		s32 first;
 
 		MeshRenderMeta renderMeta;
+		MeshRenderMeta shadowRenderMeta;
 
 		void copyConstruct(TriangleList& tl)
 		{
@@ -370,9 +468,9 @@ public:
 
 	std::vector<TriangleList> triangleLists;
 	std::vector<std::pair<DrawMode, std::vector<TriangleList*>>> triangleListsSorted;
-	std::vector<String<32>> listTextureNames;
 
 	AABounds3D bounds;
+	bool castsShadows;
 	float radius;
 };
 
@@ -431,6 +529,10 @@ struct MeshGPUMetaMultiTextured
 	glm::uvec4 normalD_alpha;
 };
 
+struct MeshGPUMetaShadow
+{
+	glm::uvec4 cmds;
+};
 
 class MeshInstance
 {

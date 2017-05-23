@@ -193,7 +193,7 @@ void Window::screenshot(StringGeneric& fileName)
 	u32 rowSize = getSizeX() * 3;
 	u8* screenshot = new u8[imageSize];
 
-	//String128 filepath = String128("res/screenshot/");
+	//String128 filepath = String128("screenshot/");
 	fileName.append(String128(".bmp"));
 	fileName.append('\0');
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
@@ -244,7 +244,7 @@ void Window::screenshot()
 	localtime_s(&tstruct, &now);
 	//OutputDebugString("SCREENSHOT");
 	strftime(buf, sizeof(buf), "%F_%H;%M;%S", &tstruct);
-	String128 fileName = String128("res/screenshot/Screenshot_").append(String64(buf));
+	String128 fileName = String128("screenshot/Screenshot_").append(String64(buf));
 	screenshot(fileName);
 }
 

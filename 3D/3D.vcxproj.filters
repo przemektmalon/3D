@@ -117,6 +117,9 @@
     <ClCompile Include="StringGenerics.cpp">
       <Filter>Source Files\String</Filter>
     </ClCompile>
+    <ClCompile Include="Lights.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h">
@@ -300,6 +303,15 @@
       <Filter>Header Files\Shaders</Filter>
     </ClInclude>
     <ClInclude Include="PrepMultiTexShader.h">
+      <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="File.h">
+      <Filter>Header Files\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="PointShadowPassShader.h">
+      <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="SpotShadowPassShader.h">
       <Filter>Header Files\Shaders</Filter>
     </ClInclude>
   </ItemGroup>

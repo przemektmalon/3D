@@ -5,6 +5,7 @@
 
 class Asset
 {
+	friend class MeshUtility;
 public:
 	Asset();
 	Asset(String128& pPath, String32& pName);
@@ -22,6 +23,11 @@ public:
 	String32& getName() { return name; }
 
 protected:
+	void setPath(String128& pPath)
+	{
+		diskPath.overwrite(pPath);
+	}
+
 	String32 name;
 	String128 diskPath;
 	bool existsOnDisk;

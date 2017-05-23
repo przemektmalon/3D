@@ -7,7 +7,7 @@
 class GLTexture : public Asset
 {
 public:
-	GLTexture() {}
+	GLTexture() : handle(0) {}
 	GLTexture(String<128>& pPath, String<32>& pName) : Asset(pPath, pName) {}
 	~GLTexture() {}
 
@@ -23,18 +23,19 @@ public:
 		handle = glGetTextureSamplerHandleARB(GLID, pSampler);
 		return handle;
 	}
-	virtual void makeResident(GLuint pSampler) 
+	virtual GLuint64 makeResident(GLuint pSampler)
 	{
 		if (handle == 0)
 		{
 			getHandle(pSampler);
 		}
 		glMakeTextureHandleResidentARB(handle);
+		return handle;
 	}
 
 	virtual void bind(GLint pTextureUnit = 0) = 0;
 
-	void setGLID(GLuint pG) { GLID = pG; }
+	//void setGLID(GLuint pG) { GLID = pG; }
 
 protected:
 
@@ -73,6 +74,35 @@ public:
 			SOIL_free_image_data(image);
 		}
 	}
+
+	void createFromStream(GLint pInternalFormat, s32 pWidth, s32 pHeight,GLenum pFormat, GLenum pType, char* image = nullptr, GLint pPixelAlignment = 4)
+	{
+		internalFormat = pInternalFormat;
+		width = pWidth; height = pHeight;
+		format = pFormat;
+		type = pType;
+		pixelAlignment = pPixelAlignment;
+		glPixelStorei(GL_PACK_ALIGNMENT, pixelAlignment);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, pixelAlignment);
+
+		glActiveTexture(GL_TEXTURE0);
+		glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &GLID);
+		glBindTextureUnit(0, GLID);
+
+		//glGenTextures(1, &GLID);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, GLID);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 0);
+		//glTexStorage2D(GL_TEXTURE_CUBE_MAP, 6, pInternalFormat, pWidth, pHeight);
+
+		for (GLuint i = 0; i < 6; ++i)
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, width, height, 0, format, type, NULL);
+
+		/*for (int i = 0; i < 6; ++i)
+		{
+			glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, pInternalFormat, width, width, 0, pFormat, pType, 0);
+		}*/
+	}
 	
 	void bind(GLint pTextureUnit = 0)
 	{
@@ -88,6 +118,10 @@ public:
 	{
 
 	}
+
+	s32 getWidth() { return width; }
+	s32 getHeight() { return height; }
+	glm::ivec2 getResolution() { return glm::ivec2(width, height); }
 };
 
 class GLTexture2D : public GLTexture
@@ -123,7 +157,7 @@ public:
 			glGenerateMipmap(GL_TEXTURE_2D);
 	}
 
-	void createFromStream(GLint pInternalFormat, s32 pWidth, s32 pHeight, GLint pFormat, GLenum pType, const void* pPixels, GLint pTextureUnit = 0, GLenum pPixelAlignment = 4)
+	void createFromStream(GLint pInternalFormat, s32 pWidth, s32 pHeight, GLint pFormat, GLenum pType, const void* pPixels, GLint pTextureUnit = 0, GLint pPixelAlignment = 4)
 	{
 		internalFormat = pInternalFormat;
 		width = pWidth; height = pHeight;
@@ -132,6 +166,7 @@ public:
 		pixelAlignment = pPixelAlignment;
 		glPixelStorei(GL_PACK_ALIGNMENT, pixelAlignment);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, pixelAlignment);
+
 		glActiveTexture(GL_TEXTURE0);
 		glCreateTextures(GL_TEXTURE_2D, 1, &GLID);
 		glBindTextureUnit(0, GLID);
@@ -156,6 +191,7 @@ public:
 
 	s32 getWidth() { return width; }
 	s32 getHeight() { return height; }
+	glm::ivec2 getResolution() { return glm::ivec2(width, height); }
 
 	void saveToFile(std::string fileName = "___AUTO_GENERATE_NAME___", bool flipY = false)
 	{
@@ -200,10 +236,11 @@ public:
 		u8* screenshot = new u8[sourceImageSize];
 		u8* flipped = new u8[targetImageSize];
 
-		std::string filepath = "res/screenshot/" + fileName + ".bmp";
+		std::string filepath = "screenshot/" + fileName + ".bmp";
 		glBindTextureUnit(1, GLID);
 		glActiveTexture(GL_TEXTURE1);
 		glGetTexImage(GL_TEXTURE_2D, 0, internalFormat, type, screenshot);
+
 
 		float flipSign = flipY == true ? -1.f : 1.f;
 		float flip = flipY == true ? sourceImageSize - sourceRowSize : 0;

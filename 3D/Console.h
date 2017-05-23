@@ -34,29 +34,22 @@ struct FnArgs<R(Args...)>
 #define CONSTRUCT_PARAMS_1(func,params) CHEAT_CAST(func, 0, params)
 #define CONSTRUCT_PARAMS_0(func,params)
 
-//#define CONSTRUCT_PARAMS(func,params) CONSTRUCT_PARAMS_6(func,params)
-
-#define VARIABLE 3
-#define PASTER(x,y) x ## _ ## y
-#define EVALUATOR(x,y)  PASTER(x,y)
-#define NAME(fun) EVALUATOR(fun, VARIABLE)
-
 #define CONSTRUCT_PARAMS_AUTO(func,params,numParms)
 #define CONSTRUCT_PARAMS_INTERM(func,params,numParams) CONSTRUCT_PARAMS_##numParams## (func,params)
 #define CONSTRUCT_PARAMS(func,params,numParams) CONSTRUCT_PARAMS_INTERM(func,params,numParams)
 
 #define BEGIN_FUNC_SWITCH(name) \
 auto funcID = funcIDs.find(name); \
-if(funcID == funcIDs.end()) { assert(0); } \
+if(funcID == funcIDs.end()) { String64 msg("Function \""); msg.append(name); msg.append("\" not found."); postError(msg); return; } \
 switch(funcID->second) {
 
 #define CHECK_CONSOLE_CALLABLE(id,func,numParams) \
 case(id):{ \
 if(params.size() > numParams) \
-	{ postMessage(String64("Too many arguments passed. Taking required amount")); } \
+	{ postError(String64("Too many arguments passed. Taking required amount")); } \
 if(params.size() < numParams) { \
 	std::string str("Not enough arguments passed. "); str += std::to_string(numParams) + std::string(" arguments expected. ") + std::to_string(params.size()) + std::string(" were passed."); \
-	postMessage(String128(str.c_str())); return; } \
+	postError(String128(str.c_str())); return; } \
 auto task = MAKE_TASK(func)(CONSTRUCT_PARAMS_##numParams##(func,params,PARAM_TUPLE_SIZE(func))); \
 pvoidary pFunc; \
 void* pVoid; \
@@ -376,7 +369,7 @@ public:
 	};
 
 	void submitCommand(StringGeneric& command);
-	void postMessage(StringGeneric& post)
+	void postMessage(StringGeneric& post, char prompt = '>')
 	{
 		std::vector<String<HEAP>*> lines;
 
@@ -400,7 +393,8 @@ public:
 			newPost->init();
 			newPost->setFont(cmd.getFont());
 			newPost->setCharSize(25);
-			newPost->setString(String<5>(">>> "));
+			newPost->setString(String<2>(prompt));
+			newPost->getString().append(' ');
 			newPost->getString().append(*(*itr));
 			consoleHistory.push_back(newPost);
 		}
@@ -411,6 +405,14 @@ public:
 		}
 
 		repositionText();
+	}
+	void postResult(StringGeneric& result)
+	{
+		postMessage(result, '#');
+	}
+	void postError(StringGeneric& error)
+	{
+		postMessage(error, '!');
 	}
 	void textInput(KeyCode code);
 	

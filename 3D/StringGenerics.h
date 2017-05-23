@@ -98,6 +98,11 @@ public:
 		overwrite(str);
 	}
 
+	void operator=(const StringGeneric& str)
+	{
+		overwrite(const_cast<StringGeneric&>(str));
+	}
+
 	void operator=(const std::string& str)
 	{
 		setToChars(str.c_str());

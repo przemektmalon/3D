@@ -9,47 +9,69 @@ DrawMode Material::drawModes[MATERIALS_COUNT];
 
 void InterleavedVertexData::fromOBJMeshData(OBJMeshData * obj)
 {
-	format = obj->vData.format;
-
-	int numVert = obj->getNumVerts();
-	int vertSize = obj->vData.format.size;
-	size = numVert * vertSize;
-	//float* glvertices = new float[size];
-	data = new float[size];
-	auto glvertices = data;
-
-	auto posArr = (std::vector<glm::fvec3>*)(obj->vData.data[0]);
-	auto norArr = (std::vector<glm::fvec3>*)(obj->vData.data[1]);
-	auto uvArr = (std::vector<glm::fvec2>*)(obj->vData.data[2]);
-
-	float* pos = (float*)posArr->data();
-	float* norm = (float*)norArr->data();
-	float* uv = (float*)uvArr->data();
-
-	//float* pos = (float*)((std::vector<glm::fvec3>*)(obj->vData.data))->data();
-	//float* norm = (float*)((std::vector<glm::fvec3>*)(obj->vData.data + sizeof(int*)))->data();
-	//float* uv = (float*)((std::vector<glm::fvec3>*)(obj->vData.data + (2 * sizeof(int*))))->data();
-
-	int count = -1;
-	for (auto itr = obj->indices.begin(); itr != obj->indices.end(); itr += 3)
+	for (auto itr = obj->groups.begin(); itr != obj->groups.end(); ++itr)
 	{
-		int index = 3 * (*(itr)-1);
-		glvertices[++count] = pos[index];
-		glvertices[++count] = pos[index + 1];
-		glvertices[++count] = pos[index + 2];
+		Group* gp = nullptr;
+		auto find = materialGroups.find(itr->materialName);
+		if (find == materialGroups.end())
+		{
+			auto ins = materialGroups.insert(std::make_pair(itr->materialName, std::list<Group>()));
 
-		//std::string s = std::to_string(pos[index]) + "," + std::to_string(pos[index + 1]) + "," + std::to_string(pos[index + 2]) + "\n";
+			ins.first->second.push_back(Group());
 
-		//OutputDebugStringA(s.c_str());
+			gp = &ins.first->second.back();
+		}
+		else
+		{
+			find->second.push_back(Group());
 
-		index = 2 * (*(itr + 1) - 1);
-		glvertices[++count] = uv[index];
-		glvertices[++count] = uv[index + 1];
+			gp = &find->second.back();
+		}
 
-		index = 3 * (*(itr + 2) - 1);
-		glvertices[++count] = norm[index];
-		glvertices[++count] = norm[index + 1];
-		glvertices[++count] = norm[index + 2];
+		auto& g = *gp;
+
+		g.format = obj->vData.format;
+		auto find2 = obj->materials.find(itr->materialName);
+		if (find2 != obj->materials.end())
+		{
+			g.textureName.overwrite(obj->materials.find(itr->materialName)->second);
+		}
+		else
+		{
+			g.textureName.setToChars("null");
+		}
+
+		int numVert = itr->getNumVerts();
+		int vertSize = obj->vData.format.size;
+		g.size = numVert * vertSize;
+		g.data = new float[g.size];
+		auto glvertices = g.data;
+
+		auto posArr = (std::vector<glm::fvec3>*)(obj->vData.data[0]);
+		auto norArr = (std::vector<glm::fvec3>*)(obj->vData.data[1]);
+		auto uvArr = (std::vector<glm::fvec2>*)(obj->vData.data[2]);
+
+		float* pos = (float*)posArr->data();
+		float* norm = (float*)norArr->data();
+		float* uv = (float*)uvArr->data();
+
+		int count = -1;
+		for (auto itr2 = itr->indices.begin(); itr2 != itr->indices.end(); itr2 += 3)
+		{
+			int index = 3 * (*(itr2)-1);
+			glvertices[++count] = pos[index];
+			glvertices[++count] = pos[index + 1];
+			glvertices[++count] = pos[index + 2];
+
+			index = 2 * (*(itr2 + 1) - 1);
+			glvertices[++count] = uv[index];
+			glvertices[++count] = uv[index + 1];
+
+			index = 3 * (*(itr2 + 2) - 1);
+			glvertices[++count] = norm[index];
+			glvertices[++count] = norm[index + 1];
+			glvertices[++count] = norm[index + 2];
+		}
 	}
 }
 
@@ -154,6 +176,117 @@ void Mesh::loadBinV11()
 
 		triangleLists.push_back(tl);
 	}
+	sortTriangleLists();
+}
+
+void Mesh::loadBinV12()
+{
+	//New method using my File class, much cleaner!
+
+	char major, minor;
+
+	File file;
+	file.open(diskPath, File::binary | File::in);
+	file.read(major);
+	file.read(minor);
+	file.readStr(name);
+	s32 triangleListsSize;
+	file.read(triangleListsSize);
+	for (auto i = 0; i < triangleListsSize; ++i)
+	{
+		TriangleList tl;
+		file.read(tl.material.matID);
+		file.read(tl.numVerts);
+
+		String<32> texName[4], norName[4], specName[4], alphaName;
+
+		for (int i = 0; i < 4; ++i)
+		{
+			file.readStr(texName[i], true);
+			tl.material.albedo[i] = Engine::assets.get2DTex(texName[i]);
+		}
+
+		for (int i = 0; i < 4; ++i)
+		{
+			file.readStr(norName[i], true);
+			tl.material.specular[i] = Engine::assets.get2DTex(norName[i]);
+		}
+
+		for (int i = 0; i < 4; ++i)
+		{
+			file.readStr(specName[i], true);
+			tl.material.normal[i] = Engine::assets.get2DTex(specName[i]);
+		}
+
+		file.readStr(alphaName, true);
+		tl.material.alpha = Engine::assets.get2DTex(alphaName);
+
+		file.read(tl.material.alphaScale);
+		s32 dataSize;
+		file.read(dataSize);
+		tl.data = new float[dataSize];
+		file.read(tl.data, dataSize);
+		tl.first = 0;
+
+		triangleLists.push_back(tl);
+	}
+
+	file.read(castsShadows);
+	sortTriangleLists();
+
+	/*std::ifstream ifs(diskPath.getString(), std::ios_base::binary);
+	char major, minor;
+	ifs.read(&major, sizeof(major));
+	ifs.read(&minor, sizeof(minor));
+	ifs.read(name.getString(), name.getCapacity());
+	s32 numTriLists;
+	ifs.read((char*)&numTriLists, sizeof(numTriLists));
+	for (auto i = 0; i < numTriLists; ++i)
+	{
+		TriangleList tl;
+		ifs.read((char*)&tl.material.matID, sizeof(tl.material.matID));
+		ifs.read((char*)&tl.numVerts, sizeof(tl.numVerts));
+
+		String<32> texName[4], norName[4], specName[4], alphaName;
+
+		for (int i = 0; i < 4; ++i)
+		{
+			ifs.read(texName[i].getString(), texName[i].getCapacity());
+			texName[i].determineLength();
+			tl.material.albedo[i] = Engine::assets.get2DTex(texName[i]);
+		}
+
+		for (int i = 0; i < 4; ++i)
+		{
+			ifs.read(specName[i].getString(), specName[i].getCapacity());
+			specName[i].determineLength();
+			tl.material.specular[i] = Engine::assets.get2DTex(specName[i]);
+		}
+
+		for (int i = 0; i < 4; ++i)
+		{
+			ifs.read(norName[i].getString(), norName[i].getCapacity());
+			norName[i].determineLength();
+			tl.material.normal[i] = Engine::assets.get2DTex(norName[i]);
+		}
+
+		ifs.read(alphaName.getString(), alphaName.getCapacity());
+		alphaName.determineLength();
+		tl.material.alpha = Engine::assets.get2DTex(alphaName);
+
+		ifs.read((char*)&tl.material.alphaScale, sizeof(float));
+
+		s32 dataSize;
+		ifs.read((char*)&dataSize, sizeof(dataSize));
+		tl.data = new float[dataSize];
+		ifs.read((char*)tl.data, dataSize);
+		tl.first = 0;
+
+		triangleLists.push_back(tl);
+	}
+
+	ifs.read((char*)&castsShadows, sizeof(bool));
+	sortTriangleLists();*/
 }
 
 void VertexFormat::defineGLVertexAttribs(GLuint vao)
@@ -177,6 +310,11 @@ void VertexFormat::defineGLVertexAttribs(GLuint vao)
 	glEnableVertexAttribArray(norAttrib);
 
 	glBindVertexArray(0);
+}
+
+Material::Material()
+{
+	//nullTextures(Engine::assets.get2DTex("null"));
 }
 
 void Material::initDrawModes()

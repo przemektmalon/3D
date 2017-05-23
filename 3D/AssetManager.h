@@ -37,6 +37,11 @@ public:
 		return (Mesh*)prepareAsset(Asset::Type::Mesh, pPath, pName);
 	}
 
+	Mesh* prepareMesh(String<128>&& pPath, String<32>& pName)
+	{
+		return (Mesh*)prepareAsset(Asset::Type::Mesh, pPath, pName);
+	}
+
 	Asset* prepareAsset(Asset::Type pType, String<128>&& pPath, String<32>&& pName)
 	{
 		return prepareAsset(pType, pPath, pName);
@@ -102,17 +107,53 @@ public:
 		return getMesh(pName);
 	}
 
+	void removeTexture(String32& pName)
+	{
+		//auto find = texture2DList.find(pName);
+		//if (find == texture2DList.end())
+		//	return;
+		texture2DList.erase(pName);
+	}
+
+	void removeMesh(String32& pName)
+	{
+		meshList.erase(pName);
+	}
+
+	void removeFont(String32& pName)
+	{
+		fontList.erase(pName);
+	}
+
 	GPUMeshManager meshManager;
 
+	std::map<String32, Font>& getFontList()
+	{
+		return fontList;
+	}
+
+	std::map<String32, GLTexture2D>& getTextureList()
+	{
+		return texture2DList;
+	}
+
 private:
+
+	class AssetLoader
+	{
+	public:
+		AssetLoader() {}
+		~AssetLoader() {}
+
+		void loadAssets(String128& assetListFilePath);
+	};
 
 	std::map<String32, Font> fontList;
 	std::map<String32, Mesh> meshList;
 	std::map<String32, GLTexture2D> texture2DList;
-
-	//std::map<String32, GLTexture2DMip> texture2DMipList;
 	std::map<String32, GLTextureCube> textureCubeList;
 
+public:
 
-	u32 lastMeshID = 0xa0000000;
+	AssetLoader loader;
 };

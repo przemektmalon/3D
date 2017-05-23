@@ -34,16 +34,10 @@
 
 
 FT_Library Engine::ftLib;
-//FontStore Engine::fontStore;
 Camera Engine::defaultOrthoCam;
-//Text Engine::t;
 HINSTANCE Engine::instance;
-//Shader Engine::s;
-//Shader Engine::testShader;
-//Shader Engine::gPassShader;
 std::mt19937_64 Engine::rand;
 s64 Engine::startTime;
-//Mesh Engine::uSphere;
 bool Engine::movingLight;
 Engine::EngineState Engine::engineState;
 Camera Engine::cam;
@@ -66,6 +60,7 @@ Window Engine::window;
 bool Engine::consoleOpen;
 Log Engine::log;
 Console Engine::console;
+MeshUtility Engine::mu;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -73,22 +68,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 #include <io.h>
 #include <fcntl.h>
 #include <windows.h>
-#include "cmder.h"
 
 int main()
 {
 	Engine::start(GetModuleHandle(NULL));
 	return 0;
 }
-
-/*int WinMain(__in HINSTANCE hInstance, __in_opt HINSTANCE hPrevInstance, __in_opt LPSTR lpCmdLine, __in int nShowCmd)
-{
-	Engine::start(hInstance);
-
-	//HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDR_ACCELERATOR1));
-
-	return 0;
-}*/
 
 void setRes()
 {
@@ -101,21 +86,19 @@ void setRes()
 	Engine::uiw->updateWindowVBO();
 }
 
-void toggleWF()
+void toggleWireFrame()
 {
-	Engine::r->rC.wireFrame = !Engine::r->rC.wireFrame;
+	Engine::r->config.drawWireFrame = !Engine::r->config.drawWireFrame;
 }
 
+void toggleTextBounds()
+{
+	Engine::r->config.drawTextBounds = !Engine::r->config.drawTextBounds;
+}
 
 void Engine::start(HINSTANCE pHInstance)
 {
-	//TESTING CONSOLE
 	Console::registerConsoleFuncs();
-
-	//console.submitCommand(String512("FUNCNAME (1,5,6) (2.3 2.4) 5 \"STRING\" 10000.0002 9999"));
-	//console.submitCommand(String512("FUNC 5"));
-	//console.submitCommand(String512("FOO 1 5.0"));
-	//TESTING CONSOLE
 
 	instance = pHInstance;
 
@@ -149,11 +132,11 @@ void Engine::select(glm::ivec2 mPos)
 	r->fboGBuffer.textureAttachments[3].bind(0);
 	glBindTexture(GL_TEXTURE_2D, r->fboGBuffer.textureAttachments[3].getGLID());
 
-	u32* idTex = new u32[r->rC.renderResolution.x * r->rC.renderResolution.y];
+	u32* idTex = new u32[r->config.renderResolution.x * r->config.renderResolution.y];
 
 	glGetTexImage(GL_TEXTURE_2D, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, idTex);
 
-	u32 source = r->rC.renderResolution.x * (r->rC.renderResolution.y - 1) + (-1.f * (mPos.y * r->rC.renderResolution.x) + (mPos.x));
+	u32 source = r->config.renderResolution.x * (r->config.renderResolution.y - 1) + (-1.f * (mPos.y * r->config.renderResolution.x) + (mPos.x));
 	auto index = source;
 
 	selectedID = idTex[index];
@@ -316,7 +299,8 @@ void Engine::mainLoop()
 	uim.mapToKeyDown(VK_ESCAPE, escapePress);
 	uim.mapToKeyDown('P', setRes);
 	uim.mapToKeyDown('L', screenshot);
-	uim.mapToKeyDown('O', toggleWF);
+	uim.mapToKeyDown('O', toggleWireFrame);
+	uim.mapToKeyDown('I', toggleTextBounds);
 	uim.mapToKeyDown(VK_OEM_COMMA, loadPosition);
 	uim.mapToKeyDown(VK_OEM_PERIOD, savePosition);
 
@@ -346,83 +330,35 @@ void Engine::mainLoop()
 	FT_Init_FreeType(&ftLib);
 
 	r->initialiseShaders();
-	//assets.initMeshBatch();
 
-	auto nullTex = assets.prepareTexture("res/tex/null.png", "null"); nullTex->load();
+	assets.prepareTexture("res/tex/null.png", "null")->load();
 
-	auto t1p = assets.prepareMipTexture("res/tex/g.jpg", "g"); t1p->load();
-	auto t2p = assets.prepareMipTexture("res/tex/gN.jpg", "gN"); t2p->load();
-	auto t3p = assets.prepareMipTexture("res/tex/gS.jpg", "gS"); t3p->load();
-	auto t4p = assets.prepareMipTexture("res/tex/gB.jpg", "gB"); t4p->load();
+	assets.loader.loadAssets(String128("res/resources.txt"));
 
-	auto ooTex = assets.prepareMipTexture("res/tex/oo.jpg", "oo"); ooTex->load();
-	auto pfTex = assets.prepareMipTexture("res/tex/pf.jpg", "pf"); pfTex->load();
-	//auto spTex = (GLTexture2D*)assets.prepareAsset(Asset::Texture2DMip, "res/tex/sp.jpg", "sp"); spTex->load();
-	auto stoneTex = assets.prepareMipTexture("res/tex/stone.png", "stone"); stoneTex->load();
-	auto terTex = assets.prepareMipTexture("res/tex/ter.png", "ter"); terTex->load();
+	auto me = mu.newObj();
+	mu.loadOBJ(String128("res/model/shed.obj"), me);
+	mu.setObjName(me, String32("shed"));
+	auto binMe = mu.newMesh();
+	mu.setMeshName(binMe, String32("shed"));
+	mu.binFromObj(me, binMe);
+	mu.exportBin(binMe);
+	mu.clearStorage();
 
-	auto stoneNTex = assets.prepareMipTexture("res/tex/stoneN.png", "stoneN"); stoneNTex->load();
-	auto terNTex = assets.prepareMipTexture("res/tex/terN.png", "terN"); terNTex->load();
-
-	auto alphaTex = (GLTexture2D*)assets.prepareMipTexture("res/tex/alpha.png", "alpha"); alphaTex->load();
-
-	auto stone2Tex = assets.prepareMipTexture("res/tex/stone2.jpg", "stone2"); stone2Tex->load();
-	auto grassTex = assets.prepareMipTexture("res/tex/grass.png", "grass"); grassTex->load();
-	auto lavaTex = assets.prepareMipTexture("res/tex/lava.png", "lava"); lavaTex->load();
-	auto dirtTex = assets.prepareMipTexture("res/tex/dirt.jpg", "dirt"); dirtTex->load();
-
-	auto a = assets.prepareMesh("res/model/box.bin", "box");
-	auto b = assets.prepareMesh("res/model/sceneNEW.bin", "ter");
-	
-	assets.prepareFont("res/fonts/clear-sans/ClearSans-Regular.ttf", "clearsans")->load();
-	assets.prepareFont("res/fonts/clear-sans/ClearSans-Bold.ttf", "clearsansb")->load();
-
-	///TODO: Automate mesh utulity through world_object definition files
-	///These should contain paths to triangle lists (.OBJ), texture names for each tri-list, world_object mesh name
-	///AND binary OUTPUT path
-
-	///Example definition file
-
-	/*
-	
-	[0]
-		"res/model/OUTPUT.bin"
-		"OUTPUT_MESH_NAME"
-	[1]
-		"res/model/SCENE.obj"
-		"g"
-	[2]
-		"res/model/BOX.obj"
-		"some_other_texture"
-	[3]
-		...
-		...
-
-	*/
-
-	///END
-
-	//OBJ TO BIN
-
-	String<128> objPath, binPath;
-	String<32> meshName, texName;
-
-	MeshUtility mu;
-	auto si = mu.objToBin(String<128>("res/model/square.obj"), String<128>("res/model/square.bin"));
-	mu.nullAllMeshTextures(si, nullTex);
-	mu.setMeshAlbedoTexture(si, 0, Engine::assets.get2DTex("dirt"), 0);
-	mu.setMeshAlbedoTexture(si, 0, Engine::assets.get2DTex("lava"), 1);
-	mu.setMeshAlbedoTexture(si, 0, Engine::assets.get2DTex("grass"), 2);
-	mu.setMeshAlbedoTexture(si, 0, Engine::assets.get2DTex("stone"), 3);
+	/*auto si = mu.objToBin(String<128>("res/model/oo.obj"), String<128>("res/model/oo.bin"), String32("oo"));
+	mu.nullAllMeshTextures(si, assets.get2DTex("null"));
+	mu.setMeshAlbedoTexture(si, 0, Engine::assets.get2DTex("oo"), 0);
+	//mu.setMeshAlbedoTexture(si, 0, Engine::assets.get2DTex("lava"), 1);
+	//mu.setMeshAlbedoTexture(si, 0, Engine::assets.get2DTex("grass"), 2);
+	//mu.setMeshAlbedoTexture(si, 0, Engine::assets.get2DTex("stone"), 3);
 	//mu.setMeshSpecularTexture(si, 0, Engine::assets.get2DTex("stoneS"), 3);
 	//mu.setMeshSpecularTexture(si, 0, Engine::assets.get2DTex("terS"), 1);
 	//mu.setMeshNormalTexture(si, 0, Engine::assets.get2DTex("stoneN"), 3);
 	//mu.setMeshNormalTexture(si, 0, Engine::assets.get2DTex("terN"), 1);
-	mu.setMeshAlphaTexture(si, 0, Engine::assets.get2DTex("alpha"));
-	mu.setTriListMaterialID(si, 0, MaterialID::PNUU_TT_SS_NN);
-	mu.setMeshName(si, String<32>("square"));
-	mu.scaleAlphaTexCoords(si, 1.f / 50.f);
-	mu.scaleTexCoords(si, 50.f);
+	//mu.setMeshAlphaTexture(si, 0, Engine::assets.get2DTex("alpha"));
+	mu.setTriListMaterialID(si, 0, MaterialID::PNUU_T_S_N);
+	mu.setMeshName(si, String<32>("oo"));
+	mu.scaleAlphaTexCoords(si, 1.f);
+	mu.scaleTexCoords(si, 1.f);
 	//mu.exportBinV10(si);
 	//mu.clearStorage();
 	//auto si2 = mu.objToBin(String<128>("res/model/pf.obj"), String<128>("res/model/pf.bin"));
@@ -439,24 +375,25 @@ void Engine::mainLoop()
 	//mu.addMeshToTriLists(si2, 0, si);
 	//mu.addMeshToTriLists(si3, 0, si);
 
-	mu.exportBinV11(si);
+	mu.exportBin(si);
+	mu.clearStorage();*/
 
-	mu.clearStorage();
+	
 
-	auto c = (Mesh*)assets.prepareAsset(Asset::Mesh, "res/model/oo.bin", "paints");
-	auto d = (Mesh*)assets.prepareAsset(Asset::Mesh, "res/model/square.bin", "square");
-
+	//auto c = (Mesh*)assets.prepareAsset(Asset::Mesh, "res/model/oo.bin", "paints");
 
 	//a->load();
 	//assets.meshManager.pushMeshToBatch(*a);
 	//b->load();
 	//assets.meshManager.pushMeshToBatch(*b);
-	c->load();
-	assets.meshManager.pushMeshToBatch(*c);
+	//c->load();
+	//assets.meshManager.pushMeshToBatch(*c);
 
-	d->loadBinV11();
-	d->sortTriangleLists();
-	assets.meshManager.pushMeshToBatch(*d);
+	//d->load();
+	//assets.meshManager.pushMeshToBatch(*d);
+
+	assets.meshManager.pushMeshToBatch(*assets.getMesh(String32("shed")));
+	assets.meshManager.pushMeshToBatch(*assets.getMesh(String32("square")));
 
 	//ooMesh->load();
 	//assets.meshManager.pushMeshToBatch(*ooMesh);
@@ -484,13 +421,23 @@ void Engine::mainLoop()
 
 	auto prevNode = world->getWorldRootNode();
 
-	auto i2 = world->addMeshInstance(*c, world->getWorldRootNode());
-	i2->sgNode->transform.translate(glm::fvec3(0, -50, 0));
-	i2->sgNode->transform.updateMatrix();
+	//auto i2 = world->addMeshInstance(*c, world->getWorldRootNode());
+	//i2->sgNode->transform.translate(glm::fvec3(0, -50, 0));
+	//i2->sgNode->transform.updateMatrix();
 
-	auto i3 = world->addMeshInstance(*d, world->getWorldRootNode());
-	i3->sgNode->transform.translate(glm::fvec3(0, 10, 0)).scale(50.f);
-	i3->sgNode->transform.updateMatrix();
+	//auto i3 = world->addMeshInstance(*d, world->getWorldRootNode());
+	//i3->sgNode->transform.translate(glm::fvec3(0, 0, 0)).scale(4.f);
+	//i3->sgNode->transform.updateMatrix();
+
+	auto e = assets.getMesh(String32("square"));
+	auto i4 = world->addMeshInstance(*e, world->getWorldRootNode());
+	i4->sgNode->transform.translate(glm::fvec3(0, 0, 0)).scale(50.f);
+	i4->sgNode->transform.updateMatrix();
+
+	e = assets.getMesh(String32("shed"));
+	auto i5 = world->addMeshInstance(*e, world->getWorldRootNode());
+	i5->sgNode->transform.scale(4.f);
+	i5->sgNode->transform.updateMatrix();
 
 	/*auto i3 = world->addMeshInstance(*ooMesh, world->getWorldRootNode());
 	i3->sgNode->transform.translate(glm::fvec3(0, 20, 0)).scale(10);
@@ -569,7 +516,8 @@ void Engine::mainLoop()
 				}
 			}
 
-			uim.keyHolds(window.keyboard);
+			if(console.stateFlags == 0)
+				uim.keyHolds(window.keyboard);
 
 			switch (engineState)
 			{
@@ -658,9 +606,9 @@ void Engine::processGameFrame()
 
 	dt.setMicroSeconds(qpc.getElapsedTime());
 	
-	//static float cc;
+	static float cc;
 
-	//cc += dt.getSecondsf();
+	cc += dt.getSecondsf();
 	programTime += dt.getSecondsf();
 
 	//if (cc > (1.f / 600.f))

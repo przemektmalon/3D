@@ -81,7 +81,7 @@ public:
 	void printLog(char* log, u32 length, StringGeneric& logName)
 	{
 		logName.insertAt(0, String32("logs/"));
-		std::ofstream ofs(logName.getString(), std::ios_base::binary);
+		std::ofstream ofs(logName.getString());
 		ofs.write(log, length);
 		ofs.close();
 	}

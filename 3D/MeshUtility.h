@@ -6,16 +6,15 @@
 class SeperatedVertexData
 {
 public:
-	~SeperatedVertexData()
+	SeperatedVertexData()
 	{
 		for (int i = 0; i < 12; ++i)
 		{
-			if (data[i] == nullptr)
-				return;
-
-			delete data[i];
 			data[i] = nullptr;
 		}
+	}
+	~SeperatedVertexData()
+	{
 	}
 
 	VertexFormat format;
@@ -25,15 +24,48 @@ public:
 class OBJMeshData
 {
 public:
-	SeperatedVertexData vData;
-	std::vector<int> indices;
+	struct Group
+	{
+		Group(String64& name) : groupName(name) {}
+		String64 groupName;
+		String64 materialName;
+		
+		std::vector<int> indices;
 
-	int getNumVerts() { return indices.size() / 3; }
-	int getNumTris() { return getNumVerts() / 3; }
+		int getNumVerts()
+		{
+			return indices.size() / 3;
+		}
+
+		int getNumTris()
+		{
+			return getNumVerts() / 3;
+		}
+
+	};
+
+	SeperatedVertexData vData;
+	std::vector<Group> groups;
+	String<32> name;
+	String<128> path;
+	std::map<String64,String32> materials;
+
+	int getNumVerts() 
+	{ 
+		int ret = 0;
+		for (auto itr = groups.begin(); itr != groups.end(); ++itr)
+		{
+			ret += itr->indices.size() / 3;
+		}
+		return ret;
+	}
+	int getNumTris() 
+	{ 
+		return getNumVerts() / 3; 
+	}
 
 	void loadMY(StringGeneric& pPath);
 	void load(StringGeneric& pPath);
-
 };
 
 class MeshUtility
@@ -73,7 +105,20 @@ public:
 		if (mesh == nullptr)
 			return;
 
-		mesh->saveBinV10(mesh->getPath());
+		mesh->save(mesh->getPath());
+	}
+
+	void setMeshPath(s32 binIndex, String128& path)
+	{
+		if (binIndex > meshes.size() - 1)
+			return;
+
+		auto mesh = meshes[binIndex];
+
+		if (mesh == nullptr)
+			return;
+
+		mesh->setPath(path);
 	}
 
 	void exportBinV10(s32 binIndex)
@@ -102,36 +147,7 @@ public:
 		mesh->saveBinV11(mesh->getPath());
 	}
 
-	void binFromObj(s32 objIndex, s32 binIndex)
-	{
-		if (objIndex > objMeshDatas.size() - 1)
-			return;
-
-		if (binIndex > meshes.size() - 1)
-			return;
-
-		auto objMeshData = objMeshDatas[objIndex];
-		auto mesh = meshes[binIndex];
-
-		InterleavedVertexData ivd;
-		ivd.fromOBJMeshData(objMeshData);
-
-		//mesh->ivd = ivd;
-		//mesh->intData.interlacedData = ivd.data;
-		//mesh->intData.size = ivd.size;
-		mesh->size = ivd.size;
-		mesh->diskPath.overwrite(String<128>("PATH"));
-		mesh->name.overwrite(String<32>("NAME"));
-
-		Mesh::TriangleList list;
-		list.material.matID = PNUU_T_S_N;
-		list.data = new float[ivd.size];
-		//list.first = Engine::assets.meshManager.solidBatches[mesh->renderMeta.batchIndex].firsts[mesh->renderMeta.batchID];
-		list.first = 0;
-		list.numVerts = ivd.size / ivd.format.size;
-		memcpy(list.data, ivd.data, ivd.getDataSizeInBytes());
-		mesh->triangleLists.push_back(list);
-	}
+	void binFromObj(s32 objIndex, s32 binIndex);
 
 	void setTriListMaterialID(s32 binIndex, s32 triListIndex, MaterialID matID)
 	{
@@ -279,10 +295,10 @@ public:
 
 	void addTriList(InterleavedVertexData& obj, Mesh& model)
 	{
-		Mesh::TriangleList list;
-		list.material.matID = PNUU_T_S_N;
-		memcpy(list.data, obj.data, obj.size);
-		model.triangleLists.push_back(list);
+		//Mesh::TriangleList list;
+		//list.material.matID = PNUU_T_S_N;
+		//memcpy(list.data, obj.data, obj.size);
+		//model.triangleLists.push_back(list);
 	}
 
 	void setMeshName(s32 meshIndex, String<32>& pName)
@@ -296,6 +312,19 @@ public:
 			return;
 
 		mesh->name.overwrite(pName);
+	}
+
+	void setObjName(s32 objIndex, String32& pName)
+	{
+		if (objIndex > objMeshDatas.size() - 1)
+			return;
+
+		OBJMeshData* obj = objMeshDatas[objIndex];
+
+		if (obj == nullptr)
+			return;
+
+		obj->name.overwrite(pName);
 	}
 
 	void setMeshDiskPath(s32 meshIndex, String<128>& pPath)
@@ -334,11 +363,12 @@ public:
 		addMesh->triangleLists.push_back(tl);
 	}
 
-	s32 objToBin(String<128>& objPath, String<128>& binPath)
+	s32 objToBin(String<128>& objPath, String<128>& binPath, String<32>& name)
 	{
 		auto objInd = newObj();
 		auto binInd = newMesh();
 		loadOBJ(objPath, objInd);
+		objMeshDatas[objInd]->name.overwrite(name);
 		binFromObj(objInd, binInd);
 		setMeshDiskPath(binInd, binPath);
 		unloadObj(objInd);

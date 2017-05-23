@@ -1,33 +1,8 @@
+#pragma once
 #include "Console.h"
 #include "AssetManager.h"
 #include "World.h"
-
-std::map<String32, u32> Console::funcIDs;
-
-void test(int x) {
-	std::cout << "X:" << x << "\n";
-	std::string s; s = std::to_string(x);
-	Engine::console.postMessage(String<HEAP>(s.c_str()));
-}
-
-void test2(int x, float y) {
-	std::string string = (std::to_string(x) + std::to_string(y));
-	Engine::console.postMessage(String<HEAP>(string.c_str()));
-}
-
-void test3(glm::ivec3 iv3, glm::fvec2 fv2, int i, String32 str, float f, int i2)
-{
-	std::stringstream ss;
-	ss << "(" << iv3.x << ", " << iv3.y << ", " << iv3.z << ")" << std::endl;
-	ss << "(" << fv2.x << ", " << fv2.y << ")" << std::endl;
-	ss << i << std::endl;
-	ss << str.getString() << std::endl;
-	ss << f << std::endl;
-	ss << i2;
-	std::string string;
-	string = ss.str();
-	Engine::console.postMessage(String<HEAP>(string.c_str()));
-}
+#include "MeshUtility.h"
 
 void setModelPosition(glm::fvec3 pos)
 {
@@ -43,18 +18,136 @@ void listShaders()
 	auto& shaderMap = Engine::r->shaderStore.getShaderMap();
 	for (auto itr = shaderMap.begin(); itr != shaderMap.end(); ++itr)
 	{
-		Engine::console.postMessage(const_cast<String32&>(itr->first));
+		Engine::console.postResult(const_cast<String32&>(itr->first));
 	}
 }
 
-void Console::registerConsoleFuncs()
+void reloadShader(String32 shaderName)
 {
-	REGISTER_CONSOLE_CALLABLE(3, "FUNCNAME", 6);
-	REGISTER_CONSOLE_CALLABLE(2, "FOO", 2);
-	REGISTER_CONSOLE_CALLABLE(1, "FUNC", 1);
-	REGISTER_CONSOLE_CALLABLE(4, "SetModelPos", 1);
-	REGISTER_CONSOLE_CALLABLE(5, "shaders", 0);
+	Engine::r->shaderStore.reloadShader(shaderName);
 }
+
+void reloadAllShaders()
+{
+	auto& shaderMap = Engine::r->shaderStore.getShaderMap();
+	for (auto itr = shaderMap.begin(); itr != shaderMap.end(); ++itr)
+	{
+		itr->second->reload();
+	}
+}
+
+//MODEL LOADING AND MANIPULATION
+
+void muLoadMeshObj(String32 name)
+{
+	String128 path("res/model/");
+	path.append(name);
+	path.append(".obj");
+	auto newObj = Engine::mu.newObj();
+	Engine::mu.loadOBJ(path, newObj);
+	Engine::mu.objMeshDatas[newObj]->name.overwrite(name);
+	String64 msg;
+	msg.append(name);
+	msg.append(" (OBJ ID) = ");
+	std::string objID; objID = std::to_string(newObj);
+	msg.append(const_cast<char*>(objID.c_str())); ///TODO: own to_string()
+	Engine::console.postResult(msg);
+}
+
+void muLoadMeshBin(String32 name)
+{
+	String128 path("res/model/");
+	path.append(name);
+	path.append(".bin");
+	auto newBin = Engine::mu.newMesh();
+	Engine::mu.loadBin(path, newBin);
+	Engine::mu.setMeshName(newBin, name);
+	String64 msg;
+	msg.append(name);
+	msg.append(" (BIN ID) = ");
+	std::string binID; binID = std::to_string(newBin);
+	msg.append(const_cast<char*>(binID.c_str())); ///TODO: own to_string()
+	Engine::console.postResult(msg);
+}
+
+void muObjToBin(s32 objIndex)
+{
+	auto newMesh = Engine::mu.newMesh();
+	Engine::mu.setMeshName(newMesh, Engine::mu.objMeshDatas[objIndex]->name);
+	Engine::mu.binFromObj(objIndex, newMesh);
+	String64 msg;
+	msg.append(Engine::mu.meshes[newMesh]->getName());
+	msg.append(" (BIN ID) = ");
+	std::string binID; binID = std::to_string(newMesh);
+	msg.append(const_cast<char*>(binID.c_str())); ///TODO: own to_string()
+	Engine::console.postResult(msg);
+}
+
+void muClearStorage()
+{
+	Engine::mu.clearStorage();
+}
+
+void muExportBin(s32 binIndex)
+{
+	if (binIndex > Engine::mu.meshes.size() - 1)
+		return;
+
+	auto mesh = Engine::mu.meshes[binIndex];
+
+	if(mesh == nullptr)
+		return;
+
+	Engine::mu.exportBin(binIndex);
+	String64 msg;
+	msg.append(Engine::mu.meshes[binIndex]->getName());
+	msg.append(" : exported to \"res/model/");
+	msg.append(Engine::mu.meshes[binIndex]->getName());
+	msg.append(".bin\"");
+	Engine::console.postResult(msg);
+}
+
+void muListMeshes()
+{
+	int id = 0;
+	for (auto itr = Engine::mu.objMeshDatas.begin(); itr != Engine::mu.objMeshDatas.end(); ++itr)
+	{
+		String64 msg;
+		msg.append((*itr)->name);
+		msg.append(" (OBJ ID) = ");
+		std::string objID; objID = std::to_string(id);
+		++id;
+		msg.append(const_cast<char*>(objID.c_str())); ///TODO: own to_string()
+		Engine::console.postResult(msg);
+	}
+	id = 0;
+	for (auto itr = Engine::mu.meshes.begin(); itr != Engine::mu.meshes.end(); ++itr)
+	{
+		String64 msg;
+		msg.append((*itr)->getName());
+		msg.append(" (BIN ID) = ");
+		std::string binID; binID = std::to_string(id);
+		++id;
+		msg.append(const_cast<char*>(binID.c_str())); ///TODO: own to_string()
+		Engine::console.postResult(msg);
+	}
+}
+
+void addMeshAsset(String32 path, String32 name)
+{
+	auto mesh = Engine::assets.prepareMesh(path, name);
+	mesh->loadBinV11();
+	mesh->sortTriangleLists();
+	Engine::assets.meshManager.pushMeshToBatch(*mesh);
+	auto inst = Engine::world->addMeshInstance(*mesh, Engine::world->getWorldRootNode());
+	inst->sgNode->transform.updateMatrix();
+	Engine::world->sg.updateAll();
+	Engine::world->updateGLBuffers();
+}
+
+//MODEL LOADING AND MANIPULATION
+
+std::map<String32, u32> Console::funcIDs;
 
 void Console::submitCommand(StringGeneric& command)
 {
@@ -155,20 +248,35 @@ void Console::submitCommand(StringGeneric& command)
 		}
 	}
 
-	try {
-		BEGIN_FUNC_SWITCH(funcName)
-			CHECK_CONSOLE_CALLABLE(1, test, 1);
-			CHECK_CONSOLE_CALLABLE(2, test2, 2);
-			CHECK_CONSOLE_CALLABLE(3, test3, 6);
-			CHECK_CONSOLE_CALLABLE(4, setModelPosition, 1);
-			CHECK_CONSOLE_CALLABLE(5, listShaders, 0);
-		END_FUNC_SWITCH
-	}
-	catch (...)
-	{
-		postMessage(String32("SOMETHING WENT WRONG!"));
-	}
+	BEGIN_FUNC_SWITCH(funcName)
+		CHECK_CONSOLE_CALLABLE(1, setModelPosition, 1);
+		CHECK_CONSOLE_CALLABLE(2, listShaders, 0);
+		CHECK_CONSOLE_CALLABLE(3, reloadShader, 1);
+		CHECK_CONSOLE_CALLABLE(4, reloadAllShaders, 0);
+		CHECK_CONSOLE_CALLABLE(5, muLoadMeshObj, 1);
+		CHECK_CONSOLE_CALLABLE(6, muLoadMeshBin, 1);
+		CHECK_CONSOLE_CALLABLE(7, muObjToBin, 1);
+		CHECK_CONSOLE_CALLABLE(8, muClearStorage, 0);
+		CHECK_CONSOLE_CALLABLE(9, muExportBin, 1);
+		CHECK_CONSOLE_CALLABLE(10, muListMeshes, 0);
+		CHECK_CONSOLE_CALLABLE(20, addMeshAsset, 2);
+	END_FUNC_SWITCH
+}
 
+void Console::registerConsoleFuncs()
+{
+	REGISTER_CONSOLE_CALLABLE(1, "setModelPosition", 1);
+	REGISTER_CONSOLE_CALLABLE(2, "listShaders", 0);
+	REGISTER_CONSOLE_CALLABLE(3, "reloadShader", 1);
+	REGISTER_CONSOLE_CALLABLE(4, "reloadAllShaders", 0);
+	REGISTER_CONSOLE_CALLABLE(5, "muLoadMeshObj", 1);
+	REGISTER_CONSOLE_CALLABLE(6, "muLoadMeshBin", 1);
+	REGISTER_CONSOLE_CALLABLE(7, "muObjToBin", 1);
+	REGISTER_CONSOLE_CALLABLE(8, "muClearStorage", 0);
+	REGISTER_CONSOLE_CALLABLE(9, "muExportBin", 1);
+	REGISTER_CONSOLE_CALLABLE(10, "muListMeshes", 0);
+	REGISTER_CONSOLE_CALLABLE(20, "addMeshAsset", 2);
+	//REGISTER_CONSOLE_CALLABLE(5, "reloadAllShaders", 0);
 }
 
 void Console::textInput(KeyCode code)
@@ -231,11 +339,11 @@ void Console::textInput(KeyCode code)
 		submit.removeAt(0, 2);
 		consoleHistory.push_back(new Text2D());
 		consoleHistory.back()->init();
-		consoleHistory.back()->setFont(Engine::assets.getFont(String32("clearsans")));
+		consoleHistory.back()->setFont(Engine::assets.getFont(String32("consola")));
 		consoleHistory.back()->setCharSize(25);
 		consoleHistory.back()->setString(cmd.getString());
 		submitCommand(submit);
-		//cmdHistory.back().setTextOrigin(Text2D::Origin::TopLeft);
+		consoleHistory.back()->setTextOrigin(Text2D::Origin::TopLeft);
 		cmd.setString(String<3>("> "));
 		//cmd.forceUpdate();
 		cursor = 0;
@@ -330,8 +438,7 @@ void Console::textInput(KeyCode code)
 			++cursor;
 		}
 		else
-		{
-			
+		{	
 			//cmd.getString().append('~');
 		}
 		break;
@@ -342,9 +449,10 @@ void Console::textInput(KeyCode code)
 void Console::init()
 {
 	cmd.init();
-	cmd.setFont(Engine::assets.getFont(String32("clearsans")));
+	cmd.setFont(Engine::assets.getFont(String32("consola")));
 	cmd.setCharSize(25);
 	cmd.setString(String<3>("> "));
-	//cmd.setTextOrigin(Text2D::Origin::TopLeft);
+	cmd.setColour(glm::fvec3(1.f, 0.f, 0.f));
+	cmd.setTextOrigin(Text2D::Origin::TopLeft);
 	repositionText();
 }

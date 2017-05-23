@@ -220,6 +220,7 @@
     <ClCompile Include="Event.cpp" />
     <ClCompile Include="Font.cpp" />
     <ClCompile Include="GPUMeshManager.cpp" />
+    <ClCompile Include="Lights.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MeshUtility.cpp" />
     <ClCompile Include="Mouse.cpp" />
@@ -255,9 +256,11 @@
     <ClInclude Include="Font.h" />
     <ClInclude Include="GBufferShaderMultiTex.h" />
     <ClInclude Include="GPUMeshManager.h" />
+    <ClInclude Include="File.h" />
     <ClInclude Include="MeshUtility.h" />
     <ClInclude Include="ModelInfo.h" />
     <ClInclude Include="Keyboard.h" />
+    <ClInclude Include="SpotShadowPassShader.h" />
     <ClInclude Include="PrepMultiTexShader.h" />
     <ClInclude Include="ShaderStore.h" />
     <ClInclude Include="Logger.h" />
@@ -270,6 +273,7 @@
     <ClInclude Include="SAOShader.h" />
     <ClInclude Include="SceneGraph.h" />
     <ClInclude Include="ShaderPreprocessor.h" />
+    <ClInclude Include="PointShadowPassShader.h" />
     <ClInclude Include="Shape2DShader.h" />
     <ClInclude Include="BufferObjects.h" />
     <ClInclude Include="StringGenerics.h" />

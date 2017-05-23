@@ -25,6 +25,11 @@ public:
 		return sizes[pAscSymbol - 32];
 	}
 
+	u16 getHeight()
+	{
+		return height;
+	}
+
 	glm::ivec2 getPosition(unsigned char pAscSymbol) 
 	{
 		return positions[pAscSymbol - 32];
@@ -51,6 +56,7 @@ public:
 private:
 
 	u16 charSize;
+	u16 height;
 	GLTexture2D glyphs;
 	glm::ivec2 sizes[NO_PRINTABLE_CHARS];
 	glm::ivec2 positions[NO_PRINTABLE_CHARS];

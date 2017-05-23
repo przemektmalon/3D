@@ -93,7 +93,7 @@ public:
 		return text.getBoundingBox();
 	}
 
-private:
+//private:
 
 	Text2D text;
 

@@ -40,7 +40,7 @@ public:
 	~Camera() {}
 
 	//void initialiseProj(float pAspect, float pFOV = float(PI) / 2.5f, float pNear = 0.1f, float pFar = 100000000000000000000000000000000000000.f)
-	void initialiseProj(float pAspect, float pFOV = float(PI) / 2.5f, float pNear = 0.0000001f, float pFar = 10000.f)
+	void initialiseProj(float pAspect, float pFOV = float(PI) / 2.5f, float pNear = 0.1f, float pFar = 10000.f)
 	{
 		fov = pFOV;
 		aspect = pAspect;

@@ -25,6 +25,16 @@ public:
 		return loc;
 	}
 
+	ShaderProgram* reloadShader(String32& pName)
+	{
+		auto s = getShader(pName);
+		if (!s)
+			return nullptr;
+
+		s->reload();
+		return s;
+	}
+
 	ShaderProgram* getShader(const String32& name)
 	{
 		auto find = shaders.find(name);
