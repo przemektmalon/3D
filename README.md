@@ -6,7 +6,7 @@ Some screenshots on Google Drive: https://drive.google.com/open?id=0B9uuq4IEinJP
 
 # Current features
 
--Deferred HDR rendering using half-z tile light culling through OGL compute shader. Supports normal & specular mapping, and tonemapping.
+-Deferred HDR rendering using half-z tile light culling through OGL compute shader. Supports normal, specular and tone mapping.
 
 -Frustum culling on GPU compute shader
 
@@ -14,17 +14,13 @@ Some screenshots on Google Drive: https://drive.google.com/open?id=0B9uuq4IEinJP
 
 -Ambient Occlusion
 
--Blended multi-texturing using alpha map, up to four textures.
+-Blended multi-texturing (splatting) using alpha map, up to four textures.
 
--Multi material meshes (any number of triangle lists with different materials in one mesh)
+-Multi material models (any number of triangle lists with different materials in one mesh)
 
 -Logarithmic depth buffer (large precision allows for very large scenes with no z clipping)
 
--Easily programmable text console (define commands that take numbers, vectors and strings)
-
--Mouse object selection
-
--Mesh utilities tool. For importing and exporting wavefront and binary mesh files, joining triangle lists, setting textures.
+-Text console (define commands that take numbers, vectors and strings)
 
 -Scene graph/hierarchical tranformations
 
@@ -32,21 +28,21 @@ Some screenshots on Google Drive: https://drive.google.com/open?id=0B9uuq4IEinJP
 
 -Shadows for point, spot and directional lights.
 
+-Tweak files for updating engine variables at runtime automatically from a file
+
 -Some basic UI elements (window, labels, buttons)
 
--Asset manager (meshes, fonts, textures)
+-Asset manager (models, fonts, textures)
 
 -Text rendering
 
 -Modern OpenGL approach
 
--Automatic asset loading from external .txt asset list.
-
 # Planned features
 
 -Depth of field
 
--LOD scaling for meshes
+-LOD scaling for models
 
 -Emissive and parallax mapping
 
@@ -66,5 +62,17 @@ Some screenshots on Google Drive: https://drive.google.com/open?id=0B9uuq4IEinJP
 
 -Skeletal animation and inverse kinematics
 
--Physics engine
+# Dependencies
+
+-Assimp
+
+-Bullet Physics
+
+-FreeType
+
+-GLI
+
+-GLM
+
+-GLEW
 

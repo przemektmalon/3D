@@ -25,7 +25,6 @@
 #include "Model.hpp"
 #include "Camera.hpp"
 
-
 #include "GBufferShaderNonBindlessRegular.hpp"
 
 #define NUM_VALID_RESOLUTIONS 8
