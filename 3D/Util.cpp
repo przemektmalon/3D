@@ -8,7 +8,7 @@ void getDateTimeStr(StringGeneric& str)
 	String128 logName;
 	char buf[80];
 	localtime_s(&tstruct, &now);
-	strftime(buf, sizeof(buf), "%F_%H;%M;%S", &tstruct);
+	strftime(buf, sizeof(buf), "%F %H,%M,%S", &tstruct);
 	str.setToChars(buf);
 }
 

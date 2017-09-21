@@ -243,8 +243,8 @@ void Window::screenshot()
 	char buf[80];
 	localtime_s(&tstruct, &now);
 	//OutputDebugString("SCREENSHOT");
-	strftime(buf, sizeof(buf), "%F_%H;%M;%S", &tstruct);
-	String128 fileName = String128("screenshot/Screenshot_").append(String64(buf));
+	strftime(buf, sizeof(buf), "%F %H,%M,%S", &tstruct);
+	String128 fileName = String128("screenshot/").append(String64(buf));
 	screenshot(fileName);
 }
 

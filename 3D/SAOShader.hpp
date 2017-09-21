@@ -26,7 +26,7 @@ public:
 		projInfoLoc = glGetUniformLocation(GLID, "projInfo");
 
 
-		setRadius(1.75f);
+		setRadius(1.5f);
 		setIntensity(2.75f);
 		setProjScale(500.f);
 

@@ -72,7 +72,6 @@ artifacts/
 
 *.jpg
 *.png
-*.bmp
 *.shader
 *.tga
 *.7z
@@ -83,6 +82,13 @@ artifacts/
 *.dae
 *.blend
 *.blend1
+
+3D/res/tex/
+3D/screenshot/
+Release/res/tex/
+Release/screenshot/
+Debug/res/tex/
+Debug/screenshot/
 
 # Chutzpah Test files
 _Chutzpah*
