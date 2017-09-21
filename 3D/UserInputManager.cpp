@@ -8,8 +8,3 @@ void escapePress()
 {
 	Engine::window.escapePressed();
 }
-
-void screenshot()
-{
-	Engine::window.screenshot();
-}

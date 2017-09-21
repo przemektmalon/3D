@@ -28,11 +28,7 @@ void reloadShader(String32 shaderName)
 
 void reloadAllShaders()
 {
-	auto& shaderMap = Engine::r->shaderStore.getShaderMap();
-	for (auto itr = shaderMap.begin(); itr != shaderMap.end(); ++itr)
-	{
-		itr->second->reload();
-	}
+	Engine::r->shaderStore.reloadAllShaders();
 }
 
 //MODEL LOADING AND MANIPULATION

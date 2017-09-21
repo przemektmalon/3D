@@ -54,11 +54,7 @@ enum DrawMode { Regular, MultiTextured, Water, Reflective, Shadow, DrawModesCoun
 class MasterRenderer
 {
 public:
-	MasterRenderer()// : shadScale(1.f) 
-	{
-		config.ssaoPower = (1.f);
-		config.ssaoScale = (1.f);
-	}
+	MasterRenderer() { }
 	~MasterRenderer() {}
 
 	inline void initialiseScreenQuad();
@@ -92,19 +88,8 @@ public:
 
 	void setResolution(int resIndex)
 	{
-		config.renderResolution = glm::fvec2(validResolutionsRaw[0][resIndex], validResolutionsRaw[1][resIndex]) * config.frameScale;
+		//config.renderResolution = glm::fvec2(validResolutionsRaw[0][resIndex], validResolutionsRaw[1][resIndex]) * config.frameScale;
 		reInitialiseFramebuffers();
-	}
-
-	void setFrameScale(float pFrameScale)
-	{
-		config.frameScale = pFrameScale;
-	}
-
-	static const s32 validResolutionsRaw[2][NUM_VALID_RESOLUTIONS];
-	static const glm::ivec2 getValidResolution(int pIndex)
-	{
-		return glm::ivec2(validResolutionsRaw[0][pIndex], validResolutionsRaw[1][pIndex]);
 	}
 
 	template <class T>
@@ -179,36 +164,4 @@ public:
 	Sampler shadowSampler;
 	Sampler shadowCubeSampler;
 	Sampler arraySampler;
-
-	struct DrawList
-	{
-		GBufferShaderBase* shader;
-		GLint vao;
-		GLBufferObject* drawIndirect;
-		struct TextureGroup
-		{
-			GLTexture* texture;
-			u32 indirectOffset;
-			GLBufferObject* textureArrayIndices;
-			GLBufferObject* transforms;
-		};
-		std::vector<TextureGroup> textureGroups;
-	};
-
-	struct RenderConfig
-	{
-		glm::ivec2 renderResolution;
-		float frameScale;
-		float ssaoPower;
-		float ssaoScale;
-		bool drawWireFrame;
-		bool drawTextBounds;
-		//FOG
-		//AA level
-		//Tonemap settings (exposure + curve parameters)
-		//Motion blur
-		//DoF
-		//Vignetting
-		//draw AABB
-	} config;
 };

@@ -147,7 +147,7 @@ public:
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 		glDrawArrays(GL_QUADS, 0, vboSize);
 
-		if (Engine::r->config.drawTextBounds)
+		if(Engine::cfg.render.drawTextBounds)
 		{
 			glBindVertexArray(vaoBBox);
 

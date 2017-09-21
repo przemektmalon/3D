@@ -35,6 +35,14 @@ public:
 		return s;
 	}
 
+	void reloadAllShaders()
+	{
+		for (auto s : shaders)
+		{
+			s.second->reload();
+		}
+	}
+
 	ShaderProgram* getShader(const String32& name)
 	{
 		auto find = shaders.find(name);

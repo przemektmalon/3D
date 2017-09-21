@@ -220,7 +220,7 @@
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Event.cpp" />
     <ClCompile Include="Font.cpp" />
-    <ClCompile Include="GPUMeshManager.cpp" />
+    <ClCompile Include="GPUModelManager.cpp" />
     <ClCompile Include="ImageData.cpp" />
     <ClCompile Include="Lights.cpp" />
     <ClCompile Include="Model.cpp" />

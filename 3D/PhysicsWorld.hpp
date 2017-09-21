@@ -52,3 +52,51 @@ public:
 
 	std::vector<PhysicsObject*> objects;
 };
+
+class Physics
+{
+public:
+
+	Physics()
+	{
+
+	}
+
+	~Physics()
+	{
+		delete dynamicsWorld;
+		delete solver;
+		delete dispatcher;
+		delete collisionConfiguration;
+		delete broadphase;
+	}
+
+	btBroadphaseInterface* broadphase;
+
+	btDefaultCollisionConfiguration* collisionConfiguration;
+	btCollisionDispatcher* dispatcher;
+	btSequentialImpulseConstraintSolver* solver;
+
+	btDiscreteDynamicsWorld* dynamicsWorld;
+
+	btCollisionShape* groundShape;
+	btCollisionShape* fallShape;
+
+	btDefaultMotionState* groundMotionState;
+
+	btRigidBody* groundRigidBody;
+	btRigidBody* fallRigidBody;
+
+	btRigidBody* pickedBody;
+
+	int savedState;
+	btPoint2PointConstraint* p2p;
+	btPoint2PointConstraint* pickedConstraint;
+
+	btVector3 oldPickingPos;
+	btVector3 hitPos;
+	btScalar oldPickingDist;
+
+
+
+};

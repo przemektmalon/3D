@@ -13,8 +13,6 @@
 #include <time.h>
 #include <Windows.h>
 #include <SDKDDKVer.h>
-#include "SOIL.h"
-
 
 #include <stdlib.h>
 #include <malloc.h>

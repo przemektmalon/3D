@@ -4,36 +4,24 @@
 #include "Shader.hpp"
 #include "Time.hpp"
 #include "QPC.hpp"
-#include "SOIL.h"
 #include "Camera.hpp"
 #include "Renderer.hpp"
 #include <chrono>
 #include "Font.hpp"
 #include "Text.hpp"
-#include <windows.h>
-#include <strsafe.h>
 #include <functional>
 #include "AssetManager.hpp"
 #include "Billboard.hpp"
-
-#include "glm\gtc\quaternion.hpp"
-
-#define MODEL_PATH std::string("res/model/")
-
 #include "World.hpp"
-
 #include "StringGenerics.hpp"
-
 #include "UILabel.hpp"
 #include "UIButton.hpp"
-
 #include "ModelInfo.hpp"
-
-
 #include "Console.hpp"
-
 #include "Tweaks.hpp"
-
+#include <stdio.h>
+#include <io.h>
+#include <fcntl.h>
 
 FT_Library Engine::ftLib;
 Camera Engine::defaultOrthoCam;
@@ -64,41 +52,17 @@ Log Engine::log;
 Console Engine::console;
 Physics Engine::p;
 PhysicsWorld Engine::physics;
-
 EngineConfig Engine::cfg;
-
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-
-#include <stdio.h>
-#include <io.h>
-#include <fcntl.h>
-#include <windows.h>
+const s32 EngineConfig::RenderConfig::validResolutionsRaw[2][NUM_VALID_RESOLUTIONS] =
+{
+	{ 1920, 1600, 1536, 1366, 1280, 1024, 960, 848 },
+	{ 1080, 900,  864,  768 , 720 , 576 , 540, 480 },
+};
 
 int main()
 {
 	Engine::start(GetModuleHandle(NULL));
 	return 0;
-}
-
-void setRes()
-{
-	static int curRes = 0;
-	--curRes;
-	if (curRes < 0)
-		curRes = NUM_VALID_RESOLUTIONS - 1;
-	Engine::r->setResolution(curRes);
-	Engine::window.setResolution(MasterRenderer::getValidResolution(curRes));
-	Engine::uiw->updateWindowVBO();
-}
-
-void toggleWireFrame()
-{
-	Engine::r->config.drawWireFrame = !Engine::r->config.drawWireFrame;
-}
-
-void toggleTextBounds()
-{
-	Engine::r->config.drawTextBounds = !Engine::r->config.drawTextBounds;
 }
 
 void Engine::start(HINSTANCE pHInstance)
@@ -131,74 +95,7 @@ void Engine::stop()
 	engineState = Quitting;
 }
 
-void Engine::select(glm::ivec2 mPos)
-{
-	glActiveTexture(GL_TEXTURE0);
-	r->fboGBuffer.textureAttachments[3].bind(0);
-	glBindTexture(GL_TEXTURE_2D, r->fboGBuffer.textureAttachments[3].getGLID());
-
-	u32* idTex = new u32[r->config.renderResolution.x * r->config.renderResolution.y];
-
-	glGetTexImage(GL_TEXTURE_2D, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, idTex);
-
-	u32 source = r->config.renderResolution.x * (r->config.renderResolution.y - 1) + (-1.f * (mPos.y * r->config.renderResolution.x) + (mPos.x));
-	auto index = source;
-
-	selectedID = idTex[index];
-
-	//if (selectedID == 0)
-	//{
-		//selectedID = -1;
-	//}
-
-	Engine::r->tileCullShader.use();
-	Engine::r->tileCullShader.setSelectedID(selectedID);
-	Engine::r->tileCullShader.sendSelectedID();
-	Engine::r->tileCullShader.stop();
-
-	delete[] idTex;
-}
-
-
-void printlog()
-{
-	Engine::logger.printLog(Engine::log);
-}
-
-void mouseDown()
-{
-	auto mPos = Engine::window.mouse.getWindowPosition(&Engine::window);
-	auto uiw = Engine::uiw;
-	UIRect wa = uiw->getWindowArea();
-	if (mPos.x > wa.left && mPos.x < wa.left + wa.width && mPos.y > wa.top && mPos.y < wa.top + wa.height)
-	{
-		Engine::windowClicked = true;
-		Engine::clickedPos = mPos - glm::ivec2(wa.left,wa.top);
-	}
-	//uiw->mouseDown();
-}
-
-void mouseUp()
-{
-	Engine::windowClicked = false;
-}
-
-void hotLoadShader()
-{
-	//Engine::r->shaderStore.getShader(String32("gBufferPass"))->reload();
-	//Engine::r->tileCullShader.reload();
-	Engine::r->ssaoShader.reload();
-}
-
-void killFocus()
-{
-	Engine::window.postMessage(WM_KILLFOCUS, 0, 0);
-}
-
-void toggleConsole()
-{
-	Engine::console.toggle();
-}
+//************ TEMPORARY PHYSICS CONTROL *************/
 
 btVector3 getRayTo(int x, int y)
 {
@@ -244,7 +141,7 @@ bool pickBody(btVector3& rayFromWorld, btVector3& rayToWorld)
 		//btRigidBody* body = (btRigidBody*)btRigidBody::upcast(rayCallback.m_collisionObject);
 		btRigidBody* body = (btRigidBody*)btRigidBody::upcast(rayCallback.m_collisionObject);
 		if (body) {
-			if (!(body->isStaticObject() || body->isKinematicObject())) 
+			if (!(body->isStaticObject() || body->isKinematicObject()))
 			{
 				Engine::p.pickedBody = body;
 				Engine::p.savedState = Engine::p.pickedBody->getActivationState();
@@ -299,35 +196,95 @@ bool mouseMoveCallback(float x, float y)
 	btVector3 rayTo = getRayTo(int(x), int(y));
 	glm::fvec3 p = Engine::r->activeCam->pos;
 	btVector3 rayFrom(p.x, p.y, p.z);
-	
+
 	movePickedBody(rayFrom, rayTo);
 
 	return false;
 }
 
+void Engine::select(glm::ivec2 mPos)
+{
+	glActiveTexture(GL_TEXTURE0);
+	r->fboGBuffer.textureAttachments[3].bind(0);
+	glBindTexture(GL_TEXTURE_2D, r->fboGBuffer.textureAttachments[3].getGLID());
+
+	u32* idTex = new u32[cfg.render.resolution.x * cfg.render.resolution.y];
+
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, idTex);
+
+	u32 source = cfg.render.resolution.x * (cfg.render.resolution.y - 1) + (-1.f * (mPos.y * cfg.render.resolution.x) + (mPos.x));
+	auto index = source;
+
+	selectedID = idTex[index];
+
+	//if (selectedID == 0)
+	//{
+	//selectedID = -1;
+	//}
+
+	Engine::r->tileCullShader.use();
+	Engine::r->tileCullShader.setSelectedID(selectedID);
+	Engine::r->tileCullShader.sendSelectedID();
+	Engine::r->tileCullShader.stop();
+
+	delete[] idTex;
+}
+
+void printlog()
+{
+	Engine::logger.printLog(Engine::log);
+}
+
+void mouseDown()
+{
+	auto mPos = Engine::window.mouse.getWindowPosition(&Engine::window);
+	auto uiw = Engine::uiw;
+	UIRect wa = uiw->getWindowArea();
+	if (mPos.x > wa.left && mPos.x < wa.left + wa.width && mPos.y > wa.top && mPos.y < wa.top + wa.height)
+	{
+		Engine::windowClicked = true;
+		Engine::clickedPos = mPos - glm::ivec2(wa.left, wa.top);
+	}
+	//uiw->mouseDown();
+}
+
+void mouseUp()
+{
+	Engine::windowClicked = false;
+}
+
+void toggleConsole()
+{
+	Engine::console.toggle();
+}
+
+//************ TEMPORARY PHYSICS CONTROL *************/
+
+#define CFG_FUNC(name) []() -> void { Engine::cfg.##name##(); }
+
 void Engine::mainLoop()
 {
 	glewExperimental = GL_TRUE;
 	glewInit();
-	//wglewInit();
 	
 	wglSwapIntervalEXT(0);
 
 	uim.mapToKeyDown(VK_ESCAPE, escapePress);
-	uim.mapToKeyDown('P', setRes);
-	uim.mapToKeyDown('L', screenshot);
-	uim.mapToKeyDown('O', toggleWireFrame);
-	uim.mapToKeyDown('I', toggleTextBounds);
+	uim.mapToKeyDown('P', CFG_FUNC(render.cycleRes));
+	uim.mapToKeyDown('L', CFG_FUNC(render.screenshot));
+	uim.mapToKeyDown('O', CFG_FUNC(render.toggleDrawWireframe));
+	uim.mapToKeyDown('I', CFG_FUNC(render.toggleDrawTextBounds));
 
-	uim.mapToKeyDown('M', hotLoadShader);
+	uim.mapToKeyDown('M', CFG_FUNC(render.reloadAllShaders));
 
-	uim.mapToKeyDown(VK_OEM_3, toggleConsole);
+	uim.mapToKeyDown(VK_OEM_3, CFG_FUNC(render.toggleDrawConsole));
 
 	uim.mapToKeyDown('K', printlog);
-	uim.mapToKeyDown('Q', killFocus);
 
 	uim.mapToMouseDown(0, mouseDown);
 	uim.mapToMouseUp(0, mouseUp);
+
+	
 
 	r = new MasterRenderer();
 
@@ -365,13 +322,21 @@ void Engine::mainLoop()
 	cam.calculateViewRays();
 	r->initialiseRenderer(&window, cam);
 
+	//cfg.render.resolutionIndex = 5;
+	//cfg.render.resolution = cfg.render.getValidResolution(5);
+
+	createModelInfoWindow(uiw);
+
+	cfg.render.setResolution(5);
+	cfg.render.setFrameScale(1.f);
+
 	defaultOrthoCam.initaliseOrtho(window.getSizeX(), window.getSizeY());
 
 	s64 tot = 0;
 
 	float exposure = 1.f;
 
-	createModelInfoWindow(uiw);
+	
 
 	world = new World();
 	world->initialiseGLBuffers();
@@ -623,4 +588,28 @@ void Engine::processGameFrame()
 void Engine::processMenuFrame()
 {
 
+}
+
+//********************************* SOME FUNCTIONS / CALLBACKS TO CHANGE CONFIGS *********************************//
+
+
+
+void EngineConfig::RenderConfig::setResolution(int validResIndex)
+{
+	if (validResIndex > NUM_VALID_RESOLUTIONS - 1 || validResIndex < 0)
+		return;
+	resolutionIndex = validResIndex;
+	resolution = Engine::cfg.render.getValidResolution(resolutionIndex);
+	Engine::r->setResolution(resolutionIndex);
+	Engine::window.setResolution(Engine::cfg.render.getValidResolution(resolutionIndex));
+}
+
+void EngineConfig::RenderConfig::reloadAllShaders()
+{
+	Engine::r->shaderStore.reloadAllShaders();
+}
+
+void EngineConfig::RenderConfig::screenshot()
+{
+	Engine::window.screenshot();
 }

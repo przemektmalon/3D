@@ -4,12 +4,12 @@
 #include <queue>
 
 void escapePress();
-void screenshot();
 
 
 struct ControlArray
 {
 	std::function<void(void)> keyDownFunctions[256];
+	std::function<void(void*)> keyDownFunctionsClass[256];
 	std::function<void(void)> keyUpFunctions[256];
 	std::function<void(void)> keyHoldFunctions[256];
 	std::function<void(void)> mouseDownFunctions[5];
@@ -22,9 +22,12 @@ public:
 	UIM() { ca = &defCA; }
 	~UIM() {}
 
-	void mapToKeyDown(KeyCode keyCode, std::function<void(void)> fnc)
-	{
+	void mapToKeyDown(KeyCode keyCode, std::function<void(void)> fnc) {
 		ca->keyDownFunctions[keyCode.code] = fnc;
+	}
+
+	void mapToKeyDown(KeyCode keyCode, std::function<void(void*)> fnc) {
+		ca->keyDownFunctionsClass[keyCode.code] = fnc;
 	}
 
 	void mapToKeyUp(KeyCode keyCode, std::function<void(void)> fnc)
@@ -53,6 +56,12 @@ public:
 		if (fnc != nullptr)
 		{
 			fnc();
+		}
+		auto fnc2 = ca->keyDownFunctionsClass[keyCode.code];
+		if (fnc2 != nullptr)
+		{
+			char* a = nullptr;
+			fnc2(a);
 		}
 	}
 

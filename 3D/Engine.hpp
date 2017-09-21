@@ -21,50 +21,7 @@ class AssetManager;
 class World;
 class Console;
 
-class Physics
-{
-public:
-
-	Physics()
-	{
-
-	}
-
-	~Physics()
-	{
-		delete dynamicsWorld;
-		delete solver;
-		delete dispatcher;
-		delete collisionConfiguration;
-		delete broadphase;
-	}
-
-	btBroadphaseInterface* broadphase;
-
-	btDefaultCollisionConfiguration* collisionConfiguration;
-	btCollisionDispatcher* dispatcher;
-	btSequentialImpulseConstraintSolver* solver;
-
-	btDiscreteDynamicsWorld* dynamicsWorld;
-
-	btCollisionShape* groundShape;
-	btCollisionShape* fallShape;
-
-	btDefaultMotionState* groundMotionState;
-
-	btRigidBody* groundRigidBody;
-	btRigidBody* fallRigidBody;
-
-	btRigidBody* pickedBody;
-
-	int savedState;
-	btPoint2PointConstraint* p2p;
-	btPoint2PointConstraint* pickedConstraint;
-
-	btVector3 oldPickingPos;
-	btVector3 hitPos;
-	btScalar oldPickingDist;
-};
+#define NUM_VALID_RESOLUTIONS 8
 
 class EngineConfig
 {
@@ -73,9 +30,48 @@ public:
 	struct RenderConfig {
 
 		struct SSSAOConfig {
+			float frameScale;
 			float sampleRadius;
 			float intensity;
 		} ssao;
+		///TODO: setters getters
+
+		static const s32 validResolutionsRaw[2][NUM_VALID_RESOLUTIONS];
+		static const glm::ivec2 getValidResolution(int pIndex) {
+			return glm::ivec2(validResolutionsRaw[0][pIndex], validResolutionsRaw[1][pIndex]);
+		}
+
+		glm::ivec2 resolution;
+		s32 resolutionIndex;
+		float frameScale;
+		void setResolution(int validResIndex);
+		void cycleRes() { setResolution(resolutionIndex == 0 ? NUM_VALID_RESOLUTIONS - 1 : resolutionIndex - 1); }
+		int getResolutionIndex() { return resolutionIndex; }
+		void setFrameScale(float set) { frameScale = set; }
+
+		bool drawWireframe;
+		void setDrawWireFrame(bool set) { drawWireframe = set; }
+		void toggleDrawWireframe() { drawWireframe = !drawWireframe; }
+
+		bool drawTextBounds;
+		void setDrawTextBounds(bool set) { drawTextBounds = set; }
+		void toggleDrawTextBounds() { drawTextBounds = !drawTextBounds; }
+
+		void reloadAllShaders();
+
+		void screenshot();
+
+		bool drawConsole;
+		void setDrawConsole(bool set) { drawConsole = set; }
+		void toggleDrawConsole() { drawConsole = !drawConsole; }
+
+		//FOG
+		//AA level
+		//Tonemap settings (exposure + curve parameters)
+		//Motion blur
+		//DoF
+		//Vignetting
+		//draw AABB
 
 	} render;
 

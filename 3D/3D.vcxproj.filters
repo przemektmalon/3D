@@ -49,6 +49,12 @@
     <Filter Include="Header Files\GL">
       <UniqueIdentifier>{a480df06-34fe-41a5-bd24-bf86ddfebec5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Renderer">
+      <UniqueIdentifier>{10ad43da-fb76-487b-a2da-0b3a2b1e2a15}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GL">
+      <UniqueIdentifier>{76db7edb-7d75-49b0-bcf4-ab46986eaf14}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine.cpp">
@@ -61,9 +67,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="UserInputManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="UIWindow.cpp">
@@ -111,20 +114,11 @@
     <ClCompile Include="Util.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GPUMeshManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="StringGenerics.cpp">
       <Filter>Source Files\String</Filter>
     </ClCompile>
-    <ClCompile Include="Lights.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ImageData.cpp">
       <Filter>Source Files\Assets</Filter>
-    </ClCompile>
-    <ClCompile Include="Texture.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Model.cpp">
       <Filter>Source Files\Assets</Filter>
@@ -132,11 +126,23 @@
     <ClCompile Include="PhysicsWorld.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Lights.cpp">
+      <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
     <ClCompile Include="Billboard.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>Source Files\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="TextBillboard.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Source Files\GL</Filter>
+    </ClCompile>
+    <ClCompile Include="GPUModelManager.cpp">
+      <Filter>Source Files\GL</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -168,9 +174,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Keyboard.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Lights.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="List.hpp">
@@ -305,9 +308,6 @@
     <ClInclude Include="GBufferShaderNonBindlessRegular.hpp">
       <Filter>Header Files\Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="Texture.hpp">
-      <Filter>Header Files\Assets</Filter>
-    </ClInclude>
     <ClInclude Include="ImageData.hpp">
       <Filter>Header Files\Assets</Filter>
     </ClInclude>
@@ -357,6 +357,12 @@
       <Filter>Header Files\GL</Filter>
     </ClInclude>
     <ClInclude Include="GPUModelManager.hpp">
+      <Filter>Header Files\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="Lights.hpp">
+      <Filter>Header Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.hpp">
       <Filter>Header Files\GL</Filter>
     </ClInclude>
   </ItemGroup>

@@ -51,7 +51,7 @@ void MasterRenderer::render()
 	// *********************************************************** G-BUFFER PASS *********************************************************** //
 
 	{
-		glViewport(0, 0, config.renderResolution.x, config.renderResolution.y);
+		glViewport(0, 0, Engine::cfg.render.resolution.x, Engine::cfg.render.resolution.y);
 		fboGBuffer.bind();
 
 		glDepthRangedNV(-1.f, 1.f);
@@ -68,7 +68,7 @@ void MasterRenderer::render()
 		glDisable(GL_BLEND);
 		glCullFace(GL_BACK);
 
-		glPolygonMode(GL_FRONT_AND_BACK, config.drawWireFrame ? GL_LINE : GL_FILL);
+		glPolygonMode(GL_FRONT_AND_BACK, Engine::cfg.render.drawWireframe ? GL_LINE : GL_FILL);
 
 		gBufferShader.use();
 
@@ -161,8 +161,8 @@ void MasterRenderer::render()
 
 	//SSAO pass
 	{
-		config.ssaoScale = 1.f;
-		glViewport(0, 0, config.renderResolution.x * config.ssaoScale, config.renderResolution.y * config.ssaoScale);
+		Engine::cfg.render.frameScale = 1.f;
+		glViewport(0, 0, Engine::cfg.render.resolution.x * Engine::cfg.render.frameScale, Engine::cfg.render.resolution.y * Engine::cfg.render.frameScale);
 
 		fboSSAO.bind();
 		fboSSAO.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -200,7 +200,7 @@ void MasterRenderer::render()
 
 	fboSSAO.bindDraw();
 	fboSSAOBlur.bindRead();
-	glBlitFramebuffer(0, 0, config.renderResolution.x * config.ssaoScale, config.renderResolution.y * config.ssaoScale, 0, 0, config.renderResolution.x * config.ssaoScale, config.renderResolution.y * config.ssaoScale, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	glBlitFramebuffer(0, 0, Engine::cfg.render.resolution.x * Engine::cfg.render.frameScale, Engine::cfg.render.resolution.y * Engine::cfg.render.frameScale, 0, 0, Engine::cfg.render.resolution.x * Engine::cfg.render.frameScale, Engine::cfg.render.resolution.y * Engine::cfg.render.frameScale, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
 	fboSSAOBlur.bind();
 
@@ -212,7 +212,7 @@ void MasterRenderer::render()
 	fboSSAO.bindDraw();
 	//glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	fboSSAOBlur.bindRead();
-	glBlitFramebuffer(0, 0, config.renderResolution.x * config.ssaoScale, config.renderResolution.y * config.ssaoScale, 0, 0, config.renderResolution.x * config.ssaoScale, config.renderResolution.y * config.ssaoScale, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	glBlitFramebuffer(0, 0, Engine::cfg.render.resolution.x * Engine::cfg.render.frameScale, Engine::cfg.render.resolution.y * Engine::cfg.render.frameScale, 0, 0, Engine::cfg.render.resolution.x * Engine::cfg.render.frameScale, Engine::cfg.render.resolution.y * Engine::cfg.render.frameScale, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
 	// *********************************************************** SSAO-BLUR PASS *********************************************************** //
 
@@ -254,7 +254,7 @@ void MasterRenderer::render()
 
 	lightManager.pointLightsBuffer.bindBase(0);
 	lightManager.spotLightsBuffer.bindBase(1);
-	glDispatchCompute(std::ceilf(config.renderResolution.x / 16.f), std::ceilf(float(config.renderResolution.y) / 16.f), 1);
+	glDispatchCompute(std::ceilf(Engine::cfg.render.resolution.x / 16.f), std::ceilf(float(Engine::cfg.render.resolution.y) / 16.f), 1);
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 	lightManager.pointLightsBuffer.unbind();
 	lightManager.spotLightsBuffer.unbind();
@@ -296,7 +296,7 @@ void MasterRenderer::render()
 
 inline void MasterRenderer::initialiseGBuffer()
 {
-	fboGBuffer.setResolution(config.renderResolution);
+	fboGBuffer.setResolution(Engine::cfg.render.resolution);
 	fboGBuffer.attachTexture(GL_RG16F, GL_RG, GL_HALF_FLOAT, GL_COLOR_ATTACHMENT0);//NORMAL
 	fboGBuffer.attachTexture(GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT1);//ALBEDO_SPEC
 	fboGBuffer.attachTexture(GL_DEPTH_COMPONENT32F_NV, GL_DEPTH_COMPONENT, GL_FLOAT, GL_DEPTH_ATTACHMENT);
@@ -310,18 +310,18 @@ inline void MasterRenderer::initialiseGBuffer()
 
 inline void MasterRenderer::initialiseSSAOBuffer()
 {
-	fboSSAO.setResolution(config.renderResolution);
-	fboSSAO.attachTexture(GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT0, glm::fvec2(config.ssaoScale));
+	fboSSAO.setResolution(Engine::cfg.render.resolution);
+	fboSSAO.attachTexture(GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT0, glm::fvec2(Engine::cfg.render.frameScale));
 	fboSSAO.checkStatus();
 
-	fboSSAOBlur.setResolution(config.renderResolution);
-	fboSSAOBlur.attachTexture(GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT0, glm::fvec2(config.ssaoScale));
+	fboSSAOBlur.setResolution(Engine::cfg.render.resolution);
+	fboSSAOBlur.attachTexture(GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT0, glm::fvec2(Engine::cfg.render.frameScale));
 	fboSSAOBlur.checkStatus();
 }
 
 inline void MasterRenderer::initialiseScreenFramebuffer()
 {
-	fboScreen.setResolution(config.renderResolution);
+	fboScreen.setResolution(Engine::cfg.render.resolution);
 	fboScreen.attachTexture(GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT0);
 	fboScreen.checkStatus();
 }
@@ -531,11 +531,10 @@ inline void MasterRenderer::initialiseSamplers()
 void MasterRenderer::initialiseRenderer(Window * pwin, Camera & cam)
 {
 	window = pwin;
-	//MSAALevel = Msaalev;
 	viewport.top = 0; viewport.left = 0; viewport.width = window->getSizeX(); viewport.height = window->getSizeY();
-	config.frameScale = 1.f;
-	config.renderResolution.x = viewport.width * config.frameScale;
-	config.renderResolution.y = viewport.height * config.frameScale;
+	Engine::cfg.render.frameScale = 1.f;
+	//Engine::cfg.render.resolution.x = viewport.width * Engine::cfg.render.frameScale;
+	//Engine::cfg.render.resolution.y = viewport.height * Engine::cfg.render.frameScale;
 
 	initialiseSamplers();
 	//initialiseShaders();
@@ -553,7 +552,7 @@ void MasterRenderer::initialiseRenderer(Window * pwin, Camera & cam)
 	b.text->setPosition(glm::fvec3(0, 0, 0));
 
 	fboGBuffer.setClearDepth(0.f);
-	th.createFromStream(GL_RGBA32F, config.renderResolution.x, config.renderResolution.y, GL_RGBA, GL_FLOAT, NULL);
+	th.createFromStream(GL_RGBA32F, Engine::cfg.render.resolution.x, Engine::cfg.render.resolution.y, GL_RGBA, GL_FLOAT, NULL);
 }
 
 void MasterRenderer::initialiseShaders()
@@ -588,7 +587,7 @@ void MasterRenderer::reInitialiseFramebuffers()
 	destroyFramebufferTextures();
 	initialiseFramebuffers();
 	th.release();
-	th.createFromStream(GL_RGBA32F, config.renderResolution.x, config.renderResolution.y, GL_RGBA, GL_FLOAT, NULL);
+	th.createFromStream(GL_RGBA32F, Engine::cfg.render.resolution.x, Engine::cfg.render.resolution.y, GL_RGBA, GL_FLOAT, NULL);
 }
 
 void MasterRenderer::destroyFramebufferTextures()
