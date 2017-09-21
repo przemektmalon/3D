@@ -1,5 +1,4 @@
 #pragma once
-#include "Mesh.hpp"
 #include "SceneGraph.hpp"
 #include "Engine.hpp"
 #include "AssetManager.hpp"
@@ -22,21 +21,6 @@ public:
 	SGNode* getWorldRootNode()
 	{
 		return &sg.rootNode;
-	}
-
-	MeshInstance* addMeshInstance(Mesh& mesh, SGNode* parent)
-	{
-		++objectCount;
-
-		MeshInstance mi;
-		mi.sgNode = parent->addChild(SGNode());
-
-		u32 instanceID = numTriLists[Regular] + numTriLists[MultiTextured];
-		numTriLists[Regular] += mesh.getNumTriLists(Regular);
-		numTriLists[MultiTextured] += mesh.getNumTriLists(MultiTextured);
-		mi.mesh = &mesh;
-		instances.insert(std::make_pair(instanceID, mi));
-		return &instances.at(instanceID);
 	}
 
 	ModelInstance* addModelInstance(Model& model)
@@ -72,23 +56,9 @@ public:
 		return &find->second;
 	}
 
-	MeshInstance* getMeshInstance(u32 pInstanceID)
-	{
-		auto find = instances.find(pInstanceID);
-		while (find == instances.end())
-		{
-			--pInstanceID;
-			if (pInstanceID == -1)
-				return nullptr;
-
-			find = instances.find(pInstanceID);
-		}
-		return &find->second;
-	}
-
 	void initialiseGLBuffers()
 	{
-		instances.reserve(objectScopes.getTotalMaxObjects());
+		//instances.reserve(objectScopes.getTotalMaxObjects());
 
 		auto maxRegular = objectScopes.maxRegular;
 		auto maxMultiTextured = objectScopes.maxMultiTextured;
@@ -101,7 +71,7 @@ public:
 		drawIndirectBuffer[MultiTextured].bufferData(maxMultiTextured * sizeof(GLCMD), 0, GL_STREAM_DRAW);
 		instanceTransformsBuffer[MultiTextured].bufferData(maxMultiTextured * sizeof(float) * 16, 0, GL_STATIC_READ);
 
-		drawIndirectBuffer[Shadow].bufferData((maxRegular + maxMultiTextured) * sizeof(MeshGPUMetaShadow), 0, GL_STATIC_READ);
+		drawIndirectBuffer[Shadow].bufferData((maxRegular + maxMultiTextured) * sizeof(GLCMD), 0, GL_STATIC_READ);
 		instanceTransformsBuffer[Shadow].bufferData((maxRegular + maxMultiTextured) * sizeof(u32), 0, GL_STATIC_READ);
 
 		instanceIDBuffer.bufferData(objectScopes.getTotalMaxObjects() * sizeof(u32), 0, GL_DYNAMIC_READ);
@@ -147,7 +117,7 @@ public:
 		auto texHandle = (u64*)texHandleBuffer[Regular].mapRange(0, numTriLists[Regular] * sizeof(u64) * 3, GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_WRITE_BIT);
 		u32 i = 0;
 
-		const GPUMeshManager& mm = Engine::assets.meshManager;
+		const GPUModelManager& mm = Engine::assets.modelManager;
 
 		u32 texIndBufferLengths[4];
 		texIndBufferLengths[0] = 0;
@@ -298,9 +268,6 @@ public:
 	*/
 	GLBufferObject instanceIDBuffer;
 
-	//std::map<u32, GLBufferObject> textureArrayIndices;
-
-	std::unordered_map<u32, MeshInstance> instances;
 	std::unordered_map<u32, ModelInstance> modelInstances;
 	u32 numTriLists[DrawModesCount];
 

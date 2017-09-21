@@ -1,9 +1,9 @@
-#include "GPUMeshManager.hpp"
+#include "GPUModelManager.hpp"
 #include "Engine.hpp"
 #include "ShaderStore.hpp"
 #include "Renderer.hpp"
 
-void GPUMeshManager::newBatch()
+void GPUModelManager::newBatch()
 {
 	MeshBatch nextBatch;
 

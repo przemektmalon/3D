@@ -223,8 +223,6 @@
     <ClCompile Include="GPUMeshManager.cpp" />
     <ClCompile Include="ImageData.cpp" />
     <ClCompile Include="Lights.cpp" />
-    <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="MeshUtility.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Mouse.cpp" />
     <ClCompile Include="PhysicsWorld.cpp" />
@@ -266,7 +264,7 @@
     <ClInclude Include="GBufferShaderBase.hpp" />
     <ClInclude Include="GBufferShaderMultiTex.hpp" />
     <ClInclude Include="GBufferShaderNonBindlessRegular.hpp" />
-    <ClInclude Include="GPUMeshManager.hpp" />
+    <ClInclude Include="GPUModelManager.hpp" />
     <ClInclude Include="GPUTextureManager.hpp" />
     <ClInclude Include="ImageData.hpp" />
     <ClInclude Include="Include.hpp" />
@@ -275,8 +273,6 @@
     <ClInclude Include="List.hpp" />
     <ClInclude Include="Logger.hpp" />
     <ClInclude Include="MathIncludes.hpp" />
-    <ClInclude Include="Mesh.hpp" />
-    <ClInclude Include="MeshUtility.hpp" />
     <ClInclude Include="ModelInfo.hpp" />
     <ClInclude Include="Mouse.hpp" />
     <ClInclude Include="Model.hpp" />

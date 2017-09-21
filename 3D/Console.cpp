@@ -2,12 +2,11 @@
 #include "Console.hpp"
 #include "AssetManager.hpp"
 #include "World.hpp"
-#include "MeshUtility.hpp"
 
 void setModelPosition(glm::fvec3 pos)
 {
 	if (Engine::selectedID == -1) return;
-	auto i = Engine::world->getMeshInstance(Engine::selectedID);
+	auto i = Engine::world->getModelInstance(Engine::selectedID);
 	i->sgNode->transform.setTranslation(pos);
 	i->sgNode->updateAll();
 	Engine::world->updateGLBuffers();
@@ -33,103 +32,6 @@ void reloadAllShaders()
 	for (auto itr = shaderMap.begin(); itr != shaderMap.end(); ++itr)
 	{
 		itr->second->reload();
-	}
-}
-
-//MODEL LOADING AND MANIPULATION
-
-void muLoadMeshObj(String32 name)
-{
-	String128 path("res/model/");
-	path.append(name);
-	path.append(".obj");
-	auto newObj = Engine::mu.newObj();
-	Engine::mu.loadOBJ(path, newObj);
-	Engine::mu.objMeshDatas[newObj]->name.overwrite(name);
-	String64 msg;
-	msg.append(name);
-	msg.append(" (OBJ ID) = ");
-	std::string objID; objID = std::to_string(newObj);
-	msg.append(const_cast<char*>(objID.c_str())); ///TODO: own to_string()
-	Engine::console.postResult(msg);
-}
-
-void muLoadMeshBin(String32 name)
-{
-	String128 path("res/model/");
-	path.append(name);
-	path.append(".bin");
-	auto newBin = Engine::mu.newMesh();
-	Engine::mu.loadBin(path, newBin);
-	Engine::mu.setMeshName(newBin, name);
-	String64 msg;
-	msg.append(name);
-	msg.append(" (BIN ID) = ");
-	std::string binID; binID = std::to_string(newBin);
-	msg.append(const_cast<char*>(binID.c_str())); ///TODO: own to_string()
-	Engine::console.postResult(msg);
-}
-
-void muObjToBin(s32 objIndex)
-{
-	auto newMesh = Engine::mu.newMesh();
-	Engine::mu.setMeshName(newMesh, Engine::mu.objMeshDatas[objIndex]->name);
-	Engine::mu.binFromObj(objIndex, newMesh);
-	String64 msg;
-	msg.append(Engine::mu.meshes[newMesh]->getName());
-	msg.append(" (BIN ID) = ");
-	std::string binID; binID = std::to_string(newMesh);
-	msg.append(const_cast<char*>(binID.c_str())); ///TODO: own to_string()
-	Engine::console.postResult(msg);
-}
-
-void muClearStorage()
-{
-	Engine::mu.clearStorage();
-}
-
-void muExportBin(s32 binIndex)
-{
-	if (binIndex > Engine::mu.meshes.size() - 1)
-		return;
-
-	auto mesh = Engine::mu.meshes[binIndex];
-
-	if(mesh == nullptr)
-		return;
-
-	Engine::mu.exportBin(binIndex);
-	String64 msg;
-	msg.append(Engine::mu.meshes[binIndex]->getName());
-	msg.append(" : exported to \"res/model/");
-	msg.append(Engine::mu.meshes[binIndex]->getName());
-	msg.append(".bin\"");
-	Engine::console.postResult(msg);
-}
-
-void muListMeshes()
-{
-	int id = 0;
-	for (auto itr = Engine::mu.objMeshDatas.begin(); itr != Engine::mu.objMeshDatas.end(); ++itr)
-	{
-		String64 msg;
-		msg.append((*itr)->name);
-		msg.append(" (OBJ ID) = ");
-		std::string objID; objID = std::to_string(id);
-		++id;
-		msg.append(const_cast<char*>(objID.c_str())); ///TODO: own to_string()
-		Engine::console.postResult(msg);
-	}
-	id = 0;
-	for (auto itr = Engine::mu.meshes.begin(); itr != Engine::mu.meshes.end(); ++itr)
-	{
-		String64 msg;
-		msg.append((*itr)->getName());
-		msg.append(" (BIN ID) = ");
-		std::string binID; binID = std::to_string(id);
-		++id;
-		msg.append(const_cast<char*>(binID.c_str())); ///TODO: own to_string()
-		Engine::console.postResult(msg);
 	}
 }
 
@@ -241,12 +143,6 @@ void Console::submitCommand(StringGeneric& command)
 		CHECK_CONSOLE_CALLABLE(2, listShaders, 0);
 		CHECK_CONSOLE_CALLABLE(3, reloadShader, 1);
 		CHECK_CONSOLE_CALLABLE(4, reloadAllShaders, 0);
-		CHECK_CONSOLE_CALLABLE(5, muLoadMeshObj, 1);
-		CHECK_CONSOLE_CALLABLE(6, muLoadMeshBin, 1);
-		CHECK_CONSOLE_CALLABLE(7, muObjToBin, 1);
-		CHECK_CONSOLE_CALLABLE(8, muClearStorage, 0);
-		CHECK_CONSOLE_CALLABLE(9, muExportBin, 1);
-		CHECK_CONSOLE_CALLABLE(10, muListMeshes, 0);
 	END_FUNC_SWITCH
 }
 
@@ -256,12 +152,6 @@ void Console::registerConsoleFuncs()
 	REGISTER_CONSOLE_CALLABLE(2, "listShaders", 0);
 	REGISTER_CONSOLE_CALLABLE(3, "reloadShader", 1);
 	REGISTER_CONSOLE_CALLABLE(4, "reloadAllShaders", 0);
-	REGISTER_CONSOLE_CALLABLE(5, "muLoadMeshObj", 1);
-	REGISTER_CONSOLE_CALLABLE(6, "muLoadMeshBin", 1);
-	REGISTER_CONSOLE_CALLABLE(7, "muObjToBin", 1);
-	REGISTER_CONSOLE_CALLABLE(8, "muClearStorage", 0);
-	REGISTER_CONSOLE_CALLABLE(9, "muExportBin", 1);
-	REGISTER_CONSOLE_CALLABLE(10, "muListMeshes", 0);
 }
 
 void Console::textInput(KeyCode code)

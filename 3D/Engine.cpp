@@ -1,9 +1,7 @@
 #pragma once
 #include "Engine.hpp"
-//#include "SDL.h"
 #include "Include.hpp"
 #include "Shader.hpp"
-#include "Mesh.hpp"
 #include "Time.hpp"
 #include "QPC.hpp"
 #include "SOIL.h"
@@ -31,7 +29,6 @@
 
 #include "ModelInfo.hpp"
 
-#include "MeshUtility.hpp"
 
 #include "Console.hpp"
 
@@ -65,12 +62,10 @@ Window Engine::window;
 bool Engine::consoleOpen;
 Log Engine::log;
 Console Engine::console;
-MeshUtility Engine::mu;
 Physics Engine::p;
 PhysicsWorld Engine::physics;
 
-float Engine::moveSpeed;
-float Engine::radDiff = 1.f;
+EngineConfig Engine::cfg;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -231,64 +226,6 @@ btVector3 getRayTo(int x, int y)
 	//std::cout << "RAY_WOR: " << ray_wor.x << " " << ray_wor.y << " " << ray_wor.z << std::endl;
 
 	return btVector3(ray_wor.x, ray_wor.y, ray_wor.z);
-
-	/*float top = 1.f;
-	float bottom = -1.f;
-	float nearPlane = 1.f;
-	float tanFov = (top - bottom)*0.5f / nearPlane;
-	float fov = btScalar(2.0) * btAtan(tanFov);
-
-	glm::fvec3 c = Engine::r->activeCam->pos;
-	glm::fvec3 d = Engine::r->activeCam->getDirectionVector();
-
-	btVector3 camPos(c.x, c.y, c.z), camTarget(c.x + d.x, c.y + d.y, c.z + d.z);
-
-	btVector3	rayFrom = camPos;
-	btVector3 rayForward = (camTarget - camPos);
-	rayForward.normalize();
-	float farPlane = 10000000.f;
-	rayForward *= farPlane;
-
-	btVector3 rightOffset;
-	btVector3 cameraUp = btVector3(0, 0, 0);
-	cameraUp[1] = 1;
-
-	btVector3 vertical = cameraUp;
-
-	btVector3 hor;
-	hor = rayForward.cross(vertical);
-	hor.safeNormalize();
-	vertical = hor.cross(rayForward);
-	vertical.safeNormalize();
-
-	float tanfov = tanf(0.5f*fov);
-
-
-	hor *= 2.f * farPlane * tanfov;
-	vertical *= 2.f * farPlane * tanfov;
-
-	btScalar aspect;
-	float width = float(Engine::r->config.renderResolution.x);
-	float height = float(Engine::r->config.renderResolution.y);
-
-	aspect = width / height;
-
-	hor *= aspect;
-
-
-	btVector3 rayToCenter = rayFrom + rayForward;
-	btVector3 dHor = hor * 1.f / width;
-	btVector3 dVert = vertical * 1.f / height;
-
-
-	btVector3 rayTo = rayToCenter - 0.5f * hor + 0.5f * vertical;
-	rayTo += btScalar(x) * dHor;
-	rayTo -= btScalar(y) * dVert;
-
-	std::cout << "RAY_WOR: " << ray_wor.x << " " << ray_wor.y << " " << ray_wor.z << std::endl;
-	std::cout << "RayTo  : " << rayTo.x() << " " << rayTo.y() << " " << rayTo.z() << std::endl;
-
-	return rayTo;*/
 }
 
 bool pickBody(btVector3& rayFromWorld, btVector3& rayToWorld)
@@ -373,9 +310,6 @@ void Engine::mainLoop()
 	glewExperimental = GL_TRUE;
 	glewInit();
 	//wglewInit();
-
-	Material::initVertexFormats();
-	Material::initDrawModes();
 	
 	wglSwapIntervalEXT(0);
 
@@ -408,105 +342,24 @@ void Engine::mainLoop()
 	r->initialiseShaders();
 	Billboard::initGLVAO();
 
-	//Texture2D* nullTex = assets.prepareTexture("res/tex/null.png", "null");
-	//nullTex->load();
-	//nullTex->makeGLAsset();
-	
-
 	assets.loader.loadAssets(String128("res/resources.txt"));
 	assets.pushTexturesToGPU();
 
-
-	/*Model m2;
-	m2.prepare(String128("res/model/NEWBOX.obj"), String32("newbox"));
-	m2.load();*/
-
-	assets.meshManager.init();
+	assets.modelManager.init();
 
 	auto m = assets.prepareModel(String128("res/model/COLBOX.dae"), String32("colbox"));
 	m->load();
-	assets.meshManager.pushModelToBatch(*m);
+	assets.modelManager.pushModelToBatch(*m);
 
 	auto m2 = assets.prepareModel(String128("res/model/ground2.obj"), String32("ground"));
 	m2->load();
-	assets.meshManager.pushModelToBatch(*m2);
+	assets.modelManager.pushModelToBatch(*m2);
 
 	auto m3 = assets.prepareModel(String128("res/model/mon.obj"), String32("mon"));
 	m3->load();
-	assets.meshManager.pushModelToBatch(*m3);
+	assets.modelManager.pushModelToBatch(*m3);
 
-	/*auto me = mu.newObj();
-	mu.loadOBJ(String128("res/model/stones.obj"), me);
-	mu.setObjName(me, String32("stones"));
-	auto binMe = mu.newMesh();
-	mu.setMeshName(binMe, String32("stones"));
-	mu.binFromObj(me, binMe);
-	mu.exportBin(binMe);
-	mu.clearStorage();*/
-
-	/*auto si = mu.objToBin(String<128>("res/model/oo.obj"), String<128>("res/model/oo.bin"), String32("oo"));
-	mu.nullAllMeshTextures(si, assets.get2DTex("null"));
-	mu.setMeshAlbedoTexture(si, 0, Engine::assets.get2DTex("oo"), 0);
-	//mu.setMeshAlbedoTexture(si, 0, Engine::assets.get2DTex("lava"), 1);
-	//mu.setMeshAlbedoTexture(si, 0, Engine::assets.get2DTex("grass"), 2);
-	//mu.setMeshAlbedoTexture(si, 0, Engine::assets.get2DTex("stone"), 3);
-	//mu.setMeshSpecularTexture(si, 0, Engine::assets.get2DTex("stoneS"), 3);
-	//mu.setMeshSpecularTexture(si, 0, Engine::assets.get2DTex("terS"), 1);
-	//mu.setMeshNormalTexture(si, 0, Engine::assets.get2DTex("stoneN"), 3);
-	//mu.setMeshNormalTexture(si, 0, Engine::assets.get2DTex("terN"), 1);
-	//mu.setMeshAlphaTexture(si, 0, Engine::assets.get2DTex("alpha"));
-	mu.setTriListMaterialID(si, 0, MaterialID::PNUU_T_S_N);
-	mu.setMeshName(si, String<32>("oo"));
-	mu.scaleAlphaTexCoords(si, 1.f);
-	mu.scaleTexCoords(si, 1.f);
-	//mu.exportBinV10(si);
-	//mu.clearStorage();
-	//auto si2 = mu.objToBin(String<128>("res/model/pf.obj"), String<128>("res/model/pf.bin"));
-	//mu.setMeshTexture(si2, 0, Engine::assets.get2DTex("pf"), 0);
-	//mu.setMeshName(si2, String<32>("pf"));
-	//mu.exportBinV10(si);
-	//mu.clearStorage();
-	//auto si3 = mu.objToBin(String<128>("res/model/sp.obj"), String<128>("res/model/sp.bin"));
-	//mu.setMeshTexture(si3, 0, Engine::assets.get2DTex("sp"), 0);
-	//mu.setMeshName(si3, String<32>("sp"));
-	//mu.exportBinV10(si);
-	//mu.clearStorage();
-
-	//mu.addMeshToTriLists(si2, 0, si);
-	//mu.addMeshToTriLists(si3, 0, si);
-
-	mu.exportBin(si);
-	mu.clearStorage();*/
-
-	
-
-	/*auto c = (Mesh*)assets.prepareAsset(Asset::Mesh, "res/model/stones.bin", "stones");
-	c->load();
-	assets.meshManager.pushMeshToBatch(*c);*/
-
-	//a->load();
-	//assets.meshManager.pushMeshToBatch(*a);
-	//b->load();
-	//assets.meshManager.pushMeshToBatch(*b);
-	//c->load();
-	//assets.meshManager.pushMeshToBatch(*c);
-
-	//d->load();
-	//assets.meshManager.pushMeshToBatch(*d);
-
-	/*
-	assets.meshManager.pushMeshToBatch(*assets.getMesh(String32("square")));*/
-
-	//assets.meshManager.pushMeshToBatch(*assets.getMesh(String32("shed")));
-
-	//ooMesh->load();
-	//assets.meshManager.pushMeshToBatch(*ooMesh);
-	//pfMesh->load();
-	//assets.meshManager.pushMeshToBatch(*pfMesh);
-	//spMesh->load();
-	//assets.meshManager.pushMeshToBatch(*spMesh);
-	
-	const GPUMeshManager& mm = Engine::assets.meshManager;
+	const GPUModelManager& mm = Engine::assets.modelManager;
 
 	cam.initialiseProj(float(window.getSizeX()) / float(window.getSizeY()));
 	cam.calculateViewRays();
@@ -524,31 +377,6 @@ void Engine::mainLoop()
 	world->initialiseGLBuffers();
 
 	auto prevNode = world->getWorldRootNode();
-
-	//auto i2 = world->addMeshInstance(*c, world->getWorldRootNode());
-	//i2->sgNode->transform.translate(glm::fvec3(0, -50, 0));
-	//i2->sgNode->transform.updateMatrix();
-
-	//auto i3 = world->addMeshInstance(*d, world->getWorldRootNode());
-	//i3->sgNode->transform.translate(glm::fvec3(0, 0, 0)).scale(4.f);
-	//i3->sgNode->transform.updateMatrix();
-
-	/*auto e = assets.getMesh(String32("shed"));
-	auto i5 = world->addMeshInstance(*e, world->getWorldRootNode());
-	i5->sgNode->transform.scale(4.f);
-	i5->sgNode->transform.updateMatrix();*/
-
-	/*e = assets.getMesh(String32("square"));
-	auto i4 = world->addMeshInstance(*e, world->getWorldRootNode());
-	i4->sgNode->transform.translate(glm::fvec3(0, 0, 0)).scale(50.f);
-	i4->sgNode->transform.updateMatrix();
-
-	
-
-	e = assets.getMesh(String32("stones"));
-	auto i6 = world->addMeshInstance(*e, world->getWorldRootNode());
-	i6->sgNode->transform.scale(4.f);
-	i6->sgNode->transform.updateMatrix();*/
 
 	auto c1 = new btStaticPlaneShape(glm::fvec3(0.f, 1.f, 0.f), 0.f);
 	auto c2 = new btStaticPlaneShape(btVector3(1.f, 0.f, 0.f), -50.f);
@@ -577,30 +405,6 @@ void Engine::mainLoop()
 	i8->makePhysicsObject(s, 0.f);
 	
 	i8->physicsObject->rigidBody->setRestitution(0.95f);
-
-	/*auto i2 = world->addModelInstance(*ee, worldRoot);
-	rot = glm::angleAxis<float>(-1.f, glm::fvec3(0, 0, 1));
-	dir = rot * glm::fvec3(0, 1, 0);
-	i2->sgNode->transform.setQuat(rot);
-	i2->sgNode->transform.translate(glm::fvec3(-20, 0, 0));
-	col = new btStaticPlaneShape(dir, 20.f);
-	i2->makePhysicsObject(col, 0.f);
-
-	auto i3 = world->addModelInstance(*ee, worldRoot);
-	rot = glm::angleAxis<float>(1.f, glm::fvec3(1, 0, 0));
-	dir = rot * glm::fvec3(0, 1, 0);
-	i3->sgNode->transform.setQuat(rot);
-	i3->sgNode->transform.translate(glm::fvec3(0, 0, -20));
-	col = new btStaticPlaneShape(dir, 20.f);
-	i3->makePhysicsObject(col, 0.f);
-
-	auto i4 = world->addModelInstance(*ee, worldRoot);
-	rot = glm::angleAxis<float>(-1.f, glm::fvec3(1, 0, 0));
-	dir = rot * glm::fvec3(0, 1, 0);
-	i4->sgNode->transform.setQuat(rot);
-	i4->sgNode->transform.translate(glm::fvec3(0, 0, 20));
-	col = new btStaticPlaneShape(dir, -20.f);
-	i4->makePhysicsObject(col, 0.f);*/
 
 	ee = assets.getModel(String32("colbox"));
 	auto i7 = world->addModelInstance(*ee, worldRoot);
@@ -632,43 +436,6 @@ void Engine::mainLoop()
 		i2->physicsObject->rigidBody->setRestitution(0.95);
 	}
 
-	//auto i9 = world->addModelInstance(*ee, world->getWorldRootNode());
-
-	/*e = assets.getMesh(String32("buddha"));
-	auto i6 = world->addMeshInstance(*e, world->getWorldRootNodpenis
-	e());
-	i5->sgNode->transform.translate(glm::fvec3(50, 0, 50));
-	i6->sgNode->transform.updateMatrix();*/
-
-	/*auto i3 = world->addMeshInstance(*ooMesh, world->getWorldRootNode());
-	i3->sgNode->transform.translate(glm::fvec3(0, 20, 0)).scale(10);
-	i3->sgNode->transform.updateMatrix();
-
-	auto i4 = world->addMeshInstance(*ooMesh, world->getWorldRootNode());
-	i4->sgNode->transform.translate(glm::fvec3(0, 40, 0)).scale(10);
-	i4->mesh->triangleListsSorted[0].second[0]->material.albedo[0] = pfTex; ///TODO: This doesnt work beacuse all instances are using the same mesh, which can only have one texture
-																			///Maybe disconnect Material, from triangle list. Allow copying of triangle lists (using same data pointer) with different materials
-																			///
-	i4->sgNode->transform.updateMatrix();
-
-	auto i5 = world->addMeshInstance(*ooMesh, world->getWorldRootNode());
-	i5->sgNode->transform.translate(glm::fvec3(0, 60, 0)).scale(10);
-	i5->mesh->triangleListsSorted[0].second[0]->material.albedo[0] = spTex;
-	i5->sgNode->transform.updateMatrix();
-
-	auto i6 = world->addMeshInstance(*ooMesh, world->getWorldRootNode());
-	i6->sgNode->transform.translate(glm::fvec3(0, 80, 0)).scale(10);
-	i6->mesh->triangleListsSorted[0].second[0]->material.albedo[0] = Engine::assets.get2DTex("oo");
-	i6->sgNode->transform.updateMatrix();*/
-
-	/*auto i4 = world->addMeshInstance(*pfMesh, world->getWorldRootNode());
-	i4->sgNode->transform.translate(glm::fvec3(0, 20, 0)).scale(10);
-	i4->sgNode->transform.updateMatrix();
-
-	auto i5 = world->addMeshInstance(*spMesh, world->getWorldRootNode());
-	i5->sgNode->transform.translate(glm::fvec3(0, 20, 0)).scale(10);
-	i5->sgNode->transform.updateMatrix();*/
-
 	world->sg.updateAll();
 
 	world->updateGLBuffers();
@@ -681,8 +448,7 @@ void Engine::mainLoop()
 	Tweaks tweak;
 	tweak.setTweaksFile("res/tweaks.txt");
 	tweak.setUpdateTime(t);
-	tweak.bindVariable(moveSpeed, "moveSpeed", Tweaks::Floating);
-	tweak.bindVariable(radDiff, "radDiff", Tweaks::Floating);
+	tweak.bindVariable(cfg.world.camSpeed, "camSpeed", Tweaks::Floating);
 
 	while (engineState != Quitting) {
 		if (!window.processMessages()) 
@@ -781,21 +547,21 @@ void Engine::processGameFrame()
 
 	auto keyboardState = window.keyboard.keyState;
 
-	auto move = glm::fvec3(glm::fvec4(0, 0, moveSpeed * dt.getSeconds(), 1) * cam.matYaw);
+	auto move = glm::fvec3(glm::fvec4(0, 0, cfg.world.camSpeed * dt.getSeconds(), 1) * cam.matYaw);
 	cam.targetPos -= move * float(window.keyboard.isKeyPressed('W'));
 
-	move = glm::cross(glm::fvec3(glm::fvec4(0, 0, moveSpeed * dt.getSeconds(), 1) * cam.matYaw), glm::fvec3(0, 1, 0));
+	move = glm::cross(glm::fvec3(glm::fvec4(0, 0, cfg.world.camSpeed * dt.getSeconds(), 1) * cam.matYaw), glm::fvec3(0, 1, 0));
 	cam.targetPos += move * float(window.keyboard.isKeyPressed('A'));
 
-	move = glm::fvec3(glm::fvec4(0, 0, moveSpeed * dt.getSeconds(), 1) * cam.matYaw);
+	move = glm::fvec3(glm::fvec4(0, 0, cfg.world.camSpeed * dt.getSeconds(), 1) * cam.matYaw);
 	cam.targetPos += move * float(window.keyboard.isKeyPressed('S'));
 
-	move = glm::cross(glm::fvec3(glm::fvec4(0, 0, moveSpeed * dt.getSeconds(), 1) * cam.matYaw), glm::fvec3(0, 1, 0));
+	move = glm::cross(glm::fvec3(glm::fvec4(0, 0, cfg.world.camSpeed * dt.getSeconds(), 1) * cam.matYaw), glm::fvec3(0, 1, 0));
 	cam.targetPos -= move * float(window.keyboard.isKeyPressed('D'));
 
-	cam.targetPos.y += moveSpeed * dt.getSeconds() * float(window.keyboard.isKeyPressed('R'));
+	cam.targetPos.y += cfg.world.camSpeed * dt.getSeconds() * float(window.keyboard.isKeyPressed('R'));
 
-	cam.targetPos.y -= moveSpeed * dt.getSeconds() * float(window.keyboard.isKeyPressed('F'));
+	cam.targetPos.y -= cfg.world.camSpeed * dt.getSeconds() * float(window.keyboard.isKeyPressed('F'));
 
 	static float exposure = 1.f;
 
@@ -806,7 +572,7 @@ void Engine::processGameFrame()
 	{
 		auto rad = r->ssaoShader.getRadius();
 		auto newRad = rad;
-		newRad += radDiff * dt.getSecondsf();
+		newRad += 0.1 * dt.getSecondsf();
 		newRad = std::max(newRad, 0.0000000001f);
 
 		r->ssaoShader.setRadius(newRad);
@@ -817,7 +583,7 @@ void Engine::processGameFrame()
 	{
 		auto rad = r->ssaoShader.getRadius();
 		auto newRad = rad;
-		newRad -= radDiff * dt.getSecondsf();
+		newRad -= 0.1 * dt.getSecondsf();
 		newRad = std::max(newRad, 0.0000000001f);
 
 		r->ssaoShader.setRadius(newRad);

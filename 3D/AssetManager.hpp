@@ -1,13 +1,12 @@
 #pragma once
 #include "Include.hpp"
 #include "Font.hpp"
-#include "Mesh.hpp"
 #include "ImageData.hpp"
 #include <unordered_map>
 
 #include <Windows.h>
 
-#include "GPUMeshManager.hpp"
+#include "GPUModelManager.hpp"
 #include "GPUTextureManager.hpp"
 
 class AssetManager
@@ -28,16 +27,6 @@ public:
 		return (Font*)prepareAsset(Asset::Type::Font, pPath, pName);
 	}
 
-	Mesh* prepareMesh(String<128>&& pPath, String<32>&& pName)
-	{
-		return (Mesh*)prepareAsset(Asset::Type::Mesh, pPath, pName);
-	}
-
-	Mesh* prepareMesh(String<128>&& pPath, String<32>& pName)
-	{
-		return (Mesh*)prepareAsset(Asset::Type::Mesh, pPath, pName);
-	}
-
 	Model* prepareModel(String128& pPath, String32& pName)
 	{
 		return (Model*)prepareAsset(Asset::Type::Model, pPath, pName);
@@ -56,11 +45,6 @@ public:
 	Asset* prepareAsset(Asset::Type pType, String<128>&& pPath, String<32>& pName)
 	{
 		return prepareAsset(pType, pPath, pName);
-	}
-
-	void initMeshBatch()
-	{
-		meshManager.newBatch();
 	}
 
 	Font* getFont(String32& pName)
@@ -111,19 +95,6 @@ public:
 	}
 
 	GLTextureCube getCubeTex(String32& pName);
-	
-	Mesh* getMesh(String32& pName)
-	{
-		auto find = meshList.find(pName);
-		if (find == meshList.end())
-			return nullptr;//TODO: Error
-
-		return &find->second;
-	}
-	Mesh* getMesh(String32&& pName)
-	{
-		return getMesh(pName);
-	}
 
 	Model* getModel(String32& pName)
 	{
@@ -141,17 +112,12 @@ public:
 		texture2DList.erase(pName);
 	}
 
-	void removeMesh(String32& pName)
-	{
-		meshList.erase(pName);
-	}
-
 	void removeFont(String32& pName)
 	{
 		fontList.erase(pName);
 	}
 
-	GPUMeshManager meshManager;
+	GPUModelManager modelManager;
 	GPUTextureManager textureManager;
 
 	std::map<String32, Font>& getFontList()
@@ -180,7 +146,6 @@ private:
 
 
 	std::map<String32, Font> fontList;
-	std::map<String32, Mesh> meshList;
 	std::map<String32, Model> modelList;
 	std::map<String32, Texture2D> texture2DList;
 	std::map<String32, GLTextureCube> textureCubeList;

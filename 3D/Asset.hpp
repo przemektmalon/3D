@@ -5,7 +5,6 @@
 
 class Asset
 {
-	friend class MeshUtility;
 public:
 	Asset();
 	Asset(String128& pPath, String32& pName);

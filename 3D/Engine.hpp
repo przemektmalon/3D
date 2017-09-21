@@ -13,7 +13,6 @@
 #include "PhysicsWorld.hpp"
 
 class FontStore;
-class Mesh;
 class Camera;
 class Time;
 class MasterRenderer;
@@ -21,7 +20,6 @@ class QPC;
 class AssetManager;
 class World;
 class Console;
-class MeshUtility;
 
 class Physics
 {
@@ -68,6 +66,27 @@ public:
 	btScalar oldPickingDist;
 };
 
+class EngineConfig
+{
+public:
+
+	struct RenderConfig {
+
+		struct SSSAOConfig {
+			float sampleRadius;
+			float intensity;
+		} ssao;
+
+	} render;
+
+	struct WorldConfig {
+
+		float camSpeed;
+
+	} world;
+
+};
+
 class Engine
 {
 public:
@@ -108,8 +127,7 @@ public:
 	static bool windowClicked;
 	static glm::ivec2 clickedPos;
 	static Log log;
-	static MeshUtility mu;
-
+	
 	static AssetManager assets;
 
 	static bool consoleOpen;
@@ -117,8 +135,7 @@ public:
 	static Physics p;
 	static PhysicsWorld physics;
 
-	static float moveSpeed;
-	static float radDiff;
+	static EngineConfig cfg;
 
 //private:
 

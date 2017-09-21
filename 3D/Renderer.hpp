@@ -1,6 +1,5 @@
 #pragma once
 #include <unordered_map>
-#include "Mesh.hpp"
 #include "Transform.hpp"
 #include "SAOShader.hpp"
 #include "GBufferShader.hpp"
@@ -22,6 +21,10 @@
 #include "ShaderStore.hpp"
 #include "Shape3DShader.hpp"
 #include "TextBillboard.hpp"
+#include "Window.hpp"
+#include "Model.hpp"
+#include "Camera.hpp"
+
 
 #include "GBufferShaderNonBindlessRegular.hpp"
 
@@ -80,11 +83,6 @@ public:
 	void reInitialiseFramebuffers();
 	void destroyFramebufferTextures();
 
-	GLuint gArrayTexture;
-	std::vector<MeshInstance*> drawList;
-	void setupDrawList();
-	void setupIndirectBuffers();
-
 	void setActiveCam(Camera& pCam);
 
 	void cameraProjUpdated();
@@ -118,14 +116,6 @@ public:
 
 		T top, left, width, height;
 	};
-
-	struct MeshUseMeta
-	{
-		MeshUseMeta(u32 pID, MeshRenderMeta pMRM) : id(pID), renderMeta(pMRM) {}
-		u32 id;
-		MeshRenderMeta renderMeta;
-	};
-
 
 	u32 drawCount[DrawModesCount];
 

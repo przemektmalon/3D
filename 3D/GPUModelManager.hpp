@@ -1,7 +1,9 @@
 #pragma once
-#include "Mesh.hpp"
 #include "Renderer.hpp"
 #include "Model.hpp"
+
+#define MAX_BATCH_COUNT 512
+#define MAX_BATCH_SIZE 1024*1024*128
 
 class MeshBatch
 {
@@ -17,15 +19,15 @@ public:
 	GLuint vaoID;
 };
 
-class GPUMeshManager
+class GPUModelManager
 {
 public:
-	GPUMeshManager() {}
-	~GPUMeshManager() {}
+	GPUModelManager() {}
+	~GPUModelManager() {}
 
 	void init()
 	{
-		auto program = &Engine::r->gBufferShaderNonBindlessRegular;
+		auto program = &Engine::r->gBufferShader;
 
 		program->use();
 

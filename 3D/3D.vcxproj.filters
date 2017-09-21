@@ -96,9 +96,6 @@
     <ClCompile Include="Font.cpp">
       <Filter>Source Files\Assets</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>Source Files\Assets</Filter>
-    </ClCompile>
     <ClCompile Include="Shader.cpp">
       <Filter>Source Files\Shaders</Filter>
     </ClCompile>
@@ -106,9 +103,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Util.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MeshUtility.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GPUMeshManager.cpp">
@@ -167,9 +161,6 @@
     <ClInclude Include="Framebuffer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GPUMeshManager.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Include.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -183,9 +174,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Logger.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MeshUtility.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Mouse.hpp">
@@ -284,9 +272,6 @@
     <ClInclude Include="Font.hpp">
       <Filter>Header Files\Assets</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh.hpp">
-      <Filter>Header Files\Assets</Filter>
-    </ClInclude>
     <ClInclude Include="ModelInfo.hpp">
       <Filter>Header Files\UI Elements\Windows</Filter>
     </ClInclude>
@@ -363,6 +348,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Tweaks.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GPUModelManager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -9,7 +9,7 @@
 #include "World.hpp"
 #include "Text.hpp"
 #include "Text3D.hpp"
-#include "GPUMeshManager.hpp"
+#include "GPUModelManager.hpp"
 
 #include "Console.hpp"
 
@@ -430,19 +430,6 @@ void MasterRenderer::destroyFramebufferTextures()
 	fboSSAOBlur.destroyAllAttachments();
 }
 
-void MasterRenderer::setupDrawList()
-{
-	for (auto itr = world->instances.begin(); itr != world->instances.end(); ++itr)
-	{
-		//Frustum cull the mesh vs view frustum
-		//Maybe selectively do frustum vs aabb and frustum vs sphere
-		//As some mesh shapes (long) might not work too well with sphere vs frust culling
-		//That would be stored per mesh
-
-		drawList.push_back(&(*itr).second);
-	}
-}
-
 void MasterRenderer::setActiveCam(Camera & pCam)
 {
 	activeCam = &pCam;
@@ -510,7 +497,7 @@ void MasterRenderer::render()
 	lightManager.updateAllPointLights();
 	lightManager.updateAllSpotLights();
 
-	const GPUMeshManager& mm = Engine::assets.meshManager;
+	const GPUModelManager& mm = Engine::assets.modelManager;
 
 	//GBuffer pass
 

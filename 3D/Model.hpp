@@ -10,6 +10,17 @@
 #include "Texture.hpp"
 #include "PhysicsObject.hpp"
 
+
+
+#include "Shader.hpp"
+#include "Transform.hpp"
+#include "Engine.hpp"
+
+#include "Bounds3D.hpp"
+
+#include "File.hpp"
+
+
 struct Vertex {
 	glm::vec3 position;
 	glm::vec3 normal;

@@ -30,11 +30,11 @@ void createModelInfoWindow(UIWindow*& win)
 			Engine::select(me.getPosition());
 			if (Engine::selectedID != -1)
 			{
-				auto i = Engine::world->getMeshInstance(Engine::selectedID);
+				auto i = Engine::world->getModelInstance(Engine::selectedID);
 				if (!i)
 					return false;
 				String<64> line("Model name: ");
-				line.append(i->mesh->getName());
+				line.append(i->model->getName());
 				_this->setString(line);
 			}
 			return true;
@@ -51,7 +51,7 @@ void createModelInfoWindow(UIWindow*& win)
 
 		if (Engine::selectedID != -1 && Engine::selectedID != 0)
 		{
-			auto i = Engine::world->getMeshInstance(Engine::selectedID);
+			auto i = Engine::world->getModelInstance(Engine::selectedID);
 			if (!i)
 				return false;
 
@@ -93,7 +93,7 @@ void createModelInfoWindow(UIWindow*& win)
 		}
 		if (Engine::selectedID != -1)
 		{
-			auto i = Engine::world->getMeshInstance(Engine::selectedID);
+			auto i = Engine::world->getModelInstance(Engine::selectedID);
 			if (!i)
 				return false;
 

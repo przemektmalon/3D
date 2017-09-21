@@ -16,11 +16,9 @@ Asset* AssetManager::prepareAsset(Asset::Type pType, String<128>& pPath, String<
 		auto ins = fontList.insert(std::make_pair(pName, Font(pPath, pName)));
 		return &ins.first->second; }
 	case Asset::Mesh: {
-		//auto ins2 = meshList.insert(std::make_pair(pName, Mesh(pPath, pName)));
-		auto ins2 = meshList.try_emplace(pName, pPath, pName);
+		auto ins2 = modelList.try_emplace(pName, pPath, pName);
 		return &ins2.first->second; }
 	case Asset::Model: {
-		//auto ins2 = meshList.insert(std::make_pair(pName, Mesh(pPath, pName)));
 		auto ins3 = modelList.try_emplace(pName, pPath, pName);
 		return &ins3.first->second; }
 	case Asset::Texture2D: {
@@ -108,7 +106,7 @@ void AssetManager::AssetLoader::loadAssets(String128 & assetListFilePath)
 				}
 				
 			}
-			else if (line == "[Mesh]")
+			/*else if (line == "[Mesh]")
 			{
 				std::string line;
 				std::getline(file, line);
@@ -148,14 +146,14 @@ void AssetManager::AssetLoader::loadAssets(String128 & assetListFilePath)
 					key = getUntil(line, '=');
 				}
 
-				auto find = Engine::assets.meshList.find(String32(name.c_str()));
-				if (find != Engine::assets.meshList.end())
+				auto find = Engine::assets.modelList.find(String32(name.c_str()));
+				if (find != Engine::assets.modelList.end())
 				{
 					std::cout << "Mesh \"" << name << "\" already loaded" << std::endl;
 					continue;
 				}
 
-				auto mesh = Engine::assets.prepareMesh(String128(path.c_str()), String128(name.c_str()));
+				auto mesh = Engine::assets.prepareModel(String128(path.c_str()), String128(name.c_str()));
 				if (mesh->doesExist())
 				{
 					if(version == "12")
@@ -171,7 +169,7 @@ void AssetManager::AssetLoader::loadAssets(String128 & assetListFilePath)
 				{
 					std::cout << "Mesh at \"" << path << "\" does not exist" << std::endl;
 				}
-			}
+			}*/
 			else if (line == "[Font]")
 			{
 				std::string name, path, ext;
