@@ -3,6 +3,7 @@
 Asset::Asset() {}
 Asset::Asset(String<128>& pPath, String<32>& pName) {
 	prepare(pPath, pName);
+	existsOnDisk = true;
 }
 
 Asset::~Asset() {}
@@ -11,6 +12,7 @@ void Asset::prepare(String<128>& pPath, String<32>& pName)
 {
 	diskPath.overwrite(pPath);
 	name.overwrite(pName);
+	existsOnDisk = true;
 	if (existsOnDisk)
 	{
 		struct stat buf;
@@ -23,7 +25,7 @@ void Asset::prepare(String<128>& pPath, String<32>& pName)
 		//	size = 0;
 		//}
 		//else {
-			existsOnDisk = true;
+			
 			//size = buf.st_size;
 			size = 1;
 		//}

@@ -611,22 +611,13 @@ void Engine::processGameFrame()
 		r->ssaoShader.setIntensity(newInts);
 	}
 
+	uiw->update();
 	cam.update(dt);
 
 	r->render();
 
 	dt.setMicroSeconds(qpc.getElapsedTime());
-	
-	static float cc;
-
-	cc += dt.getSecondsf();
 	programTime += dt.getSecondsf();
-
-	if (cc > (1.f / 30.f))
-	{
-		((UILabel*)(uiw->elements[0]))->text.setString(std::string("FPS: " + std::to_string(1.0 / dt.getSeconds()) + '\n' + "Dt: " + std::to_string(dt.getMilliSeconds()) + '\n' +  "Draw Count: " + std::to_string((int)r->drawCount)).c_str());
-		cc = 0;
-	}
 }
 
 void Engine::processMenuFrame()

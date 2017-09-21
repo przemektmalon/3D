@@ -43,6 +43,12 @@
     <Filter Include="Header Files\UI Elements\Windows">
       <UniqueIdentifier>{c7b89ff0-3961-4694-8743-b73f1541bf53}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Renderer">
+      <UniqueIdentifier>{77f48b0d-58b7-4f2f-bd7f-a03628ef3ed9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\GL">
+      <UniqueIdentifier>{a480df06-34fe-41a5-bd24-bf86ddfebec5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine.cpp">
@@ -140,9 +146,6 @@
     <ClInclude Include="Bounds3D.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BufferObjects.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Camera.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -185,16 +188,7 @@
     <ClInclude Include="Rect.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Sampler.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="SceneGraph.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Text.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Time.hpp">
@@ -317,9 +311,6 @@
     <ClInclude Include="ImageData.hpp">
       <Filter>Header Files\Assets</Filter>
     </ClInclude>
-    <ClInclude Include="GPUTextureManager.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GBufferShaderBase.hpp">
       <Filter>Header Files\Shaders</Filter>
     </ClInclude>
@@ -335,23 +326,38 @@
     <ClInclude Include="MathIncludes.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Billboard.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Shape3DShader.hpp">
       <Filter>Header Files\Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="TextBillboard.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Text3D.hpp">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Tweaks.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RendererData.hpp">
+      <Filter>Header Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.hpp">
+      <Filter>Header Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Sampler.hpp">
+      <Filter>Header Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Billboard.hpp">
+      <Filter>Header Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Text.hpp">
+      <Filter>Header Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Text3D.hpp">
+      <Filter>Header Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="TextBillboard.hpp">
+      <Filter>Header Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="BufferObjects.hpp">
+      <Filter>Header Files\GL</Filter>
+    </ClInclude>
     <ClInclude Include="GPUModelManager.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\GL</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

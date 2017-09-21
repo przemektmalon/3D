@@ -15,7 +15,7 @@ public:
 	virtual ~UIElement();
 
 	virtual void draw() {}
-	virtual void update() {}
+	virtual void update();
 
 	virtual void onKeyDown(KeyEvent& pKeyEvent) 
 	{
@@ -73,6 +73,11 @@ public:
 
 	//enum LayoutType { SpanHor, SpanVer, Flow };
 
+	void setUpdate(std::function<void(UIWindow*, UIElement*)> pUpdate)
+	{
+		updateImpl = pUpdate;
+	}
+
 	void setOnKeyboardUp(std::function<bool(UIWindow*, UIElement*, KeyEvent&)> pOnKeyboardUp)
 	{
 		onKeyUpImpl = pOnKeyboardUp;
@@ -108,6 +113,9 @@ protected:
 
 	const ElementType elementType;
 
+	float updateInterval;
+	float updateClock;
+	std::function<void(UIWindow*, UIElement*)> updateImpl;
 	std::function<bool(UIWindow*, UIElement*, KeyEvent&)> onKeyUpImpl;
 	std::function<bool(UIWindow*, UIElement*, KeyEvent&)> onKeyDownImpl;
 	std::function<bool(UIWindow*, UIElement*, MouseEvent&) > onMouseUpImpl;

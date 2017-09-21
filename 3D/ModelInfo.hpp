@@ -2,23 +2,31 @@
 #include "UIWindow.hpp"
 #include "UIAllElements.hpp"
 #include "Text.hpp"
+#include <string>
 
 #include "Engine.hpp"
 
 void createModelInfoWindow(UIWindow*& win)
 {
-	win = new UIWindow(UIRect(50, 50, 500, 600), 6, &Engine::window);
-	win->setTitle("TITLE");
+	win = new UIWindow(UIRect(50, 50, 140, 50), 4, &Engine::window);
+	win->setTitle("STATS");
 
 	Text2D::TextStyle styleA(Engine::assets.getFont("clearsansb"), 14);
 
-	C_LABEL(lblModelName, win);
-	lblModelName.setStyle(styleA);
-	lblModelName.setString(String<32>("Model name: "));
-	lblModelName.setTextOrigin(Text2D::TopLeft);
-	lblModelName.setPosition(glm::fvec2(4, 0));
+	C_LABEL(lblFPS, win);
+	lblFPS.setStyle(styleA);
+	lblFPS.setString(String<32>("FPS: "));
+	lblFPS.setTextOrigin(Text2D::TopLeft);
+	lblFPS.setPosition(glm::fvec2(8, 4));
+	
+	lblFPS.setUpdate(
+		[](UIWindow * win, UIElement* __this) -> void {
+		UILabel* _this = (UILabel*)__this;
 
-	lblModelName.setOnMouseDown([](UIWindow* win, UIElement* __this, MouseEvent& me) -> bool {
+		_this->text.setString(std::string("FPS: ") + std::to_string(1.f / Engine::dt.getSecondsf()));
+	});
+
+	/*lblFPS.setOnMouseDown([](UIWindow* win, UIElement* __this, MouseEvent& me) -> bool {
 		UILabel* _this = (UILabel*)__this;
 
 		if (Engine::window.isMouseInClientArea() && (me.getCode().code == MouseCode::M_LEFT))
@@ -123,10 +131,10 @@ void createModelInfoWindow(UIWindow*& win)
 
 			return true;
 		}
-	});
+	});*/
 
 	win->setMovable(true);
-	win->addElement(lblModelNamePtr);
-	win->addElement(lblModelInfoPtr);
-	win->addElement(butMovXPPtr);
+	win->addElement(lblFPSPtr);
+	//win->addElement(lblModelInfoPtr);
+	//win->addElement(butMovXPPtr);
 }

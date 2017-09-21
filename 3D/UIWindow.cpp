@@ -178,7 +178,7 @@ void UIWindow::setTitle(std::string pTitle)
 
 	title->setParentWindow(this);
 
-	title->setFont(Engine::assets.getFont("clearsans"));
+	title->setFont(Engine::assets.getFont("clearsansb"));
 	title->setCharSize(14);
 	title->setColour(glm::fvec3(0.f, 1.f, 1.f));
 	title->setWindowSize(glm::ivec2(windowArea.width, windowArea.height));

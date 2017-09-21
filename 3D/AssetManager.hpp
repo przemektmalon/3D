@@ -7,7 +7,6 @@
 #include <Windows.h>
 
 #include "GPUModelManager.hpp"
-#include "GPUTextureManager.hpp"
 
 class AssetManager
 {
@@ -118,7 +117,6 @@ public:
 	}
 
 	GPUModelManager modelManager;
-	GPUTextureManager textureManager;
 
 	std::map<String32, Font>& getFontList()
 	{

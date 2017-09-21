@@ -1,6 +1,5 @@
 #include "Model.hpp"
 #include "AssetManager.hpp"
-#include "GPUTextureManager.hpp"
 #include "Engine.hpp"
 
 void Model::importModel()

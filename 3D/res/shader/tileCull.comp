@@ -355,7 +355,7 @@ void main()
 	
 	vec3 viewDir = viewRay;
 
-	oCol += albedoSpec.xyz * 0.005;
+	oCol += albedoSpec.xyz * 0.05;
 
 	for(uint j = 0; j < currentTilePointLightIndex; ++j)
 	{
@@ -467,8 +467,8 @@ void main()
 		if(projCoords.z > 1.0)
         	shadow = 0.0;
 
-        //oCol += specular + diffuse;
-		oCol += (1.f - shadow)*(specular + diffuse);
+        oCol += specular + diffuse;
+		//oCol += (1.f - shadow)*(specular + diffuse);
 	}
 
 	vec3 lightDir = normalize(vec3(0.0f,1.f,0.0f));
@@ -509,6 +509,6 @@ void main()
 
 	//imageStore(outColour, pixel, vec4(vec3(albedoSpec.xyz * ssaoVal),1.f));
 	imageStore(outColour, pixel, vec4(finalTone(exposure * oCol),1.f));
-	//imageStore(outColour, pixel, vec4(exposure * oCol,1.f));
+	//imageStore(outColour, pixel, vec4(albedoSpec.xyz,1.f));
 	//imageStore(outColour, pixel, vec4(vec3(ssaoVal),1.f));
 }

@@ -67,6 +67,8 @@ void AssetManager::AssetLoader::loadAssets(String128 & assetListFilePath)
 				std::getline(file, value);
 				mip = value;
 
+				std::cout << path << std::endl;
+
 				auto find = Engine::assets.texture2DList.find(String32(name.c_str()));
 				if (find != Engine::assets.texture2DList.end())
 				{

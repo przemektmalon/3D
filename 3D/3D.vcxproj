@@ -265,7 +265,6 @@
     <ClInclude Include="GBufferShaderMultiTex.hpp" />
     <ClInclude Include="GBufferShaderNonBindlessRegular.hpp" />
     <ClInclude Include="GPUModelManager.hpp" />
-    <ClInclude Include="GPUTextureManager.hpp" />
     <ClInclude Include="ImageData.hpp" />
     <ClInclude Include="Include.hpp" />
     <ClInclude Include="Keyboard.hpp" />
@@ -283,6 +282,7 @@
     <ClInclude Include="QPC.hpp" />
     <ClInclude Include="Rect.hpp" />
     <ClInclude Include="Renderer.hpp" />
+    <ClInclude Include="RendererData.hpp" />
     <ClInclude Include="Sampler.hpp" />
     <ClInclude Include="SAOShader.hpp" />
     <ClInclude Include="SceneGraph.hpp" />

@@ -1,4 +1,5 @@
 #include "Renderer.hpp"
+#include "RendererData.hpp"
 #include "Engine.hpp"
 #include "Time.hpp"
 #include "QPC.hpp"
@@ -18,112 +19,280 @@
 #include "UIButton.hpp"
 
 
-const s32 MasterRenderer::validResolutionsRaw[2][NUM_VALID_RESOLUTIONS] =
+#define NUM_SPOT_LIGHTS 4
+
+void MasterRenderer::render()
 {
-	{ 1920, 1600, 1536, 1366, 1280, 1024, 960, 848},
-	{ 1080, 900,  864,  768 , 720 , 576 , 540, 480},
-};
+	for (int i = 0; i < lightManager.spotLights.size(); ++i)
+	{
+		lightManager.spotLightsGPUData[i].position = glm::fvec3(std::cos(Engine::programTime*0.2*(i + 1) + (i*PI*0.5))*30.f, 20.f, std::sin(Engine::programTime*0.2*(i + 1) + (i*PI*0.5))*30.f);
+		lightManager.spotLightsGPUData[i].direction = -glm::normalize(lightManager.spotLightsGPUData[i].position);
+		lightManager.spotLights[i].updateProj();
+		lightManager.spotLights[i].updateView();
+		lightManager.spotLights[i].updateProjView();
+	}
 
-const GLfloat quadVertices[] = {
-	-1.0f,  1.0f,  0.0f, 1.0f,//TL
-	1.0f,  1.0f,  1.0f, 1.0f,//TR
-	1.0f, -1.0f,  1.0f, 0.0f,//BR
+	for (int i = 0; i < lightManager.pointLights.size(); ++i)
+	{
+		lightManager.pointLightsGPUData[i].position.y = 20.f + (10.f * std::sin(Engine::programTime * 0.1f));
+		lightManager.pointLightsGPUData[i].position.x = 40.f * std::sin(Engine::programTime * 0.1f + ((i + 1) * 2 * PI / NUM_SPOT_LIGHTS));
+		lightManager.pointLightsGPUData[i].position.z = 40.f * std::cos(Engine::programTime * 0.1f + ((i + 1) * 2 * PI / NUM_SPOT_LIGHTS));
+		lightManager.pointLights[i].updateProj();
+		lightManager.pointLights[i].updateView();
+		lightManager.pointLights[i].updateProjView();
+	}
 
-	1.0f, -1.0f,  1.0f, 0.0f,//BR
-	-1.0f, -1.0f,  0.0f, 0.0f,//BL
-	-1.0f,  1.0f,  0.0f, 1.0f//TL
-};
+	lightManager.updateAllPointLights();
+	lightManager.updateAllSpotLights();
 
-GLfloat quadVerticesViewRays[] = {
-	-1.0f,  1.0f,  0.0f, 1.0f, 999.f, 999.f,
-	1.0f,  1.0f,  1.0f, 1.0f, 999.f, 999.f,
-	1.0f, -1.0f,  1.0f, 0.0f, 999.f, 999.f,
+	const GPUModelManager& mm = Engine::assets.modelManager;
 
-	1.0f, -1.0f,  1.0f, 0.0f, 999.f, 999.f,
-	-1.0f, -1.0f,  0.0f, 0.0f, 999.f, 999.f,
-	-1.0f,  1.0f,  0.0f, 1.0f, 999.f, 999.f,
-};
 
-inline void MasterRenderer::initialiseScreenQuad()
-{
-	glGenVertexArrays(1, &vaoQuad);
-	glGenBuffers(1, &vboQuad);
+	// *********************************************************** G-BUFFER PASS *********************************************************** //
 
-	glBindBuffer(GL_ARRAY_BUFFER, vboQuad);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+	{
+		glViewport(0, 0, config.renderResolution.x, config.renderResolution.y);
+		fboGBuffer.bind();
+
+		glDepthRangedNV(-1.f, 1.f);
+
+		fboGBuffer.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glm::ivec4 clearC(-1, -1, -1, -1);
+		glClearBufferiv(GL_COLOR, GL_COLOR_ATTACHMENT2, &clearC.x); // Clear IDs buffer
+
+		glEnable(GL_DEPTH_TEST);
+		//glDisable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		//glDisable(GL_CULL_FACE);
+		glDisable(GL_BLEND);
+		glCullFace(GL_BACK);
+
+		glPolygonMode(GL_FRONT_AND_BACK, config.drawWireFrame ? GL_LINE : GL_FILL);
+
+		gBufferShader.use();
+
+		gBufferShader.setView(activeCam->view);
+		gBufferShader.setCamPos(activeCam->pos);
+
+		gBufferShader.sendView();
+		gBufferShader.sendCamPos();
+
+		gBufferShader.sendUniforms();
+
+		glBindVertexArray(mm.regularBatch.vaoID);
+
+		world->texHandleBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 3);
+		world->instanceTransformsBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 4);
+		world->drawIndirectBuffer[Regular].bind(GL_DRAW_INDIRECT_BUFFER);
+
+		glMultiDrawArraysIndirect(GL_TRIANGLES, 0, world->modelInstances.size(), 0);
+		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
+
+	// *********************************************************** G-BUFFER PASS *********************************************************** //
+
+	// *********************************************************** SHADOW PASS *********************************************************** //
+
+	pointShadowPassShader.use();
+
+	glDepthRange(0.f, 1.f);
+	//glDepthRangedNV(-1.f, 1.f);
+	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+	glDisable(GL_BLEND);
+
+	for (auto itr = lightManager.pointLights.begin(); itr != lightManager.pointLights.end(); ++itr)
+	{
+		glViewport(0, 0, itr->shadowTex.getWidth(), itr->shadowTex.getHeight());
+
+		fboLight[0].bind();
+		fboLight[0].attachForeignCubeTexture(&itr->shadowTex, GL_DEPTH_ATTACHMENT);
+
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+		shadowMatrixBuffer.bufferData(sizeof(glm::fmat4) * 6, &itr->gpuData->projView[0][0], GL_STREAM_READ);
+		shadowMatrixBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 2);
+
+		pointShadowPassShader.setFarPlane(itr->gpuData->radius);
+		pointShadowPassShader.setLightPos(itr->gpuData->position);
+		pointShadowPassShader.sendUniforms();
+
+		glBindVertexArray(mm.shadowVAO);
+		world->drawIndirectBuffer[Regular].bind(GL_DRAW_INDIRECT_BUFFER);
+		world->instanceTransformsBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 1);
+
+		glMultiDrawArraysIndirect(GL_TRIANGLES, 0, world->modelInstances.size(), 0);
+		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
+
+		glBindVertexArray(0);
+	}
+
+	spotShadowPassShader.use();
+
+	for (auto itr = lightManager.spotLights.begin(); itr != lightManager.spotLights.end(); ++itr)
+	{
+		glViewport(0, 0, itr->shadowTex.getWidth(), itr->shadowTex.getHeight());
+
+		fboLight[0].bind();
+		fboLight[0].attachForeignTexture(&itr->shadowTex, GL_DEPTH_ATTACHMENT);
+
+		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+		spotShadowPassShader.setProj(itr->proj);
+		spotShadowPassShader.setView(itr->view);
+		spotShadowPassShader.sendUniforms();
+
+		glBindVertexArray(mm.shadowVAO);
+		world->drawIndirectBuffer[Regular].bind(GL_DRAW_INDIRECT_BUFFER);
+		world->instanceTransformsBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 1);
+
+		glMultiDrawArraysIndirect(GL_TRIANGLES, 0, world->modelInstances.size(), 0);
+		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
+
+		glBindVertexArray(0);
+	}
+
+	// *********************************************************** SHADOW PASS *********************************************************** //
+
+	// *********************************************************** SSAO PASS *********************************************************** //
+
+	//SSAO pass
+	{
+		config.ssaoScale = 1.f;
+		glViewport(0, 0, config.renderResolution.x * config.ssaoScale, config.renderResolution.y * config.ssaoScale);
+
+		fboSSAO.bind();
+		fboSSAO.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//fboDefault.bind();
+		//fboDefault.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_CULL_FACE);
+		glCullFace(GL_FRONT);
+
+		ssaoShader.use();
+		ssaoShader.sendUniforms();
+
+		glBindVertexArray(vaoQuad);
+		fboGBuffer.textureAttachments[2].bind(0);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glDisable(GL_BLEND);
+	}
+
+	// *********************************************************** SSAO PASS *********************************************************** //
+
+	// *********************************************************** SSAO-BLUR PASS *********************************************************** //
+
+	fboSSAOBlur.bind();
+	fboSSAOBlur.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	bilatBlurShader.use();
-	auto locc = glGetUniformLocation(bilatBlurShader.getGLID(), "source");
-	glUniform1i(locc, 0);
 
-	glBindVertexArray(vaoQuad);
-	glBindBuffer(GL_ARRAY_BUFFER, vboQuad);
+	glm::ivec2 axis(1, 0);
+	bilatBlurShader.setAxis(axis);
+	bilatBlurShader.sendUniforms();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, fboSSAO.textureAttachments[0].getGLID());
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 
-	GLint posAttrib = glGetAttribLocation(bilatBlurShader.getGLID(), "position");
-	glEnableVertexAttribArray(posAttrib);
-	glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
+	fboSSAO.bindDraw();
+	fboSSAOBlur.bindRead();
+	glBlitFramebuffer(0, 0, config.renderResolution.x * config.ssaoScale, config.renderResolution.y * config.ssaoScale, 0, 0, config.renderResolution.x * config.ssaoScale, config.renderResolution.y * config.ssaoScale, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
-	GLint texAttrib = glGetAttribLocation(bilatBlurShader.getGLID(), "texCoord");
-	glEnableVertexAttribArray(texAttrib);
-	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
+	fboSSAOBlur.bind();
 
-	ssaoShader.use();
+	axis = glm::ivec2(0, 1);
+	bilatBlurShader.setAxis(axis);
+	bilatBlurShader.sendUniforms();
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 
-	posAttrib = glGetAttribLocation(ssaoShader.getGLID(), "position");
-	glEnableVertexAttribArray(posAttrib);
-	glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
+	fboSSAO.bindDraw();
+	//glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+	fboSSAOBlur.bindRead();
+	glBlitFramebuffer(0, 0, config.renderResolution.x * config.ssaoScale, config.renderResolution.y * config.ssaoScale, 0, 0, config.renderResolution.x * config.ssaoScale, config.renderResolution.y * config.ssaoScale, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
-	texAttrib = glGetAttribLocation(ssaoShader.getGLID(), "texCoord");
-	glEnableVertexAttribArray(texAttrib);
-	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
+	// *********************************************************** SSAO-BLUR PASS *********************************************************** //
 
-	glGenVertexArrays(1, &vaoQuadViewRays);
-	glGenBuffers(1, &vboQuadViewRays);
+	// *********************************************************** LIGHT PASS *********************************************************** //
 
-	glBindBuffer(GL_ARRAY_BUFFER, vboQuadViewRays);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVerticesViewRays), quadVerticesViewRays, GL_STATIC_DRAW);
+	tileCullShader.use();
 
-	auto program = shaderStore.getShader(String<32>("Standard"));
+	//glUniformMatrix4fv(20, 1, GL_FALSE, &lightManager.spotLightsGPUData[0].projView[0][0]);
+
+	glBindTextureUnit(2, th.getGLID());
+	glBindImageTexture(2, th.getGLID(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+
+	glBindTextureUnit(3, fboGBuffer.textureAttachments[0].getGLID());
+	glBindImageTexture(3, fboGBuffer.textureAttachments[0].getGLID(), 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
+
+	fboGBuffer.textureAttachments[0].bindImage(3, GL_READ_ONLY);
+	fboGBuffer.textureAttachments[1].bindImage(4, GL_READ_ONLY);
+	fboGBuffer.textureAttachments[2].bind(5);
+	fboGBuffer.textureAttachments[3].bindImage(7, GL_READ_ONLY);
+	fboSSAO.textureAttachments[0].bindImage(6, GL_READ_ONLY);
+	glActiveTexture(GL_TEXTURE15);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
+
+	glm::fvec4 vrays;
+	vrays.x = activeCam->viewRays2[2].x;
+	vrays.y = activeCam->viewRays2[2].y;
+	vrays.z = activeCam->viewRays2[0].x;
+	vrays.w = activeCam->viewRays2[0].y;
+
+	tileCullShader.setViewRays(vrays);
+	tileCullShader.setView(activeCam->view);
+	tileCullShader.setViewPos(activeCam->pos);
+
+	tileCullShader.sendViewRays();
+	tileCullShader.sendView();
+	tileCullShader.sendViewPos();
+
+	tileCullShader.sendUniforms();
+
+	lightManager.pointLightsBuffer.bindBase(0);
+	lightManager.spotLightsBuffer.bindBase(1);
+	glDispatchCompute(std::ceilf(config.renderResolution.x / 16.f), std::ceilf(float(config.renderResolution.y) / 16.f), 1);
+	glMemoryBarrier(GL_ALL_BARRIER_BITS);
+	lightManager.pointLightsBuffer.unbind();
+	lightManager.spotLightsBuffer.unbind();
+
+	// *********************************************************** LIGHT PASS *********************************************************** //
+
+	// *********************************************************** SCREEN PASS *********************************************************** //
+
+	fboDefault.bind();
+	fboDefault.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+
+	glBindVertexArray(vaoQuadViewRays);
+	auto program = shaderStore.getShader(String<32>("test"));
 	program->use();
 
-	glBindVertexArray(vaoQuadViewRays);
-	glBindBuffer(GL_ARRAY_BUFFER, vboQuadViewRays);
+	glUniform1i(0, 2);
+	th.bind(2);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 
-	posAttrib = glGetAttribLocation(program->getGLID(), "position");
-	glEnableVertexAttribArray(posAttrib);
-	glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
+	glDisable(GL_CULL_FACE);
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
 
-	texAttrib = glGetAttribLocation(program->getGLID(), "texCoord");
-	glEnableVertexAttribArray(texAttrib);
-	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
+	//b.draw();
+	lightManager.drawLightIcons();
 
-	auto viewAttrib = glGetAttribLocation(program->getGLID(), "viewRay");
-	glEnableVertexAttribArray(viewAttrib);
-	glVertexAttribPointer(viewAttrib, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(4 * sizeof(GLfloat)));
+	// *********************************************************** SCREEN PASS *********************************************************** //
 
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	Engine::uiw->draw(); //UI Window
 
-	program = shaderStore.getShader(String<32>("test"));
+	Engine::console.draw();
 
-	glBindVertexArray(vaoQuadViewRays);
-	glBindBuffer(GL_ARRAY_BUFFER, vboQuadViewRays);
-
-	posAttrib = glGetAttribLocation(program->getGLID(), "p");
-	glEnableVertexAttribArray(posAttrib);
-	glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
-
-	texAttrib = glGetAttribLocation(program->getGLID(), "t");
-	glEnableVertexAttribArray(texAttrib);
-	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
-
-	viewAttrib = glGetAttribLocation(program->getGLID(), "v");
-	glEnableVertexAttribArray(viewAttrib);
-	glVertexAttribPointer(viewAttrib, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(4 * sizeof(GLfloat)));
-
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	window->swapBuffers();
 }
+
+
 
 inline void MasterRenderer::initialiseGBuffer()
 {
@@ -198,30 +367,30 @@ inline void MasterRenderer::initialiseSkybox()
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
-#define NUM_LIGHTS 1
-
 inline void MasterRenderer::initialiseLights()
 {
-	const int nr = NUM_LIGHTS;
+	const int nr = NUM_SPOT_LIGHTS;
 	for (int i = 0; i < nr; ++i)
 	{
 		auto& add = lightManager.addPointLight();
 		auto cc = Engine::rand() % 3;
 		glm::fvec3 col(0.f);
-		switch (cc)
+		switch (i)
 		{
 		case 0:
-			col.x = 0.4;
+			col = glm::fvec3(1.f, 61.f / 255.f, 55.f / 255.f);
 			break;
 		case 1:
-			col.y = 0.4;
+			col = glm::fvec3(232.f / 255.f, 197.f / 255.f, 50.f / 255.f);
 			break;
 		case 2:
-			col.z = 0.4;
+			col = glm::fvec3(42.f / 255.f, 255.f / 255.f, 118.f / 255.f);
+			break;
+		case 3:
+			col = glm::fvec3(38.f / 255.f, 45.f / 255.f, 232.f / 255.f);
 			break;
 		}
-		add.setColour(glm::fvec3(1.5,1.5,1.5));
-		add.setColour(glm::fvec3(0.05, .05, 0.05));
+		add.setColour(col);
 		add.setLinear(0.0001f);
 		add.setQuadratic(0.005f);
 		add.setPosition(glm::fvec3(100.f, 100.f, 100.f));
@@ -233,7 +402,7 @@ inline void MasterRenderer::initialiseLights()
 
 	lightManager.updateAllPointLights();
 
-	const int nr2 = 1;
+	const int nr2 = 0;
 	for (int i = 0; i < nr2; ++i)
 	{
 		auto& add = lightManager.addSpotLight();
@@ -471,276 +640,6 @@ void MasterRenderer::cameraProjUpdated()
 	frustCullShader.setProj(activeCam->proj);
 }
 
-void MasterRenderer::render()
-{
-	// *********************************************************** G-BUFFER PASS *********************************************************** //
-
-	for (int i = 0; i < lightManager.spotLights.size(); ++i)
-	{
-		lightManager.spotLightsGPUData[i].position = glm::fvec3(std::cos(Engine::programTime*0.2*(i + 1) + (i*PI*0.5))*30.f, 20.f, std::sin(Engine::programTime*0.2*(i+1) + (i*PI*0.5))*30.f);
-		lightManager.spotLightsGPUData[i].direction = -glm::normalize(lightManager.spotLightsGPUData[i].position);
-		lightManager.spotLights[i].updateProj();
-		lightManager.spotLights[i].updateView();
-		lightManager.spotLights[i].updateProjView();
-	}
-
-	for (int i = 0; i < lightManager.pointLights.size(); ++i)
-	{
-		lightManager.pointLightsGPUData[i].position.y = 60.f + (10.f * std::sin(Engine::programTime * 0.1f));
-		lightManager.pointLightsGPUData[i].position.x = 40.f * std::sin(Engine::programTime * 0.1f + ((i + 1)*2*PI / NUM_LIGHTS));
-		lightManager.pointLightsGPUData[i].position.z = 40.f * std::cos(Engine::programTime * 0.1f + ((i + 1)*2*PI / NUM_LIGHTS));
-		lightManager.pointLights[i].updateProj();
-		lightManager.pointLights[i].updateView();
-		lightManager.pointLights[i].updateProjView();
-	}
-
-	lightManager.updateAllPointLights();
-	lightManager.updateAllSpotLights();
-
-	const GPUModelManager& mm = Engine::assets.modelManager;
-
-	//GBuffer pass
-
-	//Sort by shader (draw mode) and bind
-	//Sort by texture size group and bind
-	//Bind draw indirect buffer
-	//Draw
-
-	//GBuffer pass
-	{
-		glViewport(0, 0, config.renderResolution.x, config.renderResolution.y);
-		fboGBuffer.bind();
-		
-		glDepthRangedNV(-1.f, 1.f);
-
-		fboGBuffer.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		glm::ivec4 clearC(-1, -1, -1, -1);
-		glClearBufferiv(GL_COLOR, GL_COLOR_ATTACHMENT2, &clearC.x); // Clear IDs buffer
-
-		glEnable(GL_DEPTH_TEST);
-		//glDisable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-		//glDisable(GL_CULL_FACE);
-		glDisable(GL_BLEND);
-		glCullFace(GL_BACK);
-
-		glPolygonMode(GL_FRONT_AND_BACK, config.drawWireFrame ? GL_LINE : GL_FILL);
-
-		gBufferShader.use();
-
-		gBufferShader.setView(activeCam->view);
-		gBufferShader.setCamPos(activeCam->pos);
-
-		gBufferShader.sendView();
-		gBufferShader.sendCamPos();
-
-		gBufferShader.sendUniforms();
-
-		glBindVertexArray(mm.regularBatch.vaoID);
-
-		world->texHandleBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 3);
-		world->instanceTransformsBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 4);
-		world->drawIndirectBuffer[Regular].bind(GL_DRAW_INDIRECT_BUFFER);
-
-		glMultiDrawArraysIndirect(GL_TRIANGLES, 0, world->modelInstances.size(), 0);
-		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
-
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	}
-	
-	// *********************************************************** G-BUFFER PASS *********************************************************** //
-
-	// *********************************************************** SHADOW PASS *********************************************************** //
-
-	pointShadowPassShader.use();
-
-	glDepthRange(0.f, 1.f);
-	//glDepthRangedNV(-1.f, 1.f);
-	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
-	glDisable(GL_BLEND);
-
-	for (auto itr = lightManager.pointLights.begin(); itr != lightManager.pointLights.end(); ++itr)
-	{
-		glViewport(0, 0, itr->shadowTex.getWidth(), itr->shadowTex.getHeight());
-
-		fboLight[0].bind();
-		fboLight[0].attachForeignCubeTexture(&itr->shadowTex, GL_DEPTH_ATTACHMENT);
-
-		glClear(GL_DEPTH_BUFFER_BIT);
-
-		shadowMatrixBuffer.bufferData(sizeof(glm::fmat4) * 6, &itr->gpuData->projView[0][0], GL_STREAM_READ);
-		shadowMatrixBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 2);
-
-		pointShadowPassShader.setFarPlane(itr->gpuData->radius);
-		pointShadowPassShader.setLightPos(itr->gpuData->position);
-		pointShadowPassShader.sendUniforms();
-
-		glBindVertexArray(mm.shadowVAO);
-		world->drawIndirectBuffer[Regular].bind(GL_DRAW_INDIRECT_BUFFER);
-		world->instanceTransformsBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 1);
-
-		glMultiDrawArraysIndirect(GL_TRIANGLES, 0, world->modelInstances.size(), 0);
-		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
-
-		glBindVertexArray(0);
-	}
-
-	spotShadowPassShader.use();
-
-	for (auto itr = lightManager.spotLights.begin(); itr != lightManager.spotLights.end(); ++itr)
-	{
-		glViewport(0, 0, itr->shadowTex.getWidth(), itr->shadowTex.getHeight());
-
-		fboLight[0].bind();
-		fboLight[0].attachForeignTexture(&itr->shadowTex, GL_DEPTH_ATTACHMENT);
-
-		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
-		spotShadowPassShader.setProj(itr->proj);
-		spotShadowPassShader.setView(itr->view);
-		spotShadowPassShader.sendUniforms();
-
-		glBindVertexArray(mm.shadowVAO);
-		world->drawIndirectBuffer[Regular].bind(GL_DRAW_INDIRECT_BUFFER);
-		world->instanceTransformsBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 1);
-
-		glMultiDrawArraysIndirect(GL_TRIANGLES, 0, world->modelInstances.size(), 0);
-		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
-
-		glBindVertexArray(0);
-	}
-
-	// *********************************************************** SHADOW PASS *********************************************************** //
-
-	// *********************************************************** SSAO PASS *********************************************************** //
-	
-	//SSAO pass
-	{
-		config.ssaoScale = 1.f;
-		glViewport(0, 0, config.renderResolution.x * config.ssaoScale, config.renderResolution.y * config.ssaoScale);
-
-		fboSSAO.bind();
-		fboSSAO.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		//fboDefault.bind();
-		//fboDefault.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_CULL_FACE);
-		glCullFace(GL_FRONT);
-
-		ssaoShader.use();
-		ssaoShader.sendUniforms();
-
-		glBindVertexArray(vaoQuad);
-		fboGBuffer.textureAttachments[2].bind(0);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		glDisable(GL_BLEND);
-	}
-
-	// *********************************************************** SSAO PASS *********************************************************** //
-
-	// *********************************************************** BLUR PASS *********************************************************** //
-
-	fboSSAOBlur.bind();
-	fboSSAOBlur.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	bilatBlurShader.use();
-
-	glm::ivec2 axis(1, 0);
-	bilatBlurShader.setAxis(axis);
-	bilatBlurShader.sendUniforms();
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, fboSSAO.textureAttachments[0].getGLID());
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-
-	fboSSAO.bindDraw();
-	fboSSAOBlur.bindRead();
-	glBlitFramebuffer(0, 0, config.renderResolution.x * config.ssaoScale, config.renderResolution.y * config.ssaoScale, 0, 0, config.renderResolution.x * config.ssaoScale, config.renderResolution.y * config.ssaoScale, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-
-	fboSSAOBlur.bind();
-
-	axis = glm::ivec2(0, 1);
-	bilatBlurShader.setAxis(axis);
-	bilatBlurShader.sendUniforms();
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-
-	fboSSAO.bindDraw();
-	//glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-	fboSSAOBlur.bindRead();
-	glBlitFramebuffer(0, 0, config.renderResolution.x * config.ssaoScale, config.renderResolution.y * config.ssaoScale, 0, 0, config.renderResolution.x * config.ssaoScale, config.renderResolution.y * config.ssaoScale, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-
-	// *********************************************************** BLUR PASS *********************************************************** //
-
-	tileCullShader.use();
-
-	//glUniformMatrix4fv(20, 1, GL_FALSE, &lightManager.spotLightsGPUData[0].projView[0][0]);
-
-	glBindTextureUnit(2, th.getGLID());
-	glBindImageTexture(2, th.getGLID(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-
-	glBindTextureUnit(3, fboGBuffer.textureAttachments[0].getGLID());
-	glBindImageTexture(3, fboGBuffer.textureAttachments[0].getGLID(), 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
-
-	fboGBuffer.textureAttachments[0].bindImage(3, GL_READ_ONLY);
-	fboGBuffer.textureAttachments[1].bindImage(4, GL_READ_ONLY);
-	fboGBuffer.textureAttachments[2].bind(5);
-	fboGBuffer.textureAttachments[3].bindImage(7, GL_READ_ONLY);
-	fboSSAO.textureAttachments[0].bindImage(6, GL_READ_ONLY);
-	glActiveTexture(GL_TEXTURE15);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
-
-	glm::fvec4 vrays;
-	vrays.x = activeCam->viewRays2[2].x;
-	vrays.y = activeCam->viewRays2[2].y;
-	vrays.z = activeCam->viewRays2[0].x;
-	vrays.w = activeCam->viewRays2[0].y;
-
-	tileCullShader.setViewRays(vrays);
-	tileCullShader.setView(activeCam->view);
-	tileCullShader.setViewPos(activeCam->pos);
-
-	tileCullShader.sendViewRays();
-	tileCullShader.sendView();
-	tileCullShader.sendViewPos();
-
-	tileCullShader.sendUniforms();
-
-	lightManager.pointLightsBuffer.bindBase(0);
-	lightManager.spotLightsBuffer.bindBase(1);
-	glDispatchCompute(std::ceilf(config.renderResolution.x / 16.f), std::ceilf(float(config.renderResolution.y) / 16.f), 1);
-	glMemoryBarrier(GL_ALL_BARRIER_BITS);
-	lightManager.pointLightsBuffer.unbind();
-	lightManager.spotLightsBuffer.unbind();
-
-	fboDefault.bind();
-	fboDefault.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-
-	glBindVertexArray(vaoQuadViewRays);
-	auto program = shaderStore.getShader(String<32>("test"));
-	program->use();
-
-	glUniform1i(0, 2);
-	th.bind(2);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-
-	glDisable(GL_CULL_FACE);
-	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-
-	//b.draw();
-	lightManager.drawLightIcons();
-	
-	Engine::uiw->draw();
-
-	Engine::console.draw();
-	
-	window->swapBuffers();
-}
-
 void MasterRenderer::bakeStaticLights()
 {
 	//for (auto itr = lightManager.staticPointLightsGPUData.begin(); itr != lightManager.staticPointLightsGPUData.end(); ++itr)
@@ -748,4 +647,84 @@ void MasterRenderer::bakeStaticLights()
 	//}
 }
 
+inline void MasterRenderer::initialiseScreenQuad()
+{
+	glGenVertexArrays(1, &vaoQuad);
+	glGenBuffers(1, &vboQuad);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vboQuad);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+
+	bilatBlurShader.use();
+	auto locc = glGetUniformLocation(bilatBlurShader.getGLID(), "source");
+	glUniform1i(locc, 0);
+
+	glBindVertexArray(vaoQuad);
+	glBindBuffer(GL_ARRAY_BUFFER, vboQuad);
+
+	GLint posAttrib = glGetAttribLocation(bilatBlurShader.getGLID(), "position");
+	glEnableVertexAttribArray(posAttrib);
+	glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
+
+	GLint texAttrib = glGetAttribLocation(bilatBlurShader.getGLID(), "texCoord");
+	glEnableVertexAttribArray(texAttrib);
+	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
+
+	ssaoShader.use();
+
+	posAttrib = glGetAttribLocation(ssaoShader.getGLID(), "position");
+	glEnableVertexAttribArray(posAttrib);
+	glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
+
+	texAttrib = glGetAttribLocation(ssaoShader.getGLID(), "texCoord");
+	glEnableVertexAttribArray(texAttrib);
+	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
+
+	glGenVertexArrays(1, &vaoQuadViewRays);
+	glGenBuffers(1, &vboQuadViewRays);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vboQuadViewRays);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVerticesViewRays), quadVerticesViewRays, GL_STATIC_DRAW);
+
+	auto program = shaderStore.getShader(String<32>("Standard"));
+	program->use();
+
+	glBindVertexArray(vaoQuadViewRays);
+	glBindBuffer(GL_ARRAY_BUFFER, vboQuadViewRays);
+
+	posAttrib = glGetAttribLocation(program->getGLID(), "position");
+	glEnableVertexAttribArray(posAttrib);
+	glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
+
+	texAttrib = glGetAttribLocation(program->getGLID(), "texCoord");
+	glEnableVertexAttribArray(texAttrib);
+	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
+
+	auto viewAttrib = glGetAttribLocation(program->getGLID(), "viewRay");
+	glEnableVertexAttribArray(viewAttrib);
+	glVertexAttribPointer(viewAttrib, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(4 * sizeof(GLfloat)));
+
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	program = shaderStore.getShader(String<32>("test"));
+
+	glBindVertexArray(vaoQuadViewRays);
+	glBindBuffer(GL_ARRAY_BUFFER, vboQuadViewRays);
+
+	posAttrib = glGetAttribLocation(program->getGLID(), "p");
+	glEnableVertexAttribArray(posAttrib);
+	glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
+
+	texAttrib = glGetAttribLocation(program->getGLID(), "t");
+	glEnableVertexAttribArray(texAttrib);
+	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
+
+	viewAttrib = glGetAttribLocation(program->getGLID(), "v");
+	glEnableVertexAttribArray(viewAttrib);
+	glVertexAttribPointer(viewAttrib, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(4 * sizeof(GLfloat)));
+
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
 
