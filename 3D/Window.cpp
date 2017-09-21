@@ -1,10 +1,10 @@
 #pragma once
-#include "Window.h"
-#include "Engine.h"
-#include "Camera.h"
-#include "Renderer.h"
-#include "Keyboard.h"
-#include "Event.h"
+#include "Window.hpp"
+#include "Engine.hpp"
+#include "Camera.hpp"
+#include "Renderer.hpp"
+#include "Keyboard.hpp"
+#include "Event.hpp"
 
 Window* Window::engineWindow;
 

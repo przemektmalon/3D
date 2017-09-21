@@ -1,6 +1,6 @@
-#include "UserInputManager.h"
-#include "Engine.h"
-#include "Window.h"
+#include "UserInputManager.hpp"
+#include "Engine.hpp"
+#include "Window.hpp"
 
 ControlArray UIM::defCA;
 

@@ -2,9 +2,7 @@
 
 #extension GL_ARB_shader_draw_parameters : require
 
-
 uniform layout(location = 1) mat4 proj;
-//uniform layout(location = 2) mat4 model;
 uniform layout(location = 3) mat4 view;
 uniform layout(location = 4) vec3 camPos;
 
@@ -25,8 +23,6 @@ flat out uint DrawID;
 
 out float logz;
 
-#define C 1.f
-
 #define FAR 1000000.f
 
 void main()
@@ -41,8 +37,6 @@ void main()
 	gl_Position = projPos;
 
     logz = 1.0 + gl_Position.w;
-    
-    //gl_Position.z = log2(max(1e-6, 1.0 + gl_Position.w)) * FC - 1.0;
 
 	ViewVec = camPos - worldPos.xyz;
 

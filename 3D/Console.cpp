@@ -1,8 +1,8 @@
 #pragma once
-#include "Console.h"
-#include "AssetManager.h"
-#include "World.h"
-#include "MeshUtility.h"
+#include "Console.hpp"
+#include "AssetManager.hpp"
+#include "World.hpp"
+#include "MeshUtility.hpp"
 
 void setModelPosition(glm::fvec3 pos)
 {
@@ -133,18 +133,6 @@ void muListMeshes()
 	}
 }
 
-void addMeshAsset(String32 path, String32 name)
-{
-	auto mesh = Engine::assets.prepareMesh(path, name);
-	mesh->loadBinV11();
-	mesh->sortTriangleLists();
-	Engine::assets.meshManager.pushMeshToBatch(*mesh);
-	auto inst = Engine::world->addMeshInstance(*mesh, Engine::world->getWorldRootNode());
-	inst->sgNode->transform.updateMatrix();
-	Engine::world->sg.updateAll();
-	Engine::world->updateGLBuffers();
-}
-
 //MODEL LOADING AND MANIPULATION
 
 std::map<String32, u32> Console::funcIDs;
@@ -259,7 +247,6 @@ void Console::submitCommand(StringGeneric& command)
 		CHECK_CONSOLE_CALLABLE(8, muClearStorage, 0);
 		CHECK_CONSOLE_CALLABLE(9, muExportBin, 1);
 		CHECK_CONSOLE_CALLABLE(10, muListMeshes, 0);
-		CHECK_CONSOLE_CALLABLE(20, addMeshAsset, 2);
 	END_FUNC_SWITCH
 }
 
@@ -275,8 +262,6 @@ void Console::registerConsoleFuncs()
 	REGISTER_CONSOLE_CALLABLE(8, "muClearStorage", 0);
 	REGISTER_CONSOLE_CALLABLE(9, "muExportBin", 1);
 	REGISTER_CONSOLE_CALLABLE(10, "muListMeshes", 0);
-	REGISTER_CONSOLE_CALLABLE(20, "addMeshAsset", 2);
-	//REGISTER_CONSOLE_CALLABLE(5, "reloadAllShaders", 0);
 }
 
 void Console::textInput(KeyCode code)

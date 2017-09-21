@@ -1,4 +1,4 @@
-#include "Strings.h"
+#include "Strings.hpp"
 #include <time.h>
 
 void getDateTimeStr(StringGeneric& str)

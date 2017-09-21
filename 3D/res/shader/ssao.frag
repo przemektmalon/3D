@@ -5,7 +5,7 @@
 in vec2 TexCoord;
 
 // Total number of direct samples to take at each pixel
-#define NUM_SAMPLES (9)
+#define NUM_SAMPLES (50)
 
 // If using depth mip levels, the log of the maximum pixel offset before we need to switch to a lower 
 // miplevel to maintain reasonable spatial locality in the cache
@@ -18,11 +18,12 @@ in vec2 TexCoord;
 
 /** Used for preventing AO computation on the sky (at infinite depth) and defining the CS Z to bilateral depth key scaling. 
     This need not match the real far plane*/
-#define FAR_PLANE_Z (-10000.0)
+#define FAR 1000000.f // projection matrix's far plane
+#define FAR_PLANE_Z (-1000000.0)
 
 // This is the number of turns around the circle that the spiral pattern makes.  This should be prime to prevent
 // taps from lining up.  This particular choice was tuned for NUM_SAMPLES == 9
-#define NUM_SPIRAL_TURNS (7)
+#define NUM_SPIRAL_TURNS (30)
 
 //////////////////////////////////////////////////
 
@@ -30,19 +31,19 @@ in vec2 TexCoord;
     You can compute it from your projection matrix.  The actual value is just
     a scale factor on radius; you can simply hardcode this to a constant (~500)
     and make your radius value unitless (...but resolution dependent.)  */
-uniform float           projScale = 500.f;
+uniform float           projScale = 1000.f;
 
 /** Negative, "linear" values in world-space units */
 uniform sampler2D       depthBuffer;
 
 /** World-space AO radius in scene units (r).  e.g., 1.0m */
-uniform float           radius = 50.f;
+uniform float           radius = 1.f;
 
 /** Bias to avoid AO in smooth corners, e.g., 0.01m */
-uniform float           bias = 1.0f;
+uniform float           bias = 0.01f;
 
 /** intensity / radius^6 */
-uniform float           intensityDivR6 = 0.000000001f;
+uniform float           intensityDivR6 = 100.f;
 
 uniform mat4 view;
 uniform mat4 proj;
@@ -85,7 +86,7 @@ vec3 reconstructCSFaceNormal(vec3 C) {
 }
 
 const float NEAR = 5.f; // projection matrix's near plane
-const float FAR = 10000.0f; // projection matrix's far plane
+
 float LinearizeDepth(float depth)
 {
     //float z = depth * 2.0 - 1.0; // Back to NDC 
@@ -132,6 +133,7 @@ vec3 getPosition(ivec2 ssP) {
     vec3 P;
     P.z = texelFetch(depthBuffer, ssP, 0).r;
     float depth = -(exp2(P.z * log2(FAR + 1.0)) - 1.f);
+    //float depth = P.z;
     P = reconstructCSPosition(vec2(ssP) + vec2(0.5), depth);
 
     return P;
@@ -163,6 +165,7 @@ vec3 getOffsetPosition(ivec2 ssC, vec2 unitOffset, float ssR) {
     
 
     float depth = -(exp2(P.z * log2(FAR + 1.0)) - 1.f);
+    //float depth = P.z;
 
     P = reconstructCSPosition(vec2(ssP) + vec2(0.5), depth);
 
@@ -211,7 +214,7 @@ float sampleAO(in ivec2 ssC, in vec3 C, in vec3 n_C, in float ssDiskRadius, in i
     //return 4.0 * max(1.0 - vv * invRadius2, 0.0) * max(vn - bias, 0.0);
 
     // D: Low contrast, no division operation
-    // return 2.0 * float(vv < radius * radius) * max(vn - bias, 0.0);
+    //return 2.0 * float(vv < radius * radius) * max(vn - bias, 0.0);
 }
 
 
@@ -228,7 +231,8 @@ void main() {
     packKey(CSZToKey(C.z), bilateralKey);
 
     // Hash function used in the HPG12 AlchemyAO paper
-    float randomPatternRotationAngle = (3 * ssC.x ^ ssC.y + ssC.x * ssC.y) * 10;
+    //float randomPatternRotationAngle = (3 * ssC.x ^ ssC.y + ssC.x * ssC.y) * 10;
+    float randomPatternRotationAngle = 0.5;
 
     // Reconstruct normals from positions. These will lead to 1-pixel black lines
     // at depth discontinuities, however the blur will wipe those out so they are not visible
@@ -237,7 +241,8 @@ void main() {
 
     // Choose the screen-space sample radius
     // proportional to the projected area of the sphere
-    float ssDiskRadius = -projScale * radius / C.z;
+    float ssDiskRadius = projScale * radius / C.z;
+    //float ssDiskRadius =  projScale / C.z;
     
     float sum = 0.0;
     for (int i = 0; i < NUM_SAMPLES; ++i) {
@@ -256,4 +261,14 @@ void main() {
     }
     
     visibility = A;
+
+    //gl_FragColor.rgb = vec3();
+
+    //ivec2 ssP = ssC;
+
+    //float d = texelFetch(depthBuffer, ssP, 0).r;
+    //float depth = (exp2(d * log2(FAR + 1.0)) - 1.f);
+
+    //gl_FragColor.rgb = vec3(d);
+    
 }

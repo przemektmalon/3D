@@ -1,4 +1,4 @@
-#include "Font.h"
+#include "Font.hpp"
 
 GlyphContainer* Font::requestGlyphs(u16 pCharSize, Text * pUser)
 {
@@ -53,7 +53,7 @@ void GlyphContainer::load(u16 pCharSize, FT_Face pFace)
 	int yOffset = 0;
 
 	GLTexture2D tempTex;
-	tempTex.createFromStream(GL_RED, charSize * 10, charSize * 10, GL_RGB, GL_UNSIGNED_BYTE, NULL, 0, 1);
+	tempTex.createFromStream(GL_R8, charSize * 10, charSize * 10, GL_RED, GL_UNSIGNED_BYTE, NULL, 0, 1);
 	tempTex.bind();
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
@@ -100,15 +100,16 @@ void GlyphContainer::load(u16 pCharSize, FT_Face pFace)
 		xOffset += sizes[i].x + 1;
 	}
 
-	height = pFace->height;
+	height = pFace->size->metrics.height >> 6;
 	maxYSize += lineYSize;
 	maxXSize = lineXSize > maxXSize ? lineXSize : maxXSize;
-	glyphs.createFromStream(GL_RED, maxXSize, maxYSize, GL_RGB, GL_UNSIGNED_BYTE, NULL, 0, 1);
+	glyphs.makeGLAsset();
+	glyphs.glData->createFromStream(GL_R8, maxXSize, maxYSize, GL_RED, GL_UNSIGNED_BYTE, NULL, 0, 1);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	tempTex.saveToFile("A", true);
-	glCopyImageSubData(tempTex.getGLID(), GL_TEXTURE_2D, 0, 0, 0, 0, glyphs.getGLID(), GL_TEXTURE_2D, 0, 0, 0, 0, maxXSize, maxYSize, 1);
-	glyphs.saveToFile("B", true);
+	//tempTex.saveToFile("A", true);
+	glCopyImageSubData(tempTex.getGLID(), GL_TEXTURE_2D, 0, 0, 0, 0, glyphs.glData->getGLID(), GL_TEXTURE_2D, 0, 0, 0, 0, maxXSize, maxYSize, 1);
+	//glyphs.saveToFile("B", true);
 	tempTex.release();
 }
 

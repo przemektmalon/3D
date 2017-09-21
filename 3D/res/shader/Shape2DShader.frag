@@ -17,6 +17,7 @@ void main() {
 
     //vec3 vs = ViewRay * zview;
 
+    //outColour = colour + vec4(texture(tex,TexCoord).rgba);
     outColour = colour + vec4(texture(tex,TexCoord).rgba);
 
     //outColour = colour;

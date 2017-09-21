@@ -5,9 +5,9 @@
 #include <vector>
 #include <io.h>
 #include <ios>
-#include "MeshUtility.h"
+#include "MeshUtility.hpp"
 #include "C:/Programming/Libs/GLM/glm/common.hpp"
-#include "Engine.h"
+#include "Engine.hpp"
 
 const int VertexAttrib::typeSizes[VertexAttrib::AttribTypesCount] = {
 	8, 12, 16,
@@ -182,6 +182,36 @@ void OBJMeshData::load(StringGeneric & pPath)
 						break;
 					std::getline(iss, line, ' ');
 					if (line == "map_Kd")
+					{
+						std::getline(iss, line);
+						std::string texName;
+						int i = line.length() - 4;
+						int j = 0;
+						while (true)
+						{
+							if (line[i] == '\\')
+								break;
+							--i; ++j;
+						}
+						texName = line.substr(i + 1, j - 1);
+						materials.insert(std::make_pair(String64(materialName.c_str()), String32(texName.c_str())));
+					}
+					else if (line == "map_Ks")
+					{
+						std::getline(iss, line);
+						std::string texName;
+						int i = line.length() - 4;
+						int j = 0;
+						while (true)
+						{
+							if (line[i] == '\\')
+								break;
+							--i; ++j;
+						}
+						texName = line.substr(i + 1, j - 1);
+						materials.insert(std::make_pair(String64(materialName.c_str()), String32(texName.c_str())));
+					}
+					else if (line == "map_Bump")
 					{
 						std::getline(iss, line);
 						std::string texName;

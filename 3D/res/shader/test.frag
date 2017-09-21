@@ -4,7 +4,7 @@ in vec2 TexCoord;
 //in vec3 ViewRay;
 out layout(location = 0) vec4 outColour;
 
-uniform sampler2D tex;
+layout(binding = 0) uniform sampler2D tex;
 
 //uniform mat4 proj;
 //uniform vec3 camPos;

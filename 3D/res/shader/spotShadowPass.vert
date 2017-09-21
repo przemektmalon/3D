@@ -11,7 +11,7 @@ uniform layout(location = 2) mat4 projView;
 	int transformID[];
 };*/
 
-layout (binding=4) buffer Pos
+layout (binding=1) buffer Pos
 {
 	mat4 transforms[];
 };

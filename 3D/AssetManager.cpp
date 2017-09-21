@@ -1,4 +1,4 @@
-#include "AssetManager.h"
+#include "AssetManager.hpp"
 
 AssetManager::AssetManager()
 {
@@ -19,12 +19,13 @@ Asset* AssetManager::prepareAsset(Asset::Type pType, String<128>& pPath, String<
 		//auto ins2 = meshList.insert(std::make_pair(pName, Mesh(pPath, pName)));
 		auto ins2 = meshList.try_emplace(pName, pPath, pName);
 		return &ins2.first->second; }
+	case Asset::Model: {
+		//auto ins2 = meshList.insert(std::make_pair(pName, Mesh(pPath, pName)));
+		auto ins3 = modelList.try_emplace(pName, pPath, pName);
+		return &ins3.first->second; }
 	case Asset::Texture2D: {
-		auto ins3 = texture2DList.insert(std::make_pair(pName, GLTexture2D(pPath, pName, false)));
-		return &ins3.first->second; }
-	case Asset::Texture2DMip: {
-		auto ins3 = texture2DList.insert(std::make_pair(pName, GLTexture2D(pPath, pName, true)));
-		return &ins3.first->second; }
+		auto ins4 = texture2DList.insert(std::make_pair(pName, Texture2D(pPath, pName)));
+		return &ins4.first->second; }
 	}
 }
 
@@ -77,7 +78,7 @@ void AssetManager::AssetLoader::loadAssets(String128 & assetListFilePath)
 
 				if (mip == "true")
 				{
-					auto tex = Engine::assets.prepareMipTexture(String128(path.c_str()), String128(name.c_str()));
+					auto tex = Engine::assets.prepareTexture(String128(path.c_str()), String128(name.c_str()));
 					if (tex->doesExist())
 					{
 						tex->load();
@@ -86,6 +87,9 @@ void AssetManager::AssetLoader::loadAssets(String128 & assetListFilePath)
 					{
 						std::cout << "Texture at " << path << " does not exist" << std::endl;
 					}
+					//tex->gpuMeta = Engine::assets.textureManager.pushToGPU(tex);
+					tex->makeGLAsset();
+					tex->glData->loadToGPU();
 				}
 				else
 				{
@@ -98,7 +102,11 @@ void AssetManager::AssetLoader::loadAssets(String128 & assetListFilePath)
 					{
 						std::cout << "Texture at \"" << path << "\" does not exist" << std::endl;
 					}
+					//tex->gpuMeta = Engine::assets.textureManager.pushToGPU(tex);
+					tex->makeGLAsset();
+					tex->glData->loadToGPU();
 				}
+				
 			}
 			else if (line == "[Mesh]")
 			{
@@ -194,4 +202,12 @@ void AssetManager::AssetLoader::loadAssets(String128 & assetListFilePath)
 		}
 	}
 	file.close();
+}
+
+void AssetManager::pushTexturesToGPU()
+{
+	for (auto tex : texture2DList)
+	{
+		std::cout << const_cast<String32&>(tex.first).getString() << std::endl;
+	}
 }

@@ -1,0 +1,2 @@
+moveSpeed=30.0
+radDiff=10.0001

@@ -49,7 +49,7 @@ uniform uint selectedID;
 //layout(local_size_variable) in;
 layout(local_size_x=16, local_size_y=16, local_size_z=1) in;
 
-#define MAX_LIGHTS_PER_TILE 4024
+#define MAX_LIGHTS_PER_TILE 128
 
 layout(binding=2, rgba32f) uniform writeonly image2D outColour;
 layout(binding=3, rg16f) uniform readonly image2D gNormal;
@@ -92,17 +92,38 @@ f16vec3 decode (f16vec2 enc)
     return n;
 }
 
-float A = 0.15;
+#define A shoulderStrength
+#define B linearStrength
+#define C linearAngle
+#define D toeStrength
+#define E toeNumerator
+#define F toeDenominator
+#define W linearWhite
+
+/*float A = 0.15;
 float B = 0.50;
 float C = 0.10;
 float D = 0.20;
 float E = 0.02;
+float F = 0.30;
+float W = 11.2;*/
+
+float A = 0.22;
+float B = 0.30;
+float C = 0.10;
+float D = 0.20;
+float E = 0.01;
 float F = 0.30;
 float W = 11.2;
 
 vec3 tonemap(vec3 x)
 {
 	return vec3(((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F);
+}
+
+vec3 finalTone(vec3 x)
+{
+	return (tonemap(x))/(tonemap(vec3(W,W,W)));
 }
 
 #define FAR 1000000.f
@@ -147,7 +168,7 @@ void main()
 		atomicMin(minZ, z);
 	}
 
-	barrier();
+	//barrier();
 	
 	if(localID == 0)
 	{
@@ -175,7 +196,7 @@ void main()
 		}
 	}
 
-	barrier();
+	//barrier();
 
 	float farZMinf = uintBitsToFloat(farZMin);
 	float nearZMaxf = uintBitsToFloat(nearZMax);
@@ -204,7 +225,7 @@ void main()
 
 	const uvec3 groupID = gl_WorkGroupID;
 
-	barrier();
+	//barrier();
 
 	float xMixRatio1 = float(gl_WorkGroupID.x)/(float(renderSize.x)/float(gl_WorkGroupSize.x));
 	float yMixRatio1 = float(gl_WorkGroupID.y)/(float(renderSize.y)/float(gl_WorkGroupSize.y));
@@ -265,13 +286,18 @@ void main()
 	uint threadCount = gl_WorkGroupSize.x*gl_WorkGroupSize.y;
 	uint passCount = (pointLightCount + threadCount - 1) / threadCount;
 
+	vec3 oCol = vec3(0.f);
+
 	for(uint i = 0; i < passCount; ++i)
 	{	
-		if (currentTilePointLightIndex < MAX_LIGHTS_PER_TILE)
+		//if (currentTilePointLightIndex < MAX_LIGHTS_PER_TILE)
     	{
 			uint lightIndex =  (i * threadCount) + gl_LocalInvocationIndex;
 
-			lightIndex = min(lightIndex, pointLightCount);
+			if(lightIndex > pointLightCount)
+				continue;
+
+			//lightIndex = min(lightIndex, pointLightCount);
 
 			vec4 lightPos = pointLights[lightIndex].posRad;
 			float rad = lightPos.w;
@@ -281,6 +307,7 @@ void main()
 
 			if(inFrustum)
 			{
+				//oCol += vec3(float(lightIndex)+1000.f,0.f,0.f);
 				uint nextTileLightIndex = atomicAdd(currentTilePointLightIndex,1);
 				tilePointLightIndices[nextTileLightIndex] = lightIndex;
 			}
@@ -289,18 +316,20 @@ void main()
 
 	passCount = (spotLightCount + threadCount - 1) / threadCount;
 	
-
 	for(uint i = 0; i < passCount; ++i)
 	{	
-		if (currentTileSpotLightIndex < MAX_LIGHTS_PER_TILE)
+		//if (currentTileSpotLightIndex < MAX_LIGHTS_PER_TILE)
     	{
 			uint lightIndex =  (i * threadCount) + gl_LocalInvocationIndex;
 
-			lightIndex = min(lightIndex, spotLightCount);
+			if(lightIndex > spotLightCount)
+				continue;
+
+			//lightIndex = min(lightIndex, spotLightCount);
 
 			vec4 lightPos = spotLights[lightIndex].posRad;
 			float rad = lightPos.w * 0.5;
-			lightPos.xyz = lightPos.xyz + (spotLights[lightIndex].dirInner.xyz * (rad));
+			lightPos.xyz = lightPos.xyz + (spotLights[lightIndex].dirInner.xyz * rad);
 			//lightPos = transpose(view) * vec4(lightPos.xyz,1.f);
 
 			bool inFrustum = sphereVsAABB(lightPos.xyz, rad, AABBFarCenter, AABBFarHalfSize) || sphereVsAABB(lightPos.xyz, rad, AABBNearCenter, AABBNearHalfSize);
@@ -326,7 +355,7 @@ void main()
 	
 	vec3 viewDir = viewRay;
 
-	vec3 oCol = albedoSpec.xyz * 0.000001;
+	oCol += albedoSpec.xyz * 0.005;
 
 	for(uint j = 0; j < currentTilePointLightIndex; ++j)
 	{
@@ -341,8 +370,8 @@ void main()
 		float diff = max(dot(normal, lightDir), 0.0);
 		vec3 diffuse  = lightCol.xyz * diff * albedoSpec.xyz;  
 		vec3 halfwayDir = normalize(lightDir + viewDir);
-		float spec = pow(max(dot(normal, halfwayDir), 0.0), 64); 
-		vec3 specular = lightCol.xyz * spec * albedoSpec.w;
+		float spec = pow(max(dot(normal, halfwayDir), 0.0),  64.f); 
+		vec3 specular = lightCol.xyz * spec * albedoSpec.a;
 
 		
 
@@ -353,12 +382,13 @@ void main()
 
 		float currentDepth = length(fragToLight);
 	    
-	    float bias = max(2.5f * (1.0 - dot(normal, lightDir)), 0.5f);
+	    //float bias = max(2.5f * (1.0 - dot(normal, lightDir)), 0.5f);
+	    float bias = max(2.f * (1.0 - dot(normal, lightDir)), 0.5f);
 
 	    float shadow = 0.f;
 
-		float samples = 4.0;
-		float offset = 0.1;
+		float samples = 2.0;
+		float offset = 0.05;
 		for(float x = -offset; x < offset; x += offset / (samples * 0.5))
 		{
 		    for(float y = -offset; y < offset; y += offset / (samples * 0.5))
@@ -380,6 +410,7 @@ void main()
 		diffuse *= attenuation;
 		specular *= attenuation;
 
+		//oCol += specular + diffuse;
 		oCol +=  (1.f - shadow) * (specular + diffuse);
 	}
 
@@ -401,13 +432,13 @@ void main()
 		float diff = max(dot(normal, lightDir), 0.0);
 		vec3 diffuse = colOuter.xyz  * diff * albedoSpec.xyz;  
 		vec3 halfwayDir = normalize(lightDir + viewDir);
-		float spec = pow(max(dot(normal, halfwayDir), 0.0), 64); 
-		vec3 specular = colOuter.xyz * spec * albedoSpec.w;
+		float spec = pow(max(dot(normal, halfwayDir), 0.0), 64.f); 
+		vec3 specular = colOuter.xyz * spec * albedoSpec.a;
 
 		float distance = length(posRad.xyz - worldPos);
 		float attenuation = 1.f / (1.f + linQuadTex.x * distance + linQuadTex.y * distance * distance);
 		diffuse *= attenuation * intensity;
-		specular *= attenuation * intensity * 0.03;
+		specular *= attenuation * intensity;
 
 		vec4 fragPosLightSpace = spotLights[i].pv * vec4(worldPos,1.f);
 
@@ -436,6 +467,7 @@ void main()
 		if(projCoords.z > 1.0)
         	shadow = 0.0;
 
+        //oCol += specular + diffuse;
 		oCol += (1.f - shadow)*(specular + diffuse);
 	}
 
@@ -448,21 +480,22 @@ void main()
 
 	//oCol += dirDiffuse + dirSpecular;
 
-	vec4 skyCol = vec4(0.f);
+	vec4 skyCol = vec4(0.0f);
 
 	if(imageLoad(gID, pixel).r == selectedID)
 	{
-		oCol += vec3(0.1f,0.f,0.1f);
+		oCol += vec3(0.f,0.005f,0.005f);
 	}
 
 	if(depth == 1.f)
 	{
 		skyCol = texture(skybox, -viewDir);
+		//skyCol = vec4(0.05,0.05,0.1,0.f);
 	}
 
 	oCol += skyCol.xyz;
 	
-	//oCol = col2;
+	//oCol = albedoSpec.xyz;
 
 	//imageStore(outColour, pixel, vec4(vec3(texture(skybox, -viewDir).r),1.f));
 	//imageStore(outColour, pixel, vec4(depth,1.f));
@@ -474,5 +507,8 @@ void main()
 
 	//imageStore(outColour, pixel, pcfDepth);
 
-	imageStore(outColour, pixel, vec4(tonemap(exposure * oCol),1.f));
+	//imageStore(outColour, pixel, vec4(vec3(albedoSpec.xyz * ssaoVal),1.f));
+	imageStore(outColour, pixel, vec4(finalTone(exposure * oCol),1.f));
+	//imageStore(outColour, pixel, vec4(exposure * oCol,1.f));
+	//imageStore(outColour, pixel, vec4(vec3(ssaoVal),1.f));
 }

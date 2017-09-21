@@ -107,16 +107,16 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Programming\libs\GLEW-1.13.0\include;C:\Programming\libs\GLM;C:\Programming\libs\SOIL\src;C:\Programming\libs\FreeType-2.6.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Programming\libs\GLEW-1.13.0\include;C:\Programming\libs\GLM;C:\Programming\libs\SOIL\src;C:\Programming\libs\FreeType-2.6.2\include;C:\Programming\Libs\Assimp\include\;C:\Programming\Libs\boost_1_64_0\;C:\Programming\Libs\GLI;C:\Programming\Libs\bullet3\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CallingConvention>Cdecl</CallingConvention>
       <StructMemberAlignment>Default</StructMemberAlignment>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>C:\Programming\libs\GLEW-1.13.0\lib\Release\Win32;C:\Programming\libs\SOIL\lib;C:\Programming\libs\FreeType-2.6.2\objs\vc2010\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;SOIL.lib;freetype262d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Programming\libs\GLEW-1.13.0\lib\Release\Win32;C:\Programming\libs\SOIL\lib;C:\Programming\libs\FreeType-2.6.2\objs\vc2010\Win32;C:\Programming\Libs\Assimp\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;SOIL.lib;assimp.lib;freetype262d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>
       </EntryPointSymbol>
       <OptimizeReferences>
@@ -142,16 +142,16 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Programming\libs\GLEW-1.13.0\include;C:\Programming\libs\GLM;C:\Programming\libs\SOIL\src;C:\Programming\libs\FreeType-2.6.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Programming\libs\GLEW-1.13.0\include;C:\Programming\libs\GLM;C:\Programming\libs\SOIL\src;C:\Programming\libs\FreeType-2.6.2\include;C:\Programming\Libs\Assimp\include\;C:\Programming\Libs\boost_1_64_0\;C:\Programming\Libs\GLI;C:\Programming\Libs\bullet3\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>C:\Programming\libs\GLEW-1.13.0\lib\Release\Win32;C:\Programming\libs\SOIL\lib;C:\Programming\libs\FreeType-2.6.2\objs\vc2010\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;SOIL.lib;kernel32.lib;freetype262.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Programming\libs\GLEW-1.13.0\lib\Release\Win32;C:\Programming\libs\SOIL\lib;C:\Programming\libs\FreeType-2.6.2\objs\vc2010\Win32;C:\Programming\Libs\Assimp\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;SOIL.lib;assimp.lib;kernel32.lib;freetype262.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
       <EntryPointSymbol>
       </EntryPointSymbol>
@@ -165,9 +165,9 @@
       </FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Programming\libs\GLEW-1.13.0\include;C:\Programming\libs\GLM;C:\Programming\libs\SOIL\src;C:\Programming\libs\FreeType-2.6.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Programming\libs\GLEW-1.13.0\include;C:\Programming\libs\GLM;C:\Programming\libs\SOIL\src;C:\Programming\libs\FreeType-2.6.2\include;C:\Programming\Libs\Assimp\include\;C:\Programming\Libs\boost_1_64_0\;C:\Programming\Libs\GLI;C:\Programming\Libs\bullet3\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <MinimalRebuild>false</MinimalRebuild>
@@ -177,8 +177,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>C:\Programming\libs\GLEW-1.13.0\lib\Release\Win32;C:\Programming\libs\SOIL\lib;C:\Programming\libs\FreeType-2.6.2\objs\vc2010\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;SOIL.lib;kernel32.lib;freetype262.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Programming\libs\GLEW-1.13.0\lib\Release\Win32;C:\Programming\libs\SOIL\lib;C:\Programming\libs\FreeType-2.6.2\objs\vc2010\Win32;C:\Programming\Libs\Assimp\lib\x86;C:\Programming\Libs\bullet3\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;SOIL.lib;assimp.lib;Bullet3Dynamics.lib;Bullet3Collision.lib;LinearMath.lib;Bullet3Common.lib;Bullet3Geometry.lib;kernel32.lib;freetype262.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
       <EntryPointSymbol>
       </EntryPointSymbol>
@@ -215,19 +215,25 @@
   <ItemGroup>
     <ClCompile Include="Asset.cpp" />
     <ClCompile Include="AssetManager.cpp" />
+    <ClCompile Include="Billboard.cpp" />
     <ClCompile Include="ConfigParser.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Event.cpp" />
     <ClCompile Include="Font.cpp" />
     <ClCompile Include="GPUMeshManager.cpp" />
+    <ClCompile Include="ImageData.cpp" />
     <ClCompile Include="Lights.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MeshUtility.cpp" />
+    <ClCompile Include="Model.cpp" />
     <ClCompile Include="Mouse.cpp" />
+    <ClCompile Include="PhysicsWorld.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="StringGenerics.cpp" />
+    <ClCompile Include="TextBillboard.cpp" />
+    <ClCompile Include="Texture.cpp" />
     <ClCompile Include="UIButton.cpp" />
     <ClCompile Include="UIElement.cpp" />
     <ClCompile Include="UILabel.cpp" />
@@ -240,73 +246,95 @@
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BilateralBlurShader.h" />
-    <ClInclude Include="Bounds3D.h" />
-    <ClInclude Include="Asset.h" />
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="ComputeShader.h" />
-    <ClInclude Include="ConfigParser.h" />
-    <ClInclude Include="Console.h" />
-    <ClInclude Include="DeferredTileCullComputeShader.h" />
-    <ClInclude Include="Engine.h" />
-    <ClInclude Include="Event.h" />
-    <ClInclude Include="Framebuffer.h" />
-    <ClInclude Include="FrustCullShader.h" />
-    <ClInclude Include="GBufferShader.h" />
-    <ClInclude Include="Font.h" />
-    <ClInclude Include="GBufferShaderMultiTex.h" />
-    <ClInclude Include="GPUMeshManager.h" />
-    <ClInclude Include="File.h" />
-    <ClInclude Include="MeshUtility.h" />
-    <ClInclude Include="ModelInfo.h" />
-    <ClInclude Include="Keyboard.h" />
-    <ClInclude Include="SpotShadowPassShader.h" />
-    <ClInclude Include="PrepMultiTexShader.h" />
-    <ClInclude Include="ShaderStore.h" />
-    <ClInclude Include="Logger.h" />
-    <ClInclude Include="Mouse.h" />
-    <ClInclude Include="Lights.h" />
-    <ClInclude Include="List.h" />
-    <ClInclude Include="Rect.h" />
-    <ClInclude Include="AssetManager.h" />
-    <ClInclude Include="Sampler.h" />
-    <ClInclude Include="SAOShader.h" />
-    <ClInclude Include="SceneGraph.h" />
-    <ClInclude Include="ShaderPreprocessor.h" />
-    <ClInclude Include="PointShadowPassShader.h" />
-    <ClInclude Include="Shape2DShader.h" />
-    <ClInclude Include="BufferObjects.h" />
-    <ClInclude Include="StringGenerics.h" />
-    <ClInclude Include="Strings.h" />
-    <ClInclude Include="Text.h" />
-    <ClInclude Include="TextShader.h" />
-    <ClInclude Include="Texture.h" />
-    <ClInclude Include="UIAllElements.h" />
-    <ClInclude Include="UIButton.h" />
-    <ClInclude Include="UIConsole.h" />
-    <ClInclude Include="UIElement.h" />
-    <ClInclude Include="UILabel.h" />
-    <ClInclude Include="UIRectangleShape.h" />
-    <ClInclude Include="UISlider.h" />
-    <ClInclude Include="UISwitchButton.h" />
-    <ClInclude Include="UIUtil.h" />
-    <ClInclude Include="UIVertexStore.h" />
-    <ClInclude Include="UIWindow.h" />
-    <ClInclude Include="UserInputManager.h" />
-    <ClInclude Include="Util.h" />
-    <ClInclude Include="Include.h" />
-    <ClInclude Include="Mesh.h" />
-    <ClInclude Include="QPC.h" />
-    <ClInclude Include="Renderer.h" />
-    <ClInclude Include="Shader.h" />
-    <ClInclude Include="Time.h" />
-    <ClInclude Include="Transform.h" />
-    <ClInclude Include="Types.h" />
-    <ClInclude Include="Window.h" />
-    <ClInclude Include="World.h" />
+    <ClInclude Include="Asset.hpp" />
+    <ClInclude Include="AssetManager.hpp" />
+    <ClInclude Include="BilateralBlurShader.hpp" />
+    <ClInclude Include="Billboard.hpp" />
+    <ClInclude Include="Bounds3D.hpp" />
+    <ClInclude Include="BufferObjects.hpp" />
+    <ClInclude Include="Camera.hpp" />
+    <ClInclude Include="ConfigParser.hpp" />
+    <ClInclude Include="Console.hpp" />
+    <ClInclude Include="DeferredTileCullComputeShader.hpp" />
+    <ClInclude Include="Engine.hpp" />
+    <ClInclude Include="Event.hpp" />
+    <ClInclude Include="File.hpp" />
+    <ClInclude Include="Font.hpp" />
+    <ClInclude Include="Framebuffer.hpp" />
+    <ClInclude Include="FrustCullShader.hpp" />
+    <ClInclude Include="GBufferShader.hpp" />
+    <ClInclude Include="GBufferShaderBase.hpp" />
+    <ClInclude Include="GBufferShaderMultiTex.hpp" />
+    <ClInclude Include="GBufferShaderNonBindlessRegular.hpp" />
+    <ClInclude Include="GPUMeshManager.hpp" />
+    <ClInclude Include="GPUTextureManager.hpp" />
+    <ClInclude Include="ImageData.hpp" />
+    <ClInclude Include="Include.hpp" />
+    <ClInclude Include="Keyboard.hpp" />
+    <ClInclude Include="Lights.hpp" />
+    <ClInclude Include="List.hpp" />
+    <ClInclude Include="Logger.hpp" />
+    <ClInclude Include="MathIncludes.hpp" />
+    <ClInclude Include="Mesh.hpp" />
+    <ClInclude Include="MeshUtility.hpp" />
+    <ClInclude Include="ModelInfo.hpp" />
+    <ClInclude Include="Mouse.hpp" />
+    <ClInclude Include="Model.hpp" />
+    <ClInclude Include="PhysicsObject.hpp" />
+    <ClInclude Include="PhysicsWorld.hpp" />
+    <ClInclude Include="PointShadowPassShader.hpp" />
+    <ClInclude Include="PrepMultiTexShader.hpp" />
+    <ClInclude Include="QPC.hpp" />
+    <ClInclude Include="Rect.hpp" />
+    <ClInclude Include="Renderer.hpp" />
+    <ClInclude Include="Sampler.hpp" />
+    <ClInclude Include="SAOShader.hpp" />
+    <ClInclude Include="SceneGraph.hpp" />
+    <ClInclude Include="Shader.hpp" />
+    <ClInclude Include="ShaderStore.hpp" />
+    <ClInclude Include="Shape2DShader.hpp" />
+    <ClInclude Include="Shape3DShader.hpp" />
+    <ClInclude Include="SpotShadowPassShader.hpp" />
+    <ClInclude Include="StringGenerics.hpp" />
+    <ClInclude Include="Strings.hpp" />
+    <ClInclude Include="Text.hpp" />
+    <ClInclude Include="Text3D.hpp" />
+    <ClInclude Include="TextBillboard.hpp" />
+    <ClInclude Include="TextShader.hpp" />
+    <ClInclude Include="Texture.hpp" />
+    <ClInclude Include="Time.hpp" />
+    <ClInclude Include="Transform.hpp" />
+    <ClInclude Include="Tweaks.hpp" />
+    <ClInclude Include="Types.hpp" />
+    <ClInclude Include="UIAllElements.hpp" />
+    <ClInclude Include="UIButton.hpp" />
+    <ClInclude Include="UIConsole.hpp" />
+    <ClInclude Include="UIElement.hpp" />
+    <ClInclude Include="UILabel.hpp" />
+    <ClInclude Include="UIRectangleShape.hpp" />
+    <ClInclude Include="UISlider.hpp" />
+    <ClInclude Include="UISwitchButton.hpp" />
+    <ClInclude Include="UIUtil.hpp" />
+    <ClInclude Include="UIVertexStore.hpp" />
+    <ClInclude Include="UIWindow.hpp" />
+    <ClInclude Include="UserInputManager.hpp" />
+    <ClInclude Include="Util.hpp" />
+    <ClInclude Include="Window.hpp" />
+    <ClInclude Include="World.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="3D.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Libs\bullet3\build\src\BulletCollision\BulletCollision.vcxproj">
+      <Project>{32a19b7f-bed7-3e93-b908-730dc643ed16}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Libs\bullet3\build\src\BulletDynamics\BulletDynamics.vcxproj">
+      <Project>{a99aede0-be38-3111-8515-7df7665824bd}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Libs\bullet3\build\src\LinearMath\LinearMath.vcxproj">
+      <Project>{8b3fc759-19fa-385c-a460-a4271d3a12d3}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

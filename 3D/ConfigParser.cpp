@@ -1,5 +1,5 @@
 #pragma once
-#include "ConfigParser.h"
+#include "ConfigParser.hpp"
 
 void ConfigParser::clear()
 {

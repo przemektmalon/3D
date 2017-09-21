@@ -1,5 +1,5 @@
 #pragma once
-#include "Strings.h"
+#include "Strings.hpp"
 
 #define min(a,b) a > b ? b : a
 #define max(a,b) a > b ? a : b

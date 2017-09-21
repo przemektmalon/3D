@@ -80,6 +80,9 @@ artifacts/
 *.mtl
 *.obj
 *.ttf
+*.dae
+*.blend
+*.blend1
 
 # Chutzpah Test files
 _Chutzpah*

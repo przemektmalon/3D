@@ -4,7 +4,6 @@
 //#extension GL_ARB_shader_draw_parameters : require
 
 layout (location = 0) out f16vec2 gNormal;
-//layout (location = 0) out vec3 gNormal;
 layout (location = 1) out vec4 gAlbedoSpec;
 layout (location = 2) out uint gID;
 
@@ -14,28 +13,12 @@ in vec3 ViewVec;
 in vec3 WorldPos;
 flat in uint DrawID;
 
-layout(binding = 0) uniform sampler2D diffuse;
-layout(binding = 1) uniform sampler2D specular;
-layout(binding = 2) uniform sampler2D normal;
-
-layout(bindless_sampler) uniform sampler2D textureID;
-
 layout(std430, binding=3) buffer TextureHandleBuffer
 {
-    uvec4 texHandle[];
+    uvec2 texHandle[];
 };
-
-layout(std140, binding=6) buffer InstanceIDBuffer
-{
-    uint id[];
-};
-
-//layout(binding = 3) uniform sampler2D bump;
-//uniform layout(location = 4) vec3 camPos;
-//uniform uint id;
 
 #define FAR 1000000.f
-#define C 1.f
 
 in float logz;
 
@@ -66,27 +49,10 @@ mat3 cotangent_frame( vec3 N, vec3 p, vec2 uv )
 
 vec3 perturb_normal( vec3 N, vec3 V, vec2 texcoord)
 {
-    // assume N, the interpolated vertex normal and 
-    // V, the view vector (vertex to eye)
-    vec3 map = texture2D(sampler2D(texHandle[DrawID].zw), texcoord).xyz * 2.f - 1.f;
-
-    //map = map * 255.f/127.f - 128.f/127.f;
-
-    //map.y = -map.y;
-
-
-
+    vec3 map = texture2D(sampler2D(texHandle[3*DrawID+1]), texcoord).xyz * 2.f - 1.f;
     mat3 TBN = cotangent_frame( N, -V, texcoord );
     return normalize( TBN * map );
-    //return N;
 }
-
-/*vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
-{ 
-    float height =  texture(bump, texCoords).r;
-    vec2 p = viewDir.xy / viewDir.z * (height * 0.0001f);
-    return texCoords - p;
-}*/
 
 void main()
 {
@@ -100,38 +66,12 @@ void main()
 
     vec3 mappedNormal = perturb_normal(normalize(Normal), normalize(viewVec), texCoord);
 
-    //mappedNormal = texture(normal, TexCoord).xyz;
-
-    //mappedNormal = mappedNormal * 255.f/127.f - 128.f/127.f;
-
-    //mappedNormal.y = -mappedNormal.y;
-
-    //gNormal = normalize(Normal);
-    //gNormal = vec3(1.f,0.f,1.f)
-    
-
     gNormal = encode(normalize(mappedNormal));
     
 
-    //gNormal = f16vec2(vec2(0.2f,0.5f));
-    //gAlbedoSpec.rgb = texture(diffuse, texCoord).rgb;
-    
-    gAlbedoSpec.rgb = texture(sampler2D(texHandle[DrawID].xy), TexCoord).rgb;
-    //gAlbedoSpec.rgb = vec3(1.f,0.f,1.f);
+    gAlbedoSpec.rgb = texture(sampler2D(texHandle[3*DrawID]), TexCoord).rgb;
 
-    //gAlbedoSpec.rgb = normalize(viewVec);
-    //gAlbedoSpec.rgb = vec3(texCoord,1.f);
-    
+    gAlbedoSpec.a = texture(sampler2D(texHandle[3*DrawID+2]), texCoord).r;
 
-    gAlbedoSpec.a = texture(sampler2D(texHandle[DrawID].xy), texCoord).r;
-    
-
-    //gAlbedoSpec.a = texture(specular, texCoord).r;
-    //gAlbedoSpec.a = 1.f;
-    
-
-    gID = id[DrawID];
-
-
-    //gl_FragColor = vec4(vec3(WorldPos),1.f);
+    gID = DrawID;
 }

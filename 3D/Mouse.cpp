@@ -1,5 +1,5 @@
-#include "Mouse.h"
-#include "Window.h"
+#include "Mouse.hpp"
+#include "Window.hpp"
 
 glm::ivec2 MouseState::getScreenPosition()
 {

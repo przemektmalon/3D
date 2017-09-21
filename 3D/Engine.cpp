@@ -1,36 +1,41 @@
 #pragma once
-#include "Engine.h"
+#include "Engine.hpp"
 //#include "SDL.h"
-#include "Include.h"
-#include "Shader.h"
-#include "Mesh.h"
-#include "Time.h"
-#include "QPC.h"
+#include "Include.hpp"
+#include "Shader.hpp"
+#include "Mesh.hpp"
+#include "Time.hpp"
+#include "QPC.hpp"
 #include "SOIL.h"
-#include "Camera.h"
-#include "Renderer.h"
+#include "Camera.hpp"
+#include "Renderer.hpp"
 #include <chrono>
-#include "Font.h"
-#include "Text.h"
+#include "Font.hpp"
+#include "Text.hpp"
 #include <windows.h>
 #include <strsafe.h>
 #include <functional>
-#include "AssetManager.h"
+#include "AssetManager.hpp"
+#include "Billboard.hpp"
+
+#include "glm\gtc\quaternion.hpp"
 
 #define MODEL_PATH std::string("res/model/")
 
-#include "World.h"
+#include "World.hpp"
 
-#include "StringGenerics.h"
+#include "StringGenerics.hpp"
 
-#include "UILabel.h"
-#include "UIButton.h"
+#include "UILabel.hpp"
+#include "UIButton.hpp"
 
-#include "ModelInfo.h"
+#include "ModelInfo.hpp"
 
-#include "MeshUtility.h"
+#include "MeshUtility.hpp"
 
-#include "Console.h"
+#include "Console.hpp"
+
+#include "Tweaks.hpp"
 
 
 FT_Library Engine::ftLib;
@@ -61,6 +66,11 @@ bool Engine::consoleOpen;
 Log Engine::log;
 Console Engine::console;
 MeshUtility Engine::mu;
+Physics Engine::p;
+PhysicsWorld Engine::physics;
+
+float Engine::moveSpeed;
+float Engine::radDiff = 1.f;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -146,105 +156,14 @@ void Engine::select(glm::ivec2 mPos)
 		//selectedID = -1;
 	//}
 
-	//Engine::r->tileCullShader->use();
-	//Engine::r->tileCullShader->setUniform(String64("selectedID"),&selectedID);
-	//Engine::r->tileCullShader->sendUniforms();
-	//Engine::r->tileCullShader->stop();
+	Engine::r->tileCullShader.use();
+	Engine::r->tileCullShader.setSelectedID(selectedID);
+	Engine::r->tileCullShader.sendSelectedID();
+	Engine::r->tileCullShader.stop();
 
 	delete[] idTex;
 }
 
-void savePosition()
-{
-	std::ofstream fstr("pos.dat");
-	//fstr.open("res/dat/position.dat");
-	if (fstr.is_open())
-	{
-		fstr.write((char*)&Engine::cam.targetPos, sizeof(glm::fvec2));
-		fstr.close();
-	}
-}
-
-void loadPosition()
-{
-	std::ifstream fstr("pos.dat");
-	//fstr.open("res/dat/position.dat");
-	fstr.read((char*)&Engine::cam.targetPos, sizeof(glm::fvec2));
-	fstr.close();
-}
-
-void moveObjXP()
-{
-	auto i = Engine::world->getMeshInstance(Engine::selectedID);
-	if (!i)
-		return;
-	//i->sgNode->transform.translate(glm::fvec3(0,0,Engine::dt.getSeconds() * 500));
-	i->sgNode->transform.rotate(glm::fvec3(Engine::dt.getSeconds() * 4.5, 0, 0));
-	//i->sgNode->transform.setTranslation(glm::fvec3(std::cos(i->sgNode->transform.getRoll()) * 5, std::sin(i->sgNode->transform.getRoll()) * 5, 0));
-	i->sgNode->updateAll();
-	Engine::world->updateGLBuffers();
-}
-
-void moveObjXN()
-{
-	auto i = Engine::world->getMeshInstance(Engine::selectedID);
-	if (!i)
-		return;
-	//i->sgNode->transform.translate(glm::fvec3(0,0,Engine::dt.getSeconds() * -500));
-	i->sgNode->transform.rotate(glm::fvec3(-Engine::dt.getSeconds() * 4.5, 0, 0));
-	//i->sgNode->transform.setTranslation(glm::fvec3(std::cos(i->sgNode->transform.getRoll()) * 5, std::sin(i->sgNode->transform.getRoll()) * 5, 0));
-	i->sgNode->updateAll();
-	Engine::world->updateGLBuffers();
-}
-
-
-void moveObjZP()
-{
-	auto i = Engine::world->getMeshInstance(Engine::selectedID);
-	if (!i)
-		return;
-	//i->sgNode->transform.translate(glm::fvec3(0,0,Engine::dt.getSeconds() * 500));
-	i->sgNode->transform.rotate(glm::fvec3(0, Engine::dt.getSeconds() * 4.5, 0));
-	//i->sgNode->transform.setTranslation(glm::fvec3(std::cos(i->sgNode->transform.getRoll()) * 5, std::sin(i->sgNode->transform.getRoll()) * 5, 0));
-	i->sgNode->updateAll();
-	Engine::world->updateGLBuffers();
-}
-
-void moveObjZN()
-{
-	auto i = Engine::world->getMeshInstance(Engine::selectedID);
-	if (!i)
-		return;
-	//i->sgNode->transform.translate(glm::fvec3(0,0,Engine::dt.getSeconds() * 500));
-	i->sgNode->transform.rotate(glm::fvec3(0, Engine::dt.getSeconds() * -4.5, 0));
-	//i->sgNode->transform.setTranslation(glm::fvec3(std::cos(i->sgNode->transform.getRoll()) * 5, std::sin(i->sgNode->transform.getRoll()) * 5, 0));
-	i->sgNode->updateAll();
-	Engine::world->updateGLBuffers();
-}
-
-void moveObjYP()
-{
-	auto i = Engine::world->getMeshInstance(Engine::selectedID);
-	if (!i)
-		return;
-	//i->sgNode->transform.translate(glm::fvec3(0,0,Engine::dt.getSeconds() * 500));
-	i->sgNode->transform.rotate(glm::fvec3(0,0,Engine::dt.getSeconds() * 4.5));
-	//i->sgNode->transform.setTranslation(glm::fvec3(std::cos(i->sgNode->transform.getRoll()) * 5, std::sin(i->sgNode->transform.getRoll()) * 5, 0));
-	i->sgNode->updateAll();
-	Engine::world->updateGLBuffers();
-}
-
-void moveObjYN()
-{
-	auto i = Engine::world->getMeshInstance(Engine::selectedID);
-	if (!i)
-		return;
-	//i->sgNode->transform.translate(glm::fvec3(0,0,Engine::dt.getSeconds() * 500));
-	i->sgNode->transform.rotate(glm::fvec3(0,0,Engine::dt.getSeconds() * -4.5));
-	//i->sgNode->transform.setTranslation(glm::fvec3(std::cos(i->sgNode->transform.getRoll()) * 5, std::sin(i->sgNode->transform.getRoll()) * 5, 0));
-	i->sgNode->updateAll();
-	Engine::world->updateGLBuffers();
-}
 
 void printlog()
 {
@@ -272,7 +191,8 @@ void mouseUp()
 void hotLoadShader()
 {
 	//Engine::r->shaderStore.getShader(String32("gBufferPass"))->reload();
-	Engine::r->tileCullShader.reload();
+	//Engine::r->tileCullShader.reload();
+	Engine::r->ssaoShader.reload();
 }
 
 void killFocus()
@@ -283,6 +203,169 @@ void killFocus()
 void toggleConsole()
 {
 	Engine::console.toggle();
+}
+
+btVector3 getRayTo(int x, int y)
+{
+
+	//x -= Engine::window.getSizeX() / 2;
+	//y -= Engine::window.getSizeY() / 2;
+
+	float ndcx = (2.0f * x) / float(Engine::window.getSizeX()) - 1.0f;
+	float ndcy = 1.0f - (2.0f * y) / float(Engine::window.getSizeY());
+	float ndcz = 1.0f;
+	//vec3 ray_nds = vec3(x, y, z);
+
+	glm::fvec4 ray_clip(ndcx, ndcy, -1.f, 1.f);
+
+	glm::fvec4 ray_eye;
+
+	ray_eye = Engine::r->activeCam->inverseProj * ray_clip;
+	ray_eye = glm::vec4(ray_eye.x, ray_eye.y, -1.f, 0.0);
+
+	glm::fvec4 w = (glm::inverse(Engine::r->activeCam->view) * ray_eye);
+	glm::fvec3 ray_wor(w.x, w.y, w.z);
+
+	ray_wor = glm::normalize(ray_wor) * 10000.f;
+
+	//std::cout << "RAY_WOR: " << ray_wor.x << " " << ray_wor.y << " " << ray_wor.z << std::endl;
+
+	return btVector3(ray_wor.x, ray_wor.y, ray_wor.z);
+
+	/*float top = 1.f;
+	float bottom = -1.f;
+	float nearPlane = 1.f;
+	float tanFov = (top - bottom)*0.5f / nearPlane;
+	float fov = btScalar(2.0) * btAtan(tanFov);
+
+	glm::fvec3 c = Engine::r->activeCam->pos;
+	glm::fvec3 d = Engine::r->activeCam->getDirectionVector();
+
+	btVector3 camPos(c.x, c.y, c.z), camTarget(c.x + d.x, c.y + d.y, c.z + d.z);
+
+	btVector3	rayFrom = camPos;
+	btVector3 rayForward = (camTarget - camPos);
+	rayForward.normalize();
+	float farPlane = 10000000.f;
+	rayForward *= farPlane;
+
+	btVector3 rightOffset;
+	btVector3 cameraUp = btVector3(0, 0, 0);
+	cameraUp[1] = 1;
+
+	btVector3 vertical = cameraUp;
+
+	btVector3 hor;
+	hor = rayForward.cross(vertical);
+	hor.safeNormalize();
+	vertical = hor.cross(rayForward);
+	vertical.safeNormalize();
+
+	float tanfov = tanf(0.5f*fov);
+
+
+	hor *= 2.f * farPlane * tanfov;
+	vertical *= 2.f * farPlane * tanfov;
+
+	btScalar aspect;
+	float width = float(Engine::r->config.renderResolution.x);
+	float height = float(Engine::r->config.renderResolution.y);
+
+	aspect = width / height;
+
+	hor *= aspect;
+
+
+	btVector3 rayToCenter = rayFrom + rayForward;
+	btVector3 dHor = hor * 1.f / width;
+	btVector3 dVert = vertical * 1.f / height;
+
+
+	btVector3 rayTo = rayToCenter - 0.5f * hor + 0.5f * vertical;
+	rayTo += btScalar(x) * dHor;
+	rayTo -= btScalar(y) * dVert;
+
+	std::cout << "RAY_WOR: " << ray_wor.x << " " << ray_wor.y << " " << ray_wor.z << std::endl;
+	std::cout << "RayTo  : " << rayTo.x() << " " << rayTo.y() << " " << rayTo.z() << std::endl;
+
+	return rayTo;*/
+}
+
+bool pickBody(btVector3& rayFromWorld, btVector3& rayToWorld)
+{
+	if (Engine::physics.dynamicsWorld == 0)
+		return false;
+
+	static int i = 0;
+
+	rayToWorld = rayFromWorld + (rayToWorld*10000.f);
+
+	btCollisionWorld::ClosestRayResultCallback rayCallback(rayFromWorld, rayToWorld);
+	Engine::physics.dynamicsWorld->rayTest(rayFromWorld, rayToWorld, rayCallback);
+	if (rayCallback.hasHit()) {
+		btVector3 pickPos = rayCallback.m_hitPointWorld;
+		//btRigidBody* body = (btRigidBody*)btRigidBody::upcast(rayCallback.m_collisionObject);
+		btRigidBody* body = (btRigidBody*)btRigidBody::upcast(rayCallback.m_collisionObject);
+		if (body) {
+			if (!(body->isStaticObject() || body->isKinematicObject())) 
+			{
+				Engine::p.pickedBody = body;
+				Engine::p.savedState = Engine::p.pickedBody->getActivationState();
+				Engine::p.pickedBody->setActivationState(DISABLE_DEACTIVATION);
+
+				//std::cout << "NEW CONSTRAINT " << ++i << std::endl;
+
+				btVector3 localPivot = body->getCenterOfMassTransform().inverse() * pickPos;
+				Engine::p.p2p = new btPoint2PointConstraint(*body, localPivot);
+				Engine::physics.dynamicsWorld->addConstraint(Engine::p.p2p, true);
+				Engine::p.pickedConstraint = Engine::p.p2p;
+				btScalar mousePickClamping = 3000.f;
+				Engine::p.p2p->m_setting.m_impulseClamp = mousePickClamping;
+				Engine::p.p2p->m_setting.m_tau = 0.01f;
+			}
+		}
+		Engine::p.oldPickingPos = rayToWorld;
+		Engine::p.hitPos = pickPos;
+		Engine::p.oldPickingDist = (pickPos - rayFromWorld).length();
+	}
+}
+
+void removePickingConstraint() {
+	if (Engine::p.pickedConstraint) {
+		Engine::p.pickedBody->forceActivationState(Engine::p.savedState);
+		Engine::p.pickedBody->activate();
+		Engine::physics.dynamicsWorld->removeConstraint(Engine::p.pickedConstraint);
+		delete Engine::p.pickedConstraint;
+		Engine::p.pickedConstraint = 0;
+		Engine::p.pickedBody = 0;
+	}
+}
+
+bool movePickedBody(const btVector3& rayFromWorld, const btVector3& rayToWorld) {
+	if (Engine::p.pickedBody  && Engine::p.pickedConstraint) {
+		btPoint2PointConstraint* pickCon = static_cast<btPoint2PointConstraint*>(Engine::p.pickedConstraint);
+		if (pickCon) {
+			btVector3 newPivotB;
+			btVector3 dir = rayToWorld - rayFromWorld;
+			dir.normalize();
+			dir *= Engine::p.oldPickingDist;
+			newPivotB = rayFromWorld + dir;
+			pickCon->setPivotB(newPivotB);
+			return true;
+		}
+	}
+	return false;
+}
+
+bool mouseMoveCallback(float x, float y)
+{
+	btVector3 rayTo = getRayTo(int(x), int(y));
+	glm::fvec3 p = Engine::r->activeCam->pos;
+	btVector3 rayFrom(p.x, p.y, p.z);
+	
+	movePickedBody(rayFrom, rayTo);
+
+	return false;
 }
 
 void Engine::mainLoop()
@@ -301,19 +384,10 @@ void Engine::mainLoop()
 	uim.mapToKeyDown('L', screenshot);
 	uim.mapToKeyDown('O', toggleWireFrame);
 	uim.mapToKeyDown('I', toggleTextBounds);
-	uim.mapToKeyDown(VK_OEM_COMMA, loadPosition);
-	uim.mapToKeyDown(VK_OEM_PERIOD, savePosition);
 
 	uim.mapToKeyDown('M', hotLoadShader);
 
 	uim.mapToKeyDown(VK_OEM_3, toggleConsole);
-
-	uim.mapToKeyHold(VK_NUMPAD2, moveObjZP);
-	uim.mapToKeyHold(VK_NUMPAD8, moveObjZN);
-	uim.mapToKeyHold(VK_NUMPAD6, moveObjXP);
-	uim.mapToKeyHold(VK_NUMPAD4, moveObjXN);
-	uim.mapToKeyHold(VK_NUMPAD9, moveObjYP);
-	uim.mapToKeyHold(VK_NUMPAD7, moveObjYN);
 
 	uim.mapToKeyDown('K', printlog);
 	uim.mapToKeyDown('Q', killFocus);
@@ -323,6 +397,8 @@ void Engine::mainLoop()
 
 	r = new MasterRenderer();
 
+	physics.create();
+
 	rand.seed(rand.default_seed);
 
 	startTime = std::chrono::system_clock::now().time_since_epoch().count();
@@ -330,19 +406,43 @@ void Engine::mainLoop()
 	FT_Init_FreeType(&ftLib);
 
 	r->initialiseShaders();
+	Billboard::initGLVAO();
 
-	assets.prepareTexture("res/tex/null.png", "null")->load();
+	//Texture2D* nullTex = assets.prepareTexture("res/tex/null.png", "null");
+	//nullTex->load();
+	//nullTex->makeGLAsset();
+	
 
 	assets.loader.loadAssets(String128("res/resources.txt"));
+	assets.pushTexturesToGPU();
 
-	auto me = mu.newObj();
-	mu.loadOBJ(String128("res/model/shed.obj"), me);
-	mu.setObjName(me, String32("shed"));
+
+	/*Model m2;
+	m2.prepare(String128("res/model/NEWBOX.obj"), String32("newbox"));
+	m2.load();*/
+
+	assets.meshManager.init();
+
+	auto m = assets.prepareModel(String128("res/model/COLBOX.dae"), String32("colbox"));
+	m->load();
+	assets.meshManager.pushModelToBatch(*m);
+
+	auto m2 = assets.prepareModel(String128("res/model/ground2.obj"), String32("ground"));
+	m2->load();
+	assets.meshManager.pushModelToBatch(*m2);
+
+	auto m3 = assets.prepareModel(String128("res/model/mon.obj"), String32("mon"));
+	m3->load();
+	assets.meshManager.pushModelToBatch(*m3);
+
+	/*auto me = mu.newObj();
+	mu.loadOBJ(String128("res/model/stones.obj"), me);
+	mu.setObjName(me, String32("stones"));
 	auto binMe = mu.newMesh();
-	mu.setMeshName(binMe, String32("shed"));
+	mu.setMeshName(binMe, String32("stones"));
 	mu.binFromObj(me, binMe);
 	mu.exportBin(binMe);
-	mu.clearStorage();
+	mu.clearStorage();*/
 
 	/*auto si = mu.objToBin(String<128>("res/model/oo.obj"), String<128>("res/model/oo.bin"), String32("oo"));
 	mu.nullAllMeshTextures(si, assets.get2DTex("null"));
@@ -380,7 +480,9 @@ void Engine::mainLoop()
 
 	
 
-	//auto c = (Mesh*)assets.prepareAsset(Asset::Mesh, "res/model/oo.bin", "paints");
+	/*auto c = (Mesh*)assets.prepareAsset(Asset::Mesh, "res/model/stones.bin", "stones");
+	c->load();
+	assets.meshManager.pushMeshToBatch(*c);*/
 
 	//a->load();
 	//assets.meshManager.pushMeshToBatch(*a);
@@ -392,8 +494,10 @@ void Engine::mainLoop()
 	//d->load();
 	//assets.meshManager.pushMeshToBatch(*d);
 
-	assets.meshManager.pushMeshToBatch(*assets.getMesh(String32("shed")));
-	assets.meshManager.pushMeshToBatch(*assets.getMesh(String32("square")));
+	/*
+	assets.meshManager.pushMeshToBatch(*assets.getMesh(String32("square")));*/
+
+	//assets.meshManager.pushMeshToBatch(*assets.getMesh(String32("shed")));
 
 	//ooMesh->load();
 	//assets.meshManager.pushMeshToBatch(*ooMesh);
@@ -429,15 +533,112 @@ void Engine::mainLoop()
 	//i3->sgNode->transform.translate(glm::fvec3(0, 0, 0)).scale(4.f);
 	//i3->sgNode->transform.updateMatrix();
 
-	auto e = assets.getMesh(String32("square"));
+	/*auto e = assets.getMesh(String32("shed"));
+	auto i5 = world->addMeshInstance(*e, world->getWorldRootNode());
+	i5->sgNode->transform.scale(4.f);
+	i5->sgNode->transform.updateMatrix();*/
+
+	/*e = assets.getMesh(String32("square"));
 	auto i4 = world->addMeshInstance(*e, world->getWorldRootNode());
 	i4->sgNode->transform.translate(glm::fvec3(0, 0, 0)).scale(50.f);
 	i4->sgNode->transform.updateMatrix();
 
-	e = assets.getMesh(String32("shed"));
-	auto i5 = world->addMeshInstance(*e, world->getWorldRootNode());
-	i5->sgNode->transform.scale(4.f);
-	i5->sgNode->transform.updateMatrix();
+	
+
+	e = assets.getMesh(String32("stones"));
+	auto i6 = world->addMeshInstance(*e, world->getWorldRootNode());
+	i6->sgNode->transform.scale(4.f);
+	i6->sgNode->transform.updateMatrix();*/
+
+	auto c1 = new btStaticPlaneShape(glm::fvec3(0.f, 1.f, 0.f), 0.f);
+	auto c2 = new btStaticPlaneShape(btVector3(1.f, 0.f, 0.f), -50.f);
+	auto c3 = new btStaticPlaneShape(btVector3(-1.f, 0.f, 0.f), -50.f);
+	auto c4 = new btStaticPlaneShape(btVector3(0.f, 0.f, 1.f), -50.f);
+	auto c5 = new btStaticPlaneShape(btVector3(0.f, 0.f, -1.f), -50.f);
+	auto c6 = new btStaticPlaneShape(btVector3(0.f, -1.f, 0.f), -100.f);
+
+	auto trans = btTransform(btMatrix3x3(1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f));
+
+	auto s = new btCompoundShape();
+	s->addChildShape(trans, c1);
+	s->addChildShape(trans, c2);
+	s->addChildShape(trans, c3);
+	s->addChildShape(trans, c4);
+	s->addChildShape(trans, c5);
+	s->addChildShape(trans, c6);
+
+
+	auto worldRoot = world->getWorldRootNode();
+
+	auto ee = assets.getModel(String32("ground"));
+	auto i8 = world->addModelInstance(*ee, worldRoot);
+	i8->sgNode->transform.scale(1.f);
+	auto col = new btStaticPlaneShape(glm::fvec3(0.f, 1.f, 0.f), 0.f);
+	i8->makePhysicsObject(s, 0.f);
+	
+	i8->physicsObject->rigidBody->setRestitution(0.95f);
+
+	/*auto i2 = world->addModelInstance(*ee, worldRoot);
+	rot = glm::angleAxis<float>(-1.f, glm::fvec3(0, 0, 1));
+	dir = rot * glm::fvec3(0, 1, 0);
+	i2->sgNode->transform.setQuat(rot);
+	i2->sgNode->transform.translate(glm::fvec3(-20, 0, 0));
+	col = new btStaticPlaneShape(dir, 20.f);
+	i2->makePhysicsObject(col, 0.f);
+
+	auto i3 = world->addModelInstance(*ee, worldRoot);
+	rot = glm::angleAxis<float>(1.f, glm::fvec3(1, 0, 0));
+	dir = rot * glm::fvec3(0, 1, 0);
+	i3->sgNode->transform.setQuat(rot);
+	i3->sgNode->transform.translate(glm::fvec3(0, 0, -20));
+	col = new btStaticPlaneShape(dir, 20.f);
+	i3->makePhysicsObject(col, 0.f);
+
+	auto i4 = world->addModelInstance(*ee, worldRoot);
+	rot = glm::angleAxis<float>(-1.f, glm::fvec3(1, 0, 0));
+	dir = rot * glm::fvec3(0, 1, 0);
+	i4->sgNode->transform.setQuat(rot);
+	i4->sgNode->transform.translate(glm::fvec3(0, 0, 20));
+	col = new btStaticPlaneShape(dir, -20.f);
+	i4->makePhysicsObject(col, 0.f);*/
+
+	ee = assets.getModel(String32("colbox"));
+	auto i7 = world->addModelInstance(*ee, worldRoot);
+	i7->sgNode->transform.scale(8.f);
+	i7->sgNode->transform.translate(glm::fvec3(0, 50, 0));
+	auto boxcol = new btBoxShape(glm::fvec3(8, 8, 8));
+	i7->makePhysicsObject(boxcol, 42.f);
+	
+	i7->physicsObject->rigidBody->setRestitution(0.4);
+
+	auto i = world->addModelInstance(*ee, worldRoot);
+	i->sgNode->transform.scale(glm::fvec3(4, 6,3));
+	i->sgNode->transform.translate(glm::fvec3(10, 50, 0));
+	boxcol = new btBoxShape(glm::fvec3(4, 6, 3));
+	i->makePhysicsObject(boxcol, 30.f);
+
+	i->physicsObject->rigidBody->setRestitution(0.4);
+
+	ee = assets.getModel(String32("mon"));
+
+	for (int i = 0; i < 4; ++i)
+	{
+		auto i2 = world->addModelInstance(*ee, worldRoot);
+		i2->sgNode->transform.scale(10.f);
+		i2->sgNode->transform.translate(glm::fvec3(9 * i, 70, 0));
+		auto scol = new btSphereShape(10);
+
+		i2->makePhysicsObject(scol, 50.f);
+		i2->physicsObject->rigidBody->setRestitution(0.95);
+	}
+
+	//auto i9 = world->addModelInstance(*ee, world->getWorldRootNode());
+
+	/*e = assets.getMesh(String32("buddha"));
+	auto i6 = world->addMeshInstance(*e, world->getWorldRootNodpenis
+	e());
+	i5->sgNode->transform.translate(glm::fvec3(50, 0, 50));
+	i6->sgNode->transform.updateMatrix();*/
 
 	/*auto i3 = world->addMeshInstance(*ooMesh, world->getWorldRootNode());
 	i3->sgNode->transform.translate(glm::fvec3(0, 20, 0)).scale(10);
@@ -475,6 +676,14 @@ void Engine::mainLoop()
 
 	console.init();
 
+	Time t; t.setSeconds(1.f);
+
+	Tweaks tweak;
+	tweak.setTweaksFile("res/tweaks.txt");
+	tweak.setUpdateTime(t);
+	tweak.bindVariable(moveSpeed, "moveSpeed", Tweaks::Floating);
+	tweak.bindVariable(radDiff, "radDiff", Tweaks::Floating);
+
 	while (engineState != Quitting) {
 		if (!window.processMessages()) 
 		{
@@ -489,12 +698,27 @@ void Engine::mainLoop()
 				{
 					uim.mouseDown(ev.mouse.code);
 					uiw->mouseDown((MouseEvent&)ev);
+
+					if (ev.mouse.code.code == MouseCode::M_LEFT)
+					{
+						glm::fvec3 p = r->activeCam->pos;
+						btVector3 camPos(p.x, p.y, p.z);
+
+						btVector3 rayFrom = camPos;
+						btVector3 rayTo = getRayTo(int(ev.mouse.position.x), int(ev.mouse.position.y));
+
+						pickBody(rayFrom, rayTo);
+					}
+
 					break;
 				}
 				case(Event::MouseUp):
 				{
 					uim.mouseUp(ev.mouse.code);
 					uiw->mouseUp((MouseEvent&)ev);
+
+					removePickingConstraint();
+
 					break;
 				}
 				case(Event::KeyDown):
@@ -515,6 +739,9 @@ void Engine::mainLoop()
 				}
 				}
 			}
+			ev.constructMouse(MouseCode::Code::M_NONE, window.getMousePosition(), 0);
+			uiw->mouseHover((MouseEvent&)ev);
+			mouseMoveCallback(ev.mouse.position.x, ev.mouse.position.y);
 
 			if(console.stateFlags == 0)
 				uim.keyHolds(window.keyboard);
@@ -523,6 +750,7 @@ void Engine::mainLoop()
 			{
 			case(InGame):
 			{
+				tweak.updateTweaks();
 				processGameFrame();
 				break;
 			}
@@ -532,8 +760,6 @@ void Engine::mainLoop()
 				break;
 			}
 			}
-
-			
 		}
 	}
 };
@@ -552,8 +778,6 @@ void Engine::processGameFrame()
 		//uiw->drag(window.mouse.getDelta());
 		uiw->setWindowPosition(window.mouse.getWindowPosition(&window) - clickedPos);
 	}
-
-	const float moveSpeed = 30;
 
 	auto keyboardState = window.keyboard.keyState;
 
@@ -575,30 +799,51 @@ void Engine::processGameFrame()
 
 	static float exposure = 1.f;
 
+	physics.step();
+	physics.updateModels();
+
 	if (window.keyboard.isKeyPressed('I'))
 	{
-		exposure += 10 * dt.getSeconds();
-		exposure = std::max(0.f, exposure);
-		//r->defaultSampler.setTextureAnisotropy(1);
-		//r->tileCullShader.use();
-		//r->tileCullShader.setExposure(exposure);
+		auto rad = r->ssaoShader.getRadius();
+		auto newRad = rad;
+		newRad += radDiff * dt.getSecondsf();
+		newRad = std::max(newRad, 0.0000000001f);
+
+		r->ssaoShader.setRadius(newRad);
+
+		std::cout << "Rad = " << newRad << std::endl;
 	}
 	if (window.keyboard.isKeyPressed('U'))
 	{
-		exposure -= 10 * dt.getSeconds();
-		exposure = std::max(0.f, exposure);
-		//r->defaultSampler.setTextureAnisotropy(16);
-		//r->tileCullShader.use();
-		//r->tileCullShader.setExposure(exposure);
+		auto rad = r->ssaoShader.getRadius();
+		auto newRad = rad;
+		newRad -= radDiff * dt.getSecondsf();
+		newRad = std::max(newRad, 0.0000000001f);
+
+		r->ssaoShader.setRadius(newRad);
+
+		std::cout << "Rad = " << newRad << std::endl;
 	}
 
-	//r->ssaoShader.setIntensity(r->ssaoShader.intensity + (float(keyboardState['B']) * 0.1 * dt.getSeconds()));
-	//r->ssaoShader.setIntensity(r->ssaoShader.intensity - (float(keyboardState['V']) * 0.1 * dt.getSeconds()));
-	//r->ssaoShader.intensity = std::max(0.f, r->ssaoShader.intensity);
+	if (window.keyboard.isKeyPressed('9'))
+	{
+		auto ints = r->ssaoShader.getIntensity();
+		std::cout << ints << std::endl;
+		auto newInts = ints;
+		newInts += 5 * dt.getSecondsf();
+		newInts = std::max(newInts, 0.0001f);
 
-	//r->ssaoShader.setRadius(r->ssaoShader.radius + (float(keyboardState['H']) * 0.1 * dt.getSeconds()));
-	//r->ssaoShader.setRadius(r->ssaoShader.radius - (float(keyboardState['G']) * 0.1 * dt.getSeconds()));
-	//r->ssaoShader.radius = std::max(0.f, r->ssaoShader.radius);
+		r->ssaoShader.setIntensity(newInts);
+	}
+	if (window.keyboard.isKeyPressed('8'))
+	{
+		auto ints = r->ssaoShader.getIntensity();
+		auto newInts = ints;
+		newInts -= 5 * dt.getSecondsf();
+		newInts = std::max(newInts, 0.0001f);
+
+		r->ssaoShader.setIntensity(newInts);
+	}
 
 	cam.update(dt);
 
@@ -611,12 +856,11 @@ void Engine::processGameFrame()
 	cc += dt.getSecondsf();
 	programTime += dt.getSecondsf();
 
-	//if (cc > (1.f / 600.f))
-	//{
-		//log.postMessage(String<32>("Message"));
-		//((UILabel*)(uiw->elements[0]))->text.setString(std::string("FPS: " + std::to_string(1.0 / dt.getSeconds()) + '\n' + "Dt: " + std::to_string(dt.getMilliSeconds()) + '\n' +  "Draw Count: " + std::to_string(r->drawCount)).c_str());
-		//cc = 0;
-	//}
+	if (cc > (1.f / 30.f))
+	{
+		((UILabel*)(uiw->elements[0]))->text.setString(std::string("FPS: " + std::to_string(1.0 / dt.getSeconds()) + '\n' + "Dt: " + std::to_string(dt.getMilliSeconds()) + '\n' +  "Draw Count: " + std::to_string((int)r->drawCount)).c_str());
+		cc = 0;
+	}
 }
 
 void Engine::processMenuFrame()

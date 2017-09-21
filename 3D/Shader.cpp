@@ -1,5 +1,5 @@
-#include "Shader.h"
-#include "Engine.h"
+#include "Shader.hpp"
+#include "Engine.hpp"
 
 const int ShaderProgram::typeSizes[ShaderProgram::UniformTypesCount] = {
 	4, 8, 12, 16,
@@ -108,10 +108,7 @@ void ShaderProgram::setUniform(String64 & pUniformName, const void * pUniformDat
 
 	meta.flags = pFlags;
 
-	if (count == 1)
-		memcpy(&meta.data, pUniformData, size);
-	else
-		memcpy(meta.data.array, pUniformData, size * count);
+	memcpy(&meta.data, pUniformData, size * count);
 }
 
 void ShaderProgram::setVarVal(String32 & var, String1024 & val)
@@ -260,11 +257,13 @@ void ShaderProgram::loadVertFrag(String32 & pName, String128 & pShaderLocationPa
 
 	if (vertStream.fail())
 	{
+		assert(0);
 		return; //TODO: LOG ERROR
 	}
 
 	if (fragStream.fail())
 	{
+		assert(0);
 		return; //TODO: LOG ERROR
 	}
 
@@ -321,6 +320,8 @@ void ShaderProgram::compileVertFrag()
 
 		glDeleteShader(fragmentShader);
 
+		assert(0);
+
 		return;
 	}
 
@@ -329,6 +330,7 @@ void ShaderProgram::compileVertFrag()
 	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &isCompiled);
 	if (isCompiled == GL_FALSE)
 	{
+		//assert(0);
 		GLint maxLength = 0;
 		glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &maxLength);
 
@@ -340,7 +342,7 @@ void ShaderProgram::compileVertFrag()
 
 		glDeleteShader(fragmentShader);
 		glDeleteShader(vertexShader);
-
+		assert(0);
 		return;
 	}
 
@@ -361,7 +363,7 @@ void ShaderProgram::compileVertFrag()
 	if (isCompiled == GL_FALSE)
 	{
 		///TODO: LOG ERROR
-
+		assert(0);
 		GLint maxLength = 0;
 		glGetProgramiv(shaderProgram, GL_INFO_LOG_LENGTH, &maxLength);
 

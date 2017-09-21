@@ -1,8 +1,8 @@
-#include "Mesh.h"
-#include "Engine.h"
-#include "Renderer.h"
-#include "MeshUtility.h"
-#include "AssetManager.h"
+#include "Mesh.hpp"
+#include "Engine.hpp"
+#include "Renderer.hpp"
+#include "MeshUtility.hpp"
+#include "AssetManager.hpp"
 
 VertexFormat Material::vertexFormats[MATERIALS_COUNT];
 DrawMode Material::drawModes[MATERIALS_COUNT];

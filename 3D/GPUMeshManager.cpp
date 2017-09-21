@@ -1,7 +1,7 @@
-#include "GPUMeshManager.h"
-#include "Engine.h"
-#include "ShaderStore.h"
-#include "Renderer.h"
+#include "GPUMeshManager.hpp"
+#include "Engine.hpp"
+#include "ShaderStore.hpp"
+#include "Renderer.hpp"
 
 void GPUMeshManager::newBatch()
 {
