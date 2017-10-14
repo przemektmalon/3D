@@ -21,7 +21,8 @@ class AssetManager;
 class World;
 class Console;
 
-#define NUM_VALID_RESOLUTIONS 8
+#define BORDERLESS true
+#define NUM_VALID_RESOLUTIONS 9
 
 class EngineConfig
 {
@@ -90,7 +91,7 @@ public:
 	~Engine() {}
 
 	static void start(HINSTANCE pHInstance);
-	static void mainLoop();
+	static void mainLoop(int resolutionIndex);
 	static void processGameFrame();
 	static void processMenuFrame();
 	static void stop();

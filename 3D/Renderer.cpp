@@ -45,7 +45,7 @@ void MasterRenderer::render()
 	lightManager.updateAllPointLights();
 	lightManager.updateAllSpotLights();
 
-	const GPUModelManager& mm = Engine::assets.modelManager;
+	const GPUModelManager& modelManager = Engine::assets.modelManager;
 
 
 	// *********************************************************** G-BUFFER PASS *********************************************************** //
@@ -80,7 +80,7 @@ void MasterRenderer::render()
 
 		gBufferShader.sendUniforms();
 
-		glBindVertexArray(mm.regularBatch.vaoID);
+		glBindVertexArray(modelManager.regularBatch.vaoID);
 
 		world->texHandleBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 3);
 		world->instanceTransformsBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 4);
@@ -120,7 +120,7 @@ void MasterRenderer::render()
 		pointShadowPassShader.setLightPos(itr->gpuData->position);
 		pointShadowPassShader.sendUniforms();
 
-		glBindVertexArray(mm.shadowVAO);
+		glBindVertexArray(modelManager.shadowVAO);
 		world->drawIndirectBuffer[Regular].bind(GL_DRAW_INDIRECT_BUFFER);
 		world->instanceTransformsBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 1);
 
@@ -145,7 +145,7 @@ void MasterRenderer::render()
 		spotShadowPassShader.setView(itr->view);
 		spotShadowPassShader.sendUniforms();
 
-		glBindVertexArray(mm.shadowVAO);
+		glBindVertexArray(modelManager.shadowVAO);
 		world->drawIndirectBuffer[Regular].bind(GL_DRAW_INDIRECT_BUFFER);
 		world->instanceTransformsBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 1);
 
@@ -375,7 +375,7 @@ inline void MasterRenderer::initialiseLights()
 		auto& add = lightManager.addPointLight();
 		auto cc = Engine::rand() % 3;
 		glm::fvec3 col(0.f);
-		switch (i)
+		switch (i%4)
 		{
 		case 0:
 			col = glm::fvec3(1.f, 61.f / 255.f, 55.f / 255.f);

@@ -27,7 +27,7 @@
 
 #include "GBufferShaderNonBindlessRegular.hpp"
 
-#define NUM_VALID_RESOLUTIONS 8
+#define NUM_VALID_RESOLUTIONS 9
 
 class RectangleShape;
 class UIConsole;

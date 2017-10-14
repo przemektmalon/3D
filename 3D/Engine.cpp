@@ -53,10 +53,11 @@ Console Engine::console;
 Physics Engine::p;
 PhysicsWorld Engine::physics;
 EngineConfig Engine::cfg;
+
 const s32 EngineConfig::RenderConfig::validResolutionsRaw[2][NUM_VALID_RESOLUTIONS] =
 {
-	{ 1920, 1600, 1536, 1366, 1280, 1024, 960, 848 },
-	{ 1080, 900,  864,  768 , 720 , 576 , 540, 480 },
+	{3840 , 1920, 1600, 1536, 1366, 1280, 1024, 960, 848 },
+	{2160 , 1080, 900,  864,  768 , 720 , 576 , 540, 480 },
 };
 
 int main()
@@ -76,8 +77,8 @@ void Engine::start(HINSTANCE pHInstance)
 		assert(0);
 
 	DWORD ws = 0;
-	bool borderless = true;
-	if (borderless)
+
+	if (BORDERLESS)
 	{
 		ws |= WS_POPUP;
 	}
@@ -86,8 +87,26 @@ void Engine::start(HINSTANCE pHInstance)
 		ws |= (WS_OVERLAPPED | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX);
 	}
 
-	window.createWindow(instance, "Engine", 0, 0, 1280, 720, ws);
-	mainLoop();
+
+	//Sets window to max valid resolution
+	int monitorWidth = GetSystemMetrics(SM_CXSCREEN);
+	int monitorHeight = GetSystemMetrics(SM_CYSCREEN);
+	int windowWidth = 0;
+	int windowHeight = 0;
+	int resolutionIndex = 5;
+
+	for (int i = 0; i < NUM_VALID_RESOLUTIONS; i++) {
+		if (EngineConfig::RenderConfig::validResolutionsRaw[0][i] <= monitorWidth && EngineConfig::RenderConfig::validResolutionsRaw[1][i] <= monitorHeight) {
+			windowWidth = EngineConfig::RenderConfig::validResolutionsRaw[0][i];
+			windowHeight = EngineConfig::RenderConfig::validResolutionsRaw[1][i];
+			resolutionIndex = i;
+		}
+		if (windowHeight && windowWidth)
+			break;
+	}
+
+	window.createWindow(instance, "Engine", 0, 0, windowWidth, windowHeight, ws);
+	mainLoop(resolutionIndex);
 }
 
 void Engine::stop()
@@ -262,7 +281,7 @@ void toggleConsole()
 
 #define CFG_FUNC(name) []() -> void { Engine::cfg.##name##(); }
 
-void Engine::mainLoop()
+void Engine::mainLoop(int resolutionIndex)
 {
 	glewExperimental = GL_TRUE;
 	glewInit();
@@ -320,12 +339,9 @@ void Engine::mainLoop()
 	cam.calculateViewRays();
 	r->initialiseRenderer(&window, cam);
 
-	//cfg.render.resolutionIndex = 5;
-	//cfg.render.resolution = cfg.render.getValidResolution(5);
-
 	createModelInfoWindow(uiw);
 
-	cfg.render.setResolution(5);
+	cfg.render.setResolution(resolutionIndex);
 	cfg.render.setFrameScale(1.f);
 
 	defaultOrthoCam.initaliseOrtho(window.getSizeX(), window.getSizeY());
