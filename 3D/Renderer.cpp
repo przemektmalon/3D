@@ -19,7 +19,7 @@
 #include "UIButton.hpp"
 
 
-#define NUM_SPOT_LIGHTS 4
+#define NUM_SPOT_LIGHTS 8
 
 void MasterRenderer::render()
 {
@@ -388,6 +388,9 @@ inline void MasterRenderer::initialiseLights()
 			break;
 		case 3:
 			col = glm::fvec3(38.f / 255.f, 45.f / 255.f, 232.f / 255.f);
+			break;
+		default:
+			col = glm::fvec3(1.f, 1.f, 1.f);
 			break;
 		}
 		add.setColour(col);

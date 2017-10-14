@@ -4,7 +4,9 @@
 class TextShader : public ShaderProgram
 {
 public:
-	TextShader() { initialise(); }
+	TextShader() { 
+		initialise(); 
+	}
 	
 	int initialise()
 	{

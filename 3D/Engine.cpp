@@ -284,8 +284,6 @@ void Engine::mainLoop()
 	uim.mapToMouseDown(0, mouseDown);
 	uim.mapToMouseUp(0, mouseUp);
 
-	
-
 	r = new MasterRenderer();
 
 	physics.create();
@@ -408,11 +406,9 @@ void Engine::mainLoop()
 
 	console.init();
 
-	Time t; t.setSeconds(1.f);
-
 	Tweaks tweak;
 	tweak.setTweaksFile("res/tweaks.txt");
-	tweak.setUpdateTime(t);
+	tweak.setUpdateTime(Time(1));
 	tweak.bindVariable(cfg.world.camSpeed, "camSpeed", Tweaks::Floating);
 
 	while (engineState != Quitting) {
@@ -506,7 +502,6 @@ void Engine::processGameFrame()
 
 	if (windowClicked)
 	{
-		//uiw->drag(window.mouse.getDelta());
 		uiw->setWindowPosition(window.mouse.getWindowPosition(&window) - clickedPos);
 	}
 
@@ -541,8 +536,6 @@ void Engine::processGameFrame()
 		newRad = std::max(newRad, 0.0000000001f);
 
 		r->ssaoShader.setRadius(newRad);
-
-		std::cout << "Rad = " << newRad << std::endl;
 	}
 	if (window.keyboard.isKeyPressed('U'))
 	{
@@ -552,8 +545,6 @@ void Engine::processGameFrame()
 		newRad = std::max(newRad, 0.0000000001f);
 
 		r->ssaoShader.setRadius(newRad);
-
-		std::cout << "Rad = " << newRad << std::endl;
 	}
 
 	if (window.keyboard.isKeyPressed('9'))
@@ -591,8 +582,6 @@ void Engine::processMenuFrame()
 }
 
 //********************************* SOME FUNCTIONS / CALLBACKS TO CHANGE CONFIGS *********************************//
-
-
 
 void EngineConfig::RenderConfig::setResolution(int validResIndex)
 {
