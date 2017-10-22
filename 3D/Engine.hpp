@@ -82,6 +82,12 @@ public:
 
 	} world;
 
+	struct KeyBindConfig {
+
+		//Load file with key binds and load file with mouse bind and set both
+		void loadKeyBinds();
+	
+	} keyBinds;
 };
 
 class Engine
