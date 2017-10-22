@@ -5,6 +5,7 @@ class Time
 {
 public:
 	Time() : seconds(0), milliSeconds(0), microSeconds(0) {};
+	Time(double pSeconds) { setSeconds(pSeconds); }
 	~Time() {};
 
 	Time& setMicroSeconds(s64 ms) { microSeconds = ms; milliSeconds = double(ms) * 0.001; seconds = double(ms) * 0.000001; return *this; }
