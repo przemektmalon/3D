@@ -114,8 +114,6 @@ public:
 	Framebuffer fboGBuffer;
 	Framebuffer fboScreen;
 
-	s32 shadowResolutions[4] = { 256,512,1024,2048 };
-
 	Framebuffer fboLight[4];
 	
 	GLuint vaoQuad;
@@ -147,14 +145,9 @@ public:
 	Shape3DShader shape3DShader;
 	TextShader textShader;
 	
-
-	GBufferShaderNonBindlessRegular gBufferShaderNonBindlessRegular;
-
-	TextBillboard b;
-
 	LightManager lightManager;
 	
-	GLTexture2D th;
+	GLTexture2D lightPassTex;
 	Camera* activeCam;
 
 	Sampler defaultSampler;
@@ -163,5 +156,4 @@ public:
 	Sampler textSampler;
 	Sampler shadowSampler;
 	Sampler shadowCubeSampler;
-	Sampler arraySampler;
 };

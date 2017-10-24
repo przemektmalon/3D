@@ -1,8 +1,6 @@
 #pragma once
 #include "Renderer.hpp"
 
-#define NUM_VALID_RESOLUTIONS 8
-
 const GLfloat quadVertices[] = {
 	-1.0f,  1.0f,  0.0f, 1.0f,//TL
 	1.0f,  1.0f,  1.0f, 1.0f,//TR

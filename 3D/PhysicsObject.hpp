@@ -26,5 +26,6 @@ public:
 	btDefaultMotionState* motionState;
 	btVector3 inertia;
 	btScalar mass;
+
 	ModelInstance* instance;
 };

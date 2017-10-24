@@ -285,7 +285,9 @@ void Engine::mainLoop(int resolutionIndex)
 	glewInit();
 	
 	wglSwapIntervalEXT(0);
+
 	cfg.keyBinds.loadKeyBinds();
+
 	r = new MasterRenderer();
 
 	physics.create();
@@ -607,18 +609,19 @@ void EngineConfig::KeyBindConfig::loadKeyBinds()
 {
 	//TODO: Replace with file that loads in keybinds?
 
-	Engine::uim.mapToKeyDown(VK_ESCAPE, escapePress);
-	Engine::uim.mapToKeyDown('P', CFG_FUNC(render.cycleRes));
-	Engine::uim.mapToKeyDown('L', CFG_FUNC(render.screenshot));
-	Engine::uim.mapToKeyDown('O', CFG_FUNC(render.toggleDrawWireframe));
-	Engine::uim.mapToKeyDown('I', CFG_FUNC(render.toggleDrawTextBounds));
-	Engine::uim.mapToKeyDown('M', CFG_FUNC(render.reloadAllShaders));
-	Engine::uim.mapToKeyDown(VK_OEM_3, CFG_FUNC(render.toggleDrawConsole));
-	Engine::uim.mapToKeyDown('K', printlog);
+	uim.mapToKeyDown(VK_ESCAPE, escapePress);
+	uim.mapToKeyDown('P', CFG_FUNC(render.cycleRes));
+	uim.mapToKeyDown('L', CFG_FUNC(render.screenshot));
+	uim.mapToKeyDown('O', CFG_FUNC(render.toggleDrawWireframe));
+	uim.mapToKeyDown('I', CFG_FUNC(render.toggleDrawTextBounds));
 
-	//TODO: Replace with file that loads in mousebinds?
+	uim.mapToKeyDown('M', CFG_FUNC(render.reloadAllShaders));
 
-	Engine::uim.mapToMouseDown(0, mouseDown);
-	Engine::uim.mapToMouseUp(0, mouseUp);
+	uim.mapToKeyDown(VK_OEM_3, CFG_FUNC(render.toggleDrawConsole)); //Tilde
+
+	uim.mapToKeyDown('K', printlog);
+
+	uim.mapToMouseDown(0, mouseDown);
+	uim.mapToMouseUp(0, mouseUp);
 
 }

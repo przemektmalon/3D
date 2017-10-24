@@ -18,8 +18,7 @@
 #include "UIConsole.hpp"
 #include "UIButton.hpp"
 
-
-#define NUM_SPOT_LIGHTS 8
+#define NUM_POINT_LIGHTS 8
 
 void MasterRenderer::render()
 {
@@ -35,8 +34,8 @@ void MasterRenderer::render()
 	for (int i = 0; i < lightManager.pointLights.size(); ++i)
 	{
 		lightManager.pointLightsGPUData[i].position.y = 20.f + (10.f * std::sin(Engine::programTime * 0.1f));
-		lightManager.pointLightsGPUData[i].position.x = 40.f * std::sin(Engine::programTime * 0.1f + ((i + 1) * 2 * PI / NUM_SPOT_LIGHTS));
-		lightManager.pointLightsGPUData[i].position.z = 40.f * std::cos(Engine::programTime * 0.1f + ((i + 1) * 2 * PI / NUM_SPOT_LIGHTS));
+		lightManager.pointLightsGPUData[i].position.x = 40.f * std::sin(Engine::programTime * 0.1f + ((i + 1) * 2 * PI / NUM_POINT_LIGHTS));
+		lightManager.pointLightsGPUData[i].position.z = 40.f * std::cos(Engine::programTime * 0.1f + ((i + 1) * 2 * PI / NUM_POINT_LIGHTS));
 		lightManager.pointLights[i].updateProj();
 		lightManager.pointLights[i].updateView();
 		lightManager.pointLights[i].updateProjView();
@@ -62,9 +61,7 @@ void MasterRenderer::render()
 		glClearBufferiv(GL_COLOR, GL_COLOR_ATTACHMENT2, &clearC.x); // Clear IDs buffer
 
 		glEnable(GL_DEPTH_TEST);
-		//glDisable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
-		//glDisable(GL_CULL_FACE);
 		glDisable(GL_BLEND);
 		glCullFace(GL_BACK);
 
@@ -159,7 +156,6 @@ void MasterRenderer::render()
 
 	// *********************************************************** SSAO PASS *********************************************************** //
 
-	//SSAO pass
 	{
 		Engine::cfg.render.frameScale = 1.f;
 		glViewport(0, 0, Engine::cfg.render.resolution.x * Engine::cfg.render.frameScale, Engine::cfg.render.resolution.y * Engine::cfg.render.frameScale);
@@ -210,7 +206,6 @@ void MasterRenderer::render()
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	fboSSAO.bindDraw();
-	//glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	fboSSAOBlur.bindRead();
 	glBlitFramebuffer(0, 0, Engine::cfg.render.resolution.x * Engine::cfg.render.frameScale, Engine::cfg.render.resolution.y * Engine::cfg.render.frameScale, 0, 0, Engine::cfg.render.resolution.x * Engine::cfg.render.frameScale, Engine::cfg.render.resolution.y * Engine::cfg.render.frameScale, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
@@ -220,10 +215,8 @@ void MasterRenderer::render()
 
 	tileCullShader.use();
 
-	//glUniformMatrix4fv(20, 1, GL_FALSE, &lightManager.spotLightsGPUData[0].projView[0][0]);
-
-	glBindTextureUnit(2, th.getGLID());
-	glBindImageTexture(2, th.getGLID(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+	glBindTextureUnit(2, lightPassTex.getGLID());
+	glBindImageTexture(2, lightPassTex.getGLID(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
 	glBindTextureUnit(3, fboGBuffer.textureAttachments[0].getGLID());
 	glBindImageTexture(3, fboGBuffer.textureAttachments[0].getGLID(), 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA32F);
@@ -273,7 +266,7 @@ void MasterRenderer::render()
 	program->use();
 
 	glUniform1i(0, 2);
-	th.bind(2);
+	lightPassTex.bind(2);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	glDisable(GL_CULL_FACE);
@@ -299,8 +292,8 @@ inline void MasterRenderer::initialiseGBuffer()
 	fboGBuffer.setResolution(Engine::cfg.render.resolution);
 	fboGBuffer.attachTexture(GL_RG16F, GL_RG, GL_HALF_FLOAT, GL_COLOR_ATTACHMENT0);//NORMAL
 	fboGBuffer.attachTexture(GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT1);//ALBEDO_SPEC
-	fboGBuffer.attachTexture(GL_DEPTH_COMPONENT32F_NV, GL_DEPTH_COMPONENT, GL_FLOAT, GL_DEPTH_ATTACHMENT);
-	fboGBuffer.attachTexture(GL_R32I, GL_RED_INTEGER, GL_INT, GL_COLOR_ATTACHMENT2);
+	fboGBuffer.attachTexture(GL_DEPTH_COMPONENT32F_NV, GL_DEPTH_COMPONENT, GL_FLOAT, GL_DEPTH_ATTACHMENT);//DEPTH
+	fboGBuffer.attachTexture(GL_R32I, GL_RED_INTEGER, GL_INT, GL_COLOR_ATTACHMENT2);//ID
 
 	fboGBuffer.checkStatus();
 
@@ -369,7 +362,7 @@ inline void MasterRenderer::initialiseSkybox()
 
 inline void MasterRenderer::initialiseLights()
 {
-	const int nr = NUM_SPOT_LIGHTS;
+	const int nr = NUM_POINT_LIGHTS;
 	for (int i = 0; i < nr; ++i)
 	{
 		auto& add = lightManager.addPointLight();
@@ -511,12 +504,6 @@ inline void MasterRenderer::initialiseSamplers()
 	shadowCubeSampler.setTextureWrapR(GL_CLAMP_TO_EDGE);
 	shadowCubeSampler.bind(15);
 
-	arraySampler.setTextureMinFilter(GL_LINEAR_MIPMAP_LINEAR);
-	arraySampler.setTextureMagFilter(GL_LINEAR_MIPMAP_LINEAR);
-	arraySampler.setTextureWrapS(GL_REPEAT);
-	arraySampler.setTextureWrapT(GL_REPEAT);
-	arraySampler.bind(6);
-
 	auto makeHandleResident = [&](Texture2D& tex) -> void {
 		if (!tex.glData)
 			return;
@@ -555,7 +542,7 @@ void MasterRenderer::initialiseRenderer(Window * pwin, Camera & cam)
 	b.text->setPosition(glm::fvec3(0, 0, 0));
 
 	fboGBuffer.setClearDepth(0.f);
-	th.createFromStream(GL_RGBA32F, Engine::cfg.render.resolution.x, Engine::cfg.render.resolution.y, GL_RGBA, GL_FLOAT, NULL);
+	lightPassTex.createFromStream(GL_RGBA32F, Engine::cfg.render.resolution.x, Engine::cfg.render.resolution.y, GL_RGBA, GL_FLOAT, NULL);
 }
 
 void MasterRenderer::initialiseShaders()
@@ -589,8 +576,8 @@ void MasterRenderer::reInitialiseFramebuffers()
 {
 	destroyFramebufferTextures();
 	initialiseFramebuffers();
-	th.release();
-	th.createFromStream(GL_RGBA32F, Engine::cfg.render.resolution.x, Engine::cfg.render.resolution.y, GL_RGBA, GL_FLOAT, NULL);
+	lightPassTex.release();
+	lightPassTex.createFromStream(GL_RGBA32F, Engine::cfg.render.resolution.x, Engine::cfg.render.resolution.y, GL_RGBA, GL_FLOAT, NULL);
 }
 
 void MasterRenderer::destroyFramebufferTextures()
