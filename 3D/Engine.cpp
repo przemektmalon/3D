@@ -296,7 +296,7 @@ void Engine::mainLoop(int resolutionIndex)
 
 	uim.mapToKeyDown('M', CFG_FUNC(render.reloadAllShaders));
 
-	uim.mapToKeyDown(VK_OEM_3, CFG_FUNC(render.toggleDrawConsole));
+	uim.mapToKeyDown(VK_OEM_3, CFG_FUNC(render.toggleDrawConsole)); //Tilde
 
 	uim.mapToKeyDown('K', printlog);
 
