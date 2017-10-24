@@ -87,7 +87,7 @@ void Engine::start(HINSTANCE pHInstance)
 		ws |= (WS_OVERLAPPED | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX);
 	}
 
-
+	SetProcessDPIAware();
 	//Sets window to max valid resolution
 	int monitorWidth = GetSystemMetrics(SM_CXSCREEN);
 	int monitorHeight = GetSystemMetrics(SM_CYSCREEN);
@@ -279,8 +279,6 @@ void toggleConsole()
 
 //************ TEMPORARY PHYSICS CONTROL *************/
 
-#define CFG_FUNC(name) []() -> void { Engine::cfg.##name##(); }
-
 void Engine::mainLoop(int resolutionIndex)
 {
 	glewExperimental = GL_TRUE;
@@ -288,20 +286,7 @@ void Engine::mainLoop(int resolutionIndex)
 	
 	wglSwapIntervalEXT(0);
 
-	uim.mapToKeyDown(VK_ESCAPE, escapePress);
-	uim.mapToKeyDown('P', CFG_FUNC(render.cycleRes));
-	uim.mapToKeyDown('L', CFG_FUNC(render.screenshot));
-	uim.mapToKeyDown('O', CFG_FUNC(render.toggleDrawWireframe));
-	uim.mapToKeyDown('I', CFG_FUNC(render.toggleDrawTextBounds));
-
-	uim.mapToKeyDown('M', CFG_FUNC(render.reloadAllShaders));
-
-	uim.mapToKeyDown(VK_OEM_3, CFG_FUNC(render.toggleDrawConsole)); //Tilde
-
-	uim.mapToKeyDown('K', printlog);
-
-	uim.mapToMouseDown(0, mouseDown);
-	uim.mapToMouseUp(0, mouseUp);
+	cfg.keyBinds.loadKeyBinds();
 
 	r = new MasterRenderer();
 
@@ -617,4 +602,26 @@ void EngineConfig::RenderConfig::reloadAllShaders()
 void EngineConfig::RenderConfig::screenshot()
 {
 	Engine::window.screenshot();
+}
+
+#define CFG_FUNC(name) []() -> void { Engine::cfg.##name##(); }
+void EngineConfig::KeyBindConfig::loadKeyBinds()
+{
+	//TODO: Replace with file that loads in keybinds?
+
+	uim.mapToKeyDown(VK_ESCAPE, escapePress);
+	uim.mapToKeyDown('P', CFG_FUNC(render.cycleRes));
+	uim.mapToKeyDown('L', CFG_FUNC(render.screenshot));
+	uim.mapToKeyDown('O', CFG_FUNC(render.toggleDrawWireframe));
+	uim.mapToKeyDown('I', CFG_FUNC(render.toggleDrawTextBounds));
+
+	uim.mapToKeyDown('M', CFG_FUNC(render.reloadAllShaders));
+
+	uim.mapToKeyDown(VK_OEM_3, CFG_FUNC(render.toggleDrawConsole)); //Tilde
+
+	uim.mapToKeyDown('K', printlog);
+
+	uim.mapToMouseDown(0, mouseDown);
+	uim.mapToMouseUp(0, mouseUp);
+
 }
