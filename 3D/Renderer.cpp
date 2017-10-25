@@ -214,7 +214,6 @@ void MasterRenderer::render()
 	// *********************************************************** LIGHT PASS *********************************************************** //
 
 	tileCullShader.use();
-
 	glBindTextureUnit(2, lightPassTex.getGLID());
 	glBindImageTexture(2, lightPassTex.getGLID(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
@@ -537,9 +536,10 @@ void MasterRenderer::initialiseRenderer(Window * pwin, Camera & cam)
 
 	initialiseFramebuffers();
 
-	b.initGL();
+	//wtf is b?
+	/*b.initGL();
 	b.text->setFont(Engine::assets.getFont(String32("consola")));
-	b.text->setPosition(glm::fvec3(0, 0, 0));
+	b.text->setPosition(glm::fvec3(0, 0, 0));*/
 
 	fboGBuffer.setClearDepth(0.f);
 	lightPassTex.createFromStream(GL_RGBA32F, Engine::cfg.render.resolution.x, Engine::cfg.render.resolution.y, GL_RGBA, GL_FLOAT, NULL);
@@ -558,7 +558,8 @@ void MasterRenderer::initialiseShaders()
 	shaderStore.loadShader(&pointShadowPassShader);
 	shaderStore.loadShader(&shape2DShader);
 	shaderStore.loadShader(&shape3DShader);
-	shaderStore.loadShader(&gBufferShaderNonBindlessRegular);
+	//QUESTION: What is this?
+	//shaderStore.loadShader(&gBufferShaderNonBindlessRegular);
 	shaderStore.loadShader(&textShader);
 
 	shaderStore.loadShader(ShaderProgram::VertFrag, String32("Standard"));
@@ -623,7 +624,8 @@ void MasterRenderer::cameraProjUpdated()
 {
 	gBufferShader.setProj(activeCam->proj);
 	gBufferShaderMultiTex.setProj(activeCam->proj);
-	gBufferShaderNonBindlessRegular.setProj(activeCam->proj);
+	//QUESTION: What is this and why is it not declared in Rendered.hpp
+	//gBufferShaderNonBindlessRegular.setProj(activeCam->proj);
 	ssaoShader.setProj(activeCam->proj);
 	ssaoShader.setViewport(glm::ivec2(viewport.width, viewport.height));
 	frustCullShader.setProj(activeCam->proj);

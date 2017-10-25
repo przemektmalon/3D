@@ -285,7 +285,8 @@ void Engine::mainLoop(int resolutionIndex)
 	glewInit();
 	
 	wglSwapIntervalEXT(0);
-
+	
+	cfg.keyBinds.setFunctionRepresentations();
 	cfg.keyBinds.loadKeyBinds();
 
 	r = new MasterRenderer();
@@ -604,24 +605,45 @@ void EngineConfig::RenderConfig::screenshot()
 	Engine::window.screenshot();
 }
 
+
 #define CFG_FUNC(name) []() -> void { Engine::cfg.##name##(); }
 void EngineConfig::KeyBindConfig::loadKeyBinds()
 {
-	//TODO: Replace with file that loads in keybinds?
+	//TODO: Make this more robust
+	std::ifstream fileStream("res/keyBinds.txt", std::ios_base::in);
+	std::pair<int, int> bindPair;
+	while (fileStream >> bindPair.first >> bindPair.second) {
+		auto func = functionRepresentation.find(bindPair.second);
+		Engine::uim.mapToKeyDown(bindPair.first, func->second );
+	}
 
-	uim.mapToKeyDown(VK_ESCAPE, escapePress);
-	uim.mapToKeyDown('P', CFG_FUNC(render.cycleRes));
-	uim.mapToKeyDown('L', CFG_FUNC(render.screenshot));
-	uim.mapToKeyDown('O', CFG_FUNC(render.toggleDrawWireframe));
-	uim.mapToKeyDown('I', CFG_FUNC(render.toggleDrawTextBounds));
+	//Engine::uim.mapToKeyDown(VK_ESCAPE, escapePress);
+	//Engine::uim.mapToKeyDown('P', CFG_FUNC(render.cycleRes));
+	//Engine::uim.mapToKeyDown('L', CFG_FUNC(render.screenshot));
+	//Engine::uim.mapToKeyDown('O', CFG_FUNC(render.toggleDrawWireframe));
+	//Engine::uim.mapToKeyDown('I', CFG_FUNC(render.toggleDrawTextBounds));
 
-	uim.mapToKeyDown('M', CFG_FUNC(render.reloadAllShaders));
+	//Engine::uim.mapToKeyDown('M', CFG_FUNC(render.reloadAllShaders));
 
-	uim.mapToKeyDown(VK_OEM_3, CFG_FUNC(render.toggleDrawConsole)); //Tilde
+	//Engine::uim.mapToKeyDown(VK_OEM_3, CFG_FUNC(render.toggleDrawConsole)); //Tilde
 
-	uim.mapToKeyDown('K', printlog);
+	//Engine::uim.mapToKeyDown('K', printlog);
 
-	uim.mapToMouseDown(0, mouseDown);
-	uim.mapToMouseUp(0, mouseUp);
+	Engine::uim.mapToMouseDown(0, mouseDown);
+	Engine::uim.mapToMouseUp(0, mouseUp);
+
+}
+
+
+void EngineConfig::KeyBindConfig::setFunctionRepresentations()
+{
+	functionRepresentation[functionNum::ESCAPE] = escapePress;
+	functionRepresentation[functionNum::CYCLERES] = CFG_FUNC(render.cycleRes);
+	functionRepresentation[functionNum::SCREENSHOT] = CFG_FUNC(render.screenshot);
+	functionRepresentation[functionNum::TOGGLE_WIREFRAME] = CFG_FUNC(render.toggleDrawWireframe);
+	functionRepresentation[functionNum::TOGGLE_TEXTBOUNDS] = CFG_FUNC(render.toggleDrawTextBounds);
+	functionRepresentation[functionNum::RELOAD_SHADERS] = CFG_FUNC(render.reloadAllShaders);
+	functionRepresentation[functionNum::TOGGLE_CONSOLE] = CFG_FUNC(render.toggleDrawConsole);
+	functionRepresentation[functionNum::PRINT_LOG] = printlog;
 
 }

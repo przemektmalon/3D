@@ -6,7 +6,7 @@
 #include "UserInputManager.hpp"
 #include "Logger.hpp"
 #include "UIWindow.hpp"
-
+#include <unordered_map>
 #include <ft2build.h>
 #include FT_FREETYPE_H;
 
@@ -83,7 +83,10 @@ public:
 	} world;
 
 	struct KeyBindConfig {
+		enum functionNum{ESCAPE, CYCLERES, SCREENSHOT, TOGGLE_WIREFRAME, TOGGLE_TEXTBOUNDS, RELOAD_SHADERS, TOGGLE_CONSOLE, PRINT_LOG};
+		std::unordered_map<int, std::function<void(void)>> functionRepresentation;
 
+		void setFunctionRepresentations();
 		//Load file with key binds and load file with mouse bind and set both
 		void loadKeyBinds();
 	
