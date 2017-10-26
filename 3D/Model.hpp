@@ -2,7 +2,6 @@
 #include "Asset.hpp"
 #include "Include.hpp"
 #include "boost/tokenizer.hpp"
-#include "gli/load.hpp"
 #include "SceneGraph.hpp"
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"

@@ -136,7 +136,6 @@ public:
 	static UIWindow* uiw;
 	static bool windowClicked;
 	static glm::ivec2 clickedPos;
-	//static Log engineLog;
 	static Log engineLog;
 	
 	static AssetManager assets;

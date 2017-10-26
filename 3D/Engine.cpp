@@ -593,7 +593,7 @@ void EngineConfig::RenderConfig::setResolution(int validResIndex)
 		return;
 	resolutionIndex = validResIndex;
 	resolution = Engine::cfg.render.getValidResolution(resolutionIndex);
-	Engine::r->setResolution(resolutionIndex);
+	Engine::r->reInitialiseFramebuffers();
 	Engine::window.setResolution(Engine::cfg.render.getValidResolution(resolutionIndex));
 }
 

@@ -522,11 +522,8 @@ void MasterRenderer::initialiseRenderer(Window * pwin, Camera & cam)
 	window = pwin;
 	viewport.top = 0; viewport.left = 0; viewport.width = window->getSizeX(); viewport.height = window->getSizeY();
 	Engine::cfg.render.frameScale = 1.f;
-	//Engine::cfg.render.resolution.x = viewport.width * Engine::cfg.render.frameScale;
-	//Engine::cfg.render.resolution.y = viewport.height * Engine::cfg.render.frameScale;
 
 	initialiseSamplers();
-	//initialiseShaders();
 
 	setActiveCam(cam);
 
@@ -535,11 +532,6 @@ void MasterRenderer::initialiseRenderer(Window * pwin, Camera & cam)
 	initialiseLights();
 
 	initialiseFramebuffers();
-
-	//wtf is b?
-	/*b.initGL();
-	b.text->setFont(Engine::assets.getFont(String32("consola")));
-	b.text->setPosition(glm::fvec3(0, 0, 0));*/
 
 	fboGBuffer.setClearDepth(0.f);
 	lightPassTex.createFromStream(GL_RGBA32F, Engine::cfg.render.resolution.x, Engine::cfg.render.resolution.y, GL_RGBA, GL_FLOAT, NULL);
@@ -558,8 +550,6 @@ void MasterRenderer::initialiseShaders()
 	shaderStore.loadShader(&pointShadowPassShader);
 	shaderStore.loadShader(&shape2DShader);
 	shaderStore.loadShader(&shape3DShader);
-	//QUESTION: What is this?
-	//shaderStore.loadShader(&gBufferShaderNonBindlessRegular);
 	shaderStore.loadShader(&textShader);
 
 	shaderStore.loadShader(ShaderProgram::VertFrag, String32("Standard"));
@@ -592,6 +582,9 @@ void MasterRenderer::destroyFramebufferTextures()
 void MasterRenderer::setActiveCam(Camera & pCam)
 {
 	activeCam = &pCam;
+	cameraProjUpdated();
+
+	// Indices for corners of the view
 	//TL 4  5
 	//TR 10 11
 	//BR 16 17
@@ -599,8 +592,7 @@ void MasterRenderer::setActiveCam(Camera & pCam)
 	//BR 22 23
 	//BL 28 29
 	//TL 34 35
-	//ssaoShader.setProj(activeCam->proj, glm::ivec2(viewport.width, viewport.height));
-	cameraProjUpdated();
+
 	quadVerticesViewRays[4] = activeCam->viewRays2[3].x;
 	quadVerticesViewRays[5] = activeCam->viewRays2[3].y;
 
@@ -624,8 +616,6 @@ void MasterRenderer::cameraProjUpdated()
 {
 	gBufferShader.setProj(activeCam->proj);
 	gBufferShaderMultiTex.setProj(activeCam->proj);
-	//QUESTION: What is this and why is it not declared in Rendered.hpp
-	//gBufferShaderNonBindlessRegular.setProj(activeCam->proj);
 	ssaoShader.setProj(activeCam->proj);
 	ssaoShader.setViewport(glm::ivec2(viewport.width, viewport.height));
 	frustCullShader.setProj(activeCam->proj);

@@ -32,6 +32,7 @@
 class RectangleShape;
 class UIConsole;
 
+// OpenGL draw command structure for issuing indirect draw calls
 typedef struct {
 	u32 count;
 	u32 instanceCount;
@@ -86,24 +87,9 @@ public:
 
 	void bakeStaticLights();
 
-	void setResolution(int resIndex)
-	{
-		//config.renderResolution = glm::fvec2(validResolutionsRaw[0][resIndex], validResolutionsRaw[1][resIndex]) * config.frameScale;
-		reInitialiseFramebuffers();
-	}
-
-	template <class T>
-	struct Rect
-	{
-		Rect() {}
-		~Rect() {}
-
-		T top, left, width, height;
-	};
-
 	u32 drawCount[DrawModesCount];
 
-	Rect<int> viewport;
+	irect viewport;
 
 	Window* window;
 	World* world;
