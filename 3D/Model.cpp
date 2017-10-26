@@ -181,7 +181,7 @@ void Model::loadMaterialTextures(aiMaterial * material, aiTextureType type, Tria
 void ModelInstance::makePhysicsObject(btCollisionShape * collisionShape, float mass)
 {
 	physicsObject = new PhysicsObject();
-	physicsObject->create(sgNode->transform.getTranslation(), sgNode->transform.getQRotation(), collisionShape, mass);
+	physicsObject->create(sgNode->transform.getTranslation(), sgNode->transform.getQuat(), collisionShape, mass);
 	physicsObject->instance = this;
 	Engine::physics.addRigidBody(physicsObject);
 }
