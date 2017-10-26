@@ -22,20 +22,20 @@ public:
 	UIM() { ca = &defCA; }
 	~UIM() {}
 
-	void mapToKeyDown(KeyCode keyCode, std::function<void(void)> fnc) {
+	void mapToKeyDown(Key keyCode, std::function<void(void)> fnc) {
 		ca->keyDownFunctions[keyCode.code] = fnc;
 	}
 
-	void mapToKeyDown(KeyCode keyCode, std::function<void(void*)> fnc) {
+	void mapToKeyDown(Key keyCode, std::function<void(void*)> fnc) {
 		ca->keyDownFunctionsClass[keyCode.code] = fnc;
 	}
 
-	void mapToKeyUp(KeyCode keyCode, std::function<void(void)> fnc)
+	void mapToKeyUp(Key keyCode, std::function<void(void)> fnc)
 	{
 		ca->keyUpFunctions[keyCode.code] = fnc;
 	}
 
-	void mapToKeyHold(KeyCode keyCode, std::function<void(void)> fnc)
+	void mapToKeyHold(Key keyCode, std::function<void(void)> fnc)
 	{
 		ca->keyHoldFunctions[keyCode.code] = fnc;
 	}
@@ -50,7 +50,7 @@ public:
 		ca->mouseUpFunctions[mouseCode.code] = fnc;
 	}
 
-	void keyDown(KeyCode keyCode)
+	void keyDown(Key keyCode)
 	{
 		auto fnc = ca->keyDownFunctions[keyCode.code];
 		if (fnc != nullptr)
@@ -65,7 +65,7 @@ public:
 		}
 	}
 
-	void keyUp(KeyCode keyCode)
+	void keyUp(Key keyCode)
 	{
 		auto fnc = ca->keyUpFunctions[keyCode.code];
 		if (fnc != nullptr)
@@ -79,7 +79,7 @@ public:
 		//TODO: change to linked list of active holds instead of scanning all keys
 		for (int i = 0; i < 256; ++i)
 		{
-			if (ca->keyHoldFunctions[i] != nullptr && keyStates.isKeyPressed(KeyCode(i)))
+			if (ca->keyHoldFunctions[i] != nullptr && keyStates.isKeyPressed(Key(i)))
 			{
 				ca->keyHoldFunctions[i]();
 			}

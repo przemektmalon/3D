@@ -414,7 +414,7 @@ public:
 	{
 		postMessage(error, '!');
 	}
-	void textInput(KeyCode code);
+	void textInput(Key code);
 	
 	void repositionText()
 	{

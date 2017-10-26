@@ -11,8 +11,6 @@
 #include "glm\gtc\matrix_transform.hpp"
 #include "glm\gtx\matrix_transform_2d.hpp"
 #include "Strings.hpp"
-//#include "Window.h"
-
 
 class ShaderProgram
 {
@@ -52,46 +50,16 @@ public:
 
 	void reload()
 	{
-		//VERT/FRAG SHADER RELOAD LEAKS MEMORY WHILE COMPUTE DOESNT
-
-		std::map<String64, UniformMeta> keepUniforms;
-
-		//for (auto itr = uniformLocations.begin(); itr != uniformLocations.end(); ++itr)
-		//{
-		//	auto find = uniformObjects.find(itr->second);
-
-		//	if (find != uniformObjects.end())
-		//	{
-		//		keepUniforms.insert(std::make_pair(itr->first, find->second));
-		//	}
-		//}
+		/// TODO: keep all uniforms and glsl data after shader reloading
+		/// This might be more involved if any of the uniform locations change after the reload
+		/// But this would either imply major changes to the data section or shader
+		/// Just sending data to the same uniform location will be fine for now
+		/// For later, there is a good data structure(UniformMeta) that stores uniform names, locations, types and values
+		/// we can track changes over the reload from that data structure, but its not populated atm for specialised Shaders that have their own special class (eg SAOShader.hpp)
 
 		destroy();
 		load(name, type);
 		compile();
-
-		//if (!initialise())
-		//{
-		//	for (auto itr = keepUniforms.begin(); itr != keepUniforms.end(); ++itr)
-		//	{
-		//		auto find = uniformLocations.find(itr->first);
-
-		//		if (find != uniformLocations.end())
-		//		{
-		//			auto find2 = uniformObjects.find(find->second);
-
-		//			if (find2 != uniformObjects.end())
-		//			{
-		//				find2->second = itr->second;
-		//			}
-		//		}
-		//	}
-		//	sendUniforms();
-		//}
-
-		//KEEP OLD VAR VALUES FOR SAME VAR NAMES
-		//KEEP OLD UNIFORM INFO FOR SAME UNIFORM NAMES
-		//KEEP OLD BUFFER INFO FOR SAME BUFFER NAMES
 	}
 
 	GLint getGLID() const { return GLID; }
@@ -130,6 +98,12 @@ private:
 	void loadCompute(String32& pName, String128& pShaderLocationPath);
 
 	void compileCompute();
+
+
+	bool checkShaderCompilation(GLuint pShader, char* pType);
+	bool checkProgramLinking(GLuint pProgram);
+	void reportFailedShaderLoad(char* pType, char* pPath);
+
 
 	void freeSourceContent();
 

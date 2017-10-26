@@ -267,7 +267,7 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 	{
 		engineWindow->keyboard.keyState[wParam] = false;
 		auto check = [](u8 pKey) -> bool { return engineWindow->keyboard.isKeyPressed(pKey); };
-		Event newEvent(Event::KeyDown); newEvent.constructKey(wParam, check(KeyCode::KC_SHIFT), check(KeyCode::KC_ALT), check(KeyCode::KC_SYS), check(KeyCode::KC_CAPS), check(KeyCode::KC_CTRL));
+		Event newEvent(Event::KeyDown); newEvent.constructKey(wParam, check(Key::KC_SHIFT), check(Key::KC_ALT), check(Key::KC_SYS), check(Key::KC_CAPS), check(Key::KC_CTRL));
 		engineWindow->eventQ.pushEvent(newEvent);
 		break;
 	}
@@ -275,7 +275,7 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 	{
 		engineWindow->keyboard.keyState[wParam] = true;
 		auto check = [](u8 pKey) -> bool { return engineWindow->keyboard.isKeyPressed(pKey); };
-		Event newEvent(Event::KeyUp); newEvent.constructKey(wParam, check(KeyCode::KC_SHIFT), check(KeyCode::KC_ALT), check(KeyCode::KC_SYS), check(KeyCode::KC_CAPS), check(KeyCode::KC_CTRL));
+		Event newEvent(Event::KeyUp); newEvent.constructKey(wParam, check(Key::KC_SHIFT), check(Key::KC_ALT), check(Key::KC_SYS), check(Key::KC_CAPS), check(Key::KC_CTRL));
 		engineWindow->eventQ.pushEvent(newEvent);
 		break;
 	}

@@ -20,7 +20,7 @@ struct Event
 			int delta;
 		} mouse;
 		struct key {
-			KeyCode code;
+			Key code;
 			bool shift;
 			bool alt;
 			bool sys;
@@ -38,7 +38,7 @@ struct Event
 		mouse.code = pCode; mouse.position = pPos; mouse.delta = pDelta;
 	}
 
-	void constructKey(KeyCode pCode, bool pShift, bool pAlt, bool pSys, bool pCtrl, bool pCaps)
+	void constructKey(Key pCode, bool pShift, bool pAlt, bool pSys, bool pCtrl, bool pCaps)
 	{
 		key.code = pCode; key.shift = pShift; key.alt = pAlt; key.sys = pSys; key.ctrl = pCtrl; key.caps = pCaps;
 	}
@@ -94,7 +94,7 @@ class KeyEvent : private Event
 {
 public:
 
-	KeyCode getCode() { return key.code; }
+	Key getCode() { return key.code; }
 	bool getShift() { return key.shift; }
 	bool getAlt() { return key.alt; }
 	bool getSys() { return key.sys; }

@@ -45,10 +45,9 @@ glm::ivec2 Engine::clickedPos;
 AssetManager Engine::assets;
 World* Engine::world;
 float Engine::programTime = 0;
-Logger Engine::logger;
 Window Engine::window;
 bool Engine::consoleOpen;
-Log Engine::log;
+Log Engine::engineLog;
 Console Engine::console;
 Physics Engine::p;
 PhysicsWorld Engine::physics;
@@ -251,7 +250,7 @@ void Engine::select(glm::ivec2 mPos)
 
 void printlog()
 {
-	Engine::logger.printLog(Engine::log);
+	Engine::engineLog.printLog(Engine::engineLog);
 }
 
 void mouseDown()
@@ -286,8 +285,11 @@ void Engine::mainLoop(int resolutionIndex)
 	
 	wglSwapIntervalEXT(0);
 	
-	cfg.keyBinds.setFunctionRepresentations();
+	cfg.keyBinds.initialiseFunctionBindingConfig();
 	cfg.keyBinds.loadKeyBinds();
+
+	Engine::uim.mapToMouseDown(0, mouseDown);
+	Engine::uim.mapToMouseUp(0, mouseUp);
 
 	r = new MasterRenderer();
 
@@ -609,41 +611,107 @@ void EngineConfig::RenderConfig::screenshot()
 #define CFG_FUNC(name) []() -> void { Engine::cfg.##name##(); }
 void EngineConfig::KeyBindConfig::loadKeyBinds()
 {
-	//TODO: Make this more robust
-	std::ifstream fileStream("res/keyBinds.txt", std::ios_base::in);
-	std::pair<int, int> bindPair;
-	while (fileStream >> bindPair.first >> bindPair.second) {
-		auto func = functionRepresentation.find(bindPair.second);
-		Engine::uim.mapToKeyDown(bindPair.first, func->second );
+	/// TODO: Make this more robust
+	// As long as input file is correct this will work fine
+	// Theres still a few ways we can have bad input, but I've made it much more robust, including comment lines
+
+	// Bad input includes:	spaces after function name
+	//						and some other cases probably
+
+	File keyBinds;
+	keyBinds.setPath("res/keyBinds.txt");
+	keyBinds.open(File::Mode::in);
+	
+	std::string key;		// Read from file
+	std::string funcName;	// Read from file
+	
+	KeyCode keyCode;		// Generated from read input
+
+	while (!keyBinds.atEOF())
+	{
+		// Peek at next char to check for empty line (or end of input)
+		auto peek = keyBinds.peekChar();
+		if (peek == '\n' || peek == '\0')
+		{
+			keyBinds.pullChar(); // Next line or reach EOF
+			continue;
+		}
+
+		// Drop spaces lambda
+		auto dropSpaces = [&keyBinds]() -> void {
+			while (keyBinds.peekChar() == ' '){
+				keyBinds.pullChar();}};
+		
+		dropSpaces(); // Drop leading spaces
+
+		/// TODO: right now '#' must be the first non-whitespace character on a line for it to be a comment
+		if (keyBinds.peekChar() == '#')
+		{
+			std::string commentLine;
+			keyBinds.readStr(commentLine, '\n'); // Move read pointer to next line
+			continue; // Ignore comment line
+		}
+
+		// Read key character
+		keyBinds.readStr(key, ' ');
+
+		dropSpaces(); // Drop spaces between key and function
+
+		// Read function name
+		keyBinds.readStr(funcName, '\n');
+
+		// Ignore malformed lines. Not sure if this is needed atm
+		if (key.size() == 0 || funcName.size() == 0)
+			continue;
+
+		// Check if we have the function to bind to
+		auto func = functionNames.find(funcName);
+		if (func == functionNames.end())
+		{
+			std::cout << "Function \'" << funcName << "\' not available for binding (check spelling)" << std::endl;
+			continue;
+		}
+
+		if (key.size() != 1) // Non alpha/printable or special character
+		{
+			// We need to translate the multi character(byte) code to a system character code the system can understand
+			// For example "ESC" is escape, so translate to (char)27
+
+			if (key == "ESC")		// Escape
+				keyCode = 27;
+			else if (key == "TIL")	// Tilde
+				keyCode = 192;
+			else if (key == "SCP")	// Space
+				keyCode = 32;
+			// And we can add more as we need
+		}
+		else
+		{
+			// Normal alpha character (if the key binds text file has no errors). It is its own KeyCode (ascii value).
+			keyCode = key[0];
+		}
+
+		// Reset key and funcname since out File::read function always appends to the provided std::string
+		// Consider if this is desired behaviour
+		key.clear();
+		funcName.clear();
+		Engine::uim.mapToKeyDown(keyCode, func->second);
 	}
 
-	//Engine::uim.mapToKeyDown(VK_ESCAPE, escapePress);
-	//Engine::uim.mapToKeyDown('P', CFG_FUNC(render.cycleRes));
-	//Engine::uim.mapToKeyDown('L', CFG_FUNC(render.screenshot));
-	//Engine::uim.mapToKeyDown('O', CFG_FUNC(render.toggleDrawWireframe));
-	//Engine::uim.mapToKeyDown('I', CFG_FUNC(render.toggleDrawTextBounds));
-
-	//Engine::uim.mapToKeyDown('M', CFG_FUNC(render.reloadAllShaders));
-
-	//Engine::uim.mapToKeyDown(VK_OEM_3, CFG_FUNC(render.toggleDrawConsole)); //Tilde
-
-	//Engine::uim.mapToKeyDown('K', printlog);
-
-	Engine::uim.mapToMouseDown(0, mouseDown);
-	Engine::uim.mapToMouseUp(0, mouseUp);
-
+	keyBinds.close();
 }
 
 
-void EngineConfig::KeyBindConfig::setFunctionRepresentations()
+void EngineConfig::KeyBindConfig::initialiseFunctionBindingConfig()
 {
-	functionRepresentation[functionNum::ESCAPE] = escapePress;
-	functionRepresentation[functionNum::CYCLERES] = CFG_FUNC(render.cycleRes);
-	functionRepresentation[functionNum::SCREENSHOT] = CFG_FUNC(render.screenshot);
-	functionRepresentation[functionNum::TOGGLE_WIREFRAME] = CFG_FUNC(render.toggleDrawWireframe);
-	functionRepresentation[functionNum::TOGGLE_TEXTBOUNDS] = CFG_FUNC(render.toggleDrawTextBounds);
-	functionRepresentation[functionNum::RELOAD_SHADERS] = CFG_FUNC(render.reloadAllShaders);
-	functionRepresentation[functionNum::TOGGLE_CONSOLE] = CFG_FUNC(render.toggleDrawConsole);
-	functionRepresentation[functionNum::PRINT_LOG] = printlog;
+	// If this was jai, we could generate this list automatically at compilation time from functions that we mark with some label or metadata
 
+	functionNames["escape"] = escapePress;
+	functionNames["cycleres"] = CFG_FUNC(render.cycleRes);
+	functionNames["screenshot"] = CFG_FUNC(render.screenshot);
+	functionNames["toggle_wireframe"] = CFG_FUNC(render.toggleDrawWireframe);
+	functionNames["toggle_textbounds"] = CFG_FUNC(render.toggleDrawTextBounds);
+	functionNames["reload_shaders"] = CFG_FUNC(render.reloadAllShaders);
+	functionNames["toggle_console"] = CFG_FUNC(render.toggleDrawConsole);
+	functionNames["print_log"] = printlog;
 }

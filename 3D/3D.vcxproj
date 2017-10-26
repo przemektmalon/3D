@@ -270,7 +270,7 @@
     <ClInclude Include="Keyboard.hpp" />
     <ClInclude Include="Lights.hpp" />
     <ClInclude Include="List.hpp" />
-    <ClInclude Include="Logger.hpp" />
+    <ClInclude Include="Log.hpp" />
     <ClInclude Include="MathIncludes.hpp" />
     <ClInclude Include="ModelInfo.hpp" />
     <ClInclude Include="Mouse.hpp" />

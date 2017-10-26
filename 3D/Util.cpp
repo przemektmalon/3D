@@ -30,3 +30,25 @@ void getTimeStr(StringGeneric& str, char delim = ';')
 	strftime(buf, sizeof(buf), formatStr.getString(), &tstruct);
 	str.setToChars(buf);
 }
+
+void getTimeStr(std::string& str, char delim = ';')
+{
+	time_t now = time(0);
+	tm  tstruct;
+	String128 logName;
+	char buf[80];
+	localtime_s(&tstruct, &now);
+
+	char fs[9]; // Format string
+	fs[0] = '%';
+	fs[1] = 'H';
+	fs[2] = delim;
+	fs[3] = '%';
+	fs[4] = 'M';
+	fs[5] = delim;
+	fs[6] = '%';
+	fs[7] = 'S';
+	fs[8] = '\0';
+	strftime(buf, sizeof(buf), fs, &tstruct);
+	str = buf;
+}
