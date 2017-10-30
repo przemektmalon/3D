@@ -645,5 +645,4 @@ void EngineConfig::KeyBindConfig::setFunctionRepresentations()
 	functionRepresentation[functionNum::RELOAD_SHADERS] = CFG_FUNC(render.reloadAllShaders);
 	functionRepresentation[functionNum::TOGGLE_CONSOLE] = CFG_FUNC(render.toggleDrawConsole);
 	functionRepresentation[functionNum::PRINT_LOG] = printlog;
-
 }

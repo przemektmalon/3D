@@ -579,6 +579,7 @@ void MasterRenderer::reInitialiseFramebuffers()
 	initialiseFramebuffers();
 	lightPassTex.release();
 	lightPassTex.createFromStream(GL_RGBA32F, Engine::cfg.render.resolution.x, Engine::cfg.render.resolution.y, GL_RGBA, GL_FLOAT, NULL);
+	
 }
 
 void MasterRenderer::destroyFramebufferTextures()
@@ -624,7 +625,6 @@ void MasterRenderer::cameraProjUpdated()
 {
 	gBufferShader.setProj(activeCam->proj);
 	gBufferShaderMultiTex.setProj(activeCam->proj);
-	//QUESTION: What is this and why is it not declared in Rendered.hpp
 	//gBufferShaderNonBindlessRegular.setProj(activeCam->proj);
 	ssaoShader.setProj(activeCam->proj);
 	ssaoShader.setViewport(glm::ivec2(viewport.width, viewport.height));
