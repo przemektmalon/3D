@@ -28,6 +28,8 @@ public:
 		Mode fileMode;
 	} meta;
 
+	std::fstream& fstream() { return file; }
+
 	bool create(StringGeneric& pPath, s32 pFileMode)
 	{
 		return create(pPath, (Mode)pFileMode);
@@ -81,6 +83,11 @@ public:
 		{
 			std::cout << "S" << std::endl;
 		}
+	}
+
+	bool atEOF()
+	{
+		return file.eof();
 	}
 
 	void close()
@@ -202,6 +209,18 @@ public:
 		}
 	}
 
+	char peekChar()
+	{
+		return file.peek();
+	}
+
+	char pullChar()
+	{
+		char pull;
+		file.read(&pull, 1);
+		return pull;
+	}
+
 	/////////////////////////// READING ///////////////////////////
 
 	bool checkWritable()
@@ -222,6 +241,11 @@ public:
 	void setPath(String<128>& pPath)
 	{
 		meta.path.overwrite(pPath);
+	}
+
+	void setPath(std::string pPath)
+	{
+		meta.path.setToChars(pPath.c_str());
 	}
 
 };

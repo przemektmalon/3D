@@ -257,14 +257,14 @@ void ShaderProgram::loadVertFrag(String32 & pName, String128 & pShaderLocationPa
 
 	if (vertStream.fail())
 	{
-		assert(0);
-		return; //TODO: LOG ERROR
+		reportFailedShaderLoad("Vertex", vertexPath.getString());
+		return;
 	}
 
 	if (fragStream.fail())
 	{
-		assert(0);
-		return; //TODO: LOG ERROR
+		reportFailedShaderLoad("Fragment", fragmentPath.getString());
+		return;
 	}
 
 	vertexSize = 1 + vertStream.tellg();
@@ -303,46 +303,18 @@ void ShaderProgram::compileVertFrag()
 	glShaderSource(vertexShader, 1, &glCharVert, NULL);
 	glShaderSource(fragmentShader, 1, &glCharFrag, NULL);
 
-
 	glCompileShader(fragmentShader);
-	GLint isCompiled = GL_FALSE;
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &isCompiled);
-	if (isCompiled == GL_FALSE)
+	if (!checkShaderCompilation(fragmentShader, "Fragment"))
 	{
-		GLint maxLength = 0;
-		glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &maxLength);
-
-		std::vector<GLchar> errorLog(maxLength);
-		glGetShaderInfoLog(fragmentShader, maxLength, &maxLength, &errorLog[0]);
-
-		Engine::log.postMessage(errorLog.data());
-		Engine::logger.printLog(Engine::log,String32("ShaderCompileFailed"));
-
 		glDeleteShader(fragmentShader);
-
-		assert(0);
-
 		return;
 	}
 
 	glCompileShader(vertexShader);
-	isCompiled = GL_FALSE;
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &isCompiled);
-	if (isCompiled == GL_FALSE)
+	if (!checkShaderCompilation(vertexShader, "Vertex"))
 	{
-		//assert(0);
-		GLint maxLength = 0;
-		glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &maxLength);
-
-		std::vector<GLchar> errorLog(maxLength);
-		glGetShaderInfoLog(vertexShader, maxLength, &maxLength, &errorLog[0]);
-
-		Engine::log.postMessage(errorLog.data());
-		Engine::logger.printLog(Engine::log, String32("ShaderCompileFailed"));
-
 		glDeleteShader(fragmentShader);
 		glDeleteShader(vertexShader);
-		assert(0);
 		return;
 	}
 
@@ -351,107 +323,55 @@ void ShaderProgram::compileVertFrag()
 	glAttachShader(shaderProgram, vertexShader);
 	glAttachShader(shaderProgram, fragmentShader);
 
-	//glBindFragDataLocation(shaderProgram, 0, "outColour");
-
 	glLinkProgram(shaderProgram);
 
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
-	isCompiled = GL_FALSE;
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &isCompiled);
-	if (isCompiled == GL_FALSE)
+	if (!checkProgramLinking(shaderProgram))
 	{
-		///TODO: LOG ERROR
-		assert(0);
-		GLint maxLength = 0;
-		glGetProgramiv(shaderProgram, GL_INFO_LOG_LENGTH, &maxLength);
-
-		std::vector<GLchar> errorLog(maxLength);
-		glGetProgramInfoLog(shaderProgram, maxLength, &maxLength, &errorLog[0]);
-
-		for (int i = 0; i < errorLog.size(); ++i)
-		{
-
-		}
-
-
 		glDeleteProgram(shaderProgram);
-
-		shaderProgram = 0;
-
 		return;
 	}
-
+	
 	GLID = shaderProgram;
 
 	use();
 	extractUniforms(vertexContent);
 	extractUniforms(fragmentContent);
-
-	return;
 }
 
 void ShaderProgram::loadVertGeomFrag(String32 & pName, String128 & pShaderLocationPath)
 {
+	loadVertFrag(pName, pShaderLocationPath);
+
 	String128 shaderPath; shaderPath.overwrite(pShaderLocationPath);
 
 	geomPath.overwrite(shaderPath);
 	geomPath.append(pName);
 	geomPath.append(String8(".geom"));
 
-	vertexPath.overwrite(geomPath);
-	vertexPath.shrinkBy(5);
-	vertexPath.append(String8(".vert"));
-
-	fragmentPath.overwrite(vertexPath);
-	fragmentPath.shrinkBy(5);
-	fragmentPath.append(String8(".frag"));
-
 	std::ifstream geomStream(geomPath.getString(), std::ifstream::in | std::ifstream::ate);
-	std::ifstream vertStream(vertexPath.getString(), std::ifstream::in | std::ifstream::ate);
-	std::ifstream fragStream(fragmentPath.getString(), std::ifstream::in | std::ifstream::ate);
 
 	if (geomStream.fail())
+	{
+		reportFailedShaderLoad("Geometry", geomPath.getString());
 		return;
-
-	if (vertStream.fail())
-	{
-		return; //TODO: LOG ERROR
-	}
-
-	if (fragStream.fail())
-	{
-		return; //TODO: LOG ERROR
 	}
 
 	geomSize = 1 + geomStream.tellg();
-	vertexSize = 1 + vertStream.tellg();
-	fragmentSize = 1 + fragStream.tellg();
 
 	geomContent = new char[geomSize];
-	vertexContent = new char[vertexSize];
-	fragmentContent = new char[fragmentSize];
 
 	geomContent[geomSize - 1] = '\0';
-	vertexContent[vertexSize - 1] = '\0';
-	fragmentContent[fragmentSize - 1] = '\0';
 
 	geomStream.seekg(0);
-	vertStream.seekg(0);
-	fragStream.seekg(0);
 
 	geomStream.read(geomContent, geomSize - 1);
-	vertStream.read(vertexContent, vertexSize - 1);
-	fragStream.read(fragmentContent, fragmentSize - 1);
 
 	geomStream.close();
-	vertStream.close();
-	fragStream.close();
 
 	extractPreprocessorVars(geomContent);
-	extractPreprocessorVars(vertexContent);
-	extractPreprocessorVars(fragmentContent);
 }
 
 void ShaderProgram::compileVertGeomFrag()
@@ -473,62 +393,26 @@ void ShaderProgram::compileVertGeomFrag()
 	glShaderSource(fragmentShader, 1, &glCharFrag, NULL);
 
 	glCompileShader(fragmentShader);
-	GLint isCompiled = GL_FALSE;
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &isCompiled);
-	if (isCompiled == GL_FALSE)
+	if (!checkShaderCompilation(fragmentShader, "Fragment"))
 	{
-		GLint maxLength = 0;
-		glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &maxLength);
-
-		std::vector<GLchar> errorLog(maxLength);
-		glGetShaderInfoLog(fragmentShader, maxLength, &maxLength, &errorLog[0]);
-
-		Engine::log.postMessage(errorLog.data());
-		Engine::logger.printLog(Engine::log, String32("ShaderCompileFailed"));
-
 		glDeleteShader(fragmentShader);
-
 		return;
 	}
 
 	glCompileShader(vertexShader);
-	isCompiled = GL_FALSE;
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &isCompiled);
-	if (isCompiled == GL_FALSE)
+	if (!checkShaderCompilation(vertexShader, "Vertex"))
 	{
-		GLint maxLength = 0;
-		glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &maxLength);
-
-		std::vector<GLchar> errorLog(maxLength);
-		glGetShaderInfoLog(vertexShader, maxLength, &maxLength, &errorLog[0]);
-
-		Engine::log.postMessage(errorLog.data());
-		Engine::logger.printLog(Engine::log, String32("ShaderCompileFailed"));
-
 		glDeleteShader(fragmentShader);
 		glDeleteShader(vertexShader);
-
 		return;
 	}
-
+	
 	glCompileShader(geomShader);
-	isCompiled = GL_FALSE;
-	glGetShaderiv(geomShader, GL_COMPILE_STATUS, &isCompiled);
-	if (isCompiled == GL_FALSE)
+	if (!checkShaderCompilation(vertexShader, "Geometry"))
 	{
-		GLint maxLength = 0;
-		glGetShaderiv(geomShader, GL_INFO_LOG_LENGTH, &maxLength);
-
-		std::vector<GLchar> errorLog(maxLength);
-		glGetShaderInfoLog(geomShader, maxLength, &maxLength, &errorLog[0]);
-
-		Engine::log.postMessage(errorLog.data());
-		Engine::logger.printLog(Engine::log, String32("ShaderCompileFailed"));
-
 		glDeleteShader(fragmentShader);
 		glDeleteShader(vertexShader);
 		glDeleteShader(geomShader);
-
 		return;
 	}
 
@@ -544,28 +428,9 @@ void ShaderProgram::compileVertGeomFrag()
 	glDeleteShader(fragmentShader);
 	glDeleteShader(geomShader);
 
-	isCompiled = GL_FALSE;
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &isCompiled);
-	if (isCompiled == GL_FALSE)
+	if (!checkProgramLinking(shaderProgram))
 	{
-		///TODO: LOG ERROR
-
-		GLint maxLength = 0;
-		glGetProgramiv(shaderProgram, GL_INFO_LOG_LENGTH, &maxLength);
-
-		std::vector<GLchar> errorLog(maxLength);
-		glGetProgramInfoLog(shaderProgram, maxLength, &maxLength, &errorLog[0]);
-
-		for (int i = 0; i < errorLog.size(); ++i)
-		{
-
-		}
-
-
 		glDeleteProgram(shaderProgram);
-
-		shaderProgram = 0;
-
 		return;
 	}
 
@@ -585,7 +450,8 @@ void ShaderProgram::loadCompute(String32 & pName, String128 & pShaderLocationPat
 
 	if (computeStream.fail())
 	{
-		return; //TODO: LOG ERROR
+		reportFailedShaderLoad("Compute", computePath.getString());
+		return;
 	}
 
 	computeSize = 1 + computeStream.tellg();
@@ -606,32 +472,16 @@ void ShaderProgram::loadCompute(String32 & pName, String128 & pShaderLocationPat
 void ShaderProgram::compileCompute()
 {
 	GLchar* glCharCompute = computeContent;
-	//glCharCompute = preprocess(computeContent, computeSize);
 
 	GLint computeShader = glCreateShader(GL_COMPUTE_SHADER);
 
 	glShaderSource(computeShader, 1, &glCharCompute, NULL);
 
 	glCompileShader(computeShader);
-	GLint isCompiled = GL_FALSE;
-	glGetShaderiv(computeShader, GL_COMPILE_STATUS, &isCompiled);
-	if (isCompiled == GL_FALSE)
+
+	if (!checkShaderCompilation(computeShader, "Compute"))
 	{
-		//TODO: LOG ERROR
-
-		GLint maxLength = 0;
-		glGetShaderiv(computeShader, GL_INFO_LOG_LENGTH, &maxLength);
-
-		std::vector<GLchar> errorLog(maxLength);
-		glGetShaderInfoLog(computeShader, maxLength, &maxLength, &errorLog[0]);
-
-		for (int i = 0; i < errorLog.size(); ++i)
-		{
-			std::cout << char(errorLog[i]);
-		}
-
 		glDeleteShader(computeShader);
-
 		return;
 	}
 
@@ -641,25 +491,9 @@ void ShaderProgram::compileCompute()
 	glLinkProgram(shaderProgram);
 	glDeleteShader(computeShader);
 
-	isCompiled = GL_FALSE;
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &isCompiled);
-	if (isCompiled == GL_FALSE)
+	if (!checkProgramLinking(shaderProgram))
 	{
-		//TODO: LOG ERROR
-
-		GLint maxLength = 0;
-		glGetProgramiv(shaderProgram, GL_INFO_LOG_LENGTH, &maxLength);
-
-		std::vector<GLchar> errorLog(maxLength);
-		glGetProgramInfoLog(shaderProgram, maxLength, &maxLength, &errorLog[0]);
-
-		for (int i = 0; i < errorLog.size(); ++i)
-		{
-			std::cout << char(errorLog[i]);
-		}
-
 		glDeleteProgram(shaderProgram);
-
 		return;
 	}
 
@@ -673,6 +507,85 @@ void ShaderProgram::compileCompute()
 	//computeContent = glCharCompute;
 
 	return;
+}
+
+
+void ShaderProgram::reportFailedShaderLoad(char* pType, char* pPath)
+{
+	std::string errorMessage;
+	errorMessage.append(pType);
+	errorMessage.append(" shader failed to load: ");
+	errorMessage.append(name.getString());
+	errorMessage.append("\n");
+	errorMessage.append("Expected path: ");
+	errorMessage.append(pPath);
+
+	Engine::engineLog.postTime();
+	Engine::engineLog.appendMessage(errorMessage.c_str());
+	Engine::engineLog.printLog(Engine::engineLog, String32("ShaderLoadFailed"));
+
+	MessageBox(NULL, errorMessage.c_str(), "Shader Loading Failed", MB_OK);
+}
+
+bool ShaderProgram::checkShaderCompilation(GLuint pShader, char* pType)
+{
+	GLint isCompiled = GL_FALSE;
+	glGetShaderiv(pShader, GL_COMPILE_STATUS, &isCompiled);
+	if (isCompiled == GL_FALSE)
+	{
+		GLint maxLength = 0;
+		glGetShaderiv(pShader, GL_INFO_LOG_LENGTH, &maxLength);
+
+		std::vector<GLchar> errorLog(maxLength);
+		glGetShaderInfoLog(pShader, maxLength, &maxLength, &errorLog[0]);
+
+		std::string errorMessage;
+		errorMessage.append(pType);
+		errorMessage.append(" shader failed to compile: ");
+		errorMessage.append(name.getString());
+
+		Engine::engineLog.postTime();
+		Engine::engineLog.appendMessage(errorMessage.c_str());
+		Engine::engineLog.appendMessage("\n\n");
+		Engine::engineLog.appendMessage(errorLog.data());
+		Engine::engineLog.appendMessage("\n\n");
+		Engine::engineLog.printLog(Engine::engineLog, String32("ShaderCompileFailed"));
+
+		MessageBox(NULL, errorMessage.c_str(), "Shader Compilation Failed", MB_OK);
+
+		return false;
+	}
+	return true;
+}
+
+bool ShaderProgram::checkProgramLinking(GLuint pProgram)
+{
+	GLint isCompiled = GL_FALSE;
+	glGetProgramiv(pProgram, GL_LINK_STATUS, &isCompiled);
+	if (isCompiled == GL_FALSE)
+	{
+		GLint maxLength = 0;
+		glGetShaderiv(pProgram, GL_INFO_LOG_LENGTH, &maxLength);
+
+		std::vector<GLchar> errorLog(maxLength);
+		glGetShaderInfoLog(pProgram, maxLength, &maxLength, &errorLog[0]);
+
+		std::string errorMessage;
+		errorMessage.append("Program failed to link: ");
+		errorMessage.append(name.getString());
+
+		Engine::engineLog.postTime();
+		Engine::engineLog.appendMessage(errorMessage.c_str());
+		Engine::engineLog.appendMessage("\n\n");
+		Engine::engineLog.appendMessage(errorLog.data());
+		Engine::engineLog.appendMessage("\n\n");
+		Engine::engineLog.printLog(Engine::engineLog, String32("ProgramLinkingFailed"));
+
+		MessageBox(NULL, errorMessage.c_str(), "Program Linking Failed", MB_OK);
+
+		return false;
+	}
+	return true;
 }
 
 void ShaderProgram::freeSourceContent()

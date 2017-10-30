@@ -66,7 +66,7 @@ void createModelInfoWindow(UIWindow*& win)
 			String<256> line("Position: ");
 
 			auto p = i->sgNode->fullTransform.getTranslation();
-			auto r = i->sgNode->fullTransform.getQRotation();
+			auto r = i->sgNode->fullTransform.getQuat();
 			auto s = i->sgNode->fullTransform.getScale();
 
 			std::string pos = ("(" + std::to_string(p.x) + ", " + std::to_string(p.y) + ", " + std::to_string(p.z) + ")\n");

@@ -71,7 +71,7 @@ void Console::submitCommand(StringGeneric& command)
 
 		if (!isAlpha(*cc))
 			//assert(0);
-			return; ///TODO: log ?
+			return; ///TODO: engineLog ?
 		else
 		{
 			for (;;)
@@ -150,7 +150,7 @@ void Console::registerConsoleFuncs()
 	REGISTER_CONSOLE_CALLABLE(4, "reloadAllShaders", 0);
 }
 
-void Console::textInput(KeyCode code)
+void Console::textInput(Key code)
 {
 	
 	switch (code.code)

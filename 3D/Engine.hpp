@@ -4,7 +4,7 @@
 #include "Shader.hpp"
 #include <random>
 #include "UserInputManager.hpp"
-#include "Logger.hpp"
+#include "Log.hpp"
 #include "UIWindow.hpp"
 #include <unordered_map>
 #include <ft2build.h>
@@ -83,10 +83,15 @@ public:
 	} world;
 
 	struct KeyBindConfig {
-		enum functionNum{ESCAPE, CYCLERES, SCREENSHOT, TOGGLE_WIREFRAME, TOGGLE_TEXTBOUNDS, RELOAD_SHADERS, TOGGLE_CONSOLE, PRINT_LOG};
-		std::unordered_map<int, std::function<void(void)>> functionRepresentation;
+		std::unordered_map<std::string, std::function<void(void)>> functionNames;
+		
+		/*struct KeyBindContext
+		{
+			KeyBindContext(std::string pName, std::)
+				std::string name; //eg. menu, in-game etc
+		};*/
 
-		void setFunctionRepresentations();
+		void initialiseFunctionBindingConfig();
 		//Load file with key binds and load file with mouse bind and set both
 		void loadKeyBinds();
 	
@@ -125,14 +130,13 @@ public:
 	static QPC qpc;
 	static glm::ivec2 lastM;
 	static UIM uim;
-	static Logger logger;
 
 	static s32 selectedID;
 
 	static UIWindow* uiw;
 	static bool windowClicked;
 	static glm::ivec2 clickedPos;
-	static Log log;
+	static Log engineLog;
 	
 	static AssetManager assets;
 

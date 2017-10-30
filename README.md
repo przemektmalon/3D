@@ -70,7 +70,7 @@ Some screenshots on Google Drive: https://drive.google.com/open?id=0B9uuq4IEinJP
 
 -FreeType
 
--GLI
+-Boost
 
 -GLM
 

@@ -1,12 +1,21 @@
 #pragma once
 #include <Windows.h>
 
-class KeyCode
+typedef int KeyCode;
+
+class Key
 {
 public:
-	KeyCode(unsigned char pKey) : code(Code(pKey)) {}
-	enum Code
+	Key(int pCode) : code(pCode) {}
+	Key() : code(KC_NULL) {}
+	enum
 	{
+		/// TODO: Consider if we need an internal key code system. 
+		/// Some of the system code defines are not always obvious like VK_MENU == ALT key.
+		/// If we want to have an internal system we can expand this list to include all keys including alpha characters
+
+		KC_NULL = 0,
+
 		KC_BACK = 0x08,
 		KC_TAB = 0x09,
 
@@ -18,7 +27,7 @@ public:
 		KC_CAPS = VK_CAPITAL,
 		KC_ESCAPE = VK_ESCAPE
 	};
-	Code code;
+	KeyCode code;
 };
 
 class KeyboardState
@@ -32,7 +41,7 @@ public:
 		GetKeyboardState(PBYTE(&keyState));
 	}
 
-	bool isKeyPressed(KeyCode keyCode)
+	bool isKeyPressed(Key keyCode)
 	{
 		return (keyState[keyCode.code] >> 1) != 0;
 	}

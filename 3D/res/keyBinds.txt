@@ -1,8 +1,22 @@
-27 0
-80 1
-76 2
-79 3
-73 4
-77 5
-192 6
-75 7
+ # comments must be on their own separate lines!
+
+# this file provides keys and the functions they are set to
+# the format is {key} {function name}, separate by one or more spaces
+# dont end lines with spaces (or they will be part of the function name)!
+# some special characters have special three letter codes explained the the end of the file
+
+ESC escape
+P   cycleres
+L   screenshot
+O   toggle_wireframe
+I   toggle_textbounds
+M   reload_shaders
+TIL toggle_console
+K   print_log
+
+# ESC = escape
+# TIL = tilde
+# SPC = space
+# more can be added
+
+
