@@ -8,16 +8,17 @@
 
 void createModelInfoWindow(UIWindow*& win)
 {
-	win = new UIWindow(UIRect(50, 50, 500, 500), 4, &Engine::window);
+	win = new UIWindow(UIRect(0, 0, 500, 500), 4, &Engine::window);
 	win->setTitle("STATS");
 
 	Text2D::TextStyle styleA(Engine::assets.getFont("clearsansb"), 14);
 
 	C_LABEL(lblFPS, win);
+	lblFPS.setName("fps");
 	lblFPS.setStyle(styleA);
 	lblFPS.setString(String<32>("FPS: "));
 	lblFPS.setTextOrigin(Text2D::TopLeft);
-	lblFPS.setPosition(glm::fvec2(8, 4));
+	lblFPS.setPosition(glm::fvec2(20, 4));
 	
 	lblFPS.setUpdate(
 		[](UIWindow * win, UIElement* __this) -> void {
@@ -33,34 +34,44 @@ void createModelInfoWindow(UIWindow*& win)
 		return;
 	});
 
-	C_BUTTON(butMovXP, win);
-	butMovXP.setSize(glm::fvec2(200, 200));
-	butMovXP.getText().setStyle(styleA);
-	butMovXP.setString(SSTR("MoveXP"));
-	butMovXP.setPosition(glm::fvec2(100, 100));
+	C_BUTTON(button, win);
+	button.setName("button");
+	button.setSize(glm::fvec2(200, 30));
+	button.getText().setStyle(styleA);
+	button.getText().setCharSize(18);
+	button.setString(SSTR("Button!"));
+	button.getText().setTextOrigin(Text2D::BotLeft);
+	button.setPosition(glm::fvec2(20, 370));
 
-	butMovXP.setOnMouseDown([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
+	button.setOnMouseDown([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
 		UIButton* _this = (UIButton*)__this;
-
+		_this->setString(SSTR("Button Pressed!"));
 	});
 
-	butMovXP.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
+	button.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
 		UIButton* _this = (UIButton*)__this;
-
+		if (_this->isHovered())
+			_this->setString(SSTR("Button Hovered!"));
+		else
+			_this->setString(SSTR("Button!"));
 	});
 
-	butMovXP.setOnMouseEnter([](UIWindow* win, UIElement* __this, MouseEvent& me) -> void {
+	button.setOnMouseEnter([](UIWindow* win, UIElement* __this, MouseEvent& me) -> void {
 		UIButton* _this = (UIButton*)__this;
-
+		_this->setString(SSTR("Button Hovered!"));
 	});
 
-	butMovXP.setOnMouseLeave([](UIWindow* win, UIElement* __this, MouseEvent& me) -> void {
+	button.setOnMouseLeave([](UIWindow* win, UIElement* __this, MouseEvent& me) -> void {
 		UIButton* _this = (UIButton*)__this;
-
-		
+		_this->setString(SSTR("Button!"));
 	});
+
+	C_SLIDER(slider, win);
+	slider.setName("slider");
+	slider.init(irect(20, 420, 250, 10));
 
 	win->setMovable(false);
+	win->addElement(sliderPtr);
 	win->addElement(lblFPSPtr);
-	win->addElement(butMovXPPtr);
+	win->addElement(buttonPtr);
 }

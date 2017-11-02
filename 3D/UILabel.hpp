@@ -5,8 +5,7 @@
 
 class UIWindow;
 
-class UILabel :
-	public UIElement
+class UILabel : public UIElement
 {
 public:
 	UILabel(UIWindow* pParent);

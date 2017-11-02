@@ -13,12 +13,13 @@ UIElement::~UIElement()
 
 void UIElement::update()
 {
-	updateClock += Engine::dt.getSecondsf();
-	if (updateClock > updateInterval)
+	if (updateImpl != nullptr)
 	{
-		if (updateImpl != nullptr)
+		updateClock += Engine::dt.getSecondsf();
+		if (updateClock > updateInterval)
+		{
 			updateImpl(parentWindow, this);
-
-		updateClock = 0.f;
+			updateClock = 0.f;
+		}
 	}
 }

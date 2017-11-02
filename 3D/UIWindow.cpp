@@ -75,7 +75,7 @@ void UIWindow::draw()
 	float innerAlpha = 0.9f;
 
 	glBlendColor(0.f, 0.f, 0.f, innerAlpha); //Alpha is absolute alpha for inner area. RGB are not used.
-	glBlendFunc(GL_CONSTANT_ALPHA, GL_ZERO);
+	glBlendFunc(GL_SRC_ALPHA, GL_ZERO);
 	glBindTextureUnit(0, 0);
 	glDrawArrays(GL_QUADS, 4, 4);
 
@@ -88,7 +88,7 @@ void UIWindow::draw()
 
 	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
 	{
-		(*itr)->draw();
+		(*itr).second->draw();
 	}
 	
 	Engine::r->fboDefault.bind();
@@ -107,10 +107,7 @@ void UIWindow::draw()
 	glBindVertexArray(vao);
 
 	glEnable(GL_BLEND);
-	//glDisable(GL_BLEND);
-	glBlendFunc(GL_CONSTANT_ALPHA, GL_SRC_COLOR);
-	//or
-	//glBlendFunc(GL_SRC_ALPHA, GL_SRC_ALPHA);
+	glBlendFunc(GL_SRC_ALPHA, GL_SRC_COLOR);
 
 	glDrawArrays(GL_QUADS, 0, 4);
 
@@ -122,7 +119,7 @@ void UIWindow::update()
 {
 	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
 	{
-		(*itr)->update();
+		(*itr).second->update();
 	}
 }
 
@@ -130,14 +127,14 @@ void UIWindow::mouseDown(MouseEvent& pMouseEvent)
 {
 	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
 	{
-		auto rect = (*itr)->getBounds();
-		auto mp = glm::ivec2(pMouseEvent.getUIWindowPosition((*itr)->getParentWindow()).x, (*itr)->getParentWindow()->getWindowRect().height - pMouseEvent.getUIWindowPosition((*itr)->getParentWindow()).y);
+		auto rect = (*itr).second->getBounds();
+		auto mp = glm::ivec2(pMouseEvent.getUIWindowPosition((*itr).second->getParentWindow()).x, (*itr).second->getParentWindow()->getWindowRect().height - pMouseEvent.getUIWindowPosition((*itr).second->getParentWindow()).y);
 
 		if (!rect.contains(mp))
 			continue;
 
-		(*itr)->setClicked(true);
-		(*itr)->onMouseDown(pMouseEvent);
+		(*itr).second->setClicked(true);
+		(*itr).second->onMouseDown(pMouseEvent);
 	}
 }
 
@@ -145,10 +142,10 @@ void UIWindow::mouseUp(MouseEvent& pMouseEvent)
 {
 	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
 	{
-		if ((*itr)->isClicked())
+		if ((*itr).second->isClicked())
 		{
-			(*itr)->setClicked(false);
-			(*itr)->onMouseUp(pMouseEvent);
+			(*itr).second->setClicked(false);
+			(*itr).second->onMouseUp(pMouseEvent);
 		}
 	}
 }
@@ -157,7 +154,7 @@ void UIWindow::keyDown(KeyEvent & pKeyEvent)
 {
 	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
 	{
-		(*itr)->onKeyDown(pKeyEvent);
+		(*itr).second->onKeyDown(pKeyEvent);
 	}
 }
 
@@ -165,7 +162,7 @@ void UIWindow::keyUp(KeyEvent & pKeyEvent)
 {
 	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
 	{
-		(*itr)->onKeyUp(pKeyEvent);
+		(*itr).second->onKeyUp(pKeyEvent);
 	}
 }
 
@@ -173,27 +170,27 @@ void UIWindow::checkMouseEnter(MouseEvent& pMouseEvent)
 {
 	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
 	{
-		auto rect = (*itr)->getBounds();
-		auto mp = glm::ivec2(pMouseEvent.getUIWindowPosition((*itr)->getParentWindow()).x, (*itr)->getParentWindow()->getWindowRect().height - pMouseEvent.getUIWindowPosition((*itr)->getParentWindow()).y);
+		auto rect = (*itr).second->getBounds();
+		auto mp = glm::ivec2(pMouseEvent.getUIWindowPosition((*itr).second->getParentWindow()).x, (*itr).second->getParentWindow()->getWindowRect().height - pMouseEvent.getUIWindowPosition((*itr).second->getParentWindow()).y);
 
 		if (!rect.contains(mp))
 		{
-			if ((*itr)->isHovered())
+			if ((*itr).second->isHovered())
 			{
-				(*itr)->setHovered(false);
-				(*itr)->onMouseLeave(pMouseEvent);
-				if ((*itr)->isClicked())
-					(*itr)->setOffClick(true);
+				(*itr).second->setHovered(false);
+				(*itr).second->onMouseLeave(pMouseEvent);
+				if ((*itr).second->isClicked())
+					(*itr).second->setOffClick(true);
 			}
 			continue;
 		}
 		
-		if (!(*itr)->isHovered())
+		if (!(*itr).second->isHovered())
 		{
-			(*itr)->setHovered(true);
-			(*itr)->onMouseEnter(pMouseEvent);
-			if ((*itr)->isClicked())
-				(*itr)->setOffClick(false);
+			(*itr).second->setHovered(true);
+			(*itr).second->onMouseEnter(pMouseEvent);
+			if ((*itr).second->isClicked())
+				(*itr).second->setOffClick(false);
 		}
 	}
 }
@@ -228,8 +225,9 @@ void UIWindow::setTitle(std::string pTitle)
 
 void UIWindow::addElement(UIElement * pEl)
 {
-	pEl->setParentWindow(this); elements.push_back(pEl);
-}
+	pEl->setParentWindow(this); 
+	elements.insert(std::make_pair(pEl->getName(), pEl));
+} 
 
 void UIWindow::updateWindowVBO()
 {

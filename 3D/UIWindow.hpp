@@ -5,6 +5,7 @@
 #include "Window.hpp"
 #include "Event.hpp"
 #include "Rect.hpp"
+#include <unordered_map>
 
 class Font;
 class UIElement;
@@ -89,7 +90,7 @@ public:
 
 	Framebuffer renderTarget;
 
-	std::vector<UIElement*> elements;
+	std::unordered_map<std::string,UIElement*> elements;
 	UILabel* title;
 
 	Shape2DShader* shader;

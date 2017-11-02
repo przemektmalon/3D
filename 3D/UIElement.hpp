@@ -16,6 +16,16 @@ public:
 	UIElement(ElementType elType, UIWindow* pParent);
 	virtual ~UIElement();
 
+	void setName(std::string pName)
+	{
+		name = pName;
+	}
+
+	std::string& getName()
+	{
+		return name;
+	}
+
 	virtual void draw() {}
 	virtual void update();
 
@@ -153,6 +163,7 @@ public:
 
 protected:
 
+	std::string name;
 	UIVariable elementVar;
 	//u32 varCount;
 	
