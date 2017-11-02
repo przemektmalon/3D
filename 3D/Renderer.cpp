@@ -569,6 +569,7 @@ void MasterRenderer::reInitialiseFramebuffers()
 	initialiseFramebuffers();
 	lightPassTex.release();
 	lightPassTex.createFromStream(GL_RGBA32F, Engine::cfg.render.resolution.x, Engine::cfg.render.resolution.y, GL_RGBA, GL_FLOAT, NULL);
+	
 }
 
 void MasterRenderer::destroyFramebufferTextures()
