@@ -117,8 +117,6 @@ public:
 
 	static std::mt19937_64 rand;
 
-	static Camera defaultOrthoCam;
-
 	static FT_Library ftLib;
 	static s64 startTime;
 
@@ -134,8 +132,6 @@ public:
 	static s32 selectedID;
 
 	static UIWindow* uiw;
-	static bool windowClicked;
-	static glm::ivec2 clickedPos;
 	static Log engineLog;
 	
 	static AssetManager assets;

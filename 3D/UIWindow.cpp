@@ -9,7 +9,7 @@
 #include "AssetManager.hpp"
 #include "Mouse.hpp"
 
-UIWindow::UIWindow(UIRect pWindowArea, int pBorderWidth, const Window* pParentWindow) : parentWindow(pParentWindow), title(new UILabel(this)), borderWidth(pBorderWidth)
+UIWindow::UIWindow(irect pWindowArea, int pBorderWidth, const Window* pParentWindow) : parentWindow(pParentWindow), title(new UILabel(this)), borderWidth(pBorderWidth)
 {
 	windowArea = pWindowArea;
 	renderTarget.setResolution(glm::ivec2(windowArea.width, windowArea.height));
@@ -121,10 +121,21 @@ void UIWindow::update()
 	{
 		(*itr).second->update();
 	}
+
+	if(dragging)
+		setWindowPosition(Engine::window.getMousePosition()-clickedPos);
 }
 
 void UIWindow::mouseDown(MouseEvent& pMouseEvent)
 {
+	if (!windowArea.contains(pMouseEvent.getPosition()))
+	{
+		dragging = false;
+		return;
+	}
+
+	bool canDrag = true;
+
 	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
 	{
 		auto rect = (*itr).second->getBounds();
@@ -135,7 +146,16 @@ void UIWindow::mouseDown(MouseEvent& pMouseEvent)
 
 		(*itr).second->setClicked(true);
 		(*itr).second->onMouseDown(pMouseEvent);
+		canDrag = false;
 	}
+
+	if (canDrag)
+	{
+		clickedPos = pMouseEvent.getPosition() - glm::ivec2(windowArea.left, windowArea.top);
+		dragging = true;
+	}
+	else
+		dragging = false;
 }
 
 void UIWindow::mouseUp(MouseEvent& pMouseEvent)
@@ -148,6 +168,7 @@ void UIWindow::mouseUp(MouseEvent& pMouseEvent)
 			(*itr).second->onMouseUp(pMouseEvent);
 		}
 	}
+	dragging = false;
 }
 
 void UIWindow::keyDown(KeyEvent & pKeyEvent)

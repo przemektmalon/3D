@@ -14,7 +14,7 @@ class UILabel;
 class UIWindow
 {
 public:
-	UIWindow(UIRect pWindowArea, int pBorderWidth, const Window* pParentWindow);
+	UIWindow(irect pWindowArea, int pBorderWidth, const Window* pParentWindow);
 	~UIWindow();
 
 	void draw();
@@ -42,27 +42,10 @@ public:
 		windowArea.height = newY;
 	}
 
-	void moveWindow(u32 newX, u32 newY)
-	{
-		if (!movable)
-			return;
-		windowArea.left = newX;
-		windowArea.top = newY;
-	}
-
 	void updateWindowVBO();
 
-	UIRect getWindowArea() { return windowArea; }
+	irect getWindowArea() { return windowArea; }
 	irect getWindowRect() { return irect(windowArea.left, windowArea.top, windowArea.width, windowArea.height); }
-
-	void drag(glm::ivec2 delta)
-	{
-		if (!movable)
-			return;
-		windowArea.left += delta.x;
-		windowArea.top += delta.y;
-		updateWindowVBO();//TODO: DONT UPDATE VBO, CHANGE TRANSFORM(MODEL) MATRIX
-	}
 
 	void setWindowPosition(glm::ivec2 pos)
 	{
@@ -80,11 +63,13 @@ public:
 
 //private:
 
-	UIRect windowArea;
-	UIRect elementArea;
+	irect windowArea;
+	irect elementArea;
 	int borderWidth;
 	int titleWidth;
 	bool movable;
+	bool dragging;
+	glm::ivec2 clickedPos;
 	bool hasTitle;
 	bool hasFocus;
 

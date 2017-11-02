@@ -24,7 +24,6 @@
 #include <fcntl.h>
 
 FT_Library Engine::ftLib;
-Camera Engine::defaultOrthoCam;
 HINSTANCE Engine::instance;
 std::mt19937_64 Engine::rand;
 s64 Engine::startTime;
@@ -40,8 +39,6 @@ char Engine::workingDirectory[MAX_PATH];
 u32 Engine::workingDirectoryLength;
 s32 Engine::selectedID;
 UIWindow* Engine::uiw;
-bool Engine::windowClicked = false;
-glm::ivec2 Engine::clickedPos;
 AssetManager Engine::assets;
 World* Engine::world;
 float Engine::programTime = 0;
@@ -259,20 +256,12 @@ void printlog()
 
 void mouseDown()
 {
-	auto mPos = Engine::window.mouse.getWindowPosition(&Engine::window);
-	auto uiw = Engine::uiw;
-	UIRect wa = uiw->getWindowArea();
-	if (mPos.x > wa.left && mPos.x < wa.left + wa.width && mPos.y > wa.top && mPos.y < wa.top + wa.height)
-	{
-		Engine::windowClicked = true;
-		Engine::clickedPos = mPos - glm::ivec2(wa.left, wa.top);
-	}
-	//uiw->mouseDown();
+
 }
 
 void mouseUp()
 {
-	Engine::windowClicked = false;
+
 }
 
 void toggleConsole()
@@ -336,14 +325,6 @@ void Engine::mainLoop(int resolutionIndex)
 	cfg.render.setResolution(resolutionIndex);
 	cfg.render.setFrameScale(1.f);
 
-	defaultOrthoCam.initaliseOrtho(window.getSizeX(), window.getSizeY());
-
-	s64 tot = 0;
-
-	float exposure = 1.f;
-
-	
-
 	world = new World();
 	world->initialiseGLBuffers();
 
@@ -365,7 +346,6 @@ void Engine::mainLoop(int resolutionIndex)
 	s->addChildShape(trans, c4);
 	s->addChildShape(trans, c5);
 	s->addChildShape(trans, c6);
-
 
 	auto worldRoot = world->getWorldRootNode();
 
@@ -508,11 +488,6 @@ void Engine::processGameFrame()
 	if (window.mouse.rightDown)
 	{
 		SetCursorPos(window.getPosX() + (window.getSizeX() / 2), window.getPosY() + (window.getSizeY() / 2));
-	}
-
-	if (windowClicked)
-	{
-		uiw->setWindowPosition(window.mouse.getWindowPosition(&window) - clickedPos);
 	}
 
 	auto keyboardState = window.keyboard.keyState;

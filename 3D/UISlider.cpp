@@ -2,17 +2,22 @@
 #include "UIWindow.hpp"
 #include "Engine.hpp"
 #include "Window.hpp"
+#include "AssetManager.hpp"
 
 UISlider::UISlider(UIWindow* pParent) : UIElement(Slider,pParent)
 {
 	slider.initOGL();
 	range.initOGL();
-	leftLimit.init();
-	rightLimit.init();
+	valueText.init();
+
+	Text2D::TextStyle style(Engine::assets.getFont("clearsansb"), 14);
+
+	valueText.setStyle(style);
+	valueText.setTextOrigin(Text2D::BotMiddle);
 
 	sliderColour = glm::fvec4(0.7, 0.7, 0.7, 0.8);
-	sliderClickColour = glm::fvec4(0.8, 0.8, 0.8, 0.9);
-	sliderHoverColour = glm::fvec4(0.75, 0.75, 0.75, 0.8);
+	sliderClickColour = glm::fvec4(0.9, 0.9, 0.9, 0.9);
+	sliderHoverColour = glm::fvec4(0.8, 0.8, 0.8, 0.8);
 	rangeColour = glm::fvec4(0.3, 0.3, 0.3, 0.9);
 
 	slider.setColour(sliderColour);
@@ -23,16 +28,33 @@ UISlider::UISlider(UIWindow* pParent) : UIElement(Slider,pParent)
 		if (_this->isSliding)
 		{
 			auto newBounds = _this->slider.getBounds();
-			newBounds.left = Engine::window.mouse.getWindowPosition(&Engine::window).x - 4;
+			newBounds.left = Engine::window.mouse.getWindowPosition(&Engine::window).x - 4 - win->getWindowArea().left;
 			if (newBounds.left < _this->range.getBounds().left)
 				newBounds.left = _this->range.getBounds().left;
 			if (newBounds.right() > _this->range.getBounds().right())
-				newBounds.left = _this->range.getBounds().left + _this->range.getBounds().width;
+				newBounds.left = _this->range.getBounds().left + _this->range.getBounds().width - 8;
 			_this->slider.setBounds(newBounds);
+
+			float ratio = float(newBounds.left - _this->range.getBounds().left) / float(_this->range.getBounds().width-8.f);
+
+			std::string valString;
+
+			switch (_this->valType)
+			{
+			case Integer:
+				_this->value.i = _this->limits.left.i + int(float(_this->limits.right.i - _this->limits.left.i) * ratio);
+				valString = std::to_string(_this->value.i);
+				break;
+			case Float:
+				_this->value.f = _this->limits.left.f + (float(_this->limits.right.f - _this->limits.left.f) * ratio);
+				valString = std::to_string(_this->value.f);
+				break;
+			}
+
+			_this->valueText.setString(valString);
 		}
 	});
 }
-
 
 UISlider::~UISlider()
 {
