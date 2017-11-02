@@ -335,9 +335,6 @@ public: ///TODO: Max light count is 500, add setters etc
 
 	void updateAllPointLights()
 	{
-		//auto data = pointLightsBuffer.mapRange(0, sizeof(GPUData) * pointLightsGPUData.size(), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
-		//memcpy(data, (void*)pointLightsGPUData.data(), pointLightsGPUData.size() * sizeof(GPUData));
-		//pointLightsBuffer.unmap();
 		pointLightsBuffer.bufferData(sizeof(PointLight::GPUData) * pointLightsGPUData.size(), pointLightsGPUData.data(), GL_DYNAMIC_DRAW);
 	}
 

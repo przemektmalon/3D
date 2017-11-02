@@ -60,7 +60,7 @@ void UIWindow::draw()
 
 	renderTarget.bind();
 	//renderTarget.textureAttachments[0].bind();
-	renderTarget.clear(GL_COLOR_BUFFER_BIT, glm::fvec4(0.05, 0.05, 0.05, 0.65f));
+	renderTarget.clear(GL_COLOR_BUFFER_BIT, glm::fvec4(0.1, 0.1, 0.1, 0.9f));
 
 	glBindVertexArray(vao);
 	//glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -72,7 +72,7 @@ void UIWindow::draw()
 	shader->setProjModel(proj);
 	shader->sendUniforms();
 	
-	float innerAlpha = 0.8f;
+	float innerAlpha = 0.9f;
 
 	glBlendColor(0.f, 0.f, 0.f, innerAlpha); //Alpha is absolute alpha for inner area. RGB are not used.
 	glBlendFunc(GL_CONSTANT_ALPHA, GL_ZERO);
@@ -95,7 +95,7 @@ void UIWindow::draw()
 	glViewport(0, 0, Engine::window.getSizeX(), Engine::window.getSizeY());
 	shader->use();
 
-	col = glm::fvec4(0.f,0.f,0.f,0.f);
+	col = glm::fvec4(0.f,0.f,0.f,0.9f);
 	auto m = glm::ortho(0.f, (float)Engine::window.getSizeX(), 0.f, (float)Engine::window.getSizeY(), 0.f, 100.f);
 	//auto m = glm::fmat4(0.f);
 	shader->setColour(col);
@@ -108,9 +108,9 @@ void UIWindow::draw()
 
 	glEnable(GL_BLEND);
 	//glDisable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendFunc(GL_CONSTANT_ALPHA, GL_SRC_COLOR);
 	//or
-	glBlendFunc(GL_SRC_ALPHA, GL_SRC_ALPHA);
+	//glBlendFunc(GL_SRC_ALPHA, GL_SRC_ALPHA);
 
 	glDrawArrays(GL_QUADS, 0, 4);
 
@@ -130,6 +130,13 @@ void UIWindow::mouseDown(MouseEvent& pMouseEvent)
 {
 	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
 	{
+		auto rect = (*itr)->getBounds();
+		auto mp = glm::ivec2(pMouseEvent.getUIWindowPosition((*itr)->getParentWindow()).x, (*itr)->getParentWindow()->getWindowRect().height - pMouseEvent.getUIWindowPosition((*itr)->getParentWindow()).y);
+
+		if (!rect.contains(mp))
+			continue;
+
+		(*itr)->setClicked(true);
 		(*itr)->onMouseDown(pMouseEvent);
 	}
 }
@@ -138,7 +145,11 @@ void UIWindow::mouseUp(MouseEvent& pMouseEvent)
 {
 	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
 	{
-		(*itr)->onMouseUp(pMouseEvent);
+		if ((*itr)->isClicked())
+		{
+			(*itr)->setClicked(false);
+			(*itr)->onMouseUp(pMouseEvent);
+		}
 	}
 }
 
@@ -158,11 +169,32 @@ void UIWindow::keyUp(KeyEvent & pKeyEvent)
 	}
 }
 
-void UIWindow::mouseHover(MouseEvent& pMouseEvent)
+void UIWindow::checkMouseEnter(MouseEvent& pMouseEvent)
 {
 	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
 	{
-		(*itr)->onHover(pMouseEvent);
+		auto rect = (*itr)->getBounds();
+		auto mp = glm::ivec2(pMouseEvent.getUIWindowPosition((*itr)->getParentWindow()).x, (*itr)->getParentWindow()->getWindowRect().height - pMouseEvent.getUIWindowPosition((*itr)->getParentWindow()).y);
+
+		if (!rect.contains(mp))
+		{
+			if ((*itr)->isHovered())
+			{
+				(*itr)->setHovered(false);
+				(*itr)->onMouseLeave(pMouseEvent);
+				if ((*itr)->isClicked())
+					(*itr)->setOffClick(true);
+			}
+			continue;
+		}
+		
+		if (!(*itr)->isHovered())
+		{
+			(*itr)->setHovered(true);
+			(*itr)->onMouseEnter(pMouseEvent);
+			if ((*itr)->isClicked())
+				(*itr)->setOffClick(false);
+		}
 	}
 }
 

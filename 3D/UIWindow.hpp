@@ -22,7 +22,7 @@ public:
 	void mouseUp(MouseEvent& pMouseEvent);
 	void keyDown(KeyEvent& pMouseEvent);
 	void keyUp(KeyEvent& pMouseEvent);
-	void mouseHover(MouseEvent & pMouseEvent);
+	void checkMouseEnter(MouseEvent & pMouseEvent);
 	const GLTexture2D& getTexture() { return renderTarget.textureAttachments[0]; }
 
 	void setBorderWidth(u32 pWidth)
@@ -85,6 +85,7 @@ public:
 	int titleWidth;
 	bool movable;
 	bool hasTitle;
+	bool hasFocus;
 
 	Framebuffer renderTarget;
 

@@ -3,27 +3,51 @@
 #include "Text.hpp"
 #include "UIRectangleShape.hpp"
 
-class UIButton :
-	public UIElement
+class UIButton : public UIElement
 {
 public:
 	UIButton(UIWindow* pParent);
 	~UIButton();
 	
-	void mouseDown() 
+	void onMouseDown(MouseEvent& pMouseEvent)
 	{
-		if (text.getColour().x == 1.f)
-		{
-			text.setColour(glm::fvec3(0.f, 1.f, 0.f));
-		}
-		else if (text.getColour().y == 1.f)
-		{
-			text.setColour(glm::fvec3(0.f, 0.f, 1.f));
-		}
-		else if (text.getColour().z == 1.f)
-		{
-			text.setColour(glm::fvec3(1.f, 0.f, 0.f));
-		}
+		if (onMouseDownImpl)
+			onMouseDownImpl(parentWindow, this, pMouseEvent);
+
+		setRectColour(backClickColour);
+	}
+
+	void onMouseUp(MouseEvent& pMouseEvent)
+	{
+		if (onMouseUpImpl)
+			onMouseUpImpl(parentWindow, this, pMouseEvent);
+
+		if (isHovered())
+			setRectColour(backHoverColour);
+		else
+			setRectColour(backColour);
+	}
+
+	void onMouseEnter(MouseEvent& pMouseEvent)
+	{
+		if (onMouseEnterImpl)
+			onMouseEnterImpl(parentWindow, this, pMouseEvent);
+
+		if(isClicked())
+			setRectColour(backClickColour);
+		else
+			setRectColour(backHoverColour);
+	}
+
+	void onMouseLeave(MouseEvent& pMouseEvent)
+	{
+		if (onMouseLeaveImpl)
+			onMouseLeaveImpl(parentWindow, this, pMouseEvent);
+
+		if (isClicked())
+			setRectColour(backHoverColour);
+		else
+			setRectColour(backColour);
 	}
 
 	void draw()
@@ -52,15 +76,15 @@ public:
 
 	void setSize(glm::fvec2 pSize)
 	{
-		size = pSize;
+		dimensions = UISize(pSize);
 		updateBounds();
 	}
 
 	void updateBounds()
 	{
 		auto b = text.getBoundingBox();
-		border.x = (size.x - b.width) * 0.5;
-		border.y = (size.y - b.height) * 0.5;
+		border.x = (dimensions.width - b.width) * 0.5;
+		border.y = (dimensions.height - b.height) * 0.5;
 		text.setPosition(position + border);
 		rect.setBounds(frect(position.x, position.y, (border.x*2.f) + b.width, (border.y * 2.f) + b.height));
 	}
@@ -82,23 +106,23 @@ public:
 
 	frect getBounds()
 	{
-		return frect(position.x, position.y, size.x, size.y);
+		return frect(position.x, position.y, dimensions.width, dimensions.height);
 	}
 
-	//glm::ivec2 getPosition() { return rect.bounds.topLeft; }
-	glm::ivec2 getPosition() { return glm::ivec2(1.f,1.f); }
+	glm::ivec2 getPosition() { return rect.getBounds().topLeft; }
 	glm::ivec2 getTopLeft() { return getPosition(); }
-	//glm::ivec2 getSize() { return rect.bounds.size; }
-	glm::ivec2 getSize() { return glm::ivec2(1.f,1.f); }
-
-
-
+	glm::ivec2 getSize() { return rect.getBounds().size; }
+	
 private:
+
+	/// TODO: Colour transitions for all classes 
+	/// make a class that takes the address of the colour to change and some parameters like time, start and end colour
+	glm::fvec4 backColour;
+	glm::fvec4 backHoverColour;
+	glm::fvec4 backClickColour;
 
 	Text2D text;
 	RectangleShape rect;
-	glm::fvec2 size;
 	glm::fvec2 border;
-	glm::fvec2 position;
 };
 

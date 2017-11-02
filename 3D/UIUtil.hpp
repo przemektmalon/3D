@@ -1,9 +1,11 @@
 #pragma once
 #include "Types.hpp"
+#include "MathIncludes.hpp"
+#include <string>
 
 struct UIVariable
 {
-	char* valString;
+	std::string valueString;
 	union
 	{
 		double valFloat;
@@ -20,5 +22,7 @@ struct UIRect
 
 struct UISize
 {
-	s32 width, height;
+	UISize() {}
+	UISize(glm::fvec2 pSize) : width(pSize.x), height(pSize.y) {}
+	float width, height;
 };

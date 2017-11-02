@@ -1,1 +1,3 @@
 camSpeed=30.0
+tau=0.8
+damping=1.7

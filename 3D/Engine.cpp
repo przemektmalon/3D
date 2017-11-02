@@ -53,6 +53,9 @@ Physics Engine::p;
 PhysicsWorld Engine::physics;
 EngineConfig Engine::cfg;
 
+float Engine::tau;
+float Engine::damping;
+
 const s32 EngineConfig::RenderConfig::validResolutionsRaw[2][NUM_VALID_RESOLUTIONS] =
 {
 	{3840 , 1920, 1600, 1536, 1366, 1280, 1024, 960, 848 },
@@ -173,7 +176,8 @@ bool pickBody(btVector3& rayFromWorld, btVector3& rayToWorld)
 				Engine::p.pickedConstraint = Engine::p.p2p;
 				btScalar mousePickClamping = 3000.f;
 				Engine::p.p2p->m_setting.m_impulseClamp = mousePickClamping;
-				Engine::p.p2p->m_setting.m_tau = 0.01f;
+				Engine::p.p2p->m_setting.m_tau = Engine::tau;
+				Engine::p.p2p->m_setting.m_damping = Engine::damping;
 			}
 		}
 		Engine::p.oldPickingPos = rayToWorld;
@@ -414,6 +418,8 @@ void Engine::mainLoop(int resolutionIndex)
 	tweak.setTweaksFile("res/tweaks.txt");
 	tweak.setUpdateTime(Time(1));
 	tweak.bindVariable(cfg.world.camSpeed, "camSpeed", Tweaks::Floating);
+	tweak.bindVariable(Engine::tau, "tau", Tweaks::Floating);
+	tweak.bindVariable(Engine::damping, "damping", Tweaks::Floating);
 
 	while (engineState != Quitting) {
 		if (!window.processMessages()) 
@@ -471,7 +477,7 @@ void Engine::mainLoop(int resolutionIndex)
 				}
 			}
 			ev.constructMouse(MouseCode::Code::M_NONE, window.getMousePosition(), 0);
-			uiw->mouseHover((MouseEvent&)ev);
+			uiw->checkMouseEnter((MouseEvent&)ev);
 			mouseMoveCallback(ev.mouse.position.x, ev.mouse.position.y);
 
 			if(console.stateFlags == 0)

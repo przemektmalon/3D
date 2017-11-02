@@ -145,6 +145,8 @@ public:
 	static Physics p;
 	static PhysicsWorld physics;
 
+	static float tau, damping;
+
 	static EngineConfig cfg;
 
 //private:

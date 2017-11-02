@@ -3,11 +3,13 @@
 #include "glm\common.hpp"
 #include "Event.hpp"
 #include <functional>
+#include "Rect.hpp"
 
 class UIWindow;
 
 class UIElement
 {
+	friend class UIWindow;
 public:
 	enum ElementType { Label, Button, Slider, SwitchButton, Console };
 
@@ -31,11 +33,11 @@ public:
 			onKeyUpImpl(parentWindow, this, pKeyEvent);
 		}
 	}
-	virtual void onMouseDown(MouseEvent& pMouseEvent) 
+	virtual void onMouseDown(MouseEvent& pMouseEvent)
 	{
 		if (onMouseDownImpl != nullptr)
 		{
-			onMouseDownImpl(parentWindow, this,pMouseEvent);
+			onMouseDownImpl(parentWindow, this, pMouseEvent);	
 		}
 	}
 	virtual void onMouseUp(MouseEvent& pMouseEvent) 
@@ -45,11 +47,19 @@ public:
 			onMouseUpImpl(parentWindow, this, pMouseEvent);
 		}
 	}
-	virtual void onHover(MouseEvent& pMouseEvent)
+	virtual void onMouseEnter(MouseEvent& pMouseEvent)
 	{
-		if (onHoverImpl != nullptr)
+		if (onMouseEnterImpl != nullptr)
 		{
-			onHoverImpl(parentWindow, this, pMouseEvent);
+			onMouseEnterImpl(parentWindow, this, pMouseEvent);
+		}
+	}
+
+	virtual void onMouseLeave(MouseEvent& pMouseEvent)
+	{
+		if (onMouseLeaveImpl != nullptr)
+		{
+			onMouseLeaveImpl(parentWindow, this, pMouseEvent);
 		}
 	}
 
@@ -71,54 +81,100 @@ public:
 		return parentWindow;
 	}
 
-	//enum LayoutType { SpanHor, SpanVer, Flow };
+	frect getBounds()
+	{
+		return frect(position.x, position.y, dimensions.width, dimensions.height);
+	}
 
 	void setUpdate(std::function<void(UIWindow*, UIElement*)> pUpdate)
 	{
 		updateImpl = pUpdate;
 	}
 
-	void setOnKeyboardUp(std::function<bool(UIWindow*, UIElement*, KeyEvent&)> pOnKeyboardUp)
+	void setOnKeyboardUp(std::function<void(UIWindow*, UIElement*, KeyEvent&)> pOnKeyboardUp)
 	{
 		onKeyUpImpl = pOnKeyboardUp;
 	}
 
-	void setOnKeyboardDown(std::function<bool(UIWindow*, UIElement*, KeyEvent&)> pOnKeyboardDown)
+	void setOnKeyboardDown(std::function<void(UIWindow*, UIElement*, KeyEvent&)> pOnKeyboardDown)
 	{
 		onKeyDownImpl = pOnKeyboardDown;
 	}
 
-	void setOnMouseUp(std::function<bool(UIWindow*, UIElement*, MouseEvent&)> pOnMouseUp)
+	void setOnMouseUp(std::function<void(UIWindow*, UIElement*, MouseEvent&)> pOnMouseUp)
 	{
 		onMouseUpImpl = pOnMouseUp;
 	}
 
-	void setOnMouseDown(std::function<bool(UIWindow*, UIElement*, MouseEvent&)> pOnMouseDown)
+	void setOnMouseDown(std::function<void(UIWindow*, UIElement*, MouseEvent&)> pOnMouseDown)
 	{
 		onMouseDownImpl = pOnMouseDown;
 	}
 
-	void setOnHover(std::function<bool(UIWindow*, UIElement*, MouseEvent&)> pOnHover)
+	void setOnMouseEnter(std::function<void(UIWindow*, UIElement*, MouseEvent&)> pOnMouseEnter)
 	{
-		onHoverImpl = pOnHover;
+		onMouseEnterImpl = pOnMouseEnter;
+	}
+
+	void setOnMouseLeave(std::function<void(UIWindow*, UIElement*, MouseEvent&)> pOnMouseLeave)
+	{
+		onMouseLeaveImpl = pOnMouseLeave;
+	}
+
+	bool isClicked()
+	{
+		return clicked;
+	}
+
+	bool isHovered()
+	{
+		return hovered;
+	}
+
+	bool isOffClick()
+	{
+		return offClick;
+	}
+
+	void setHovered(bool state)
+	{
+		hovered = state;
+	}
+
+	void setClicked(bool state)
+	{
+		clicked = state;
+	}
+
+	void setOffClick(bool state)
+	{
+		offClick = state;
 	}
 
 protected:
+
 	UIVariable elementVar;
 	//u32 varCount;
 	
 	UIWindow* parentWindow;
 	
-	UISize elementSize;
+	glm::fvec2 position;
+	UISize dimensions;
+
+	bool clicked;
+	bool hovered;
+	bool offClick;
 
 	const ElementType elementType;
 
 	float updateInterval;
 	float updateClock;
+	std::function<void(UIWindow*, UIElement*)> initImpl;
 	std::function<void(UIWindow*, UIElement*)> updateImpl;
-	std::function<bool(UIWindow*, UIElement*, KeyEvent&)> onKeyUpImpl;
-	std::function<bool(UIWindow*, UIElement*, KeyEvent&)> onKeyDownImpl;
-	std::function<bool(UIWindow*, UIElement*, MouseEvent&) > onMouseUpImpl;
-	std::function<bool(UIWindow*, UIElement*, MouseEvent&)> onMouseDownImpl;
-	std::function<bool(UIWindow*, UIElement*, MouseEvent&)> onHoverImpl;
+	std::function<void(UIWindow*, UIElement*, KeyEvent&)> onKeyUpImpl;
+	std::function<void(UIWindow*, UIElement*, KeyEvent&)> onKeyDownImpl;
+	std::function<void(UIWindow*, UIElement*, MouseEvent&)> onMouseUpImpl;
+	std::function<void(UIWindow*, UIElement*, MouseEvent&)> onMouseDownImpl;
+	std::function<void(UIWindow*, UIElement*, MouseEvent&)> onMouseEnterImpl;
+	std::function<void(UIWindow*, UIElement*, MouseEvent&)> onMouseLeaveImpl;
 };
