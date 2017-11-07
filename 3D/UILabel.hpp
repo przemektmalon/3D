@@ -19,8 +19,6 @@ public:
 	void draw()
 	{
 		text.shader->setProj(parentWindow->getProj());
-		text.shader->setModel(glm::fmat4());
-		text.shader->setView(glm::fmat4());
 		text.draw();
 	}
 

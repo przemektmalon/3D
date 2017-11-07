@@ -2,20 +2,28 @@
 #include "Include.hpp"
 #include "Shape3DShader.hpp"
 #include "Texture.hpp"
+#include "Billboard.hpp"
+#include "Framebuffer.hpp"
 
-class Text3D;
+class Text2D;
 
-class TextBillboard
+class TextBillboard : public Billboard
 {
 public:
-	TextBillboard() {}
+	TextBillboard(glm::fvec3 pPos, std::string pString) 
+	{
+		pos = pPos;
+		string = pString;
+		initGL();
+	}
 	~TextBillboard() {}
 
 	void initGL();
 
 	void draw();
 
-	glm::fvec3 pos;
+	std::string string;
+	Text2D* text;
 
-	Text3D* text;
+	Framebuffer fbo;
 };

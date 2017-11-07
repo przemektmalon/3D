@@ -170,9 +170,6 @@
     <ClInclude Include="Event.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Framebuffer.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Include.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -371,10 +368,8 @@
     <ClInclude Include="DebugWindow.hpp">
       <Filter>Header Files\UI Elements\Windows</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="3D.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
+    <ClInclude Include="Framebuffer.hpp">
+      <Filter>Header Files\GL</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

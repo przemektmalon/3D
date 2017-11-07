@@ -49,6 +49,7 @@ public:
 		void cycleRes() { setResolution(resolutionIndex == 0 ? NUM_VALID_RESOLUTIONS - 1 : resolutionIndex - 1); }
 		int getResolutionIndex() { return resolutionIndex; }
 		void setFrameScale(float set) { frameScale = set; }
+		glm::ivec2 getResolution() { return resolution; }
 
 		bool drawWireframe;
 		void setDrawWireFrame(bool set) { drawWireframe = set; }

@@ -24,6 +24,7 @@
 #include "Window.hpp"
 #include "Model.hpp"
 #include "Camera.hpp"
+#include "TextBillboard.hpp"
 
 #include "GBufferShaderNonBindlessRegular.hpp"
 
@@ -55,7 +56,7 @@ enum DrawMode { Regular, MultiTextured, Water, Reflective, Shadow, DrawModesCoun
 class MasterRenderer
 {
 public:
-	MasterRenderer() { }
+	MasterRenderer() {}
 	~MasterRenderer() {}
 
 	inline void initialiseScreenQuad();
@@ -113,7 +114,9 @@ public:
 
 	GLBufferObject shadowMatrixBuffer;
 
-	GLTextureArray2D texArr;
+	//GLTextureArray2D texArr;
+
+	TextBillboard* tb;
 
 	//Shaders
 	ShaderStore shaderStore;
@@ -137,6 +140,7 @@ public:
 	Camera* activeCam;
 
 	Sampler defaultSampler;
+	Sampler billboardSampler;
 	Sampler postSampler;
 	Sampler cubeSampler;
 	Sampler textSampler;

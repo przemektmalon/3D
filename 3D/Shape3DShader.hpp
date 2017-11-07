@@ -33,7 +33,6 @@ public:
 		tex = pTex;
 		use();
 		glUniform1i(texLoc, tex);
-		stop();
 	}
 	
 	void sendUniforms()

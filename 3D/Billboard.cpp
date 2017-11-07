@@ -8,7 +8,6 @@ Shape3DShader* Billboard::shader;
 void Billboard::initGLVAO()
 {
 	shader = &(Engine::r->shape3DShader);
-	shader->use();
 }
 
 void Billboard::initGL()
@@ -68,9 +67,10 @@ void Billboard::draw()
 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(squareVerts), data, GL_STATIC_DRAW);
 
-	tex->bind();
+	tex->bind(6);
 
 	shader->setPVM(pvm);
+	shader->setTex(6);
 	shader->sendUniforms();
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

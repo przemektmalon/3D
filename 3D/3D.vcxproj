@@ -320,9 +320,6 @@
     <ClInclude Include="World.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="3D.rc" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\Libs\bullet3\build\src\BulletCollision\BulletCollision.vcxproj">
       <Project>{32a19b7f-bed7-3e93-b908-730dc643ed16}</Project>
     </ProjectReference>

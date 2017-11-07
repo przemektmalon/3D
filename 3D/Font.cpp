@@ -80,6 +80,9 @@ void GlyphContainer::load(u16 pCharSize, FT_Face pFace)
 
 		FT_Error err = FT_Load_Char(pFace, ascSymbol, FT_LOAD_RENDER);
 
+		if (err)
+			assert(0);
+
 		lineXSize += pFace->glyph->bitmap.width + 1;
 		lineYSize = pFace->glyph->bitmap.rows > lineYSize ? pFace->glyph->bitmap.rows : lineYSize;
 

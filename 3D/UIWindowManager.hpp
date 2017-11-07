@@ -1,7 +1,6 @@
 #pragma once
 #include "UIWindow.hpp"
 
-
 class UIWindowManager
 {
 public:

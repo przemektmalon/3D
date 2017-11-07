@@ -272,7 +272,7 @@ void MasterRenderer::render()
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 
-	//b.draw();
+	tb->draw();
 	lightManager.drawLightIcons();
 
 	// *********************************************************** SCREEN PASS *********************************************************** //
@@ -284,7 +284,27 @@ void MasterRenderer::render()
 	window->swapBuffers();
 }
 
+void MasterRenderer::initialiseRenderer(Window * pwin, Camera & cam)
+{
+	window = pwin;
+	viewport.top = 0; viewport.left = 0; viewport.width = window->getSizeX(); viewport.height = window->getSizeY();
+	Engine::cfg.render.frameScale = 1.f;
 
+	initialiseSamplers();
+
+	setActiveCam(cam);
+
+	initialiseScreenQuad();
+	initialiseSkybox();
+	initialiseLights();
+
+	initialiseFramebuffers();
+
+	tb = new TextBillboard(glm::fvec3(0, 20, 0), "Welcome to the 3D Game Engine! :D");
+
+	fboGBuffer.setClearDepth(0.f);
+	lightPassTex.createFromStream(GL_RGBA32F, Engine::cfg.render.resolution.x, Engine::cfg.render.resolution.y, GL_RGBA, GL_FLOAT, NULL);
+}
 
 inline void MasterRenderer::initialiseGBuffer()
 {
@@ -465,6 +485,15 @@ inline void MasterRenderer::initialiseSamplers()
 	defaultSampler.bind(2);
 	defaultSampler.bind(3);
 
+	billboardSampler.initialiseDefaults();
+	billboardSampler.setTextureWrapS(GL_CLAMP_TO_EDGE);
+	billboardSampler.setTextureWrapT(GL_CLAMP_TO_EDGE);
+	billboardSampler.setTextureMinFilter(GL_LINEAR);
+	billboardSampler.setTextureMagFilter(GL_LINEAR);
+	billboardSampler.setTextureLODBias(0);
+	billboardSampler.setTextureCompareMode(GL_NONE);
+	billboardSampler.bind(6);
+
 	postSampler.setTextureWrapS(GL_MIRRORED_REPEAT);
 	postSampler.setTextureWrapT(GL_MIRRORED_REPEAT);
 	postSampler.setTextureMinFilter(GL_LINEAR);
@@ -515,26 +544,6 @@ inline void MasterRenderer::initialiseSamplers()
 	{
 		makeHandleResident(itr->second);
 	}
-}
-
-void MasterRenderer::initialiseRenderer(Window * pwin, Camera & cam)
-{
-	window = pwin;
-	viewport.top = 0; viewport.left = 0; viewport.width = window->getSizeX(); viewport.height = window->getSizeY();
-	Engine::cfg.render.frameScale = 1.f;
-
-	initialiseSamplers();
-
-	setActiveCam(cam);
-
-	initialiseScreenQuad();
-	initialiseSkybox();
-	initialiseLights();
-
-	initialiseFramebuffers();
-
-	fboGBuffer.setClearDepth(0.f);
-	lightPassTex.createFromStream(GL_RGBA32F, Engine::cfg.render.resolution.x, Engine::cfg.render.resolution.y, GL_RGBA, GL_FLOAT, NULL);
 }
 
 void MasterRenderer::initialiseShaders()
