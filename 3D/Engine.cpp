@@ -16,7 +16,7 @@
 #include "StringGenerics.hpp"
 #include "UILabel.hpp"
 #include "UIButton.hpp"
-#include "ModelInfo.hpp"
+#include "DebugWindow.hpp"
 #include "Console.hpp"
 #include "Tweaks.hpp"
 #include <stdio.h>
@@ -320,7 +320,7 @@ void Engine::mainLoop(int resolutionIndex)
 	cam.calculateViewRays();
 	r->initialiseRenderer(&window, cam);
 
-	createModelInfoWindow(uiw);
+	createDebugWindow(uiw);
 
 	cfg.render.setResolution(resolutionIndex);
 	cfg.render.setFrameScale(1.f);
@@ -572,10 +572,15 @@ void EngineConfig::RenderConfig::setResolution(int validResIndex)
 {
 	if (validResIndex > NUM_VALID_RESOLUTIONS - 1 || validResIndex < 0)
 		return;
+	glm::ivec2 oldRes = Engine::cfg.render.getValidResolution(resolutionIndex);
 	resolutionIndex = validResIndex;
 	resolution = Engine::cfg.render.getValidResolution(resolutionIndex);
 	Engine::r->reInitialiseFramebuffers();
 	Engine::window.setResolution(Engine::cfg.render.getValidResolution(resolutionIndex));
+
+	glm::fvec2 ratio((float)Engine::uiw->getWindowArea().left / (float)oldRes.x, (float)Engine::uiw->getWindowArea().top / (float)oldRes.y);
+
+	Engine::uiw->setWindowPosition(glm::ivec2(ratio.x * float(resolution.x), ratio.y * float(resolution.y)));
 }
 
 void EngineConfig::RenderConfig::reloadAllShaders()

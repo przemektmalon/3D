@@ -6,10 +6,9 @@
 
 #include "Engine.hpp"
 
-void createModelInfoWindow(UIWindow*& win)
+void createDebugWindow(UIWindow*& win)
 {
-	win = new UIWindow(irect(0, 0, 300, 500), 4, &Engine::window);
-	win->setTitle("UI Window");
+	win = new UIWindow("Debug", irect(100, 100, 300, 500), 4, &Engine::window);
 
 	Text2D::TextStyle styleA(Engine::assets.getFont("clearsansb"), 16);
 

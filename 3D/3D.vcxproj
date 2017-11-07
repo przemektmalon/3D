@@ -272,7 +272,7 @@
     <ClInclude Include="List.hpp" />
     <ClInclude Include="Log.hpp" />
     <ClInclude Include="MathIncludes.hpp" />
-    <ClInclude Include="ModelInfo.hpp" />
+    <ClInclude Include="DebugWindow.hpp" />
     <ClInclude Include="Mouse.hpp" />
     <ClInclude Include="Model.hpp" />
     <ClInclude Include="PhysicsObject.hpp" />
@@ -313,6 +313,7 @@
     <ClInclude Include="UIUtil.hpp" />
     <ClInclude Include="UIVertexStore.hpp" />
     <ClInclude Include="UIWindow.hpp" />
+    <ClInclude Include="UIWindowManager.hpp" />
     <ClInclude Include="UserInputManager.hpp" />
     <ClInclude Include="Util.hpp" />
     <ClInclude Include="Window.hpp" />

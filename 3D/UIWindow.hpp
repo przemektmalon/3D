@@ -14,7 +14,7 @@ class UILabel;
 class UIWindow
 {
 public:
-	UIWindow(irect pWindowArea, int pBorderWidth, const Window* pParentWindow);
+	UIWindow(std::string pName, irect pWindowArea, int pBorderWidth, const Window* pParentWindow);
 	~UIWindow();
 
 	void draw();
@@ -51,6 +51,19 @@ public:
 	{
 		if (!movable)
 			return;
+
+		if (pos.x + windowArea.width > parentWindow->getSizeX())
+			pos.x = parentWindow->getSizeX() - windowArea.width;
+
+		if (pos.y + windowArea.height > parentWindow->getSizeY())
+			pos.y = parentWindow->getSizeY() - windowArea.height;
+
+		if (pos.x < 0)
+			pos.x = 0;
+
+		if (pos.y < 0)
+			pos.y = 0;
+
 		windowArea.left = pos.x;
 		windowArea.top = pos.y;
 		updateWindowVBO();
@@ -59,6 +72,11 @@ public:
 	void setMovable(bool pMovable)
 	{
 		movable = pMovable;
+	}
+
+	const std::string& getName()
+	{
+		return name;
 	}
 
 //private:
@@ -72,6 +90,7 @@ public:
 	glm::ivec2 clickedPos;
 	bool hasTitle;
 	bool hasFocus;
+	std::string name;
 
 	Framebuffer renderTarget;
 

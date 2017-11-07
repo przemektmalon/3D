@@ -266,9 +266,6 @@
     <ClInclude Include="Font.hpp">
       <Filter>Header Files\Assets</Filter>
     </ClInclude>
-    <ClInclude Include="ModelInfo.hpp">
-      <Filter>Header Files\UI Elements\Windows</Filter>
-    </ClInclude>
     <ClInclude Include="UIAllElements.hpp">
       <Filter>Header Files\UI Elements</Filter>
     </ClInclude>
@@ -367,6 +364,12 @@
     </ClInclude>
     <ClInclude Include="Log.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UIWindowManager.hpp">
+      <Filter>Header Files\UI Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugWindow.hpp">
+      <Filter>Header Files\UI Elements\Windows</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -9,7 +9,7 @@
 #include "AssetManager.hpp"
 #include "Mouse.hpp"
 
-UIWindow::UIWindow(irect pWindowArea, int pBorderWidth, const Window* pParentWindow) : parentWindow(pParentWindow), title(new UILabel(this)), borderWidth(pBorderWidth)
+UIWindow::UIWindow(std::string pName, irect pWindowArea, int pBorderWidth, const Window* pParentWindow) : name(pName), parentWindow(pParentWindow), title(new UILabel(this)), borderWidth(pBorderWidth)
 {
 	windowArea = pWindowArea;
 	renderTarget.setResolution(glm::ivec2(windowArea.width, windowArea.height));
@@ -43,8 +43,10 @@ UIWindow::UIWindow(irect pWindowArea, int pBorderWidth, const Window* pParentWin
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	proj = glm::ortho(0.f, float(windowArea.width), 0.f, float(windowArea.height), -1.f, 100.f);
+	proj = glm::ortho(0.f, float(windowArea.width), float(windowArea.height), 0.f, -1.f, 100.f);
 	//proj = glm::ortho(0.f, float(windowArea.width), float(windowArea.height), 0.f, 0.f, 100.f);
+
+	setTitle(name);
 }
 
 UIWindow::~UIWindow()
@@ -96,7 +98,7 @@ void UIWindow::draw()
 	shader->use();
 
 	col = glm::fvec4(0.f,0.f,0.f,0.9f);
-	auto m = glm::ortho(0.f, (float)Engine::window.getSizeX(), 0.f, (float)Engine::window.getSizeY(), 0.f, 100.f);
+	auto m = glm::ortho(0.f, (float)Engine::window.getSizeX(), (float)Engine::window.getSizeY(), 0.f, 0.f, 100.f);
 	//auto m = glm::fmat4(0.f);
 	shader->setColour(col);
 	shader->setProjModel(m);
@@ -122,13 +124,19 @@ void UIWindow::update()
 		(*itr).second->update();
 	}
 
-	if(dragging)
-		setWindowPosition(Engine::window.getMousePosition()-clickedPos);
+	if (dragging)
+	{
+		auto mp = Engine::window.getMousePosition();
+		mp.y = parentWindow->getSizeY() - mp.y;
+		setWindowPosition(mp-clickedPos);
+	}
 }
 
 void UIWindow::mouseDown(MouseEvent& pMouseEvent)
 {
-	if (!windowArea.contains(pMouseEvent.getPosition()))
+	auto mp = pMouseEvent.getPosition();
+	mp.y = parentWindow->getSizeY() - mp.y;
+	if (!windowArea.contains(mp))
 	{
 		dragging = false;
 		return;
@@ -139,9 +147,11 @@ void UIWindow::mouseDown(MouseEvent& pMouseEvent)
 	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
 	{
 		auto rect = (*itr).second->getBounds();
-		auto mp = glm::ivec2(pMouseEvent.getUIWindowPosition((*itr).second->getParentWindow()).x, (*itr).second->getParentWindow()->getWindowRect().height - pMouseEvent.getUIWindowPosition((*itr).second->getParentWindow()).y);
+		//auto mp = glm::ivec2(pMouseEvent.getUIWindowPosition((*itr).second->getParentWindow()).x, (*itr).second->getParentWindow()->getWindowRect().bot() - pMouseEvent.getUIWindowPosition((*itr).second->getParentWindow()).y);
 
-		if (!rect.contains(mp))
+		auto winMP = pMouseEvent.getUIWindowPosition((*itr).second->getParentWindow());
+
+		if (!rect.contains(winMP))
 			continue;
 
 		(*itr).second->setClicked(true);
@@ -151,7 +161,7 @@ void UIWindow::mouseDown(MouseEvent& pMouseEvent)
 
 	if (canDrag)
 	{
-		clickedPos = pMouseEvent.getPosition() - glm::ivec2(windowArea.left, windowArea.top);
+		clickedPos = mp - glm::ivec2(windowArea.left, windowArea.top);
 		dragging = true;
 	}
 	else
@@ -189,12 +199,17 @@ void UIWindow::keyUp(KeyEvent & pKeyEvent)
 
 void UIWindow::checkMouseEnter(MouseEvent& pMouseEvent)
 {
+	auto mp = pMouseEvent.getPosition();
+	mp.y = parentWindow->getSizeY() - mp.y;
+
 	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
 	{
 		auto rect = (*itr).second->getBounds();
-		auto mp = glm::ivec2(pMouseEvent.getUIWindowPosition((*itr).second->getParentWindow()).x, (*itr).second->getParentWindow()->getWindowRect().height - pMouseEvent.getUIWindowPosition((*itr).second->getParentWindow()).y);
+		//auto mp = glm::ivec2(pMouseEvent.getUIWindowPosition((*itr).second->getParentWindow()).x, (*itr).second->getParentWindow()->getWindowRect().height - pMouseEvent.getUIWindowPosition((*itr).second->getParentWindow()).y);
 
-		if (!rect.contains(mp))
+		auto winMP = pMouseEvent.getUIWindowPosition((*itr).second->getParentWindow());
+
+		if (!rect.contains(winMP))
 		{
 			if ((*itr).second->isHovered())
 			{
@@ -224,6 +239,8 @@ void UIWindow::setTitle(std::string pTitle)
 		return;
 	}
 
+	name = pTitle;
+
 	hasTitle = true;
 
 	title->setParentWindow(this);
@@ -233,7 +250,7 @@ void UIWindow::setTitle(std::string pTitle)
 	title->setColour(glm::fvec3(0.f, 1.f, 1.f));
 	title->setWindowSize(glm::ivec2(windowArea.width, windowArea.height));
 	title->setWindowOrigin(Text2D::TopLeft);
-	String<512> tit; tit.setToChars(pTitle.c_str());
+	String<512> tit; tit.setToChars(name.c_str());
 	title->setString(tit);
 	//title->setTextOrigin(glm::ivec2(title->getBoundingBox().width / 2.f, title->getBoundingBox().height));
 	title->setTextOrigin(Text2D::MiddleMiddle);

@@ -45,7 +45,7 @@ public:
 			onMouseDownImpl(parentWindow, this, pMouseEvent);
 
 		auto uiMousePos = pMouseEvent.getUIWindowPosition(getParentWindow());
-		auto mp = glm::ivec2(uiMousePos.x, getParentWindow()->getWindowRect().height - uiMousePos.y);
+		auto mp = glm::ivec2(uiMousePos.x, uiMousePos.y);
 
 		if (slider.getBounds().contains(mp))
 		{

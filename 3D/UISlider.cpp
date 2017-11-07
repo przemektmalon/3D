@@ -17,7 +17,7 @@ UISlider::UISlider(UIWindow* pParent) : UIElement(Slider,pParent)
 
 	sliderColour = glm::fvec4(0.7, 0.7, 0.7, 0.8);
 	sliderClickColour = glm::fvec4(0.9, 0.9, 0.9, 0.9);
-	sliderHoverColour = glm::fvec4(0.8, 0.8, 0.8, 0.8);
+	sliderHoverColour = glm::fvec4(0.9, 1.0, 0.9, 0.8);
 	rangeColour = glm::fvec4(0.3, 0.3, 0.3, 0.9);
 
 	slider.setColour(sliderColour);
