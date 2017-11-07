@@ -4,6 +4,7 @@
 
 UISwitchButton::UISwitchButton(UIWindow* pParent) : UIElement(SwitchButton,pParent)
 {
+	
 }
 
 
