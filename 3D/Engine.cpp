@@ -331,11 +331,11 @@ void Engine::mainLoop(int resolutionIndex)
 	auto prevNode = world->getWorldRootNode();
 
 	auto c1 = new btStaticPlaneShape(glm::fvec3(0.f, 1.f, 0.f), 0.f);
-	auto c2 = new btStaticPlaneShape(btVector3(1.f, 0.f, 0.f), -50.f);
-	auto c3 = new btStaticPlaneShape(btVector3(-1.f, 0.f, 0.f), -50.f);
-	auto c4 = new btStaticPlaneShape(btVector3(0.f, 0.f, 1.f), -50.f);
-	auto c5 = new btStaticPlaneShape(btVector3(0.f, 0.f, -1.f), -50.f);
-	auto c6 = new btStaticPlaneShape(btVector3(0.f, -1.f, 0.f), -100.f);
+	auto c2 = new btStaticPlaneShape(btVector3(1.f, 0.f, 0.f), -250.f);
+	auto c3 = new btStaticPlaneShape(btVector3(-1.f, 0.f, 0.f), -250.f);
+	auto c4 = new btStaticPlaneShape(btVector3(0.f, 0.f, 1.f), -250.f);
+	auto c5 = new btStaticPlaneShape(btVector3(0.f, 0.f, -1.f), -250.f);
+	auto c6 = new btStaticPlaneShape(btVector3(0.f, -1.f, 0.f), -500.f);
 
 	auto trans = btTransform(btMatrix3x3(1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f));
 
@@ -351,40 +351,45 @@ void Engine::mainLoop(int resolutionIndex)
 
 	auto ee = assets.getModel(String32("ground"));
 	auto i8 = world->addModelInstance(*ee, worldRoot);
-	i8->sgNode->transform.scale(1.f);
+	i8->sgNode->transform.scale(5.f);
 	auto col = new btStaticPlaneShape(glm::fvec3(0.f, 1.f, 0.f), 0.f);
 	i8->makePhysicsObject(s, 0.f);
 	
+	i8->physicsObject->rigidBody->setFriction(1.f);
 	i8->physicsObject->rigidBody->setRestitution(0.95f);
 
 	ee = assets.getModel(String32("colbox"));
 	auto i7 = world->addModelInstance(*ee, worldRoot);
 	i7->sgNode->transform.scale(8.f);
-	i7->sgNode->transform.translate(glm::fvec3(0, 50, 0));
+	i7->sgNode->transform.translate(glm::fvec3(50, 50, 0));
 	auto boxcol = new btBoxShape(glm::fvec3(8, 8, 8));
 	i7->makePhysicsObject(boxcol, 42.f);
 	
 	i7->physicsObject->rigidBody->setRestitution(0.4);
+	i7->physicsObject->rigidBody->setFriction(0.7f);
 
 	auto i = world->addModelInstance(*ee, worldRoot);
 	i->sgNode->transform.scale(glm::fvec3(4, 6,3));
-	i->sgNode->transform.translate(glm::fvec3(10, 50, 0));
+	i->sgNode->transform.translate(glm::fvec3(50, 50, 0));
 	boxcol = new btBoxShape(glm::fvec3(4, 6, 3));
 	i->makePhysicsObject(boxcol, 30.f);
 
 	i->physicsObject->rigidBody->setRestitution(0.4);
+	i->physicsObject->rigidBody->setFriction(0.7f);
 
-	ee = assets.getModel(String32("mon"));
+	/*ee = assets.getModel(String32("mon"));*/
+	
+	boxcol = new btBoxShape(glm::fvec3(5, 5, 5));
 
-	for (int i = 0; i < 4; ++i)
+	for (int i = 0; i < 40; ++i)
 	{
 		auto i2 = world->addModelInstance(*ee, worldRoot);
-		i2->sgNode->transform.scale(10.f);
-		i2->sgNode->transform.translate(glm::fvec3(9 * i, 70, 0));
-		auto scol = new btSphereShape(10);
+		i2->sgNode->transform.scale(5.f);
+		i2->sgNode->transform.translate(glm::fvec3(9, 10 * i, 0));
 
-		i2->makePhysicsObject(scol, 50.f);
-		i2->physicsObject->rigidBody->setRestitution(0.95);
+		i2->makePhysicsObject(boxcol, 0.1f);
+		i2->physicsObject->rigidBody->setRestitution(0.35);
+		i2->physicsObject->rigidBody->setFriction(0.7f);
 	}
 
 	world->sg.updateAll();
