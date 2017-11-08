@@ -22,6 +22,12 @@
 
 void MasterRenderer::render()
 {
+	static auto restOfProgram = Engine::qpc.getElapsedTime();
+
+	restOfProgram = Engine::qpc.getElapsedTime() - restOfProgram;
+
+	auto beginRenderTime = Engine::qpc.getElapsedTime();
+
 	for (int i = 0; i < lightManager.spotLights.size(); ++i)
 	{
 		lightManager.spotLightsGPUData[i].position = glm::fvec3(std::cos(Engine::programTime*0.2*(i + 1) + (i*PI*0.5))*30.f, 20.f, std::sin(Engine::programTime*0.2*(i + 1) + (i*PI*0.5))*30.f);
@@ -33,9 +39,13 @@ void MasterRenderer::render()
 
 	for (int i = 0; i < lightManager.pointLights.size(); ++i)
 	{
-		lightManager.pointLightsGPUData[i].position.y = 20.f + (10.f * std::sin(Engine::programTime * 0.1f));
-		lightManager.pointLightsGPUData[i].position.x = 40.f * std::sin(Engine::programTime * 0.1f + ((i + 1) * 2 * PI / NUM_POINT_LIGHTS));
-		lightManager.pointLightsGPUData[i].position.z = 40.f * std::cos(Engine::programTime * 0.1f + ((i + 1) * 2 * PI / NUM_POINT_LIGHTS));
+		lightManager.pointLightsGPUData[i].position.y = 40.f + (10.f * std::sin(Engine::programTime * 0.4f));
+		lightManager.pointLightsGPUData[i].position.x = 40.f * std::sin(Engine::programTime * 0.4f + ((i + 1) * 2 * PI / NUM_POINT_LIGHTS));
+		lightManager.pointLightsGPUData[i].position.z = 40.f * std::cos(Engine::programTime * 0.4f + ((i + 1) * 2 * PI / NUM_POINT_LIGHTS));
+
+		lightManager.pointLightsGPUData[i].position.x *= (2.f + std::sin(Engine::programTime * 0.8f)) * 1.1f;
+		lightManager.pointLightsGPUData[i].position.z *= (2.f + std::sin(Engine::programTime * 0.8f)) * 1.1f;
+
 		lightManager.pointLights[i].updateProj();
 		lightManager.pointLights[i].updateView();
 		lightManager.pointLights[i].updateProjView();
@@ -46,6 +56,8 @@ void MasterRenderer::render()
 
 	const GPUModelManager& modelManager = Engine::assets.modelManager;
 
+	glFinish();
+	auto lightUpdateTime = Engine::qpc.getElapsedTime() - beginRenderTime;
 
 	// *********************************************************** G-BUFFER PASS *********************************************************** //
 
@@ -89,6 +101,9 @@ void MasterRenderer::render()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 
+	glFinish();
+	auto gBufferTime = Engine::qpc.getElapsedTime() - lightUpdateTime;
+
 	// *********************************************************** G-BUFFER PASS *********************************************************** //
 
 	// *********************************************************** SHADOW PASS *********************************************************** //
@@ -110,7 +125,7 @@ void MasterRenderer::render()
 
 		glClear(GL_DEPTH_BUFFER_BIT);
 
-		shadowMatrixBuffer.bufferData(sizeof(glm::fmat4) * 6, &itr->gpuData->projView[0][0], GL_STREAM_READ);
+		shadowMatrixBuffer.bufferSubData(0, sizeof(glm::fmat4) * 6, &itr->gpuData->projView[0][0]);
 		shadowMatrixBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 2);
 
 		pointShadowPassShader.setFarPlane(itr->gpuData->radius);
@@ -151,6 +166,9 @@ void MasterRenderer::render()
 
 		glBindVertexArray(0);
 	}
+
+	glFinish();
+	auto shadowTime = Engine::qpc.getElapsedTime() - gBufferTime;
 
 	// *********************************************************** SHADOW PASS *********************************************************** //
 
@@ -211,6 +229,9 @@ void MasterRenderer::render()
 
 	// *********************************************************** SSAO-BLUR PASS *********************************************************** //
 
+	glFinish();
+	auto ssaoTime = Engine::qpc.getElapsedTime() - shadowTime;
+
 	// *********************************************************** LIGHT PASS *********************************************************** //
 
 	tileCullShader.use();
@@ -255,6 +276,9 @@ void MasterRenderer::render()
 
 	// *********************************************************** SCREEN PASS *********************************************************** //
 
+	glFinish();
+	auto lightPassTime = Engine::qpc.getElapsedTime() - ssaoTime;
+
 	fboDefault.bind();
 	fboDefault.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glDisable(GL_DEPTH_TEST);
@@ -272,7 +296,7 @@ void MasterRenderer::render()
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 
-	tb->draw();
+	//tb->draw();
 	lightManager.drawLightIcons();
 
 	// *********************************************************** SCREEN PASS *********************************************************** //
@@ -282,6 +306,23 @@ void MasterRenderer::render()
 	Engine::console.draw();
 
 	window->swapBuffers();
+
+	glFinish();
+	auto screenTime = Engine::qpc.getElapsedTime() - lightPassTime;
+
+	auto toms = [](long long time) -> double { return ((double)time) / 1000.0; };
+	
+	/*std::cout << "Light update: " << toms(lightUpdateTime) << std::endl;
+	std::cout << "GBuffer:      " << toms(gBufferTime) << std::endl;
+	std::cout << "Shadows:      " << toms(shadowTime) << std::endl;
+	std::cout << "SSAO:         " << toms(ssaoTime) << std::endl;
+	std::cout << "Light:        " << toms(lightPassTime) << std::endl;
+	std::cout << "Screen:       " << toms(screenTime) << std::endl;
+	std::cout << "Rest:         " << toms(restOfProgram) << std::endl;*/
+
+	
+
+	restOfProgram = Engine::qpc.getElapsedTime();
 }
 
 void MasterRenderer::initialiseRenderer(Window * pwin, Camera & cam)
@@ -299,6 +340,8 @@ void MasterRenderer::initialiseRenderer(Window * pwin, Camera & cam)
 	initialiseLights();
 
 	initialiseFramebuffers();
+
+	shadowMatrixBuffer.bufferData(sizeof(glm::fmat4) * 6, nullptr, GL_STREAM_DRAW);
 
 	tb = new TextBillboard(glm::fvec3(0, 20, 0), "Welcome to the 3D Game Engine! :D");
 
@@ -405,9 +448,9 @@ inline void MasterRenderer::initialiseLights()
 			col = glm::fvec3(1.f, 1.f, 1.f);
 			break;
 		}
-		add.setColour(col);
+		add.setColour(col * 1.5f);
 		add.setLinear(0.0001f);
-		add.setQuadratic(0.005f);
+		add.setQuadratic(0.002f);
 		add.setPosition(glm::fvec3(100.f, 100.f, 100.f));
 		add.updateRadius();
 		add.initTexture(shadowCubeSampler);

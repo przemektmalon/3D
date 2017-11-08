@@ -27,6 +27,11 @@ public:
 		glNamedBufferData(GLID, pSize, pData, pUsage);
 	}
 
+	inline void bufferSubData(GLintptr pOffset, GLsizeiptr pSize, void* pData)
+	{
+		glNamedBufferSubData(GLID, pOffset, pSize, pData);
+	}
+
 	inline void* mapRange(GLintptr pOffset, GLsizeiptr pLength, GLbitfield pAccess)
 	{
 		return glMapNamedBufferRange(GLID, pOffset, pLength, pAccess);

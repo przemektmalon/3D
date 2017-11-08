@@ -48,3 +48,4 @@ void TextBillboard::draw()
 
 	Billboard::draw();
 }
+
