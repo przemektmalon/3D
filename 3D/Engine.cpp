@@ -385,7 +385,7 @@ void Engine::mainLoop(int resolutionIndex)
 	{
 		auto i2 = world->addModelInstance(*ee, worldRoot);
 		i2->sgNode->transform.scale(5.f);
-		i2->sgNode->transform.translate(glm::fvec3(9, 10 * i, 0));
+		i2->sgNode->transform.translate(glm::fvec3(9, 5.1 + (5.1 * i), 0));
 
 		i2->makePhysicsObject(boxcol, 0.1f);
 		i2->physicsObject->rigidBody->setRestitution(0.35);

@@ -2,7 +2,7 @@
 
 3D rendering/game engine using OpenGL by Przemek Malon.
 
-![alt text](https://github.com/przemektmalon/3D/blob/master/gitimg/img.bmp)
+![alt text](https://github.com/przemektmalon/3D/blob/master/gitimg/img.png)
 
 # Current features
 
