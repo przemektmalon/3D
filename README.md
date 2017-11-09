@@ -12,6 +12,8 @@
 
 -Shader hot-loading & preprocessing
 
+-Partial bullet physics library integration
+
 -Ambient Occlusion
 
 -Blended multi-texturing (splatting) using alpha map, up to four textures.
