@@ -518,24 +518,7 @@ void Engine::processGameFrame()
 	physics.step();
 	physics.updateModels();
 
-	if (window.keyboard.isKeyPressed('I'))
-	{
-		auto rad = r->ssaoShader.getRadius();
-		auto newRad = rad;
-		newRad += 0.1 * dt.getSecondsf();
-		newRad = std::max(newRad, 0.0000000001f);
-
-		r->ssaoShader.setRadius(newRad);
-	}
-	if (window.keyboard.isKeyPressed('U'))
-	{
-		auto rad = r->ssaoShader.getRadius();
-		auto newRad = rad;
-		newRad -= 0.1 * dt.getSecondsf();
-		newRad = std::max(newRad, 0.0000000001f);
-
-		r->ssaoShader.setRadius(newRad);
-	}
+	r->ssaoShader.setRadius(Engine::cfg.render.ssao.sampleRadius);
 
 	if (window.keyboard.isKeyPressed('9'))
 	{

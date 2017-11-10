@@ -23,6 +23,8 @@ UISlider::UISlider(UIWindow* pParent) : UIElement(Slider,pParent)
 	slider.setColour(sliderColour);
 	range.setColour(rangeColour);
 
+	binding.f = nullptr;
+
 	setUpdate([](UIWindow* win, UIElement* __this) -> void {
 		UISlider* _this = (UISlider*)__this;
 		if (_this->isSliding)
@@ -44,10 +46,14 @@ UISlider::UISlider(UIWindow* pParent) : UIElement(Slider,pParent)
 			case Integer:
 				_this->value.i = _this->limits.left.i + int(float(_this->limits.right.i - _this->limits.left.i) * ratio);
 				valString = std::to_string(_this->value.i);
+				if (_this->binding.i)
+					*_this->binding.i = _this->value.i;
 				break;
 			case Float:
 				_this->value.f = _this->limits.left.f + (float(_this->limits.right.f - _this->limits.left.f) * ratio);
 				valString = std::to_string(_this->value.f);
+				if (_this->binding.f)
+					*_this->binding.f = _this->value.f;
 				break;
 			}
 

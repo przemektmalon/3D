@@ -135,6 +135,12 @@ public:
 		s32 i;
 	}value;
 
+	union Binding
+	{
+		float* f;
+		s32* i;
+	}binding;
+
 	Text2D valueText;
 };
 

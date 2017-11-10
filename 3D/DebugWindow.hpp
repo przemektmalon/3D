@@ -34,7 +34,7 @@ void createDebugWindow(UIWindow*& win)
 
 	C_BUTTON(butToggleWire, win);
 	butToggleWire.setName("button");
-	butToggleWire.setSize(glm::fvec2(250, 30));
+	butToggleWire.setSize(glm::fvec2(258, 30));
 	butToggleWire.getText().setStyle(styleA);
 	butToggleWire.getText().setCharSize(18);
 	butToggleWire.setString(SSTR("Toggle wireframe"));
@@ -47,7 +47,7 @@ void createDebugWindow(UIWindow*& win)
 
 	C_BUTTON(butRes0, win);
 	butRes0.setName("res0");
-	butRes0.setSize(glm::fvec2(250, 30));
+	butRes0.setSize(glm::fvec2(258, 30));
 	butRes0.getText().setStyle(styleA);
 	butRes0.getText().setCharSize(18);
 	butRes0.setString(SSTR("3840x2160"));
@@ -60,7 +60,7 @@ void createDebugWindow(UIWindow*& win)
 
 	C_BUTTON(butRes1, win);
 	butRes1.setName("res1");
-	butRes1.setSize(glm::fvec2(250, 30));
+	butRes1.setSize(glm::fvec2(258, 30));
 	butRes1.getText().setStyle(styleA);
 	butRes1.getText().setCharSize(18);
 	butRes1.setString(SSTR("1920x1080"));
@@ -73,7 +73,7 @@ void createDebugWindow(UIWindow*& win)
 
 	C_BUTTON(butRes2, win);
 	butRes2.setName("res2");
-	butRes2.setSize(glm::fvec2(250, 30));
+	butRes2.setSize(glm::fvec2(258, 30));
 	butRes2.getText().setStyle(styleA);
 	butRes2.getText().setCharSize(18);
 	butRes2.setString(SSTR("1280x720"));
@@ -86,7 +86,7 @@ void createDebugWindow(UIWindow*& win)
 
 	C_BUTTON(butRes3, win);
 	butRes3.setName("res3");
-	butRes3.setSize(glm::fvec2(250, 30));
+	butRes3.setSize(glm::fvec2(258, 30));
 	butRes3.getText().setStyle(styleA);
 	butRes3.getText().setCharSize(18);
 	butRes3.setString(SSTR("960x540"));
@@ -99,9 +99,11 @@ void createDebugWindow(UIWindow*& win)
 
 	C_SLIDER(slider, win);
 	slider.setName("slider");
-	slider.init(irect(20, 420, 250, 10));
+	slider.init(irect(20, 420, 258, 10));
 	slider.valType = UISlider::Float;
-	slider.setLimits(glm::fvec2(0.f, 100.f));
+	slider.setLimits(glm::fvec2(0.1f, 10.f));
+	slider.binding.f = &Engine::cfg.render.ssao.sampleRadius;
+	slider.value.f = 0.1f;
 
 	win->setMovable(true);
 	win->addElement(sliderPtr);
