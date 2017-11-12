@@ -12,7 +12,7 @@ PointLight::PointLight()
 	//fbo = &Engine::r->fboLight[3];
 }
 
-PointLight & LightManager::addPointLight(PointLight::GPUData & data)
+PointLight & LightManager::addPointLight(PointLight::GPUData& data)
 {
 	pointLights.push_back(PointLight());
 	auto& light = pointLights.back();
@@ -25,7 +25,7 @@ PointLight & LightManager::addPointLight(PointLight::GPUData & data)
 	return light;
 }
 
-SpotLight & LightManager::addSpotLight(SpotLight::GPUData data)
+SpotLight & LightManager::addSpotLight(SpotLight::GPUData& data)
 {
 	spotLights.push_back(SpotLight());
 	auto& light = spotLights.back();

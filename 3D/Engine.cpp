@@ -406,6 +406,8 @@ void Engine::mainLoop(int resolutionIndex)
 	tweak.bindVariable(Engine::tau, "tau", Tweaks::Floating);
 	tweak.bindVariable(Engine::damping, "damping", Tweaks::Floating);
 
+	cfg.render.ssao.sampleRadius = 10.f;
+
 	while (engineState != Quitting) {
 		if (!window.processMessages()) 
 		{

@@ -18,7 +18,7 @@
 #include "UIConsole.hpp"
 #include "UIButton.hpp"
 
-#define NUM_POINT_LIGHTS 8
+#define NUM_POINT_LIGHTS 0
 
 void MasterRenderer::render()
 {
@@ -30,8 +30,8 @@ void MasterRenderer::render()
 
 	for (int i = 0; i < lightManager.spotLights.size(); ++i)
 	{
-		lightManager.spotLightsGPUData[i].position = glm::fvec3(std::cos(Engine::programTime*0.2*(i + 1) + (i*PI*0.5))*30.f, 20.f, std::sin(Engine::programTime*0.2*(i + 1) + (i*PI*0.5))*30.f);
-		lightManager.spotLightsGPUData[i].direction = -glm::normalize(lightManager.spotLightsGPUData[i].position);
+		lightManager.spotLightsGPUData[i].position = glm::fvec3(std::cos(Engine::programTime*0.2*(i + 1) + (i*PI*0.5))*50.f, 50.f, std::sin(Engine::programTime*0.2*(i + 1) + (i*PI*0.5))*50.f);
+		lightManager.spotLightsGPUData[i].direction = -glm::normalize(lightManager.spotLightsGPUData[i].position + glm::fvec3(0.f,20.f,0.f));
 		lightManager.spotLights[i].updateProj();
 		lightManager.spotLights[i].updateView();
 		lightManager.spotLights[i].updateProjView();
@@ -40,8 +40,8 @@ void MasterRenderer::render()
 	for (int i = 0; i < lightManager.pointLights.size(); ++i)
 	{
 		lightManager.pointLightsGPUData[i].position.y = 40.f + (10.f * std::sin(Engine::programTime * 0.4f));
-		lightManager.pointLightsGPUData[i].position.x = 40.f * std::sin(Engine::programTime * 0.4f + ((i + 1) * 2 * PI / NUM_POINT_LIGHTS));
-		lightManager.pointLightsGPUData[i].position.z = 40.f * std::cos(Engine::programTime * 0.4f + ((i + 1) * 2 * PI / NUM_POINT_LIGHTS));
+		lightManager.pointLightsGPUData[i].position.x = 4.f * std::sin(Engine::programTime * 0.4f + ((i + 1) * 2 * PI / NUM_POINT_LIGHTS));
+		lightManager.pointLightsGPUData[i].position.z = 4.f * std::cos(Engine::programTime * 0.4f + ((i + 1) * 2 * PI / NUM_POINT_LIGHTS));
 
 		lightManager.pointLightsGPUData[i].position.x *= (2.f + std::sin(Engine::programTime * 0.8f)) * 1.1f;
 		lightManager.pointLightsGPUData[i].position.z *= (2.f + std::sin(Engine::programTime * 0.8f)) * 1.1f;
@@ -118,6 +118,9 @@ void MasterRenderer::render()
 
 	for (auto itr = lightManager.pointLights.begin(); itr != lightManager.pointLights.end(); ++itr)
 	{
+		if (glm::length(itr->gpuData->position - activeCam->pos) > itr->gpuData->fadeStart + itr->gpuData->fadeLength)
+			continue;
+
 		glViewport(0, 0, itr->shadowTex.getWidth(), itr->shadowTex.getHeight());
 
 		fboLight[0].bind();
@@ -146,6 +149,9 @@ void MasterRenderer::render()
 
 	for (auto itr = lightManager.spotLights.begin(); itr != lightManager.spotLights.end(); ++itr)
 	{
+		if (glm::length(itr->gpuData->position - activeCam->pos) > itr->gpuData->fadeStart + itr->gpuData->fadeLength)
+			continue;
+
 		glViewport(0, 0, itr->shadowTex.getWidth(), itr->shadowTex.getHeight());
 
 		fboLight[0].bind();
@@ -460,31 +466,21 @@ inline void MasterRenderer::initialiseLights()
 
 	lightManager.updateAllPointLights();
 
-	const int nr2 = 0;
+	const int nr2 = 4;
 	for (int i = 0; i < nr2; ++i)
 	{
 		auto& add = lightManager.addSpotLight();
-		auto cc = Engine::rand() % 3;
-		glm::fvec3 col(0.f);
-		switch (cc)
-		{
-		case 0:
-			col.x = 1.1;
-			break;
-		case 1:
-			col.y = 1.1;
-			break;
-		case 2:
-			col.z = 1.1;
-			break;
-		}
-		add.setColour(col);
+
+		add.setDirection(glm::fvec3(0.f, 0.f, 1.f));
+		add.setColour(glm::fvec3(1.f, 1.f, 1.f));
 		add.setInnerSpread(glm::radians(10.f));
 		add.setOuterSpread(glm::radians(30.f));
 		add.setLinear(0.0001);
-		add.setQuadratic(0.001);
-		add.setPosition(glm::fvec3(100.f, 100.f, 100.f));
+		add.setQuadratic(0.002);
+		add.setPosition(glm::fvec3(-100.f + 50.f * i, 10.f, 0.f));
 		add.updateRadius();
+		add.gpuData->fadeLength = 15;
+		add.gpuData->fadeStart = 100;
 		add.initTexture(shadowSampler);
 	}
 
@@ -492,7 +488,7 @@ inline void MasterRenderer::initialiseLights()
 
 	tileCullShader.use();
 	tileCullShader.setPointLightCount(lightManager.pointLightsGPUData.size());
-	tileCullShader.setSpotLightCount(lightManager.spotLights.size());
+	tileCullShader.setSpotLightCount(lightManager.spotLightsGPUData.size());
 	
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
@@ -500,12 +496,6 @@ inline void MasterRenderer::initialiseLights()
 	ddir = glm::normalize(ddir);
 
 	DirectLightData dir = DirectLightData(ddir, glm::fvec3(0.1f, 0.1f, 0.125f));
-
-	for (auto itr = lightManager.pointLights.begin(); itr != lightManager.pointLights.end(); ++itr)
-	{
-		auto handle = itr->shadowTex.getHandle(cubeSampler.getGLID());
-		glMakeTextureHandleResidentARB(handle);
-	}
 
 	fboLight[0].bind();
 	glDrawBuffer(GL_NONE);
@@ -563,6 +553,8 @@ inline void MasterRenderer::initialiseSamplers()
 	textSampler.setTextureMagFilter(GL_LINEAR);
 	textSampler.bind(12);
 
+	shadowSampler.setTextureMagFilter(GL_NEAREST);
+	shadowSampler.setTextureMinFilter(GL_NEAREST);
 	shadowSampler.setTextureWrapS(GL_CLAMP_TO_BORDER);
 	shadowSampler.setTextureWrapT(GL_CLAMP_TO_BORDER);
 	shadowSampler.setTextureBorderColour(1.f, 1.f, 1.f, 1.f);

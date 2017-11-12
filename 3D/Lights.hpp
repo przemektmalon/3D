@@ -29,7 +29,7 @@ public:
 	struct GPUData
 	{
 	public:
-		GPUData() : positionRad(glm::fvec4(0.f,0.f,0.f,50.f)), colourQuad(glm::fvec4(1.f,1.f,1.f,0.001f)), linear(0.001f), textureHandle(0) {}
+		GPUData() : positionRad(glm::fvec4(0.f,0.f,0.f,50.f)), colourQuad(glm::fvec4(1.f,1.f,1.f,0.001f)), linear(0.001f), textureHandle(0), fadeStart(100), fadeLength(15) {}
 		~GPUData() {}
 
 		union
@@ -57,7 +57,8 @@ public:
 			struct
 			{
 				float linear;
-				float UNUSED;
+				unsigned short fadeStart;
+				unsigned short fadeLength;
 				GLuint64 textureHandle;
 			};
 			glm::fvec4 linearTexHandle;
@@ -137,6 +138,8 @@ public:
 	GLTextureCube shadowTex;
 	Framebuffer* fbo;
 
+	float shadowRenderDistance;
+
 	glm::fmat4 proj;
 	glm::fmat4 view[6];
 
@@ -150,7 +153,7 @@ public:
 
 	struct GPUData
 	{
-		GPUData() {}
+		GPUData() : fadeStart(100), fadeLength(15) {}
 		GPUData(glm::fvec3 pos, glm::fvec3 dir, glm::fvec3 col, float inner, float outer = 0.f, float lin = 0.0001f, float quad = 0.0003f) : textureHandle(0), position(pos), direction(dir), colour(col), linear(lin), quadratic(quad), innerSpread(inner), outerSpread(outer) {
 			if (outer < inner) { outer = inner; }
 		}
@@ -197,10 +200,22 @@ public:
 			glm::fvec4 linQuadTex;
 		};
 
+		//unsigned short fadeStart;
+		//unsigned short fadeLength;
+
 		union
 		{
-			glm::fmat4 projView;
+			struct
+			{
+				unsigned short fadeStart;
+				unsigned short fadeLength;
+				unsigned int na;
+				unsigned int na2;
+				unsigned int na3;
+			};
 		};
+
+		glm::fmat4 projView;
 	};
 
 	void updateRadius()
@@ -264,7 +279,7 @@ public:
 
 	void updateProj()
 	{
-		proj = glm::perspective<float>(glm::acos(gpuData->outerSpread), 1.f, 1.f, gpuData->radius * 2.f); ///TODO: Look into choosing best near value
+		proj = glm::perspective<float>(gpuData->outerSpread, 1.f, 1.f, gpuData->radius * 2.f); ///TODO: Look into choosing best near value
 	}
 
 	void updateProjView()
@@ -343,7 +358,7 @@ public: ///TODO: Max light count is 500, add setters etc
 		return addSpotLight(SpotLight::GPUData());
 	}
 
-	SpotLight& addSpotLight(SpotLight::GPUData data);
+	SpotLight& addSpotLight(SpotLight::GPUData& data);
 
 	SpotLight* getSpotLight(u32 pIndex)
 	{
