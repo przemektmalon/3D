@@ -5,11 +5,30 @@
 #include "AssetManager.hpp"
 #include "Billboard.hpp"
 
-PointLight::PointLight()
+PointLight::PointLight() { }
+
+void PointLight::updateRadius()
 {
-	//shadowTex.createFromStream(1024, 1024, GL_DEPTH_COMPONENT32F_NV, GL_DEPTH_COMPONENT, GL_FLOAT);
-	//shadowTex.createFromStream(1024, 1024, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
-	//fbo = &Engine::r->fboLight[3];
+	gpuData->radius = (0.5 * (std::sqrtf(gpuData->linear*gpuData->linear + (Engine::cfg.render.minimumLightConstant * gpuData->quadratic) - gpuData->linear))) / gpuData->quadratic;
+	updateProj();
+	updateProjView();
+}
+
+inline float PointLight::calculateRadius(float linear, float quad)
+{
+	return  (0.5 * (std::sqrtf(linear*linear + (Engine::cfg.render.minimumLightConstant * quad) - linear))) / quad;
+}
+
+void SpotLight::updateRadius()
+{
+	gpuData->radius = (0.5 * (std::sqrtf(gpuData->linear*gpuData->linear + (Engine::cfg.render.minimumLightConstant * gpuData->quadratic) - gpuData->linear))) / (gpuData->quadratic * 2.f);
+	updateProj();
+	updateProjView();
+}
+
+inline float SpotLight::calculateRadius(float linear, float quad)
+{
+	return (0.5 * (std::sqrtf(linear*linear + (Engine::cfg.render.minimumLightConstant* quad) - linear))) / (quad * 2.f);
 }
 
 PointLight & LightManager::addPointLight(PointLight::GPUData& data)
@@ -37,3 +56,5 @@ SpotLight & LightManager::addSpotLight(SpotLight::GPUData& data)
 
 	return light;
 }
+
+

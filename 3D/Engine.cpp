@@ -49,6 +49,8 @@ Console Engine::console;
 Physics Engine::p;
 PhysicsWorld Engine::physics;
 EngineConfig Engine::cfg;
+float Engine::linear = 0.001;
+float Engine::quad = 0.001;
 
 float Engine::tau;
 float Engine::damping;
@@ -377,17 +379,17 @@ void Engine::mainLoop(int resolutionIndex)
 	i->physicsObject->rigidBody->setRestitution(0.4);
 	i->physicsObject->rigidBody->setFriction(0.7f);
 
-	/*ee = assets.getModel(String32("mon"));*/
+	ee = assets.getModel(String32("mon"));
 	
-	boxcol = new btBoxShape(glm::fvec3(5, 5, 5));
+	auto col2 = new btSphereShape(5);
 
-	for (int i = 0; i < 40; ++i)
+	for (int i = 0; i < 4; ++i)
 	{
 		auto i2 = world->addModelInstance(*ee, worldRoot);
 		i2->sgNode->transform.scale(5.f);
 		i2->sgNode->transform.translate(glm::fvec3(9, 5.1 + (5.1 * i), 0));
 
-		i2->makePhysicsObject(boxcol, 0.1f);
+		i2->makePhysicsObject(col2, 0.1f);
 		i2->physicsObject->rigidBody->setRestitution(0.35);
 		i2->physicsObject->rigidBody->setFriction(0.7f);
 	}
@@ -405,6 +407,9 @@ void Engine::mainLoop(int resolutionIndex)
 	tweak.bindVariable(cfg.world.camSpeed, "camSpeed", Tweaks::Floating);
 	tweak.bindVariable(Engine::tau, "tau", Tweaks::Floating);
 	tweak.bindVariable(Engine::damping, "damping", Tweaks::Floating);
+	tweak.bindVariable(Engine::linear, "linear", Tweaks::Floating);
+	tweak.bindVariable(Engine::quad, "quad", Tweaks::Floating);
+	tweak.bindVariable(Engine::cfg.render.minimumLightConstant, "minlight", Tweaks::Floating);
 
 	cfg.render.ssao.sampleRadius = 10.f;
 

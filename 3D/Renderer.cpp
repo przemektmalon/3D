@@ -18,7 +18,7 @@
 #include "UIConsole.hpp"
 #include "UIButton.hpp"
 
-#define NUM_POINT_LIGHTS 0
+#define NUM_POINT_LIGHTS 4
 
 void MasterRenderer::render()
 {
@@ -32,6 +32,7 @@ void MasterRenderer::render()
 	{
 		lightManager.spotLightsGPUData[i].position = glm::fvec3(std::cos(Engine::programTime*0.2*(i + 1) + (i*PI*0.5))*50.f, 50.f, std::sin(Engine::programTime*0.2*(i + 1) + (i*PI*0.5))*50.f);
 		lightManager.spotLightsGPUData[i].direction = -glm::normalize(lightManager.spotLightsGPUData[i].position + glm::fvec3(0.f,20.f,0.f));
+
 		lightManager.spotLights[i].updateProj();
 		lightManager.spotLights[i].updateView();
 		lightManager.spotLights[i].updateProjView();
@@ -40,11 +41,15 @@ void MasterRenderer::render()
 	for (int i = 0; i < lightManager.pointLights.size(); ++i)
 	{
 		lightManager.pointLightsGPUData[i].position.y = 40.f + (10.f * std::sin(Engine::programTime * 0.4f));
-		lightManager.pointLightsGPUData[i].position.x = 4.f * std::sin(Engine::programTime * 0.4f + ((i + 1) * 2 * PI / NUM_POINT_LIGHTS));
-		lightManager.pointLightsGPUData[i].position.z = 4.f * std::cos(Engine::programTime * 0.4f + ((i + 1) * 2 * PI / NUM_POINT_LIGHTS));
+		lightManager.pointLightsGPUData[i].position.x = 40.f * std::sin(Engine::programTime * 0.4f + ((i + 1) * 2 * PI / NUM_POINT_LIGHTS));
+		lightManager.pointLightsGPUData[i].position.z = 40.f * std::cos(Engine::programTime * 0.4f + ((i + 1) * 2 * PI / NUM_POINT_LIGHTS));
 
-		lightManager.pointLightsGPUData[i].position.x *= (2.f + std::sin(Engine::programTime * 0.8f)) * 1.1f;
-		lightManager.pointLightsGPUData[i].position.z *= (2.f + std::sin(Engine::programTime * 0.8f)) * 1.1f;
+		//lightManager.pointLightsGPUData[i].position.x *= (2.f + std::sin(Engine::programTime * 0.8f)) * 1.1f;
+		//lightManager.pointLightsGPUData[i].position.z *= (2.f + std::sin(Engine::programTime * 0.8f)) * 1.1f;
+
+		lightManager.pointLightsGPUData[i].linear = Engine::linear;
+		lightManager.pointLightsGPUData[i].quadratic = Engine::quad;
+		lightManager.pointLights[i].updateRadius();
 
 		lightManager.pointLights[i].updateProj();
 		lightManager.pointLights[i].updateView();
@@ -454,11 +459,13 @@ inline void MasterRenderer::initialiseLights()
 			col = glm::fvec3(1.f, 1.f, 1.f);
 			break;
 		}
-		add.setColour(col * 1.5f);
-		add.setLinear(0.0001f);
-		add.setQuadratic(0.002f);
+		add.setColour(col * 5.5f);
+		add.setLinear(0.00001f);
+		add.setQuadratic(0.005f);
 		add.setPosition(glm::fvec3(100.f, 100.f, 100.f));
 		add.updateRadius();
+		add.gpuData->fadeLength = 15;
+		add.gpuData->fadeStart = 500;
 		add.initTexture(shadowCubeSampler);
 	}
 
@@ -466,7 +473,7 @@ inline void MasterRenderer::initialiseLights()
 
 	lightManager.updateAllPointLights();
 
-	const int nr2 = 4;
+	const int nr2 = 0;
 	for (int i = 0; i < nr2; ++i)
 	{
 		auto& add = lightManager.addSpotLight();

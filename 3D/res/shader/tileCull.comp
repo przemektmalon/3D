@@ -207,9 +207,6 @@ void main()
 	viewRay.x = mix(viewRays.z, viewRays.x, float(pixel.x)/renderSize.x);
 	viewRay.y = mix(viewRays.w, viewRays.y, float(pixel.y)/renderSize.y);
 
-	//viewRay.x = mix(vrs.z, vrs.x, float(pixel.x)/renderSize.x);
-	//viewRay.y = mix(vrs.w, vrs.y, float(pixel.y)/renderSize.y);
-
 	viewRay = vec3(view * vec4(viewRay.xy,1.f,1.f));
 
 	float zView = exp2(depth * log2(FAR + 1.0)) - 1.f;
@@ -286,55 +283,42 @@ void main()
 
 	for(uint i = 0; i < passCount; ++i)
 	{	
-		//if (currentTilePointLightIndex < MAX_LIGHTS_PER_TILE)
-    	{
-			uint lightIndex =  (i * threadCount) + gl_LocalInvocationIndex;
+		uint lightIndex =  (i * threadCount) + gl_LocalInvocationIndex;
 
-			if(lightIndex > pointLightCount)
-				continue;
+		if(lightIndex > pointLightCount)
+			continue;
 
-			//lightIndex = min(lightIndex, pointLightCount);
+		vec4 lightPos = pointLights[lightIndex].posRad;
+		float rad = lightPos.w;
 
-			vec4 lightPos = pointLights[lightIndex].posRad;
-			float rad = lightPos.w;
-			//lightPos = transpose(view) * vec4(lightPos.xyz,1.f);
+		bool inFrustum = sphereVsAABB(lightPos.xyz, rad, AABBFarCenter, AABBFarHalfSize) || sphereVsAABB(lightPos.xyz, rad, AABBNearCenter, AABBNearHalfSize);
 
-			bool inFrustum = sphereVsAABB(lightPos.xyz, rad, AABBFarCenter, AABBFarHalfSize) || sphereVsAABB(lightPos.xyz, rad, AABBNearCenter, AABBNearHalfSize);
-
-			if(inFrustum)
-			{
-				//oCol += vec3(float(lightIndex)+1000.f,0.f,0.f);
-				uint nextTileLightIndex = atomicAdd(currentTilePointLightIndex,1);
-				tilePointLightIndices[nextTileLightIndex] = lightIndex;
-			}
+		if(inFrustum)
+		{
+			uint nextTileLightIndex = atomicAdd(currentTilePointLightIndex,1);
+			tilePointLightIndices[nextTileLightIndex] = lightIndex;
 		}
 	}
 
 	passCount = (spotLightCount + threadCount - 1) / threadCount;
 	
 	for(uint i = 0; i < passCount; ++i)
-	{	
-		//if (currentTileSpotLightIndex < MAX_LIGHTS_PER_TILE)
-    	{
-			uint lightIndex =  (i * threadCount) + gl_LocalInvocationIndex;
+	{
+		uint lightIndex =  (i * threadCount) + gl_LocalInvocationIndex;
 
-			if (lightIndex > spotLightCount)
-				continue;
+		if (lightIndex > spotLightCount)
+			continue;
 
-			//lightIndex = min(lightIndex, spotLightCount);
+		vec4 lightPos = spotLights[lightIndex].posRad;
+		float rad = lightPos.w * 0.5;
+		lightPos.xyz = lightPos.xyz + (spotLights[lightIndex].dirInner.xyz * rad);
 
-			vec4 lightPos = spotLights[lightIndex].posRad;
-			float rad = lightPos.w * 0.5;
-			lightPos.xyz = lightPos.xyz + (spotLights[lightIndex].dirInner.xyz * rad);
-			//lightPos = transpose(view) * vec4(lightPos.xyz,1.f);
+		bool inFrustum = sphereVsAABB(lightPos.xyz, rad, AABBFarCenter, AABBFarHalfSize) || sphereVsAABB(lightPos.xyz, rad, AABBNearCenter, AABBNearHalfSize);
 
-			bool inFrustum = sphereVsAABB(lightPos.xyz, rad, AABBFarCenter, AABBFarHalfSize) || sphereVsAABB(lightPos.xyz, rad, AABBNearCenter, AABBNearHalfSize);
-
-			if (inFrustum)
-			{
-				uint nextTileLightIndex = atomicAdd(currentTileSpotLightIndex,1);
-				tileSpotLightIndices[nextTileLightIndex] = lightIndex;
-			}
+		if (inFrustum)
+		{
+			uint nextTileLightIndex = atomicAdd(currentTileSpotLightIndex,1);
+			tileSpotLightIndices[nextTileLightIndex] = lightIndex;
 		}
 	}
 
@@ -344,10 +328,6 @@ void main()
 	vec4 albedoSpec = imageLoad(gAlbedoSpec, pixel.xy);
 
 	albedoSpec.xyz = albedoSpec.xyz * ssaoVal;
-	//albedoSpec.xyz = vec3(0.1f);
-
-	//imageStore(outColour, pixel, vec4(vec3(ssaoVal),1.f));
-
 	
 	vec3 viewDir = viewRay;
 
@@ -414,7 +394,6 @@ void main()
 		diffuse *= attenuation;
 		specular *= attenuation;
 
-		//oCol += specular + diffuse;
 		oCol +=  (1.f - shadow) * (specular + diffuse);
 	}
 
@@ -485,7 +464,6 @@ void main()
 		if(projCoords.z > 1.0)
         	shadow = 0.0;
 
-        //oCol += specular + diffuse;
 		oCol += (1.f - shadow)*(specular + diffuse);
 	}
 
@@ -496,19 +474,11 @@ void main()
 	float spec = pow(max(dot(normal, halfwayDir), 0.0), 16);
 	vec3 dirSpecular = vec3(0.1f) * spec * albedoSpec.w;
 
-	//oCol += dirDiffuse + dirSpecular;
-
 	vec4 skyCol = vec4(0.0f);
-
-	if(imageLoad(gID, pixel).r == selectedID)
-	{
-		oCol += vec3(0.f,0.005f,0.005f);
-	}
 
 	if(depth == 1.f)
 	{
 		skyCol = texture(skybox, -viewDir);
-		//skyCol = vec4(0.05,0.05,0.1,0.f);
 	}
 
 	oCol += skyCol.xyz;

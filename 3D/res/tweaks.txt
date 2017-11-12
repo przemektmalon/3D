@@ -1,3 +1,6 @@
 camSpeed=30.0
 tau=0.8
 damping=1.7
+linear=0.0
+quad=0.003
+minlight=10000.0

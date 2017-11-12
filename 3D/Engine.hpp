@@ -67,6 +67,11 @@ public:
 		void setDrawConsole(bool set) { drawConsole = set; }
 		void toggleDrawConsole() { drawConsole = !drawConsole; }
 
+		//Higher Constant == LOWER  MINUMUM LIGHT
+		//Lower  Constant == HIGHER MINIMUM LIGHT
+		float minimumLightConstant;
+		void setMinimumLightConstant(float set) { minimumLightConstant = set; }
+
 		//FOG
 		//AA level
 		//Tonemap settings (exposure + curve parameters)
@@ -113,6 +118,8 @@ public:
 	static void select(glm::ivec2 mPos);
 
 	static World* world;
+
+	static float linear, quad;
 
 	static float programTime;
 

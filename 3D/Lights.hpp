@@ -6,10 +6,7 @@
 #include "Sampler.hpp"
 #include "Billboard.hpp"
 
-//Minimum light constant. 
-//Higher Constant == LOWER MINUMUM LIGHT
-//Lower Constant == HIGHER MINIMUM LIGHT
-#define MIN_LIGHT_CONSTANT 2000.f
+
 
 struct DirectLightData
 {
@@ -19,8 +16,6 @@ struct DirectLightData
 
 	glm::fvec3 direction, colour;
 };
-
-#define MINIMUM_LIGHT 0.01
 
 class PointLight
 {
@@ -92,17 +87,9 @@ public:
 		updateRadius();
 	}
 
-	void updateRadius()
-	{
-		gpuData->radius = (0.5 * (std::sqrtf(gpuData->linear*gpuData->linear + (MIN_LIGHT_CONSTANT * gpuData->quadratic) - gpuData->linear))) / gpuData->quadratic;
-		updateProj();
-		updateProjView();
-	}
+	void updateRadius();
 
-	inline static float calculateRadius(float linear, float quad)
-	{
-		return  (0.5 * (std::sqrtf(linear*linear + (MIN_LIGHT_CONSTANT * quad) - linear))) / quad;
-	}
+	inline static float calculateRadius(float linear, float quad);
 
 	void updateView()
 	{ ///TODO: Dont think lookAt() is needed, since only the position is changing, the directions are always the same, so the matrix should be constructed with only changing a few of its values
@@ -116,8 +103,7 @@ public:
 
 	void updateProj()
 	{
-		//proj = glm::perspective<float>(glm::radians(90.f), 1.f, 1.f, gpuData->radius); ///TODO: Look into choosing best near value
-		proj = glm::perspective<float>(glm::radians(90.f), 1.f, 1.f, gpuData->radius); ///TODO: Look into choosing best near value
+		proj = glm::perspective<float>(glm::radians(90.f), 1.f, 0.01f, gpuData->radius);
 	}
 
 	void updateProjView()
@@ -142,7 +128,6 @@ public:
 
 	glm::fmat4 proj;
 	glm::fmat4 view[6];
-
 };
 
 class SpotLight
@@ -200,9 +185,6 @@ public:
 			glm::fvec4 linQuadTex;
 		};
 
-		//unsigned short fadeStart;
-		//unsigned short fadeLength;
-
 		union
 		{
 			struct
@@ -218,17 +200,9 @@ public:
 		glm::fmat4 projView;
 	};
 
-	void updateRadius()
-	{
-		gpuData->radius = (0.5 * (std::sqrtf(gpuData->linear*gpuData->linear + (MIN_LIGHT_CONSTANT * gpuData->quadratic) - gpuData->linear))) / (gpuData->quadratic * 2.f);
-		updateProj();
-		updateProjView();
-	}
+	void updateRadius();
 
-	inline static float calculateRadius(float linear, float quad)
-	{
-		return (0.5 * (std::sqrtf(linear*linear + (MIN_LIGHT_CONSTANT* quad) - linear))) / (quad * 2.f);
-	}
+	inline static float calculateRadius(float linear, float quad);
 
 	void setPosition(glm::fvec3 pPos)
 	{
@@ -279,7 +253,7 @@ public:
 
 	void updateProj()
 	{
-		proj = glm::perspective<float>(gpuData->outerSpread, 1.f, 1.f, gpuData->radius * 2.f); ///TODO: Look into choosing best near value
+		proj = glm::perspective<float>(gpuData->outerSpread, 1.f, 0.01f, gpuData->radius * 2.f);
 	}
 
 	void updateProjView()
