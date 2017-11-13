@@ -115,7 +115,6 @@ public:
 	static void processGameFrame();
 	static void processMenuFrame();
 	static void stop();
-	static void select(glm::ivec2 mPos);
 
 	static World* world;
 
@@ -137,8 +136,6 @@ public:
 	static QPC qpc;
 	static glm::ivec2 lastM;
 	static UIM uim;
-
-	static s32 selectedID;
 
 	static UIWindow* uiw;
 	static Log engineLog;

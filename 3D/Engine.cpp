@@ -37,7 +37,6 @@ glm::ivec2 Engine::lastM;
 UIM Engine::uim;
 char Engine::workingDirectory[MAX_PATH];
 u32 Engine::workingDirectoryLength;
-s32 Engine::selectedID;
 UIWindow* Engine::uiw;
 AssetManager Engine::assets;
 World* Engine::world;
@@ -222,34 +221,6 @@ bool mouseMoveCallback(float x, float y)
 	movePickedBody(rayFrom, rayTo);
 
 	return false;
-}
-
-void Engine::select(glm::ivec2 mPos)
-{
-	glActiveTexture(GL_TEXTURE0);
-	r->fboGBuffer.textureAttachments[3].bind(0);
-	glBindTexture(GL_TEXTURE_2D, r->fboGBuffer.textureAttachments[3].getGLID());
-
-	u32* idTex = new u32[cfg.render.resolution.x * cfg.render.resolution.y];
-
-	glGetTexImage(GL_TEXTURE_2D, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, idTex);
-
-	u32 source = cfg.render.resolution.x * (cfg.render.resolution.y - 1) + (-1.f * (mPos.y * cfg.render.resolution.x) + (mPos.x));
-	auto index = source;
-
-	selectedID = idTex[index];
-
-	//if (selectedID == 0)
-	//{
-	//selectedID = -1;
-	//}
-
-	Engine::r->tileCullShader.use();
-	Engine::r->tileCullShader.setSelectedID(selectedID);
-	Engine::r->tileCullShader.sendSelectedID();
-	Engine::r->tileCullShader.stop();
-
-	delete[] idTex;
 }
 
 void printlog()
