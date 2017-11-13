@@ -255,7 +255,6 @@ void MasterRenderer::render()
 	fboGBuffer.textureAttachments[0].bindImage(3, GL_READ_ONLY);
 	fboGBuffer.textureAttachments[1].bindImage(4, GL_READ_ONLY);
 	fboGBuffer.textureAttachments[2].bind(5);
-	fboGBuffer.textureAttachments[3].bindImage(7, GL_READ_ONLY);
 	fboSSAO.textureAttachments[0].bindImage(6, GL_READ_ONLY);
 	glActiveTexture(GL_TEXTURE15);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
@@ -366,7 +365,6 @@ inline void MasterRenderer::initialiseGBuffer()
 	fboGBuffer.attachTexture(GL_RG16F, GL_RG, GL_HALF_FLOAT, GL_COLOR_ATTACHMENT0);//NORMAL
 	fboGBuffer.attachTexture(GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT1);//ALBEDO_SPEC
 	fboGBuffer.attachTexture(GL_DEPTH_COMPONENT32F_NV, GL_DEPTH_COMPONENT, GL_FLOAT, GL_DEPTH_ATTACHMENT);//DEPTH
-	fboGBuffer.attachTexture(GL_R32I, GL_RED_INTEGER, GL_INT, GL_COLOR_ATTACHMENT2);//ID
 
 	fboGBuffer.checkStatus();
 

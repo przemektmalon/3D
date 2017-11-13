@@ -72,20 +72,6 @@ public:
 		return &inst->second;
 	}
 
-	ModelInstance* addModelInstance(Model& model, SGNode* parent)
-	{
-		++objectCount;
-
-		u32 instanceID = numTriLists[Regular] + numTriLists[MultiTextured];
-		numTriLists[Regular] += model.triLists.size();
-
-		auto inst = modelInstances.insert(std::make_pair(instanceID, ModelInstance())).first;
-		inst->second.model = &model;
-		inst->second.sgNode = parent->addChild(SGNode());
-
-		return &inst->second;
-	}
-
 	ModelInstance* getModelInstance(u32 pInstanceID)
 	{
 		auto find = modelInstances.find(pInstanceID);
