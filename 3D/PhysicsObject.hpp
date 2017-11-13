@@ -19,6 +19,42 @@ public:
 		collisionShape->calculateLocalInertia(mass, inertia);
 
 		rigidBody = new btRigidBody(mass, motionState, collisionShape, inertia);
+
+		setFriction(0.5f);
+		setRestitution(0.5f);
+		setDamping(0.05, 0.05);
+	}
+
+	void setMass(float pMass)
+	{
+		mass = pMass;
+		collisionShape->calculateLocalInertia(mass, inertia);
+		rigidBody->setMassProps(mass, inertia);
+	}
+
+	void setFriction(float f)
+	{
+		rigidBody->setFriction(f);
+	}
+
+	void setRestitution(float r)
+	{
+		rigidBody->setRestitution(r);
+	}
+
+	void setDamping(float linear, float angular)
+	{
+		rigidBody->setDamping(linear, angular);
+	}
+
+	void setLinearDamping(float linear)
+	{
+		rigidBody->setDamping(linear, rigidBody->getAngularDamping());
+	}
+
+	void setAngularDamping(float angular)
+	{
+		rigidBody->setDamping(rigidBody->getLinearDamping(), angular);
 	}
 
 	btRigidBody* rigidBody;

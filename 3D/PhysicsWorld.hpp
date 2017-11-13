@@ -4,6 +4,7 @@
 #include "btBulletDynamicsCommon.h"
 #include "BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h"
 #include <vector>
+#include "Time.hpp"
 
 class PhysicsWorld
 {
@@ -20,7 +21,7 @@ public:
 
 		dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
 
-		dynamicsWorld->setGravity(btVector3(0, -20, 0));
+		dynamicsWorld->setGravity(btVector3(0, -2, 0));
 	}
 
 	void addRigidBody(PhysicsObject* body)
@@ -35,9 +36,9 @@ public:
 
 	}
 
-	void step()
+	void step(Time& dt)
 	{
-		dynamicsWorld->stepSimulation(1.f / 60.f, 10);
+		dynamicsWorld->stepSimulation(dt.getMilliSecondsf(), 10, 1.f/60.f);
 	}
 
 	void updateModels();

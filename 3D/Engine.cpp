@@ -51,6 +51,7 @@ PhysicsWorld Engine::physics;
 EngineConfig Engine::cfg;
 float Engine::linear = 0.001;
 float Engine::quad = 0.001;
+int Engine::doPhysics = 1;
 
 float Engine::tau;
 float Engine::damping;
@@ -349,49 +350,36 @@ void Engine::mainLoop(int resolutionIndex)
 	s->addChildShape(trans, c5);
 	s->addChildShape(trans, c6);
 
+	float damping = 0.1;
+
 	auto worldRoot = world->getWorldRootNode();
 
-	auto ee = assets.getModel(String32("ground"));
-	auto i8 = world->addModelInstance(*ee, worldRoot);
+	auto i8 = world->addModelInstance("ground", worldRoot);
 	i8->sgNode->transform.scale(5.f);
 	auto col = new btStaticPlaneShape(glm::fvec3(0.f, 1.f, 0.f), 0.f);
 	i8->makePhysicsObject(s, 0.f);
-	
-	i8->physicsObject->rigidBody->setFriction(1.f);
-	i8->physicsObject->rigidBody->setRestitution(0.95f);
 
-	ee = assets.getModel(String32("colbox"));
-	auto i7 = world->addModelInstance(*ee, worldRoot);
+	auto i7 = world->addModelInstance("colbox", worldRoot);
 	i7->sgNode->transform.scale(8.f);
 	i7->sgNode->transform.translate(glm::fvec3(50, 50, 0));
 	auto boxcol = new btBoxShape(glm::fvec3(8, 8, 8));
 	i7->makePhysicsObject(boxcol, 42.f);
-	
-	i7->physicsObject->rigidBody->setRestitution(0.4);
-	i7->physicsObject->rigidBody->setFriction(0.7f);
 
-	auto i = world->addModelInstance(*ee, worldRoot);
+	auto i = world->addModelInstance("colbox", worldRoot);
 	i->sgNode->transform.scale(glm::fvec3(4, 6,3));
 	i->sgNode->transform.translate(glm::fvec3(50, 50, 0));
 	boxcol = new btBoxShape(glm::fvec3(4, 6, 3));
 	i->makePhysicsObject(boxcol, 30.f);
 
-	i->physicsObject->rigidBody->setRestitution(0.4);
-	i->physicsObject->rigidBody->setFriction(0.7f);
-
-	ee = assets.getModel(String32("mon"));
-	
 	auto col2 = new btSphereShape(5);
 
 	for (int i = 0; i < 4; ++i)
 	{
-		auto i2 = world->addModelInstance(*ee, worldRoot);
+		auto i2 = world->addModelInstance("mon", worldRoot);
 		i2->sgNode->transform.scale(5.f);
 		i2->sgNode->transform.translate(glm::fvec3(9, 5.1 + (5.1 * i), 0));
 
-		i2->makePhysicsObject(col2, 0.1f);
-		i2->physicsObject->rigidBody->setRestitution(0.35);
-		i2->physicsObject->rigidBody->setFriction(0.7f);
+		i2->makePhysicsObject(col2, 10.f);
 	}
 
 	world->sg.updateAll();
@@ -410,6 +398,7 @@ void Engine::mainLoop(int resolutionIndex)
 	tweak.bindVariable(Engine::linear, "linear", Tweaks::Floating);
 	tweak.bindVariable(Engine::quad, "quad", Tweaks::Floating);
 	tweak.bindVariable(Engine::cfg.render.minimumLightConstant, "minlight", Tweaks::Floating);
+	tweak.bindVariable(Engine::doPhysics, "doPhysics", Tweaks::Integer);
 
 	cfg.render.ssao.sampleRadius = 10.f;
 
@@ -522,8 +511,11 @@ void Engine::processGameFrame()
 
 	static float exposure = 1.f;
 
-	physics.step();
-	physics.updateModels();
+	if (doPhysics)
+	{
+		physics.step(dt);
+		physics.updateModels();
+	}
 
 	r->ssaoShader.setRadius(Engine::cfg.render.ssao.sampleRadius);
 

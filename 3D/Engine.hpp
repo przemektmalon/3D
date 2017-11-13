@@ -120,6 +120,7 @@ public:
 	static World* world;
 
 	static float linear, quad;
+	static int doPhysics;
 
 	static float programTime;
 
