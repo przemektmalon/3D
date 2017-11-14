@@ -13,7 +13,6 @@ UIButton::UIButton(UIWindow* pParent) : UIElement(Button,pParent)
 	setRectColour(backColour);
 }
 
-
 UIButton::~UIButton()
 {
 }

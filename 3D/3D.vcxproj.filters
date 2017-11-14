@@ -147,6 +147,9 @@
     <ClCompile Include="GPUModelManager.cpp">
       <Filter>Source Files\GL</Filter>
     </ClCompile>
+    <ClCompile Include="UIWindowManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Asset.hpp">
@@ -365,11 +368,14 @@
     <ClInclude Include="UIWindowManager.hpp">
       <Filter>Header Files\UI Elements</Filter>
     </ClInclude>
-    <ClInclude Include="DebugWindow.hpp">
-      <Filter>Header Files\UI Elements\Windows</Filter>
-    </ClInclude>
     <ClInclude Include="Framebuffer.hpp">
       <Filter>Header Files\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="ResolutionWindow.hpp">
+      <Filter>Header Files\UI Elements\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderConfigWindow.hpp">
+      <Filter>Header Files\UI Elements\Windows</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

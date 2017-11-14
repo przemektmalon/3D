@@ -12,6 +12,8 @@
 
 #include "PhysicsWorld.hpp"
 
+#include "UIWindowManager.hpp"
+
 class FontStore;
 class Camera;
 class Time;
@@ -137,6 +139,7 @@ public:
 	static glm::ivec2 lastM;
 	static UIM uim;
 
+	static UIWindowManager uiwm;
 	static UIWindow* uiw;
 	static Log engineLog;
 	

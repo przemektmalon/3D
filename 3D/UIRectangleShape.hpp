@@ -8,7 +8,7 @@
 class RectangleShape
 {
 public:
-	RectangleShape() { proj = glm::ortho<float>(0, 1280, 720, 0); }
+	RectangleShape() {}
 	~RectangleShape() {}
 
 	void draw()
@@ -49,9 +49,9 @@ public:
 	{
 		float verts[] = {
 			bounds.left, bounds.top, 1, 0,0,
-			bounds.left, bounds.bot(), 1, 0,0,
-			bounds.right(), bounds.bot(),1,0,0,
-			bounds.right(), bounds.top, 1,0,0
+			bounds.left, bounds.top + bounds.height, 1, 0,0,
+			bounds.right(), bounds.top + bounds.height,1, 0,0,
+			bounds.right(), bounds.top, 1, 0,0
 		};
 
 		glNamedBufferData(vbo, sizeof(verts), verts, GL_STATIC_DRAW);

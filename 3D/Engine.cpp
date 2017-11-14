@@ -16,7 +16,7 @@
 #include "StringGenerics.hpp"
 #include "UILabel.hpp"
 #include "UIButton.hpp"
-#include "DebugWindow.hpp"
+#include "ResolutionWindow.hpp"
 #include "Console.hpp"
 #include "Tweaks.hpp"
 #include <stdio.h>
@@ -37,7 +37,7 @@ glm::ivec2 Engine::lastM;
 UIM Engine::uim;
 char Engine::workingDirectory[MAX_PATH];
 u32 Engine::workingDirectoryLength;
-UIWindow* Engine::uiw;
+UIWindowManager Engine::uiwm;
 AssetManager Engine::assets;
 World* Engine::world;
 float Engine::programTime = 0;
@@ -294,15 +294,14 @@ void Engine::mainLoop(int resolutionIndex)
 	cam.calculateViewRays();
 	r->initialiseRenderer(&window, cam);
 
-	createDebugWindow(uiw);
+	uiwm.addWindow(createResolutionWindow());
+	uiwm.addWindow(createResolutionWindow());
 
 	cfg.render.setResolution(resolutionIndex);
 	cfg.render.setFrameScale(1.f);
 
 	world = new World();
 	world->initialiseGLBuffers();
-
-	auto prevNode = world->getWorldRootNode();
 
 	auto c1 = new btStaticPlaneShape(glm::fvec3(0.f, 1.f, 0.f), 0.f);
 	auto c2 = new btStaticPlaneShape(btVector3(1.f, 0.f, 0.f), -250.f);
@@ -381,12 +380,13 @@ void Engine::mainLoop(int resolutionIndex)
 			Event ev;
 			while (window.eventQ.pollEvent(ev))
 			{
+				uiwm.passEvent(ev);
+
 				switch (ev.type)
 				{
 				case(Event::MouseDown):
 				{
 					uim.mouseDown(ev.mouse.code);
-					uiw->mouseDown((MouseEvent&)ev);
 
 					if (ev.mouse.code.code == MouseCode::M_LEFT)
 					{
@@ -404,7 +404,6 @@ void Engine::mainLoop(int resolutionIndex)
 				case(Event::MouseUp):
 				{
 					uim.mouseUp(ev.mouse.code);
-					uiw->mouseUp((MouseEvent&)ev);
 
 					removePickingConstraint();
 
@@ -416,20 +415,19 @@ void Engine::mainLoop(int resolutionIndex)
 						uim.keyDown(ev.key.code);
 					else						 //Console open
 						console.textInput(ev.key.code.code);
-					uiw->keyDown((KeyEvent&)ev);
 					break;
 				}
 				case(Event::KeyUp):
 				{
 					if(console.stateFlags != 0)
 						uim.keyUp(ev.key.code);
-					uiw->keyUp((KeyEvent&)ev);
 					break;
 				}
 				}
 			}
-			ev.constructMouse(MouseCode::Code::M_NONE, window.getMousePosition(), 0);
-			uiw->checkMouseEnter((MouseEvent&)ev);
+
+			uiwm.checkMouseHovers();
+			ev.constructMouse(MouseCode::M_NONE, Engine::window.getMousePosition(), 0);
 			mouseMoveCallback(ev.mouse.position.x, ev.mouse.position.y);
 
 			if(console.stateFlags == 0)
@@ -510,7 +508,7 @@ void Engine::processGameFrame()
 		r->ssaoShader.setIntensity(newInts);
 	}
 
-	uiw->update();
+	uiwm.updateUIWindows();
 	cam.update(dt);
 
 	r->render();
@@ -536,9 +534,7 @@ void EngineConfig::RenderConfig::setResolution(int validResIndex)
 	Engine::r->reInitialiseFramebuffers();
 	Engine::window.setResolution(Engine::cfg.render.getValidResolution(resolutionIndex));
 
-	glm::fvec2 ratio((float)Engine::uiw->getWindowArea().left / (float)oldRes.x, (float)Engine::uiw->getWindowArea().top / (float)oldRes.y);
-
-	Engine::uiw->setWindowPosition(glm::ivec2(ratio.x * float(resolution.x), ratio.y * float(resolution.y)));
+	Engine::uiwm.updateUIPositionsOnResChange(oldRes, resolution);
 }
 
 void EngineConfig::RenderConfig::reloadAllShaders()

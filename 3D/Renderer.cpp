@@ -306,12 +306,11 @@ void MasterRenderer::render()
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 
-	//tb->draw();
 	lightManager.drawLightIcons();
 
 	// *********************************************************** SCREEN PASS *********************************************************** //
 
-	Engine::uiw->draw(); //UI Window
+	Engine::uiwm.drawUIWindows(); //UI Window Manager
 
 	Engine::console.draw();
 
@@ -353,7 +352,7 @@ void MasterRenderer::initialiseRenderer(Window * pwin, Camera & cam)
 
 	shadowMatrixBuffer.bufferData(sizeof(glm::fmat4) * 6, nullptr, GL_STREAM_DRAW);
 
-	tb = new TextBillboard(glm::fvec3(0, 20, 0), "Welcome to the 3D Game Engine! :D");
+	//tb = new TextBillboard(glm::fvec3(0, 20, 0), "Welcome to the 3D Game Engine! :D");
 
 	fboGBuffer.setClearDepth(0.f);
 	lightPassTex.createFromStream(GL_RGBA32F, Engine::cfg.render.resolution.x, Engine::cfg.render.resolution.y, GL_RGBA, GL_FLOAT, NULL);

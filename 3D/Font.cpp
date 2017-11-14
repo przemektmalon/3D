@@ -2,7 +2,7 @@
 
 GlyphContainer* Font::requestGlyphs(u16 pCharSize, Text * pUser)
 {
-		auto find = useTrack.find(pCharSize);
+	auto find = useTrack.find(pCharSize);
 	if (find == useTrack.end())
 	{
 		auto ret = loadGlyphs(pCharSize);
@@ -77,7 +77,6 @@ void GlyphContainer::load(u16 pCharSize, FT_Face pFace)
 
 		char ascSymbol = i + (unsigned char)(32);
 
-
 		FT_Error err = FT_Load_Char(pFace, ascSymbol, FT_LOAD_RENDER);
 
 		if (err)
@@ -104,6 +103,7 @@ void GlyphContainer::load(u16 pCharSize, FT_Face pFace)
 	}
 
 	height = pFace->size->metrics.height >> 6;
+	ascender = pFace->size->metrics.ascender >> 6;
 	maxYSize += lineYSize;
 	maxXSize = lineXSize > maxXSize ? lineXSize : maxXSize;
 	glyphs.makeGLAsset();

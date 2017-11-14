@@ -239,6 +239,7 @@
     <ClCompile Include="UIRectangleShape.cpp" />
     <ClCompile Include="UISwitchButton.cpp" />
     <ClCompile Include="UIWindow.cpp" />
+    <ClCompile Include="UIWindowManager.cpp" />
     <ClCompile Include="UserInputManager.cpp" />
     <ClCompile Include="Util.cpp" />
     <ClCompile Include="Window.cpp" />
@@ -272,7 +273,8 @@
     <ClInclude Include="List.hpp" />
     <ClInclude Include="Log.hpp" />
     <ClInclude Include="MathIncludes.hpp" />
-    <ClInclude Include="DebugWindow.hpp" />
+    <ClInclude Include="RenderConfigWindow.hpp" />
+    <ClInclude Include="ResolutionWindow.hpp" />
     <ClInclude Include="Mouse.hpp" />
     <ClInclude Include="Model.hpp" />
     <ClInclude Include="PhysicsObject.hpp" />

@@ -12,6 +12,7 @@
 UIWindow::UIWindow(std::string pName, irect pWindowArea, int pBorderWidth, const Window* pParentWindow) : name(pName), parentWindow(pParentWindow), title(new UILabel(this)), borderWidth(pBorderWidth)
 {
 	windowArea = pWindowArea;
+
 	renderTarget.setResolution(glm::ivec2(windowArea.width, windowArea.height));
 	renderTarget.attachTexture(GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT0);
 
@@ -127,7 +128,7 @@ void UIWindow::update()
 	if (dragging)
 	{
 		auto mp = Engine::window.getMousePosition();
-		mp.y = parentWindow->getSizeY() - mp.y;
+		//mp.y = parentWindow->getSizeY() - mp.y;
 		setWindowPosition(mp-clickedPos);
 	}
 }
@@ -135,7 +136,7 @@ void UIWindow::update()
 void UIWindow::mouseDown(MouseEvent& pMouseEvent)
 {
 	auto mp = pMouseEvent.getPosition();
-	mp.y = parentWindow->getSizeY() - mp.y;
+	//mp.y = parentWindow->getSizeY() - mp.y;
 	if (!windowArea.contains(mp))
 	{
 		dragging = false;
@@ -200,7 +201,7 @@ void UIWindow::keyUp(KeyEvent & pKeyEvent)
 void UIWindow::checkMouseEnter(MouseEvent& pMouseEvent)
 {
 	auto mp = pMouseEvent.getPosition();
-	mp.y = parentWindow->getSizeY() - mp.y;
+	//mp.y = parentWindow->getSizeY() - mp.y;
 
 	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
 	{
@@ -279,7 +280,7 @@ void UIWindow::updateWindowVBO()
 
 	float windowVerts[40] = {
 		//OUTSIDE AREA
-		windowArea.left, parentWindow->getSizeY() - windowArea.top,0.f,  0.0f, 1.0f,//TL
+		/*windowArea.left, parentWindow->getSizeY() - windowArea.top,0.f,  0.0f, 1.0f,//TL
 		windowArea.left + windowArea.width, parentWindow->getSizeY() - windowArea.top,0.f,  1.0f, 1.0f,//TR
 		windowArea.left + windowArea.width, parentWindow->getSizeY() - windowArea.top - windowArea.height,0.f,  1.0f, 0.0f,//BR
 		windowArea.left, parentWindow->getSizeY() - windowArea.top - windowArea.height,0.f,  0.0f, 0.0f,//BL
@@ -288,7 +289,23 @@ void UIWindow::updateWindowVBO()
 		borderWidth, windowArea.height - borderWidth - titleWidth ,0.f,0,1,
 		windowArea.width - borderWidth, windowArea.height - borderWidth - titleWidth,0.f,1,1,
 		windowArea.width - borderWidth, borderWidth,0.f,1,0,
-		borderWidth,borderWidth,0.f,0,0
+		borderWidth,borderWidth,0.f,0,0*/
+
+		windowArea.left, windowArea.top, 0.f, 0.0f, 1.0f,//TL
+		windowArea.left + windowArea.width, windowArea.top, 0.f, 1.0f, 1.0f,//TR
+		windowArea.left + windowArea.width, windowArea.top + windowArea.height, 0.f, 1.0f, 0.0f,//BR
+		windowArea.left, windowArea.top + windowArea.height, 0.f, 0.0f, 0.0f,//BL
+
+		//0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+
+		//INSIDE AREA
+		
+		/// TODO: These should not have clockwise winding for conventions sake (culling usually done on clockwise polys)
+
+		borderWidth, borderWidth + titleWidth ,0.f,0,1,//TL
+		windowArea.width - borderWidth, borderWidth + titleWidth,0.f,1,1,//TR
+		windowArea.width - borderWidth, windowArea.height - borderWidth,0.f,1,0,//BR
+		borderWidth, windowArea.height - borderWidth,0.f,0,0//BL
 
 		/*borderWidth,	windowArea.height - borderWidth - 20,  0.0f, 1.0f,//TL
 		windowArea.width - borderWidth, windowArea.height - 20 - borderWidth,  1.0f, 1.0f,//TR

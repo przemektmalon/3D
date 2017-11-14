@@ -18,6 +18,7 @@ public:
 	~UIWindow();
 
 	void draw();
+
 	void update();
 	void mouseDown(MouseEvent& pMouseEvent);
 	void mouseUp(MouseEvent& pMouseEvent);
@@ -79,6 +80,11 @@ public:
 		return name;
 	}
 
+	bool isOpen()
+	{
+		return open;
+	}
+
 //private:
 
 	irect windowArea;
@@ -87,6 +93,7 @@ public:
 	int titleWidth;
 	bool movable;
 	bool dragging;
+	bool open;
 	glm::ivec2 clickedPos;
 	bool hasTitle;
 	bool hasFocus;

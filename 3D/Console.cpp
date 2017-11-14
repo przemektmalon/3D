@@ -3,15 +3,6 @@
 #include "AssetManager.hpp"
 #include "World.hpp"
 
-void setModelPosition(glm::fvec3 pos)
-{
-	if (Engine::selectedID == -1) return;
-	auto i = Engine::world->getModelInstance(Engine::selectedID);
-	i->sgNode->transform.setTranslation(pos);
-	i->sgNode->updateAll();
-	Engine::world->updateGLBuffers();
-}
-
 void listShaders()
 {
 	auto& shaderMap = Engine::r->shaderStore.getShaderMap();
@@ -135,7 +126,6 @@ void Console::submitCommand(StringGeneric& command)
 	}
 
 	BEGIN_FUNC_SWITCH(funcName)
-		CHECK_CONSOLE_CALLABLE(1, setModelPosition, 1);
 		CHECK_CONSOLE_CALLABLE(2, listShaders, 0);
 		CHECK_CONSOLE_CALLABLE(3, reloadShader, 1);
 		CHECK_CONSOLE_CALLABLE(4, reloadAllShaders, 0);
@@ -144,7 +134,6 @@ void Console::submitCommand(StringGeneric& command)
 
 void Console::registerConsoleFuncs()
 {
-	REGISTER_CONSOLE_CALLABLE(1, "setModelPosition", 1);
 	REGISTER_CONSOLE_CALLABLE(2, "listShaders", 0);
 	REGISTER_CONSOLE_CALLABLE(3, "reloadShader", 1);
 	REGISTER_CONSOLE_CALLABLE(4, "reloadAllShaders", 0);

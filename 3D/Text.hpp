@@ -41,6 +41,7 @@ public:
 	Text2D()
 	{
 		font = nullptr;
+		glyphs = nullptr;
 		initt = false;
 		string.expand(64);
 		hasCustomOrigin = true;
@@ -131,17 +132,12 @@ public:
 		glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
 		glEnableVertexAttribArray(texAttrib);
 
-		//transform.setTranslation(glm::fvec3(-300, 100, 0));
-		//transform.setTranslation(glm::fvec3(0, 500, 0));
-
 		shader->stop();
 	}
 
 	void draw()
 	{
 		glBindVertexArray(vao);
-
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		shader->use();
 		shader->setColour(colour);
@@ -187,7 +183,7 @@ public:
 	{
 		hasCustomOrigin = true;
 		textOrigin = pO;
-		textOrigin.y = -textOrigin.y;
+		textOrigin.y = textOrigin.y;
 		updateVBO();
 	}
 
@@ -199,47 +195,47 @@ public:
 		{
 		case BotLeft:
 		{
-			setTextOrigin(0, 0);
+			setTextOrigin(0, boundingBox.height);
 			break;
 		}
 		case TopLeft:
 		{
-			setTextOrigin(0, getMaxHeight());
+			setTextOrigin(0, 0);
 			break;
 		}
 		case TopRight:
 		{
-			setTextOrigin(boundingBox.width, getMaxHeight());
+			setTextOrigin(boundingBox.width, 0);
 			break;
 		}
 		case BotRight:
 		{
-			setTextOrigin(boundingBox.width, 0);
+			setTextOrigin(boundingBox.width, boundingBox.height);
 			break;
 		}
 		case TopMiddle:
 		{
-			setTextOrigin(boundingBox.width / 2.f, getMaxHeight());
+			setTextOrigin(boundingBox.width / 2.f, 0);
 			break;
 		}
 		case BotMiddle:
 		{
-			setTextOrigin(boundingBox.width / 2.f, 0);
+			setTextOrigin(boundingBox.width / 2.f, boundingBox.height);
 			break;
 		}
 		case MiddleLeft:
 		{
-			setTextOrigin(0, getMaxHeight() / 2.f);
+			setTextOrigin(0, boundingBox.height / 2.f);
 			break;
 		}
 		case MiddleRight:
 		{
-			setTextOrigin(boundingBox.width, getMaxHeight() / 2.f);
+			setTextOrigin(boundingBox.width, boundingBox.height / 2.f);
 			break;
 		}
 		case MiddleMiddle:
 		{
-			setTextOrigin(boundingBox.width / 2.f, getMaxHeight() / 2.f);
+			setTextOrigin(boundingBox.width / 2.f, boundingBox.height / 2.f);
 			break;
 		}
 		}
@@ -258,6 +254,11 @@ public:
 		update();
 	}
 
+	GlyphContainer* getGlyphs()
+	{
+		return glyphs;
+	}
+
 private:
 
 	bool updateOrigin()
@@ -272,7 +273,7 @@ private:
 
 	void update()
 	{
-		if (!updateOrigin())
+		//if (!updateOrigin())
 		{
 			updateBoundingBox();
 			updateVBO();
@@ -286,43 +287,57 @@ private:
 		if (string.getLength() == 0) { return; }
 		if (font == nullptr) { return; }
 
-		auto glyphs = font->requestGlyphs(charSize, this); // glyphContainers[0];
+		glyphs = font->requestGlyphs(charSize, this);
 		auto glyphsTex = glyphs->getTexture();
 
 		auto p = string.getString();
 
-		glm::ivec2 rgp(0,0);
+		auto tpos = position - glm::fvec2(textOrigin);
+
+		glm::ivec2 rgp(tpos);
 
 		boundingBox.zero();
 		boundingBox.left = rgp.x;
 		boundingBox.top = rgp.y;
 
+		float ascender = glyphs->getAscender();
+
+		glm::uvec2 glyphPos = glyphs->getPosition(*p);
+		glm::uvec2 glyphSize = glyphs->getSize(*p);
+
+		glm::fvec2 botLeft(rgp.x + glyphPos.x, rgp.y + ascender + (glyphSize.y - glyphPos.y));
+		glm::fvec2 topRight(rgp.x + glyphPos.x + glyphSize.x, rgp.y + ascender - glyphPos.y);
+
 		s32 minX, maxX, minY, maxY;
-		minX = rgp.x; maxX = rgp.x;
-		minY = rgp.y; maxY = rgp.y;
+		minX = botLeft.x; maxX = topRight.x;
+		minY = topRight.y; maxY = botLeft.y;
 
 		while (*p != 0)
 		{
 			if (*p == '\n')
 			{
-				rgp.x = 0;
-				rgp.y -= charSize;
+				rgp.x = tpos.x;
+				rgp.y += charSize;
 			}
 			else
 			{
-				auto glyphPos = rgp + glyphs->getPosition(*p);
-				auto glyphSize = glyphs->getSize(*p);
-				auto glyphCoords = glyphs->getCoords(*p);
+				glm::uvec2 glyphPos = glyphs->getPosition(*p);
+				glm::uvec2 glyphSize = glyphs->getSize(*p);
 
-				if (glyphPos.x < minX)
-					minX = glyphPos.x;
-				if (glyphPos.y - glyphSize.y < minY)
-					minY = glyphPos.y - glyphSize.y;
+				glm::fvec2 botLeft(rgp.x + glyphPos.x, rgp.y + ascender + (glyphSize.y - glyphPos.y));
+				glm::fvec2 botRight(rgp.x + glyphPos.x + glyphSize.x, rgp.y + ascender + (glyphSize.y - glyphPos.y));
+				glm::fvec2 topRight(rgp.x + glyphPos.x + glyphSize.x, rgp.y + ascender - glyphPos.y);
+				glm::fvec2 topLeft(rgp.x + glyphPos.x, rgp.y + ascender - glyphPos.y);
 
-				if (glyphPos.y > maxY)
-					maxY = glyphPos.y;
-				if (glyphPos.x + glyphSize.x > maxX)
-					maxX = glyphPos.x + glyphSize.x;
+				if (botLeft.x < minX)
+					minX = botLeft.x;
+				if (botLeft.y > maxY)
+					maxY = botLeft.y;
+
+				if (topRight.x > maxX)
+					maxX = topRight.x;
+				if (topRight.y < minY)
+					minY = topRight.y;
 
 				rgp.x += glyphs->getAdvance(*p).x;
 				rgp.y += glyphs->getAdvance(*p).y;
@@ -334,13 +349,26 @@ private:
 		boundingBox.top = minY;
 		boundingBox.width = maxX - minX;
 		boundingBox.height = maxY - minY;
+
+		const auto bb = boundingBox;
+
+		float bbDataTmp[] = { 
+			
+			bb.left,			bb.top,				0.f, 0.f, 0.f,
+			bb.left + bb.width, bb.top,				0.f, 0.f, 0.f,
+			bb.left + bb.width, bb.top + bb.height,	0.f, 0.f, 0.f,
+			bb.left,			bb.top + bb.height,	0.f, 0.f, 0.f 
+		
+		};
+
+		glNamedBufferData(vboBBox, sizeof(bbDataTmp), bbDataTmp, GL_STATIC_DRAW);
 	}
 
 	void updateVBO()
 	{
 		boundingBox.zero(); vboSize = 0;
 		if (charSize == 0) { return; }
-		if (string.getLength() == 0) {  return; }
+		if (string.getLength() == 0) { return; }
 		if (font == nullptr) { return; }
 
 		int vboNumQuad = string.getLength();
@@ -352,7 +380,7 @@ private:
 		int vboSizeChar = vboNumVert * sizeOfVert * sizeof(float);
 		float* vertData = new float[vboSizeFloats];
 
-		auto glyphs = font->requestGlyphs(charSize, this); // glyphContainers[0];
+		glyphs = font->requestGlyphs(charSize, this); // glyphContainers[0];
 		auto glyphsTex = glyphs->getTexture();
 
 		int index = 0;
@@ -362,68 +390,81 @@ private:
 
 		glm::ivec2 rgp(tpos);
 
-		switch (windowOrigin)
+		/*switch (windowOrigin)
 		{
-		case(BotLeft) :
+		case(BotLeft):
 
 			break;
-		case(TopLeft) :
+		case(TopLeft):
 			rgp.y = windowSize.y - rgp.y;
 			tpos.y = rgp.y;
 			break;
-		case(TopRight) :
+		case(TopRight):
 			rgp.x = windowSize.x - rgp.x;
 			rgp.y = windowSize.y - rgp.y;
 			tpos.y = rgp.y;
 			tpos.x = rgp.x;
 			break;
-		case(BotRight) :
+		case(BotRight):
 			rgp.x = windowSize.x - rgp.x;
 			tpos.x = rgp.x;
 			break;
-		}
+		}*/
 
 		boundingBox.zero();
 		boundingBox.left = rgp.x;
 		boundingBox.top = rgp.y;
-		
+
+		float ascender = glyphs->getAscender();
+
+		glm::uvec2 glyphPos = glyphs->getPosition(*p);
+		glm::uvec2 glyphSize = glyphs->getSize(*p);
+
+		glm::fvec2 botLeft(rgp.x + glyphPos.x, rgp.y + ascender + (glyphSize.y - glyphPos.y));
+		glm::fvec2 topRight(rgp.x + glyphPos.x + glyphSize.x, rgp.y + ascender - glyphPos.y);
+
 		s32 minX, maxX, minY, maxY;
-		minX = rgp.x; maxX = rgp.x;
-		minY = rgp.y; maxY = rgp.y;
+		minX = botLeft.x; maxX = topRight.x;
+		minY = topRight.y; maxY = botLeft.y;
 
 		while (*p != 0)
 		{
 			if (*p == '\n')
 			{
 				rgp.x = tpos.x;
-				rgp.y -= charSize;
+				rgp.y += charSize;
 			}
 			else
 			{
-				glm::uvec2 glyphPos = rgp + glyphs->getPosition(*p);
+				glm::uvec2 glyphPos = glyphs->getPosition(*p);
 				glm::uvec2 glyphSize = glyphs->getSize(*p);
 				glm::fvec2 glyphCoords = glyphs->getCoords(*p);
 
 				auto cOffset = glm::fvec2(glyphSize) / glm::fvec2(glyphsTex->getWidth(), glyphsTex->getHeight());
 
+				glm::fvec2 botLeft(rgp.x + glyphPos.x, rgp.y + ascender + (glyphSize.y - glyphPos.y));
+				glm::fvec2 botRight(rgp.x + glyphPos.x + glyphSize.x, rgp.y + ascender + (glyphSize.y - glyphPos.y));
+				glm::fvec2 topRight(rgp.x + glyphPos.x + glyphSize.x, rgp.y + ascender - glyphPos.y);
+				glm::fvec2 topLeft(rgp.x + glyphPos.x, rgp.y + ascender - glyphPos.y);
+
 				GLfloat vertices[] = {
-					//Position													Texcoords
-					glyphPos.x, glyphPos.y, 0,									glyphCoords.x, glyphCoords.y, // Bot-left
-					glyphPos.x + glyphSize.x, glyphPos.y, 0,					glyphCoords.x + cOffset.x, glyphCoords.y, // Bot-right
-					glyphPos.x + glyphSize.x, glyphPos.y - glyphSize.y, 0,		glyphCoords.x + cOffset.x, glyphCoords.y + cOffset.y,  // Top-right
-					glyphPos.x, glyphPos.y - glyphSize.y, 0,					glyphCoords.x, glyphCoords.y + cOffset.y // Top-left
+					//Position						Texcoords
+					botLeft.x,  botLeft.y,  0,		glyphCoords.x,				glyphCoords.y + cOffset.y,	// Bot-left
+					botRight.x, botRight.y, 0,		glyphCoords.x + cOffset.x,	glyphCoords.y + cOffset.y,	// Bot-right
+					topRight.x, topRight.y, 0,		glyphCoords.x + cOffset.x,	glyphCoords.y,				// Top-right
+					topLeft.x,  topLeft.y,  0,		glyphCoords.x,				glyphCoords.y				// Top-left
 				};
 				memcpy((char*)(vertData)+(sizeof(vertices) * index), vertices, sizeof(vertices));
-						
-				if (glyphPos.x < minX) 
-					minX = glyphPos.x;
-				if (glyphPos.y - glyphSize.y < minY) 
-					minY = glyphPos.y - glyphSize.y;
 
-				if (glyphPos.y > maxY)
-					maxY = glyphPos.y;
-				if (glyphPos.x + glyphSize.x > maxX) 
-					maxX = glyphPos.x + glyphSize.x;
+				if (botLeft.x < minX)
+					minX = botLeft.x;
+				if (botLeft.y > maxY)
+					maxY = botLeft.y;
+
+				if (topRight.x > maxX)
+					maxX = topRight.x;
+				if (topRight.y < minY)
+					minY = topRight.y;
 
 				rgp.x += glyphs->getAdvance(*p).x;
 				rgp.y += glyphs->getAdvance(*p).y;
@@ -441,18 +482,17 @@ private:
 
 		const auto bb = boundingBox;
 
-		float bbDataTmp[] = { bb.left, bb.top, 0.f, 0.f,0.f,
-								bb.left + bb.width, bb.top, 0.f,0.f,0.f,
-								bb.left + bb.width, bb.top + bb.height,0.f,0.f,0.f,
-								bb.left,bb.top + bb.height,0.f,0.f,0.f };
+		float bbDataTmp[] = {
+
+			bb.left,			bb.top,				0.f, 0.f, 0.f,
+			bb.left + bb.width, bb.top,				0.f, 0.f, 0.f,
+			bb.left + bb.width, bb.top + bb.height,	0.f, 0.f, 0.f,
+			bb.left,			bb.top + bb.height,	0.f, 0.f, 0.f
+
+		};
 
 		glNamedBufferData(vboBBox, sizeof(bbDataTmp), bbDataTmp, GL_STATIC_DRAW);
-
-
-
 		glNamedBufferData(vbo, vboSizeChar, vertData, GL_STATIC_DRAW);
-
-		
 
 		delete[] vertData;
 	}
@@ -482,5 +522,6 @@ protected:
 	String<HEAP> string;
 	u16 charSize;
 	Font* font;
+	GlyphContainer* glyphs;
 };
 

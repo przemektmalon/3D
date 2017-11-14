@@ -83,10 +83,13 @@ public:
 	void updateBounds()
 	{
 		auto b = text.getBoundingBox();
-		border.x = (dimensions.width - b.width) * 0.5;
-		border.y = (dimensions.height - b.height) * 0.5;
-		text.setPosition(position + border);
-		rect.setBounds(frect(position.x, position.y, (border.x*2.f) + b.width, (border.y * 2.f) + b.height));
+		glm::fvec2 textPosition(0,0);
+		if (text.getGlyphs() != nullptr) {
+			textPosition = glm::fvec2(position.x + dimensions.width*0.5, position.y - (text.getGlyphs()->getAscender() - b.height) + dimensions.height*0.5);
+		}
+		
+		text.setPosition(textPosition);
+		rect.setBounds(frect(position.x, position.y, dimensions.width, dimensions.height));
 	}
 
 	void setRectColour(glm::fvec4 pCol)
@@ -106,7 +109,8 @@ public:
 
 	frect getBounds()
 	{
-		return frect(position.x, position.y, dimensions.width, dimensions.height);
+		return rect.getBounds();
+		//return frect(position.x, position.y, dimensions.width, dimensions.height);
 	}
 
 	glm::ivec2 getPosition() { return rect.getBounds().topLeft; }
