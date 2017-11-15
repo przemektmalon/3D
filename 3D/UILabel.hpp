@@ -39,6 +39,11 @@ public:
 		text.setString(pStr);
 	}
 
+	void setString(std::string& pStr)
+	{
+		text.setString(pStr);
+	}
+
 	void setColour(glm::fvec3 pCol)
 	{
 		text.setColour(pCol);
@@ -56,7 +61,7 @@ public:
 
 	void setPosition(glm::fvec2 pPos)
 	{
-		pPos += glm::fvec2(parentWindow->borderWidth) + glm::fvec2(0, parentWindow->titleWidth);
+		//pPos += glm::fvec2(parentWindow->borderWidth) + glm::fvec2(0, parentWindow->titleWidth);
 		text.setPosition(pPos);
 	}
 

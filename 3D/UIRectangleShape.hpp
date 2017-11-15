@@ -90,6 +90,6 @@ private:
 	GLuint vao;
 	GLuint vbo;
 	glm::fvec4 colour;
-	irect bounds;
+	frect bounds;
 	glm::fmat4 proj;
 };

@@ -290,9 +290,6 @@
     <ClInclude Include="UISwitchButton.hpp">
       <Filter>Header Files\UI Elements</Filter>
     </ClInclude>
-    <ClInclude Include="UIUtil.hpp">
-      <Filter>Header Files\UI Elements</Filter>
-    </ClInclude>
     <ClInclude Include="UIVertexStore.hpp">
       <Filter>Header Files\UI Elements</Filter>
     </ClInclude>

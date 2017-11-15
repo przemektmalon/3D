@@ -9,11 +9,15 @@ UISlider::UISlider(UIWindow* pParent) : UIElement(Slider,pParent)
 	slider.initOGL();
 	range.initOGL();
 	valueText.init();
+	descText.init();
 
 	Text2D::TextStyle style(Engine::assets.getFont("clearsansb"), 14);
 
 	valueText.setStyle(style);
-	valueText.setTextOrigin(Text2D::BotMiddle);
+	valueText.setTextOrigin(Text2D::TopRight);
+
+	descText.setStyle(style);
+	descText.setTextOrigin(Text2D::TopLeft);
 
 	sliderColour = glm::fvec4(0.7, 0.7, 0.7, 0.8);
 	sliderClickColour = glm::fvec4(0.9, 0.9, 0.9, 0.9);
@@ -34,10 +38,10 @@ UISlider::UISlider(UIWindow* pParent) : UIElement(Slider,pParent)
 			if (newBounds.left < _this->range.getBounds().left)
 				newBounds.left = _this->range.getBounds().left;
 			if (newBounds.right() > _this->range.getBounds().right())
-				newBounds.left = _this->range.getBounds().left + _this->range.getBounds().width - 8;
+				newBounds.left = _this->range.getBounds().left + _this->range.getBounds().width - _this->slider.getBounds().width;
 			_this->slider.setBounds(newBounds);
 
-			float ratio = float(newBounds.left - _this->range.getBounds().left) / float(_this->range.getBounds().width-8.f);
+			float ratio = float(newBounds.left - _this->range.getBounds().left) / float(_this->range.getBounds().width - _this->slider.getBounds().width);
 
 			std::string valString;
 
@@ -58,6 +62,7 @@ UISlider::UISlider(UIWindow* pParent) : UIElement(Slider,pParent)
 			}
 
 			_this->valueText.setString(valString);
+			_this->valueText.forceUpdate();
 		}
 	});
 }

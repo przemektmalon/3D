@@ -3,5 +3,4 @@ tau=0.10
 damping=0.90
 linear=0.0
 quad=0.003
-minlight=10000.0
 doPhysics=1

@@ -76,20 +76,20 @@ public:
 
 	void setSize(glm::fvec2 pSize)
 	{
-		dimensions = UISize(pSize);
+		dimensions = pSize;
 		updateBounds();
 	}
 
 	void updateBounds()
 	{
 		auto b = text.getBoundingBox();
-		glm::fvec2 textPosition(0,0);
+		glm::fvec2 textPosition(0, 0);
 		if (text.getGlyphs() != nullptr) {
-			textPosition = glm::fvec2(position.x + dimensions.width*0.5, position.y - (text.getGlyphs()->getAscender() - b.height) + dimensions.height*0.5);
+			textPosition = glm::fvec2(position.x + dimensions.x*0.5, position.y - (text.getGlyphs()->getAscender() - b.height) + dimensions.y*0.5);
 		}
 		
 		text.setPosition(textPosition);
-		rect.setBounds(frect(position.x, position.y, dimensions.width, dimensions.height));
+		rect.setBounds(frect(position.x, position.y, dimensions.x, dimensions.y));
 	}
 
 	void setRectColour(glm::fvec4 pCol)

@@ -312,7 +312,6 @@
     <ClInclude Include="UIRectangleShape.hpp" />
     <ClInclude Include="UISlider.hpp" />
     <ClInclude Include="UISwitchButton.hpp" />
-    <ClInclude Include="UIUtil.hpp" />
     <ClInclude Include="UIVertexStore.hpp" />
     <ClInclude Include="UIWindow.hpp" />
     <ClInclude Include="UIWindowManager.hpp" />

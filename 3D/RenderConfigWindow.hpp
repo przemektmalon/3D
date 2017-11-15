@@ -17,7 +17,7 @@ UIWindow* createRenderConfigWindow()
 	lblFPS.setStyle(styleA);
 	lblFPS.setString(String<32>("FPS: "));
 	lblFPS.setTextOrigin(Text2D::TopLeft);
-	lblFPS.setPosition(glm::fvec2(20, 8));
+	lblFPS.setPosition(glm::fvec2(15, 30));
 	lblFPS.setUpdate(
 		[](UIWindow * win, UIElement* __this) -> void {
 		UILabel* _this = (UILabel*)__this;
@@ -31,24 +31,55 @@ UIWindow* createRenderConfigWindow()
 	butToggleWire.getText().setStyle(styleA);
 	butToggleWire.getText().setCharSize(18);
 	butToggleWire.setString(SSTR("Toggle wireframe"));
-	butToggleWire.getText().setTextOrigin(Text2D::BotLeft);
-	butToggleWire.setPosition(glm::fvec2(20, 340));
+	butToggleWire.getText().setTextOrigin(Text2D::MiddleMiddle);
+	butToggleWire.setPosition(glm::fvec2(15, 70));
 	butToggleWire.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
 		UIButton* _this = (UIButton*)__this;
 		Engine::cfg.render.toggleDrawWireframe();
 	});
 
-	C_SLIDER(slider, win);
-	slider.setName("slider");
-	slider.init(irect(20, 420, 108, 10));
-	slider.valType = UISlider::Float;
-	slider.setLimits(glm::fvec2(0.1f, 10.f));
-	slider.binding.f = &Engine::cfg.render.ssao.sampleRadius;
-	slider.value.f = 0.1f;
+	C_SLIDER(sliSSAORad, win);
+	sliSSAORad.setName("ssaorad");
+	sliSSAORad.setDescription("SSAO Radius");
+	sliSSAORad.valType = UISlider::Float;
+	sliSSAORad.setLimits(glm::fvec2(0.1f, 40.f));
+	sliSSAORad.binding.f = &Engine::cfg.render.ssao.sampleRadius;
+	sliSSAORad.value.f = 5.f;
+	sliSSAORad.init(glm::fvec2(15, 110), 270);
+
+	C_SLIDER(sliSSAOInt, win);
+	sliSSAOInt.setName("ssaoint");
+	sliSSAOInt.setDescription("SSAO Intensity");
+	sliSSAOInt.valType = UISlider::Float;
+	sliSSAOInt.setLimits(glm::fvec2(0.1f, 40.f));
+	sliSSAOInt.binding.f = &Engine::cfg.render.ssao.intensity;
+	sliSSAOInt.value.f = 2.f;
+	sliSSAOInt.init(glm::fvec2(15, 160), 270);
+
+	C_SLIDER(sliSSAOSca, win);
+	sliSSAOSca.setName("ssaoscale");
+	sliSSAOSca.setDescription("SSAO Frame Scale");
+	sliSSAOSca.valType = UISlider::Float;
+	sliSSAOSca.setLimits(glm::fvec2(100.f, 2000.f));
+	sliSSAOSca.binding.f = &Engine::cfg.render.ssao.projScale;
+	sliSSAOSca.value.f = 500.f;
+	sliSSAOSca.init(glm::fvec2(15, 210), 270);
+
+	C_SLIDER(sliMinLight, win);
+	sliMinLight.setName("minlight");
+	sliMinLight.setDescription("Min Light Constant");
+	sliMinLight.valType = UISlider::Float;
+	sliMinLight.setLimits(glm::fvec2(1000.f, 15000.f));
+	sliMinLight.binding.f = &Engine::cfg.render.minimumLightConstant;
+	sliMinLight.value.f = 10000.f;
+	sliMinLight.init(glm::fvec2(15, 260), 270);
 
 	win->setMovable(true);
 	win->addElement(lblFPSPtr);
-	win->addElement(sliderPtr);
+	win->addElement(sliSSAORadPtr);
+	win->addElement(sliSSAOIntPtr);
+	win->addElement(sliSSAOScaPtr);
+	win->addElement(sliMinLightPtr);
 	win->addElement(butToggleWirePtr);
 
 	return win;

@@ -34,6 +34,7 @@ public:
 
 		struct SSSAOConfig {
 			float frameScale;
+			float projScale;
 			float sampleRadius;
 			float intensity;
 		} ssao;

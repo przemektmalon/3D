@@ -13,15 +13,42 @@ public:
 
 	void update();
 
-	void init(irect pRangeBounds)
+	void init(glm::fvec2 pPosition, float pWidth)
 	{
-		range.setBounds(pRangeBounds);
-		slider.setBounds(irect(pRangeBounds.left, pRangeBounds.top - 8, 8, pRangeBounds.height + 16));
-		position = glm::fvec2(pRangeBounds.left, pRangeBounds.top - 8);
-		dimensions = glm::fvec2(pRangeBounds.width, pRangeBounds.height + 16);
+		position = pPosition;
+		dimensions.x = pWidth; dimensions.y = 40;
 
-		valueText.setPosition(glm::fvec2(position.x + (dimensions.width / 2.f), position.y - 16.f));
+		descText.setPosition(glm::fvec2(position.x + 10, position.y));
+		
+		range.setBounds(irect(position.x, position.y + 25, dimensions.x, 10));
+		valueText.setPosition(glm::fvec2(position.x + dimensions.x - 10, position.y));
 
+		float ratio;
+
+		std::string valString;
+
+		switch (valType)
+		{
+		case Integer:
+			ratio = float(value.i - limits.left.i) / float(limits.right.i - limits.left.i);
+			value.i = limits.left.i + int(float(limits.right.i - limits.left.i) * ratio);
+			valString = std::to_string(value.i);
+			if (binding.i)
+				*binding.i = value.i;
+			break;
+		case Float:
+			ratio = (value.f - limits.left.f) / (limits.right.f - limits.left.f);
+			value.f = limits.left.f + (float(limits.right.f - limits.left.f) * ratio);
+			valString = std::to_string(value.f);
+			if (binding.f)
+				*binding.f = value.f;
+			break;
+		}
+
+		slider.setBounds(irect(position.x + (float(dimensions.x) * ratio), position.y + 17, 12, 24));
+
+		valueText.setString(valString);
+		valueText.forceUpdate();
 	}
 
 	void draw()
@@ -31,6 +58,12 @@ public:
 
 		range.draw();
 		slider.draw();
+
+		descText.shader->setProj(parentWindow->getProj());
+		descText.shader->setModel(glm::fmat4());
+		descText.shader->setView(glm::fmat4());
+		descText.shader->setFontBinding(12);
+		descText.draw();
 
 		valueText.shader->setProj(parentWindow->getProj());
 		valueText.shader->setModel(glm::fmat4());
@@ -105,6 +138,11 @@ public:
 		valueText.setString(std::to_string(l.x));
 	}
 
+	void setDescription(std::string pDesc)
+	{
+		descText.setString(pDesc);
+	}
+
 	glm::fvec4 sliderColour;
 	glm::fvec4 sliderClickColour;
 	glm::fvec4 sliderHoverColour;
@@ -142,5 +180,6 @@ public:
 	}binding;
 
 	Text2D valueText;
+	Text2D descText;
 };
 

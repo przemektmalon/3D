@@ -250,14 +250,10 @@ void UIWindow::setTitle(std::string pTitle)
 	title->setCharSize(14);
 	title->setColour(glm::fvec3(0.f, 1.f, 1.f));
 	title->setWindowSize(glm::ivec2(windowArea.width, windowArea.height));
-	title->setWindowOrigin(Text2D::TopLeft);
 	String<512> tit; tit.setToChars(name.c_str());
 	title->setString(tit);
-	//title->setTextOrigin(glm::ivec2(title->getBoundingBox().width / 2.f, title->getBoundingBox().height));
-	title->setTextOrigin(Text2D::MiddleMiddle);
-	//title->setPosition(glm::fvec2(windowArea.width / 2.f - 5.f, -borderWidth - titleWidth));
+	title->setTextOrigin(Text2D::TopMiddle);
 	title->setPosition(glm::fvec2(windowArea.width / 2.f, 0));
-	//title->setPosition(glm::fvec2(0, 0));
 
 	updateWindowVBO();
 }

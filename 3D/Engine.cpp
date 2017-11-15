@@ -16,12 +16,14 @@
 #include "StringGenerics.hpp"
 #include "UILabel.hpp"
 #include "UIButton.hpp"
-#include "ResolutionWindow.hpp"
 #include "Console.hpp"
 #include "Tweaks.hpp"
 #include <stdio.h>
 #include <io.h>
 #include <fcntl.h>
+
+#include "ResolutionWindow.hpp"
+#include "RenderConfigWindow.hpp"
 
 FT_Library Engine::ftLib;
 HINSTANCE Engine::instance;
@@ -295,7 +297,7 @@ void Engine::mainLoop(int resolutionIndex)
 	r->initialiseRenderer(&window, cam);
 
 	uiwm.addWindow(createResolutionWindow());
-	uiwm.addWindow(createResolutionWindow());
+	uiwm.addWindow(createRenderConfigWindow());
 
 	cfg.render.setResolution(resolutionIndex);
 	cfg.render.setFrameScale(1.f);
@@ -367,7 +369,6 @@ void Engine::mainLoop(int resolutionIndex)
 	tweak.bindVariable(Engine::damping, "damping", Tweaks::Floating);
 	tweak.bindVariable(Engine::linear, "linear", Tweaks::Floating);
 	tweak.bindVariable(Engine::quad, "quad", Tweaks::Floating);
-	tweak.bindVariable(Engine::cfg.render.minimumLightConstant, "minlight", Tweaks::Floating);
 	tweak.bindVariable(Engine::doPhysics, "doPhysics", Tweaks::Integer);
 
 	cfg.render.ssao.sampleRadius = 10.f;
@@ -486,27 +487,10 @@ void Engine::processGameFrame()
 		physics.updateModels();
 	}
 
+	/// TODO: only update these when they change !
 	r->ssaoShader.setRadius(Engine::cfg.render.ssao.sampleRadius);
-
-	if (window.keyboard.isKeyPressed('9'))
-	{
-		auto ints = r->ssaoShader.getIntensity();
-		std::cout << ints << std::endl;
-		auto newInts = ints;
-		newInts += 5 * dt.getSecondsf();
-		newInts = std::max(newInts, 0.0001f);
-
-		r->ssaoShader.setIntensity(newInts);
-	}
-	if (window.keyboard.isKeyPressed('8'))
-	{
-		auto ints = r->ssaoShader.getIntensity();
-		auto newInts = ints;
-		newInts -= 5 * dt.getSecondsf();
-		newInts = std::max(newInts, 0.0001f);
-
-		r->ssaoShader.setIntensity(newInts);
-	}
+	r->ssaoShader.setIntensity(Engine::cfg.render.ssao.intensity);
+	r->ssaoShader.setProjScale(Engine::cfg.render.ssao.projScale);
 
 	uiwm.updateUIWindows();
 	cam.update(dt);

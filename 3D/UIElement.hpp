@@ -1,5 +1,4 @@
 #pragma once
-#include "UIUtil.hpp"
 #include "glm\common.hpp"
 #include "Event.hpp"
 #include <functional>
@@ -76,8 +75,6 @@ public:
 	virtual void onEngineWindowResize(WindowEvent& pWindowEvent) {}
 	virtual void onParentWindowResize(WindowEvent& pWindowEvent) {}
 
-	const UIVariable& getVar(u32& pVarCount) { return elementVar; }
-
 	virtual glm::ivec2 getTopLeft() { return glm::ivec2(0, 0); }
 	virtual glm::ivec2 getSize() { return glm::ivec2(0, 0); }
 
@@ -93,7 +90,7 @@ public:
 
 	frect getBounds()
 	{
-		return frect(position.x, position.y, dimensions.width, dimensions.height);
+		return frect(position.x, position.y, dimensions.x, dimensions.y);
 	}
 
 	void setUpdate(std::function<void(UIWindow*, UIElement*)> pUpdate)
@@ -164,13 +161,13 @@ public:
 protected:
 
 	std::string name;
-	UIVariable elementVar;
+	//UIVariable elementVar;
 	//u32 varCount;
 	
 	UIWindow* parentWindow;
 	
 	glm::fvec2 position;
-	UISize dimensions;
+	glm::fvec2 dimensions;
 
 	bool clicked;
 	bool hovered;

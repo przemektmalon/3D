@@ -3,7 +3,6 @@
 #include "UILabel.hpp"
 #include "UISlider.hpp"
 #include "UISwitchButton.hpp"
-#include "UIUtil.hpp"
 
 #define C_LABEL(name,window) \
 UILabel* ##name##Ptr = new UILabel(window); \

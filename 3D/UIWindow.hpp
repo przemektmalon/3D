@@ -1,5 +1,4 @@
 #pragma once
-#include "UIUtil.hpp"
 #include "Framebuffer.hpp"
 #include "Shape2DShader.hpp"
 #include "Window.hpp"

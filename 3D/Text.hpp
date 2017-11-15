@@ -251,7 +251,7 @@ public:
 
 	void forceUpdate()
 	{
-		update();
+		updateOrigin();
 	}
 
 	GlyphContainer* getGlyphs()
@@ -273,7 +273,7 @@ private:
 
 	void update()
 	{
-		//if (!updateOrigin())
+		if (!updateOrigin())
 		{
 			updateBoundingBox();
 			updateVBO();
