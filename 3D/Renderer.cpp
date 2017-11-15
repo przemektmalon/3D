@@ -329,8 +329,6 @@ void MasterRenderer::render()
 	std::cout << "Screen:       " << toms(screenTime) << std::endl;
 	std::cout << "Rest:         " << toms(restOfProgram) << std::endl;*/
 
-	
-
 	restOfProgram = Engine::qpc.getElapsedTime();
 }
 

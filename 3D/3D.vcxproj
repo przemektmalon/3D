@@ -216,6 +216,7 @@
     <ClCompile Include="Asset.cpp" />
     <ClCompile Include="AssetManager.cpp" />
     <ClCompile Include="Billboard.cpp" />
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="ConfigParser.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Event.cpp" />
@@ -252,6 +253,7 @@
     <ClInclude Include="Bounds3D.hpp" />
     <ClInclude Include="BufferObjects.hpp" />
     <ClInclude Include="Camera.hpp" />
+    <ClInclude Include="CameraConfigWindow.hpp" />
     <ClInclude Include="ConfigParser.hpp" />
     <ClInclude Include="Console.hpp" />
     <ClInclude Include="DeferredTileCullComputeShader.hpp" />

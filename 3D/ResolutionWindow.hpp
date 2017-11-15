@@ -8,7 +8,7 @@
 
 UIWindow* createResolutionWindow()
 {
-	auto win = new UIWindow("Resolution", irect(100, 100, 160, 355), 4, &Engine::window);
+	auto win = new UIWindow("Resolution", irect(300, 0, 160, 355), 4, &Engine::window);
 
 	Text2D::TextStyle styleA(Engine::assets.getFont("clearsansb"), 16);
 

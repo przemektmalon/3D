@@ -34,11 +34,25 @@ public:
 
 		struct SSSAOConfig {
 			float frameScale;
+			void setFrameScale(float set);
+
 			float projScale;
+			void setProjScale(float set);
+
 			float sampleRadius;
+			void setSampleRadius(float set);
+
 			float intensity;
+			void setIntensity(float set);
 		} ssao;
-		///TODO: setters getters
+
+		struct CameraConfig {
+			float exposure;
+			void setExposure(float set);
+
+			float fov;
+			void setFOV(float set);
+		} camera;
 
 		static const s32 validResolutionsRaw[2][NUM_VALID_RESOLUTIONS];
 		static const glm::ivec2 getValidResolution(int pIndex) {

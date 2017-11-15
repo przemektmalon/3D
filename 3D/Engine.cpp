@@ -24,6 +24,7 @@
 
 #include "ResolutionWindow.hpp"
 #include "RenderConfigWindow.hpp"
+#include "CameraConfigWindow.hpp"
 
 FT_Library Engine::ftLib;
 HINSTANCE Engine::instance;
@@ -293,11 +294,7 @@ void Engine::mainLoop(int resolutionIndex)
 	const GPUModelManager& mm = Engine::assets.modelManager;
 
 	cam.initialiseProj(float(window.getSizeX()) / float(window.getSizeY()));
-	cam.calculateViewRays();
 	r->initialiseRenderer(&window, cam);
-
-	uiwm.addWindow(createResolutionWindow());
-	uiwm.addWindow(createRenderConfigWindow());
 
 	cfg.render.setResolution(resolutionIndex);
 	cfg.render.setFrameScale(1.f);
@@ -344,14 +341,15 @@ void Engine::mainLoop(int resolutionIndex)
 	i->makePhysicsObject(boxcol, 30.f);
 
 	auto col2 = new btSphereShape(5);
+	boxcol = new btBoxShape(glm::fvec3(5, 5, 5));
 
-	for (int i = 0; i < 4; ++i)
+	for (int i = 0; i < 40; ++i)
 	{
-		auto i2 = world->addModelInstance("mon", worldRoot);
+		auto i2 = world->addModelInstance("colbox", worldRoot);
 		i2->sgNode->transform.scale(5.f);
 		i2->sgNode->transform.translate(glm::fvec3(9, 5.1 + (5.1 * i), 0));
 
-		i2->makePhysicsObject(col2, 10.f);
+		i2->makePhysicsObject(boxcol, 10.f);
 	}
 
 	world->sg.updateAll();
@@ -370,6 +368,10 @@ void Engine::mainLoop(int resolutionIndex)
 	tweak.bindVariable(Engine::linear, "linear", Tweaks::Floating);
 	tweak.bindVariable(Engine::quad, "quad", Tweaks::Floating);
 	tweak.bindVariable(Engine::doPhysics, "doPhysics", Tweaks::Integer);
+
+	uiwm.addWindow(createResolutionWindow());
+	uiwm.addWindow(createRenderConfigWindow());
+	uiwm.addWindow(createCameraConfigWindow());
 
 	cfg.render.ssao.sampleRadius = 10.f;
 
@@ -461,8 +463,6 @@ void Engine::processGameFrame()
 		SetCursorPos(window.getPosX() + (window.getSizeX() / 2), window.getPosY() + (window.getSizeY() / 2));
 	}
 
-	auto keyboardState = window.keyboard.keyState;
-
 	auto move = glm::fvec3(glm::fvec4(0, 0, cfg.world.camSpeed * dt.getSeconds(), 1) * cam.matYaw);
 	cam.targetPos -= move * float(window.keyboard.isKeyPressed('W'));
 
@@ -479,18 +479,11 @@ void Engine::processGameFrame()
 
 	cam.targetPos.y -= cfg.world.camSpeed * dt.getSeconds() * float(window.keyboard.isKeyPressed('F'));
 
-	static float exposure = 1.f;
-
 	if (doPhysics)
 	{
 		physics.step(dt);
 		physics.updateModels();
 	}
-
-	/// TODO: only update these when they change !
-	r->ssaoShader.setRadius(Engine::cfg.render.ssao.sampleRadius);
-	r->ssaoShader.setIntensity(Engine::cfg.render.ssao.intensity);
-	r->ssaoShader.setProjScale(Engine::cfg.render.ssao.projScale);
 
 	uiwm.updateUIWindows();
 	cam.update(dt);
@@ -638,4 +631,39 @@ void EngineConfig::KeyBindConfig::initialiseFunctionBindingConfig()
 	functionNames["reload_shaders"] = CFG_FUNC(render.reloadAllShaders);
 	functionNames["toggle_console"] = CFG_FUNC(render.toggleDrawConsole);
 	functionNames["print_log"] = printlog;
+}
+
+void EngineConfig::RenderConfig::SSSAOConfig::setFrameScale(float set)
+{
+	frameScale = set;
+}
+
+void EngineConfig::RenderConfig::SSSAOConfig::setProjScale(float set)
+{
+	projScale = set;
+	Engine::r->ssaoShader.setProjScale(projScale);
+}
+
+void EngineConfig::RenderConfig::SSSAOConfig::setSampleRadius(float set)
+{
+	sampleRadius = set;
+	Engine::r->ssaoShader.setRadius(sampleRadius);
+}
+
+void EngineConfig::RenderConfig::SSSAOConfig::setIntensity(float set)
+{
+	intensity = set;
+	Engine::r->ssaoShader.setIntensity(intensity);
+}
+
+void EngineConfig::RenderConfig::CameraConfig::setExposure(float set)
+{
+	exposure = set;
+	Engine::r->tileCullShader.setExposure(exposure);
+}
+
+void EngineConfig::RenderConfig::CameraConfig::setFOV(float set)
+{
+	fov = set;
+	Engine::r->activeCam->setFOV(fov);
 }

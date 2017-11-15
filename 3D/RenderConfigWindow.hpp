@@ -8,7 +8,7 @@
 
 UIWindow* createRenderConfigWindow()
 {
-	auto win = new UIWindow("Render Config", irect(50, 50, 300, 500), 4, &Engine::window);
+	auto win = new UIWindow("Render Config", irect(0, 0, 300, 500), 4, &Engine::window);
 
 	Text2D::TextStyle styleA(Engine::assets.getFont("clearsansb"), 16);
 
@@ -43,27 +43,36 @@ UIWindow* createRenderConfigWindow()
 	sliSSAORad.setDescription("SSAO Radius");
 	sliSSAORad.valType = UISlider::Float;
 	sliSSAORad.setLimits(glm::fvec2(0.1f, 40.f));
-	sliSSAORad.binding.f = &Engine::cfg.render.ssao.sampleRadius;
 	sliSSAORad.value.f = 5.f;
 	sliSSAORad.init(glm::fvec2(15, 110), 270);
+	sliSSAORad.setUpdate([](UIWindow* win, UIElement* __this) -> void {
+		UISlider* _this = (UISlider*)__this;
+		Engine::cfg.render.ssao.setSampleRadius(_this->value.f);
+	});
 
 	C_SLIDER(sliSSAOInt, win);
 	sliSSAOInt.setName("ssaoint");
 	sliSSAOInt.setDescription("SSAO Intensity");
 	sliSSAOInt.valType = UISlider::Float;
 	sliSSAOInt.setLimits(glm::fvec2(0.1f, 40.f));
-	sliSSAOInt.binding.f = &Engine::cfg.render.ssao.intensity;
 	sliSSAOInt.value.f = 2.f;
 	sliSSAOInt.init(glm::fvec2(15, 160), 270);
+	sliSSAOInt.setUpdate([](UIWindow* win, UIElement* __this) -> void {
+		UISlider* _this = (UISlider*)__this;
+		Engine::cfg.render.ssao.setIntensity(_this->value.f);
+	});
 
 	C_SLIDER(sliSSAOSca, win);
 	sliSSAOSca.setName("ssaoscale");
 	sliSSAOSca.setDescription("SSAO Frame Scale");
 	sliSSAOSca.valType = UISlider::Float;
 	sliSSAOSca.setLimits(glm::fvec2(100.f, 2000.f));
-	sliSSAOSca.binding.f = &Engine::cfg.render.ssao.projScale;
 	sliSSAOSca.value.f = 500.f;
 	sliSSAOSca.init(glm::fvec2(15, 210), 270);
+	sliSSAOSca.setUpdate([](UIWindow* win, UIElement* __this) -> void {
+		UISlider* _this = (UISlider*)__this;
+		Engine::cfg.render.ssao.setProjScale(_this->value.f);
+	});
 
 	C_SLIDER(sliMinLight, win);
 	sliMinLight.setName("minlight");
@@ -73,6 +82,8 @@ UIWindow* createRenderConfigWindow()
 	sliMinLight.binding.f = &Engine::cfg.render.minimumLightConstant;
 	sliMinLight.value.f = 10000.f;
 	sliMinLight.init(glm::fvec2(15, 260), 270);
+
+
 
 	win->setMovable(true);
 	win->addElement(lblFPSPtr);

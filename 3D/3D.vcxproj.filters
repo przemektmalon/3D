@@ -150,6 +150,9 @@
     <ClCompile Include="UIWindowManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Asset.hpp">
@@ -372,6 +375,9 @@
       <Filter>Header Files\UI Elements\Windows</Filter>
     </ClInclude>
     <ClInclude Include="RenderConfigWindow.hpp">
+      <Filter>Header Files\UI Elements\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraConfigWindow.hpp">
       <Filter>Header Files\UI Elements\Windows</Filter>
     </ClInclude>
   </ItemGroup>
