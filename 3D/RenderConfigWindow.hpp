@@ -27,7 +27,7 @@ UIWindow* createRenderConfigWindow()
 
 	C_BUTTON(butToggleWire, win);
 	butToggleWire.setName("button");
-	butToggleWire.setSize(glm::fvec2(258, 30));
+	butToggleWire.setSize(glm::fvec2(270, 30));
 	butToggleWire.getText().setStyle(styleA);
 	butToggleWire.getText().setCharSize(18);
 	butToggleWire.setString(SSTR("Toggle wireframe"));
@@ -103,9 +103,22 @@ UIWindow* createRenderConfigWindow()
 	sliMinLight.setDescription("Min Light Constant");
 	sliMinLight.valType = UISlider::Float;
 	sliMinLight.setLimits(glm::fvec2(1000.f, 15000.f));
-	sliMinLight.binding.f = &Engine::cfg.render.minimumLightConstant;
+	sliMinLight.binding.f = &Engine::cfg.render.minimumLightConstant; // No need for update function here, just bind the value to the the appropriate variable
 	sliMinLight.value.f = 10000.f;
 	sliMinLight.init(glm::fvec2(15, 360), 270);
+
+	C_BUTTON(butScreenshot, win);
+	butScreenshot.setName("screenshot");
+	butScreenshot.setSize(glm::fvec2(270, 30));
+	butScreenshot.getText().setStyle(styleA);
+	butScreenshot.getText().setCharSize(18);
+	butScreenshot.setString(SSTR("Screenshot"));
+	butScreenshot.getText().setTextOrigin(Text2D::MiddleMiddle);
+	butScreenshot.setPosition(glm::fvec2(15, 420));
+	butScreenshot.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
+		UIButton* _this = (UIButton*)__this;
+		Engine::cfg.render.screenshot();
+	});
 
 	win->setMovable(true);
 	win->addElement(lblFPSPtr);
@@ -115,6 +128,7 @@ UIWindow* createRenderConfigWindow()
 	win->addElement(sliSSAOSamPtr);
 	win->addElement(sliSSAOSpiPtr);
 	win->addElement(sliMinLightPtr);
+	win->addElement(butScreenshotPtr);
 	win->addElement(butToggleWirePtr);
 
 	return win;
