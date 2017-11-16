@@ -6,13 +6,8 @@
 # some special characters have special three letter codes explained the the end of the file
 
 ESC escape
-P   cycleres
-L   screenshot
-O   toggle_wireframe
 I   toggle_textbounds
-M   reload_shaders
 TIL toggle_console
-K   print_log
 
 # ESC = escape
 # TIL = tilde

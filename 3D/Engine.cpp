@@ -629,13 +629,8 @@ void EngineConfig::KeyBindConfig::initialiseFunctionBindingConfig()
 	// If this was jai, we could generate this list automatically at compilation time from functions that we mark with some label or metadata
 
 	functionNames["escape"] = escapePress;
-	functionNames["cycleres"] = CFG_FUNC(render.cycleRes);
-	functionNames["screenshot"] = CFG_FUNC(render.screenshot);
-	functionNames["toggle_wireframe"] = CFG_FUNC(render.toggleDrawWireframe);
 	functionNames["toggle_textbounds"] = CFG_FUNC(render.toggleDrawTextBounds);
-	functionNames["reload_shaders"] = CFG_FUNC(render.reloadAllShaders);
 	functionNames["toggle_console"] = CFG_FUNC(render.toggleDrawConsole);
-	functionNames["print_log"] = printlog;
 }
 
 void EngineConfig::RenderConfig::SSSAOConfig::setFrameScale(float set)

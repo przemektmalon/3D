@@ -8,7 +8,7 @@
 
 UIWindow* createCameraConfigWindow()
 {
-	auto win = new UIWindow("Camera Config", irect(0, 500, 300, 140), 4, &Engine::window);
+	auto win = new UIWindow("Camera Config", irect(0, 520, 300, 140), 4, &Engine::window);
 
 	Text2D::TextStyle styleA(Engine::assets.getFont("clearsansb"), 16);
 

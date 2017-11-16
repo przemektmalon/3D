@@ -8,7 +8,7 @@
 
 UIWindow* createRenderConfigWindow()
 {
-	auto win = new UIWindow("Render Config", irect(0, 0, 300, 500), 4, &Engine::window);
+	auto win = new UIWindow("Render Config", irect(0, 0, 300, 520), 4, &Engine::window);
 
 	Text2D::TextStyle styleA(Engine::assets.getFont("clearsansb"), 16);
 
@@ -120,6 +120,19 @@ UIWindow* createRenderConfigWindow()
 		Engine::cfg.render.screenshot();
 	});
 
+	C_BUTTON(butReloadShaders, win);
+	butReloadShaders.setName("shaders");
+	butReloadShaders.setSize(glm::fvec2(270, 30));
+	butReloadShaders.getText().setStyle(styleA);
+	butReloadShaders.getText().setCharSize(18);
+	butReloadShaders.setString(SSTR("Reload shaders"));
+	butReloadShaders.getText().setTextOrigin(Text2D::MiddleMiddle);
+	butReloadShaders.setPosition(glm::fvec2(15, 470));
+	butReloadShaders.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
+		UIButton* _this = (UIButton*)__this;
+		Engine::cfg.render.reloadAllShaders();
+	});
+
 	win->setMovable(true);
 	win->addElement(lblFPSPtr);
 	win->addElement(sliSSAORadPtr);
@@ -129,6 +142,7 @@ UIWindow* createRenderConfigWindow()
 	win->addElement(sliSSAOSpiPtr);
 	win->addElement(sliMinLightPtr);
 	win->addElement(butScreenshotPtr);
+	win->addElement(butReloadShadersPtr);
 	win->addElement(butToggleWirePtr);
 
 	return win;
