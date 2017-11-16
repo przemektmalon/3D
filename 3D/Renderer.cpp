@@ -38,7 +38,7 @@ void MasterRenderer::render()
 
 	for (int i = 0; i < lightManager.pointLights.size(); ++i)
 	{
-		lightManager.pointLightsGPUData[i].position.y = 40.f + (10.f * std::sin(Engine::programTime * 0.4f));
+		lightManager.pointLightsGPUData[i].position.y = 100.f + (10.f * std::sin(Engine::programTime * 0.4f));
 		lightManager.pointLightsGPUData[i].position.x = 40.f * std::sin(Engine::programTime * 0.4f + ((i + 1) * 2 * PI / NUM_POINT_LIGHTS));
 		lightManager.pointLightsGPUData[i].position.z = 40.f * std::cos(Engine::programTime * 0.4f + ((i + 1) * 2 * PI / NUM_POINT_LIGHTS));
 		

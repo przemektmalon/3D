@@ -383,5 +383,8 @@
     <ClInclude Include="ProfilingWindow.hpp">
       <Filter>Header Files\UI Elements\Windows</Filter>
     </ClInclude>
+    <ClInclude Include="RenderModeWindow.hpp">
+      <Filter>Header Files\UI Elements\Windows</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

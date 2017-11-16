@@ -24,7 +24,9 @@ public:
 		pointLightCountLoc = glGetUniformLocation(GLID, "pointLightCount");
 		spotLightCountLoc = glGetUniformLocation(GLID, "spotLightCount");
 		selectedIDLoc = glGetUniformLocation(GLID, "selectedID");
+		renderModeLoc = glGetUniformLocation(GLID, "renderMode");
 		setExposure(3.f);
+		setRenderMode(0);
 		sendUniforms();
 		stop();
 		return 1;
@@ -90,6 +92,11 @@ public:
 		spotLightCount = pSpotLightCount;
 	}
 
+	void setRenderMode(int pRenderMode)
+	{
+		renderMode = pRenderMode;
+	}
+
 	void sendUniforms()
 	{
 		glUniform1ui(selectedIDLoc, selectedID);
@@ -100,6 +107,7 @@ public:
 		glUniform1f(exposureLoc, exposure);
 		glUniform1ui(pointLightCountLoc, pointLightCount);
 		glUniform1ui(spotLightCountLoc, spotLightCount);
+		glUniform1i(renderModeLoc, renderMode);
 	}
 
 private:
@@ -112,6 +120,7 @@ private:
 	int pointLightCountLoc;
 	int spotLightCountLoc;
 	int selectedIDLoc;
+	int renderModeLoc;
 
 	glm::fvec3 viewPos;
 	glm::fvec4 viewRays;
@@ -121,5 +130,6 @@ private:
 	int pointLightCount;
 	int spotLightCount;
 	int selectedID;
+	int renderMode;
 
 };

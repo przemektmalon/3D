@@ -2,5 +2,5 @@ camSpeed=30.0
 tau=1.90
 damping=1.10
 linear=0.5
-quad=0.005
+quad=0.0005
 doPhysics=1

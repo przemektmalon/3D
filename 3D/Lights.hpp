@@ -116,7 +116,7 @@ public:
 
 	void initTexture(Sampler& sampler)
 	{
-		shadowTex.createFromStream(GL_DEPTH_COMPONENT32F_NV, 512, 512, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+		shadowTex.createFromStream(GL_DEPTH_COMPONENT32F_NV, 1024, 1024, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 		gpuData->textureHandle = shadowTex.makeResident(sampler.getGLID());
 	}
 

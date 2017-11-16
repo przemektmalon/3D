@@ -95,6 +95,9 @@ public:
 		float minimumLightConstant;
 		void setMinimumLightConstant(float set) { minimumLightConstant = set; }
 
+		int renderMode;
+		void setRenderMode(int set);
+
 		//FOG
 		//AA level
 		//Tonemap settings (exposure + curve parameters)

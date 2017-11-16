@@ -63,6 +63,8 @@ uniform mat4 proj;
 uniform layout(location = 8) mat4 view;
 uniform float exposure = 1.f;
 
+uniform int renderMode;
+
 shared uint maxZ;
 shared uint minZ;
 
@@ -482,24 +484,18 @@ void main()
 
 	oCol += skyCol.xyz;
 	
-	//oCol = albedoSpec.xyz;
+	vec4 finalColour;
 
-	//imageStore(outColour, pixel, vec4(vec3(texture(skybox, -viewDir).r),1.f));
-	//imageStore(outColour, pixel, vec4(depth,1.f));
+	if (renderMode == 0)
+		finalColour = vec4(finalTone(exposure * oCol),1.f);
+	else if (renderMode == 1)
+		finalColour = vec4(albedoSpec.xyz,1.f);
+	else if (renderMode == 2)
+		finalColour = vec4(normal*0.5 + 0.5,1.f);
+	else if (renderMode == 3)
+		finalColour = vec4(vec3(ssaoVal),1.f);
+	else if (renderMode == 4)
+		finalColour = vec4(vec3(depth),1.f);
 
-	//uvec2 handle = uvec2(floatBitsToUint(spotLights[0].linQuadTex.z),floatBitsToUint(spotLights[0].linQuadTex.w));
-
-	//vec4 pcfDepth = texture(tttt, vec2(pixel)/vec2(1280.f,720.f));
-	//float pcfDepth = texture(spotDepth, vec2(pixel)/vec2(1280.f,720.f)).r;
-
-	//imageStore(outColour, pixel, pcfDepth);
-
-	//imageStore(outColour, pixel, vec4(vec3(ssaoVal),1.f));
-	imageStore(outColour, pixel, vec4(finalTone(exposure * oCol),1.f));
-	//imageStore(outColour, pixel, vec4(albedoSpec.xyz,1.f));
-	//imageStore(outColour, pixel, vec4(vec3(ssaoVal),1.f));
-
-
-
-
+	imageStore(outColour, pixel, finalColour);
 }

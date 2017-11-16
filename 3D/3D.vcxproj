@@ -277,6 +277,7 @@
     <ClInclude Include="MathIncludes.hpp" />
     <ClInclude Include="ProfilingWindow.hpp" />
     <ClInclude Include="RenderConfigWindow.hpp" />
+    <ClInclude Include="RenderModeWindow.hpp" />
     <ClInclude Include="ResolutionWindow.hpp" />
     <ClInclude Include="Mouse.hpp" />
     <ClInclude Include="Model.hpp" />

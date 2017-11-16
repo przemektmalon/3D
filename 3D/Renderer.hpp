@@ -149,4 +149,6 @@ public:
 
 	u64 gpuBufferTime, gBufferTime, shadowTime, ssaoTime, lightPassTime, screenTime;
 
+	enum RenderMode { Shaded, Albedo, Normal, SSAO, Depth } renderMode;
+
 };
