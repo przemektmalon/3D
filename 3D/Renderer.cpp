@@ -26,7 +26,7 @@ void MasterRenderer::render()
 
 	restOfProgram = Engine::qpc.getElapsedTime() - restOfProgram;
 
-	world->updateDrawBuffer();
+	world->updateDrawBuffer(); // For LOD
 
 	auto beginRenderTime = Engine::qpc.getElapsedTime();
 	
@@ -84,8 +84,6 @@ void MasterRenderer::render()
 		glDisable(GL_BLEND);
 		glCullFace(GL_BACK);
 
-		glPolygonMode(GL_FRONT_AND_BACK, Engine::cfg.render.drawWireframe ? GL_LINE : GL_FILL);
-
 		gBufferShader.use();
 
 		gBufferShader.setView(activeCam->view);
@@ -102,14 +100,8 @@ void MasterRenderer::render()
 		world->instanceTransformsBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 4);
 		world->drawIndirectBuffer[Regular].bind(GL_DRAW_INDIRECT_BUFFER);
 
-		// To draw we need
-		// Indirect draw buffer with correct LODs
-		// Number of instances to draw
-
 		glMultiDrawArraysIndirect(GL_TRIANGLES, 0, world->modelInstances.size(), 0);
 		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
-
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 
 	glFinish();
@@ -311,6 +303,26 @@ void MasterRenderer::render()
 	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
+
+	if (Engine::cfg.render.drawWireframe)
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+		auto wireShader = shaderStore.getShader(String32("wireframe"));
+		wireShader->use();
+		wireShader->setUniform("proj", &activeCam->proj);
+		wireShader->setUniform("view", &activeCam->view);
+		wireShader->sendUniforms();
+
+		glBindVertexArray(modelManager.shadowVAO);
+		world->drawIndirectBuffer[Regular].bind(GL_DRAW_INDIRECT_BUFFER);
+		world->instanceTransformsBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 1);
+
+		glMultiDrawArraysIndirect(GL_TRIANGLES, 0, world->modelInstances.size(), 0);
+		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
 
 	lightManager.drawLightIcons();
 
@@ -604,6 +616,7 @@ void MasterRenderer::initialiseShaders()
 	shaderStore.loadShader(&shape3DShader);
 	shaderStore.loadShader(&textShader);
 
+	shaderStore.loadShader(ShaderProgram::VertFrag, String32("wireframe"));
 	shaderStore.loadShader(ShaderProgram::VertFrag, String32("Standard"));
 	shaderStore.loadShader(ShaderProgram::VertFrag, String32("test"));
 }

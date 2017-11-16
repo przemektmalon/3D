@@ -27,8 +27,6 @@ out float logz;
 
 void main()
 {
-	const float FC = 2.0 / log2(FAR + 1.0);
-
 	mat4 transform = transforms[gl_DrawIDARB];
 
 	vec4 worldPos = transform * vec4(p, 1.f);

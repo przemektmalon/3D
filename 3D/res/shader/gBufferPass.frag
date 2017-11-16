@@ -67,7 +67,6 @@ void main()
     vec3 mappedNormal = perturb_normal(normalize(Normal), normalize(viewVec), texCoord);
 
     gNormal = encode(normalize(mappedNormal));
-    
 
     gAlbedoSpec.rgb = texture(sampler2D(texHandle[3*DrawID]), TexCoord).rgb;
 
