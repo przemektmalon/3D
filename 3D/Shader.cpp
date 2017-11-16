@@ -91,12 +91,7 @@ void ShaderProgram::compile()
 	}
 }
 
-void ShaderProgram::setUniform(char* pUniformName, const void * pUniformData, s32 pFlags)
-{
-	setUniform(String64(pUniformName), pUniformData, pFlags);
-}
-
-void ShaderProgram::setUniform(String64 & pUniformName, const void * pUniformData, s32 pFlags)
+void ShaderProgram::setUniform(std::string pUniformName, const void * pUniformData, s32 pFlags)
 {
 	auto uniformObject = uniformObjects.find(pUniformName);
 	if (uniformObject == uniformObjects.end())
@@ -695,8 +690,8 @@ void ShaderProgram::extractUniforms(char * pSource)
 		}
 		++nameEnd;
 
-		String64 name; name.setToChars(nameBegin, nameEnd);
-		GLint location = glGetUniformLocation(GLID, name.getString());
+		std::string name; name.assign(nameBegin, nameEnd);
+		GLint location = glGetUniformLocation(GLID, name.c_str());
 		//uniformLocations.insert(std::make_pair(name, location));
 
 		UniformMeta newMeta;
@@ -705,7 +700,7 @@ void ShaderProgram::extractUniforms(char * pSource)
 
 		if (location != -1)
 		{
-			meta.name.copyChars(meta.name.getString(), nameBegin, nameEnd - nameBegin);
+			meta.name = name;
 
 			if (arraySizeBegin == itr->end)
 			{

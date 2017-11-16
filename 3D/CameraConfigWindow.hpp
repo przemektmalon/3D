@@ -17,7 +17,7 @@ UIWindow* createCameraConfigWindow()
 	sliExposure.setDescription("Exposure");
 	sliExposure.valType = UISlider::Float;
 	sliExposure.setLimits(glm::fvec2(0.1f, 10.f));
-	sliExposure.value.f = 2.f;
+	sliExposure.value.f = 3.f;
 	sliExposure.init(glm::fvec2(15, 30), 270);
 	sliExposure.setUpdate([](UIWindow* win, UIElement* __this) -> void {
 		UISlider* _this = (UISlider*)__this;

@@ -60,6 +60,7 @@ public:
 		destroy();
 		load(name, type);
 		compile();
+		sendUniforms();
 	}
 
 	GLint getGLID() const { return GLID; }
@@ -74,8 +75,7 @@ public:
 		glUseProgram(0);
 	}
 
-	void setUniform(char* pUniformName, const void* pUniformData, s32 pFlags = 0);
-	void setUniform(String64& pUniformName, const void* pUniformData, s32 pFlags = 0);
+	void setUniform(std::string pUniformName, const void* pUniformData, s32 pFlags = 0);
 
 	void setVarVal(String32& var, String1024& val);
 
@@ -171,7 +171,7 @@ private:
 		void operator=(UniformMeta& rhs)
 		{
 			type = rhs.type;
-			name.overwrite(rhs.name);
+			name = rhs.name;
 			data = rhs.data;
 			arrayCount = rhs.arrayCount;
 			flags = rhs.flags;
@@ -179,18 +179,18 @@ private:
 
 		void updateLocation(ShaderProgram& program)
 		{
-			location = glGetUniformLocation(program.getGLID(), name.getString());
+			location = glGetUniformLocation(program.getGLID(), name.c_str());
 		}
 
 		UniformType type;
-		String64 name;
+		std::string name;
 		UniformData data;
 		GLsizei arrayCount; //1 == not array
 		s32 flags;
 		GLint location;
 	};
 
-	std::map<String64, UniformMeta> uniformObjects;
+	std::map<std::string, UniformMeta> uniformObjects;
 	//std::map<GLint, UniformMeta> uniformObjects;
 	
 

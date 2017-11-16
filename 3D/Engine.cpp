@@ -343,7 +343,7 @@ void Engine::mainLoop(int resolutionIndex)
 	auto col2 = new btSphereShape(5);
 	boxcol = new btBoxShape(glm::fvec3(5, 5, 5));
 
-	for (int i = 0; i < 40; ++i)
+	for (int i = 0; i < 8; ++i)
 	{
 		auto i2 = world->addModelInstance("colbox", worldRoot);
 		i2->sgNode->transform.scale(5.f);

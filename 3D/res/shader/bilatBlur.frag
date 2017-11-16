@@ -5,7 +5,7 @@
 // Tunable Parameters:
 
 /** Increase to make depth edges crisper. Decrease to reduce flicker. */
-#define EDGE_SHARPNESS     (0.1)
+#define EDGE_SHARPNESS     (1.5)
 
 /** Step in 2-pixel intervals since we already blurred against neighbors in the
     first AO pass.  This constant can be increased while R decreases to improve

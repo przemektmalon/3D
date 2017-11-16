@@ -25,8 +25,6 @@ public:
 		spotLightCountLoc = glGetUniformLocation(GLID, "spotLightCount");
 		selectedIDLoc = glGetUniformLocation(GLID, "selectedID");
 		setExposure(3.f);
-		//setPointLightCount(100);
-		//setSpotLightCount(0);
 		sendUniforms();
 		stop();
 		return 1;

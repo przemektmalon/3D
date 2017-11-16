@@ -23,13 +23,13 @@ struct SpotLight
 	
 };
 
-uniform uint pointLightCount;
+uniform layout(location = 0) uint pointLightCount;
 layout(std430, binding=0) buffer PointLightBuffer
 {
 	PointLight pointLights[];
 };
 
-uniform uint spotLightCount;
+uniform layout(location = 1) uint spotLightCount;
 layout(std430, binding=1) buffer SpotLightBuffer
 {
 	SpotLight spotLights[];
@@ -329,7 +329,7 @@ void main()
 	
 	vec3 viewDir = viewRay;
 
-	oCol += albedoSpec.xyz * 0.05;
+	oCol += albedoSpec.xyz * 0.01;
 
 	for(uint j = 0; j < currentTilePointLightIndex; ++j)
 	{
@@ -351,12 +351,12 @@ void main()
 
 		float currentDepth = length(fragToLight);
 	    
-	    float bias = max(2.f * (1.0 - dot(normal, lightDir)), 0.5f);
+	    float bias = max(4.f * (1.0 - dot(normal, lightDir)), 1.f);
 
 	    float shadow = 0.f;
 
-		float samples = 2.0;
-		float offset = 0.05;
+		float samples = 4.0;
+		float offset = 0.3;
 
 		float camToLight = length(lightPos.xyz - viewPos);
 
@@ -379,6 +379,7 @@ void main()
 			        }
 			    }
 			}
+
 			shadow /= (samples * samples * samples);
 		}
 
@@ -493,8 +494,12 @@ void main()
 
 	//imageStore(outColour, pixel, pcfDepth);
 
-	//imageStore(outColour, pixel, vec4(vec3(albedoSpec.xyz * ssaoVal),1.f));
+	//imageStore(outColour, pixel, vec4(vec3(ssaoVal),1.f));
 	imageStore(outColour, pixel, vec4(finalTone(exposure * oCol),1.f));
 	//imageStore(outColour, pixel, vec4(albedoSpec.xyz,1.f));
 	//imageStore(outColour, pixel, vec4(vec3(ssaoVal),1.f));
+
+
+
+
 }

@@ -2,6 +2,7 @@
 #include "UIRectangleShape.hpp"
 #include "Text.hpp"
 #include "UIElement.hpp"
+#include <string>
 
 class UIConsole
 {
@@ -40,7 +41,7 @@ public:
 	{
 		glViewport(0, 0, Engine::window.getSizeX(), Engine::window.getSizeY());
 		glm::fmat4 p = glm::ortho<float>(0, Engine::window.getSizeX(), 0, Engine::window.getSizeY());
-		rect.shader->setUniform(String<64>("projModel"), &p);
+		rect.shader->setUniform("projModel", &p);
 		rect.draw();
 		glViewport(0, Engine::window.getSizeY() - consoleHeight, Engine::window.getSizeX(), consoleHeight);
 		for (auto itr = lines.begin(); itr != lines.end(); ++itr)

@@ -43,7 +43,7 @@ UIWindow* createRenderConfigWindow()
 	sliSSAORad.setDescription("SSAO Radius");
 	sliSSAORad.valType = UISlider::Float;
 	sliSSAORad.setLimits(glm::fvec2(0.1f, 40.f));
-	sliSSAORad.value.f = 5.f;
+	sliSSAORad.value.f = 15.f;
 	sliSSAORad.init(glm::fvec2(15, 110), 270);
 	sliSSAORad.setUpdate([](UIWindow* win, UIElement* __this) -> void {
 		UISlider* _this = (UISlider*)__this;
@@ -55,7 +55,7 @@ UIWindow* createRenderConfigWindow()
 	sliSSAOInt.setDescription("SSAO Intensity");
 	sliSSAOInt.valType = UISlider::Float;
 	sliSSAOInt.setLimits(glm::fvec2(0.1f, 40.f));
-	sliSSAOInt.value.f = 2.f;
+	sliSSAOInt.value.f = 4.f;
 	sliSSAOInt.init(glm::fvec2(15, 160), 270);
 	sliSSAOInt.setUpdate([](UIWindow* win, UIElement* __this) -> void {
 		UISlider* _this = (UISlider*)__this;
