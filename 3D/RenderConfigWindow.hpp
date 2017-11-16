@@ -74,6 +74,30 @@ UIWindow* createRenderConfigWindow()
 		Engine::cfg.render.ssao.setProjScale(_this->value.f);
 	});
 
+	C_SLIDER(sliSSAOSam, win);
+	sliSSAOSam.setName("ssaosamples");
+	sliSSAOSam.setDescription("SSAO Samples");
+	sliSSAOSam.valType = UISlider::Integer;
+	sliSSAOSam.setLimits(glm::ivec2(5, 200));
+	sliSSAOSam.value.i = 50;
+	sliSSAOSam.init(glm::fvec2(15, 260), 270);
+	sliSSAOSam.setUpdate([](UIWindow* win, UIElement* __this) -> void {
+		UISlider* _this = (UISlider*)__this;
+		Engine::cfg.render.ssao.setSamples(_this->value.i);
+	});
+
+	C_SLIDER(sliSSAOSpi, win);
+	sliSSAOSpi.setName("ssaospirals");
+	sliSSAOSpi.setDescription("SSAO Spirals");
+	sliSSAOSpi.valType = UISlider::Integer;
+	sliSSAOSpi.setLimits(glm::ivec2(0, 200));
+	sliSSAOSpi.value.i = 9;
+	sliSSAOSpi.init(glm::fvec2(15, 310), 270);
+	sliSSAOSpi.setUpdate([](UIWindow* win, UIElement* __this) -> void {
+		UISlider* _this = (UISlider*)__this;
+		Engine::cfg.render.ssao.setSpiralTurns(_this->value.i);
+	});
+
 	C_SLIDER(sliMinLight, win);
 	sliMinLight.setName("minlight");
 	sliMinLight.setDescription("Min Light Constant");
@@ -81,15 +105,15 @@ UIWindow* createRenderConfigWindow()
 	sliMinLight.setLimits(glm::fvec2(1000.f, 15000.f));
 	sliMinLight.binding.f = &Engine::cfg.render.minimumLightConstant;
 	sliMinLight.value.f = 10000.f;
-	sliMinLight.init(glm::fvec2(15, 260), 270);
-
-
+	sliMinLight.init(glm::fvec2(15, 360), 270);
 
 	win->setMovable(true);
 	win->addElement(lblFPSPtr);
 	win->addElement(sliSSAORadPtr);
 	win->addElement(sliSSAOIntPtr);
 	win->addElement(sliSSAOScaPtr);
+	win->addElement(sliSSAOSamPtr);
+	win->addElement(sliSSAOSpiPtr);
 	win->addElement(sliMinLightPtr);
 	win->addElement(butToggleWirePtr);
 

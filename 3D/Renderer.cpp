@@ -22,7 +22,7 @@
 
 void MasterRenderer::render()
 {
-	auto beginRenderTime = Engine::qpc.getElapsedTime();
+	auto beginRenderTime = Engine::qpc.now();
 
 	world->updateDrawBuffer(); // For LOD
 
@@ -60,9 +60,9 @@ void MasterRenderer::render()
 	const GPUModelManager& modelManager = Engine::assets.modelManager;
 
 	glFinish();
-	gpuBufferTime = Engine::qpc.getElapsedTime() - beginRenderTime;
+	gpuBufferTime = Engine::qpc.now() - beginRenderTime;
 
-	auto beginGBufferTime = Engine::qpc.getElapsedTime();
+	auto beginGBufferTime = Engine::qpc.now();
 
 	// *********************************************************** G-BUFFER PASS *********************************************************** //
 
@@ -107,8 +107,8 @@ void MasterRenderer::render()
 	// *********************************************************** G-BUFFER PASS *********************************************************** //
 
 	glFinish();
-	gBufferTime = Engine::qpc.getElapsedTime() - beginGBufferTime;
-	auto beginShadowTime = Engine::qpc.getElapsedTime();
+	gBufferTime = Engine::qpc.now() - beginGBufferTime;
+	auto beginShadowTime = Engine::qpc.now();
 
 	// *********************************************************** SHADOW PASS *********************************************************** //
 
@@ -180,8 +180,8 @@ void MasterRenderer::render()
 	// *********************************************************** SHADOW PASS *********************************************************** //
 
 	glFinish();
-	shadowTime = Engine::qpc.getElapsedTime() - beginShadowTime;
-	auto beginSSAOTime = Engine::qpc.getElapsedTime();
+	shadowTime = Engine::qpc.now() - beginShadowTime;
+	auto beginSSAOTime = Engine::qpc.now();
 
 	// *********************************************************** SSAO PASS *********************************************************** //
 
@@ -241,8 +241,8 @@ void MasterRenderer::render()
 	// *********************************************************** SSAO-BLUR PASS *********************************************************** //
 
 	glFinish();
-	ssaoTime = Engine::qpc.getElapsedTime() - beginSSAOTime;
-	auto beginLightPassTime = Engine::qpc.getElapsedTime();
+	ssaoTime = Engine::qpc.now() - beginSSAOTime;
+	auto beginLightPassTime = Engine::qpc.now();
 
 	// *********************************************************** LIGHT PASS *********************************************************** //
 
@@ -286,8 +286,8 @@ void MasterRenderer::render()
 	// *********************************************************** LIGHT PASS *********************************************************** //
 
 	glFinish();
-	lightPassTime = Engine::qpc.getElapsedTime() - beginLightPassTime;
-	auto beginScreenPassTime = Engine::qpc.getElapsedTime();
+	lightPassTime = Engine::qpc.now() - beginLightPassTime;
+	auto beginScreenPassTime = Engine::qpc.now();
 
 	// *********************************************************** SCREEN PASS *********************************************************** //
 
@@ -342,7 +342,7 @@ void MasterRenderer::render()
 	window->swapBuffers();
 
 	glFinish();
-	screenTime = Engine::qpc.getElapsedTime() - beginScreenPassTime;
+	screenTime = Engine::qpc.now() - beginScreenPassTime;
 }
 
 void MasterRenderer::initialiseRenderer(Window * pwin, Camera & cam)

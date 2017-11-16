@@ -13,8 +13,6 @@ public:
 
 	int initialise()
 	{
-		//load("ssao", VertFrag);
-		//compile();
 		use();
 		projScaleLoc = glGetUniformLocation(GLID, "projScale");
 		depthBufferLoc = glGetUniformLocation(GLID, "depthBuffer");
@@ -24,11 +22,14 @@ public:
 		gNormalLoc = glGetUniformLocation(GLID, "gNormal");
 		viewLoc = glGetUniformLocation(GLID, "view");
 		projInfoLoc = glGetUniformLocation(GLID, "projInfo");
-
+		samplesLoc = glGetUniformLocation(GLID, "samples");
+		spiralTurnsLoc = glGetUniformLocation(GLID, "spiralTurns");
 
 		setRadius(1.5f);
 		setIntensity(2.75f);
 		setProjScale(500.f);
+		setSamples(50);
+		setSpiralTurns(9);
 
 		stop();
 
@@ -55,6 +56,26 @@ public:
 		return radius;
 	}
 	
+	void setSamples(int pSamples)
+	{
+		samples = pSamples;
+	}
+
+	int getSamples()
+	{
+		return samples;
+	}
+
+	void setSpiralTurns(int pSpiralTurns)
+	{
+		spiralTurns = pSpiralTurns;
+	}
+
+	int getSpiralTurns()
+	{
+		return spiralTurns;
+	}
+
 	void setBias(float pBias)
 	{
 		bias = pBias;
@@ -103,6 +124,8 @@ public:
 		glUniformMatrix2fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 		glUniform1f(projScaleLoc, projScale);
 		glUniform4fv(projInfoLoc, 1, glm::value_ptr(projInfo));
+		glUniform1i(samplesLoc, samples);
+		glUniform1i(spiralTurnsLoc, spiralTurns);
 	}
 
 private:
@@ -115,6 +138,8 @@ private:
 	int gNormalLoc;
 	int viewLoc;
 	int projInfoLoc;
+	int samplesLoc;
+	int spiralTurnsLoc;
 
 	//Variables
 	float projScale;
@@ -127,5 +152,7 @@ private:
 	glm::fmat4 proj;
 	glm::ivec2 viewport = glm::ivec2(1,1);
 	glm::fvec4 projInfo = glm::fvec4(1.f,1.f,1.f,1.f);
+	int samples;
+	int spiralTurns;
 
 };

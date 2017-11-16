@@ -5,7 +5,8 @@
 in vec2 TexCoord;
 
 // Total number of direct samples to take at each pixel
-#define NUM_SAMPLES (50)
+//#define NUM_SAMPLES (50)
+uniform int samples = 50;
 
 // If using depth mip levels, the log of the maximum pixel offset before we need to switch to a lower 
 // miplevel to maintain reasonable spatial locality in the cache
@@ -23,7 +24,8 @@ in vec2 TexCoord;
 
 // This is the number of turns around the circle that the spiral pattern makes.  This should be prime to prevent
 // taps from lining up.  This particular choice was tuned for NUM_SAMPLES == 9
-#define NUM_SPIRAL_TURNS (30)
+//#define NUM_SPIRAL_TURNS (30)
+uniform int spiralTurns;
 
 //////////////////////////////////////////////////
 
@@ -101,8 +103,8 @@ float LinearizeDepth(float depth)
 /** Returns a unit vector and a screen-space radius for the tap on a unit disk (the caller should scale by the actual disk radius) */
 vec2 tapLocation(int sampleNumber, float spinAngle, out float ssR){
     // Radius relative to ssR
-    float alpha = float(sampleNumber + 0.5) * (1.0 / NUM_SAMPLES);
-    float angle = alpha * (NUM_SPIRAL_TURNS * 6.28) + spinAngle;
+    float alpha = float(sampleNumber + 0.5) * (1.0 / float(samples));
+    float angle = alpha * (float(spiralTurns) * 6.28) + spinAngle;
 
     ssR = alpha;
     return vec2(cos(angle), sin(angle));
@@ -245,11 +247,11 @@ void main() {
     //float ssDiskRadius =  projScale / C.z;
     
     float sum = 0.0;
-    for (int i = 0; i < NUM_SAMPLES; ++i) {
+    for (int i = 0; i < samples; ++i) {
         sum += sampleAO(ssC, C, n_C, ssDiskRadius, i, randomPatternRotationAngle);
     }
 
-    float A = max(0.0, 1.0 - sum * intensityDivR6 * (5.0 / NUM_SAMPLES));
+    float A = max(0.0, 1.0 - sum * intensityDivR6 * (5.0 / float(samples)));
 
     // Bilateral box-filter over a quad for free, respecting depth edges
     // (the difference that this makes is subtle)

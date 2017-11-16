@@ -44,6 +44,12 @@ public:
 
 			float intensity;
 			void setIntensity(float set);
+
+			int samples;
+			void setSamples(int set);
+
+			int spiralTurns;
+			void setSpiralTurns(int set);
 		} ssao;
 
 		struct CameraConfig {

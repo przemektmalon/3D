@@ -367,8 +367,6 @@ void Engine::mainLoop(int resolutionIndex)
 
 	cfg.render.ssao.sampleRadius = 10.f;
 
-	qpc.start();
-
 	while (engineState != Quitting) {
 		if (!window.processMessages()) 
 		{
@@ -653,6 +651,18 @@ void EngineConfig::RenderConfig::SSSAOConfig::setIntensity(float set)
 {
 	intensity = set;
 	Engine::r->ssaoShader.setIntensity(intensity);
+}
+
+void EngineConfig::RenderConfig::SSSAOConfig::setSamples(int set)
+{
+	samples = set;
+	Engine::r->ssaoShader.setSamples(samples);
+}
+
+void EngineConfig::RenderConfig::SSSAOConfig::setSpiralTurns(int set)
+{
+	spiralTurns = set;
+	Engine::r->ssaoShader.setSpiralTurns(spiralTurns);
 }
 
 void EngineConfig::RenderConfig::CameraConfig::setExposure(float set)
