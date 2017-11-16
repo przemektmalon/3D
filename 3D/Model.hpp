@@ -19,6 +19,7 @@
 
 #include "File.hpp"
 
+#include <string>
 
 struct Vertex {
 	glm::vec3 position;
@@ -58,7 +59,15 @@ public:
 
 	void load() 
 	{
-		importModel();
+		if (lodLimits.size() != 0)
+			assert(lodPaths.size() == lodLimits.size());
+		else
+			lodLimits.push_back(INT_MAX);
+
+		for (int i = 0; i < lodPaths.size(); ++i)
+		{
+			importModel(lodPaths[i], i);
+		}
 	}
 
 	struct TriangleList {
@@ -86,19 +95,20 @@ public:
 		}
 	};
 
-	std::vector<TriangleList> triLists;
+	std::vector<std::string> lodPaths;
+	std::vector<u32> lodLimits;
+	std::vector<std::vector<TriangleList>> triLists;
 
-	
-	s32 getPositionsArray(fltptr& arr)
+	s32 getPositionsArray(fltptr& arr, u32 lod)
 	{
 		s32 length = 0;
-		for (auto list : triLists)
+		for (auto list : triLists[lod])
 			length += list.numVerts;
 
 		arr = new float[length];
 		int j = 0, k = 0;
 
-		for (auto list : triLists)
+		for (auto list : triLists[lod])
 		{
 			for (int i = 0; i < list.numVerts; i += 8)
 			{
@@ -112,11 +122,11 @@ public:
 
 private:
 
-	void importModel();
+	void importModel(std::string pPath, u32 lod);
 
-	void processNode(aiNode *node, const aiScene *scene);
+	void processNode(aiNode *node, const aiScene *scene, u32 lod);
 
-	void processMesh(aiMesh *mesh, const aiScene *scene);
+	void processMesh(aiMesh *mesh, const aiScene *scene, std::vector<TriangleList>& triListVec);
 
 	void loadMaterialTextures(aiMaterial *material, aiTextureType type, TriangleList& triList);
 

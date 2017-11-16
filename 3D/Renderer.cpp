@@ -26,8 +26,10 @@ void MasterRenderer::render()
 
 	restOfProgram = Engine::qpc.getElapsedTime() - restOfProgram;
 
-	auto beginRenderTime = Engine::qpc.getElapsedTime();
+	world->updateDrawBuffer();
 
+	auto beginRenderTime = Engine::qpc.getElapsedTime();
+	
 	for (int i = 0; i < lightManager.spotLights.size(); ++i)
 	{
 		lightManager.spotLightsGPUData[i].position = glm::fvec3(std::cos(Engine::programTime*0.2*(i + 1) + (i*PI*0.5))*50.f, 50.f, std::sin(Engine::programTime*0.2*(i + 1) + (i*PI*0.5))*50.f);
@@ -99,6 +101,10 @@ void MasterRenderer::render()
 		world->texHandleBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 3);
 		world->instanceTransformsBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 4);
 		world->drawIndirectBuffer[Regular].bind(GL_DRAW_INDIRECT_BUFFER);
+
+		// To draw we need
+		// Indirect draw buffer with correct LODs
+		// Number of instances to draw
 
 		glMultiDrawArraysIndirect(GL_TRIANGLES, 0, world->modelInstances.size(), 0);
 		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);

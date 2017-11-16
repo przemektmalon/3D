@@ -108,11 +108,13 @@ void AssetManager::AssetLoader::loadAssets(String128 & assetListFilePath)
 				}
 				
 			}
-			/*else if (line == "[Mesh]")
+			else if (line == "[Model]")
 			{
 				std::string line;
 				std::getline(file, line);
-				std::string name, path, ext, version;
+				std::string name, path, ext, limit;
+				std::vector<std::string> paths;
+				std::vector<u32> limits;
 
 				auto place = [&](std::string key, std::string value) -> bool {
 					if (key == "path")
@@ -130,9 +132,9 @@ void AssetManager::AssetLoader::loadAssets(String128 & assetListFilePath)
 						ext = value;
 						return true;
 					}
-					else if (key == "version")
+					else if (key == "limit")
 					{
-						version = value;
+						limit = value;
 						return true;
 					}
 					return false;
@@ -140,11 +142,19 @@ void AssetManager::AssetLoader::loadAssets(String128 & assetListFilePath)
 
 				key = getUntil(line, '=');
 
+				int lod = 0;
+
 				while(key != "")
 				{
 					value = line;
 					place(key, value);
 					std::getline(file, line);
+
+					if (key == "path")
+						paths.push_back(path);
+					else if (key == "limit")
+						limits.push_back(std::stoi(limit));
+
 					key = getUntil(line, '=');
 				}
 
@@ -155,23 +165,19 @@ void AssetManager::AssetLoader::loadAssets(String128 & assetListFilePath)
 					continue;
 				}
 
-				auto mesh = Engine::assets.prepareModel(String128(path.c_str()), String128(name.c_str()));
-				if (mesh->doesExist())
+				auto model = Engine::assets.prepareModel(String128(path.c_str()), String32(name.c_str()));
+				if (model->doesExist())
 				{
-					if(version == "12")
-					{
-						mesh->loadBinV12();
-					}
-					else
-					{
-						mesh->load();
-					}
+					model->lodPaths = paths;
+					model->lodLimits = limits;
+					model->load();
+					Engine::assets.modelManager.pushModelToBatch(*model);
 				}
 				else
 				{
 					std::cout << "Mesh at \"" << path << "\" does not exist" << std::endl;
 				}
-			}*/
+			}
 			else if (line == "[Font]")
 			{
 				std::string name, path, ext;

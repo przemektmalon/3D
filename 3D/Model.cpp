@@ -2,10 +2,10 @@
 #include "AssetManager.hpp"
 #include "Engine.hpp"
 
-void Model::importModel()
+void Model::importModel(std::string pPath, u32 lod)
 {
 	Assimp::Importer import;
-	const aiScene *scene = import.ReadFile(std::string(getPath().getString()), 0);
+	const aiScene *scene = import.ReadFile(pPath, 0);
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
@@ -13,10 +13,11 @@ void Model::importModel()
 		return;
 	}
 
-	processNode(scene->mRootNode, scene);
+	triLists.push_back(std::vector<TriangleList>());
+	processNode(scene->mRootNode, scene, lod);
 }
 
-void Model::processNode(aiNode * node, const aiScene * scene)
+void Model::processNode(aiNode * node, const aiScene * scene, u32 lod)
 {
 	// process each mesh located at the current node
 	for (unsigned int i = 0; i < node->mNumMeshes; i++)
@@ -24,16 +25,16 @@ void Model::processNode(aiNode * node, const aiScene * scene)
 		// the node object only contains indices to index the actual objects in the scene. 
 		// the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		processMesh(mesh, scene);
+		processMesh(mesh, scene, triLists[lod]);
 	}
 	// after we've processed all of the meshes (if any) we then recursively process each of the children nodes
 	for (unsigned int i = 0; i < node->mNumChildren; i++)
 	{
-		processNode(node->mChildren[i], scene);
+		processNode(node->mChildren[i], scene, lod);
 	}
 }
 
-void Model::processMesh(aiMesh * mesh, const aiScene * scene)
+void Model::processMesh(aiMesh * mesh, const aiScene * scene, std::vector<TriangleList>& triListVec)
 {
 	u32		numVerts = mesh->mNumFaces * 3;
 	u32		vDataSize = numVerts * 8;
@@ -74,8 +75,8 @@ void Model::processMesh(aiMesh * mesh, const aiScene * scene)
 		}
 	}
 
-	triLists.push_back(TriangleList(vData, vDataSize, numVerts));
-	auto& triList = triLists.back();
+	triListVec.push_back(TriangleList(vData, vDataSize, numVerts));
+	auto& triList = triListVec.back();
 
 	// process materials
 	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];

@@ -274,22 +274,10 @@ void Engine::mainLoop(int resolutionIndex)
 	r->initialiseShaders();
 	Billboard::initGLVAO();
 
-	assets.loader.loadAssets(String128("res/resources.txt"));
-	assets.pushTexturesToGPU();
-
 	assets.modelManager.init();
 
-	auto m = assets.prepareModel(String128("res/model/COLBOX.dae"), String32("colbox"));
-	m->load();
-	assets.modelManager.pushModelToBatch(*m);
-
-	auto m2 = assets.prepareModel(String128("res/model/ground2.obj"), String32("ground"));
-	m2->load();
-	assets.modelManager.pushModelToBatch(*m2);
-
-	auto m3 = assets.prepareModel(String128("res/model/mon.obj"), String32("mon"));
-	m3->load();
-	assets.modelManager.pushModelToBatch(*m3);
+	assets.loader.loadAssets(String128("res/resources.txt"));
+	assets.pushTexturesToGPU();
 
 	const GPUModelManager& mm = Engine::assets.modelManager;
 
@@ -343,11 +331,11 @@ void Engine::mainLoop(int resolutionIndex)
 	auto col2 = new btSphereShape(5);
 	boxcol = new btBoxShape(glm::fvec3(5, 5, 5));
 
-	for (int i = 0; i < 8; ++i)
+	for (int i = 0; i < 1; ++i)
 	{
-		auto i2 = world->addModelInstance("colbox", worldRoot);
+		auto i2 = world->addModelInstance("mon", worldRoot);
 		i2->sgNode->transform.scale(5.f);
-		i2->sgNode->transform.translate(glm::fvec3(9, 5.1 + (5.1 * i), 0));
+		i2->sgNode->transform.translate(glm::fvec3(5.1, 5.1 + (5.1 * i), 0));
 
 		i2->makePhysicsObject(boxcol, 10.f);
 	}

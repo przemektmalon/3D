@@ -107,7 +107,7 @@ public:
 		instanceIDBuffer.bufferData(objectScopes.getTotalMaxObjects() * sizeof(u32), 0, GL_DYNAMIC_READ);
 	}
 
-	//TODO: updateInstanceRange, updateInstanceList
+	/// TODO: updateInstanceRange, updateInstanceList
 
 	void calculateGLMetrics()
 	{
@@ -119,7 +119,6 @@ public:
 			auto m = mItr.second.model;
 			auto numTris = m->triLists.size();
 			glMetrics.regIndirectBufferSize += numTris;
-			//glMetrics.shadowIndirectBufferSize += (m->)
 		}
 	}
 
@@ -130,7 +129,20 @@ public:
 
 		for (auto itr = modelInstances.begin(); itr != modelInstances.end(); ++itr)
 		{
-			for (auto itr2 = itr->second.model->triLists.begin(); itr2 != itr->second.model->triLists.end(); ++itr2)
+			auto model = itr->second.model;
+			u32 lodLevel = 0;
+
+			float camToModel = glm::length(itr->second.sgNode->transform.getTranslation() - Engine::r->activeCam->pos);
+
+			for (auto it = model->lodLimits.begin(); it < model->lodLimits.end(); ++it)
+			{
+				if (camToModel < *it)
+					break;
+				else
+					lodLevel++;
+			}
+
+			for (auto itr2 = itr->second.model->triLists[lodLevel].begin(); itr2 != itr->second.model->triLists[lodLevel].end(); ++itr2)
 			{
 				instanceTransformsRegular[i] = itr->second.sgNode->transform.getTransformMat();
 				++i;
@@ -149,15 +161,25 @@ public:
 
 		const GPUModelManager& mm = Engine::assets.modelManager;
 
-		u32 texIndBufferLengths[4];
-		texIndBufferLengths[0] = 0;
-		texIndBufferLengths[1] = 0;
-		texIndBufferLengths[2] = 0;
-		texIndBufferLengths[3] = 0;
-
 		for (auto itr = modelInstances.begin(); itr != modelInstances.end(); ++itr)
 		{
-			for (auto itr2 = itr->second.model->triLists.begin(); itr2 != itr->second.model->triLists.end(); ++itr2)
+			auto model = itr->second.model;
+			u32 lodLevel = 0;
+
+			float camToModel = glm::length(itr->second.sgNode->transform.getTranslation() - Engine::r->activeCam->pos);
+
+			for (auto i = model->lodLimits.begin(); i < model->lodLimits.end(); ++i)
+			{
+				if (camToModel < *i)
+					break;
+				else
+					lodLevel++;
+			}
+
+			//while (lodLevel > model->lodLimits.size())
+			//	lodLevel--;
+
+			for (auto itr2 = model->triLists[lodLevel].begin(); itr2 != model->triLists[lodLevel].end(); ++itr2)
 			{
 				auto bptr = itr2->renderMeta.batchPtr; //If render meta is missing, then most likely the mesh has not been pushed to a gpu batch
 				auto bindex = itr2->renderMeta.batchIndex;
@@ -177,14 +199,9 @@ public:
 			}
 		}
 
-
-
 		drawIndirectBuffer[Regular].unmap();
 		instanceTransformsBuffer[Regular].unmap();
 		texHandleBuffer[Regular].unmap();
-
-		//drawIndirectBuffer[Shadow].unmap();
-		//instanceTransformsBuffer[Shadow].unmap();
 		
 		/*MeshGPUMetaMultiTextured* metaMultiTextured = (MeshGPUMetaMultiTextured*)objectMetaBuffer[MultiTextured].mapRange(0, numTriLists[MultiTextured] * sizeof(MeshGPUMetaMultiTextured), GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_WRITE_BIT);
 		glm::fmat4* instanceTransformsMultiTextured = (glm::fmat4*)instanceTransformsBuffer[MultiTextured].mapRange(0, numTriLists[MultiTextured] * sizeof(float) * 16, GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_WRITE_BIT);
@@ -271,6 +288,49 @@ public:
 
 		objectMetaBuffer[MultiTextured].unmap();
 		instanceTransformsBuffer[MultiTextured].unmap();*/
+	}
+
+	void updateDrawBuffer()
+	{
+		GLCMD* indirectReg = (GLCMD*)drawIndirectBuffer[Regular].mapRange(0, numTriLists[Regular] * sizeof(GLCMD), GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_WRITE_BIT);
+		int i = 0;
+
+		/// TODO: only update the LOD if the lod boundry was crossed. Do we need to map the whole range every time ?
+
+		for (auto itr = modelInstances.begin(); itr != modelInstances.end(); ++itr)
+		{
+			auto model = itr->second.model;
+			u32 lodLevel = 0;
+
+			float camToModel = glm::length(itr->second.sgNode->transform.getTranslation() - Engine::r->activeCam->pos);
+
+			for (auto it = model->lodLimits.begin(); it < model->lodLimits.end(); ++it)
+			{
+				if (camToModel < *it)
+					break;
+				else
+					lodLevel++;
+			}
+
+			//while (lodLevel > model->lodLimits.size())
+				//lodLevel--;
+
+			for (auto itr2 = model->triLists[lodLevel].begin(); itr2 != model->triLists[lodLevel].end(); ++itr2)
+			{
+				auto bptr = itr2->renderMeta.batchPtr; //If render meta is missing, then most likely the mesh has not been pushed to a gpu batch
+				auto bindex = itr2->renderMeta.batchIndex;
+
+				indirectReg[i].count = bptr->counts[bindex];
+				indirectReg[i].instanceCount = 1;
+				indirectReg[i].first = bptr->firsts[bindex];
+				indirectReg[i].baseInstance = 0;
+
+				++i;
+			}
+		}
+
+		drawIndirectBuffer[Regular].unmap();
+		//instanceTransformsBuffer[Regular].unmap();
 	}
 
 	/*

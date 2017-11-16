@@ -78,53 +78,56 @@ public:
 	{
 		for (auto itr = pModel.triLists.begin(); itr != pModel.triLists.end(); ++itr)
 		{
-			auto& batch = regularBatch;
-
-			GLsizei size = 0;
-			for (int i = 0; i < batch.length; ++i)
+			for (auto itr2 = itr->begin(); itr2 != itr->end(); ++itr2)
 			{
-				size += batch.dataSizeInBytes[i];
+				auto& batch = regularBatch;
+
+				GLsizei size = 0;
+				for (int i = 0; i < batch.length; ++i)
+				{
+					size += batch.dataSizeInBytes[i];
+				}
+
+				auto prevFirst = batch.length == 0 ? 0 : batch.firsts[batch.length - 1];
+				auto prevCount = batch.length == 0 ? 0 : batch.counts[batch.length - 1];
+
+				batch.firsts[batch.length] = prevFirst + prevCount;
+				batch.counts[batch.length] = itr2->numVerts;
+				batch.data[batch.length] = itr2->data;
+				batch.dataSizeInBytes[batch.length] = itr2->getDataSizeInBytes();
+
+				glBindVertexArray(batch.vaoID);
+
+				glBindBuffer(GL_ARRAY_BUFFER, batch.vboID);
+
+				glBufferSubData(GL_ARRAY_BUFFER, size, batch.dataSizeInBytes[batch.length], batch.data[batch.length]);
+
+				/*for (int i = 0; i < batch.dataSizeInBytes[batch.length] / 4; i+=8)
+				{
+					std::cout << std::endl << std::endl;
+					std::cout << "VERTEX " << i / 8 << std::endl;
+
+					std::cout << "V: " << batch.data[batch.length][i] << std::endl;
+					std::cout << "V: " << batch.data[batch.length][i+1] << std::endl;
+					std::cout << "V: " << batch.data[batch.length][i+2] << std::endl;
+
+					std::cout << "N: " << batch.data[batch.length][i+3] << std::endl;
+					std::cout << "N: " << batch.data[batch.length][i+4] << std::endl;
+					std::cout << "N: " << batch.data[batch.length][i+5] << std::endl;
+
+					std::cout << "U: " << batch.data[batch.length][i+6] << std::endl;
+					std::cout << "U: " << batch.data[batch.length][i+7] << std::endl;
+				}*/
+
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
+				glBindVertexArray(0);
+
+				itr2->renderMeta.batchPtr = &batch;
+				itr2->renderMeta.batchIndex = batch.length;
+
+				size += batch.dataSizeInBytes[batch.length];
+				++batch.length;
 			}
-
-			auto prevFirst = batch.length == 0 ? 0 : batch.firsts[batch.length - 1];
-			auto prevCount = batch.length == 0 ? 0 : batch.counts[batch.length - 1];
-
-			batch.firsts[batch.length] = prevFirst + prevCount;
-			batch.counts[batch.length] = itr->numVerts;
-			batch.data[batch.length] = itr->data;
-			batch.dataSizeInBytes[batch.length] = itr->getDataSizeInBytes();
-
-			glBindVertexArray(batch.vaoID);
-
-			glBindBuffer(GL_ARRAY_BUFFER, batch.vboID);
-
-			glBufferSubData(GL_ARRAY_BUFFER, size, batch.dataSizeInBytes[batch.length], batch.data[batch.length]);
-
-			/*for (int i = 0; i < batch.dataSizeInBytes[batch.length] / 4; i+=8)
-			{
-				std::cout << std::endl << std::endl;
-				std::cout << "VERTEX " << i / 8 << std::endl;
-
-				std::cout << "V: " << batch.data[batch.length][i] << std::endl;
-				std::cout << "V: " << batch.data[batch.length][i+1] << std::endl;
-				std::cout << "V: " << batch.data[batch.length][i+2] << std::endl;
-
-				std::cout << "N: " << batch.data[batch.length][i+3] << std::endl;
-				std::cout << "N: " << batch.data[batch.length][i+4] << std::endl;
-				std::cout << "N: " << batch.data[batch.length][i+5] << std::endl;
-				
-				std::cout << "U: " << batch.data[batch.length][i+6] << std::endl;
-				std::cout << "U: " << batch.data[batch.length][i+7] << std::endl;
-			}*/
-
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
-			glBindVertexArray(0);
-
-			itr->renderMeta.batchPtr = &batch;
-			itr->renderMeta.batchIndex = batch.length;
-
-			size += batch.dataSizeInBytes[batch.length];
-			++batch.length;
 		}
 	}
 

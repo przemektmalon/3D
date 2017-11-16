@@ -29,7 +29,7 @@ UIWindow* createCameraConfigWindow()
 	sliFOV.setDescription("FOV");
 	sliFOV.valType = UISlider::Float;
 	sliFOV.setLimits(glm::fvec2(30.f, 150.f));
-	sliFOV.value.f = 100.f;
+	sliFOV.value.f = 90.f;
 	sliFOV.init(glm::fvec2(15, 80), 270);
 	sliFOV.setUpdate([](UIWindow* win, UIElement* __this) -> void {
 		UISlider* _this = (UISlider*)__this;

@@ -123,16 +123,23 @@ path=res/tex/g_S.jpg
 name=g_S
 mip=true
 
-[Mesh]
-path=res/model/square.bin
-name=square
-ext=bin
+[Model]
+limit=20
+path=res/model/mon1.obj
+limit=999999
+path=res/model/mon2.obj
+name=mon
+ext=obj
 
-[Mesh]
-path=res/model/shed.bin
-name=shed
-ext=bin
-version=12
+[Model]
+path=res/model/COLBOX.dae
+name=colbox
+ext=dae
+
+[Model]
+path=res/model/ground2.obj
+name=ground
+ext=obj
 
 [Font]
 path=res/fonts/clear-sans/ClearSans-Regular.ttf
