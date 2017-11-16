@@ -16,6 +16,8 @@
 
 -Ambient Occlusion
 
+-LOD system
+
 -Blended multi-texturing (splatting) using alpha map, up to four textures.
 
 -Multi material models (any number of triangle lists with different materials in one mesh)
@@ -43,8 +45,6 @@
 # Planned features
 
 -Depth of field
-
--LOD scaling for models
 
 -Emissive and parallax mapping
 
