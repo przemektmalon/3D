@@ -275,6 +275,7 @@
     <ClInclude Include="List.hpp" />
     <ClInclude Include="Log.hpp" />
     <ClInclude Include="MathIncludes.hpp" />
+    <ClInclude Include="ProfilingWindow.hpp" />
     <ClInclude Include="RenderConfigWindow.hpp" />
     <ClInclude Include="ResolutionWindow.hpp" />
     <ClInclude Include="Mouse.hpp" />

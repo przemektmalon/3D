@@ -1,35 +1,23 @@
 #pragma once
 #include <Windows.h>
 
+#include <chrono>
+
 class QPC
 {
 public:
 	QPC() {}
 	~QPC() {}
 
-	void start()
+	u64 now()
 	{
-		QueryPerformanceCounter(&StartingTime);
-		QueryPerformanceFrequency(&Frequency);
-	}
-
-	long long getElapsedTime()
-	{
-		QueryPerformanceCounter(&EndingTime);
-		ElapsedMicroseconds.QuadPart = EndingTime.QuadPart - StartingTime.QuadPart;
-
-		ElapsedMicroseconds.QuadPart *= 1000000;
-		ElapsedMicroseconds.QuadPart /= Frequency.QuadPart;
-
-		return ElapsedMicroseconds.QuadPart;
+		auto t = std::chrono::time_point_cast<std::chrono::microseconds>(clock.now());
+		auto t2 = t.time_since_epoch();
+		return t2.count();
 	}
 
 private:
 
-	LARGE_INTEGER StartingTime;
-	LARGE_INTEGER EndingTime;
-	LARGE_INTEGER ElapsedMicroseconds;
-	LARGE_INTEGER Frequency;
-
+	std::chrono::high_resolution_clock clock;
 };
 

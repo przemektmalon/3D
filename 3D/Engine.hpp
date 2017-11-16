@@ -169,6 +169,9 @@ public:
 
 	static EngineConfig cfg;
 
+	static u64 physicsTime;
+	static u64 frameTime;
+
 //private:
 
 	enum EngineState { InGame, Menu, Quitting };

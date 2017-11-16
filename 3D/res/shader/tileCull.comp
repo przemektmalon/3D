@@ -355,7 +355,7 @@ void main()
 
 	    float shadow = 0.f;
 
-		float samples = 4.0;
+		float samples = 2.0;
 		float offset = 0.3;
 
 		float camToLight = length(lightPos.xyz - viewPos);

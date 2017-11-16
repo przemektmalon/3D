@@ -25,6 +25,7 @@
 #include "ResolutionWindow.hpp"
 #include "RenderConfigWindow.hpp"
 #include "CameraConfigWindow.hpp"
+#include "ProfilingWindow.hpp"
 
 FT_Library Engine::ftLib;
 HINSTANCE Engine::instance;
@@ -54,6 +55,8 @@ EngineConfig Engine::cfg;
 float Engine::linear = 0.001;
 float Engine::quad = 0.001;
 int Engine::doPhysics = 1;
+u64 Engine::physicsTime = 0;
+u64 Engine::frameTime = 0;
 
 float Engine::tau;
 float Engine::damping;
@@ -331,9 +334,9 @@ void Engine::mainLoop(int resolutionIndex)
 	auto col2 = new btSphereShape(5);
 	boxcol = new btBoxShape(glm::fvec3(5, 5, 5));
 
-	for (int i = 0; i < 1; ++i)
+	for (int i = 0; i < 40; ++i)
 	{
-		auto i2 = world->addModelInstance("mon", worldRoot);
+		auto i2 = world->addModelInstance("colbox", worldRoot);
 		i2->sgNode->transform.scale(5.f);
 		i2->sgNode->transform.translate(glm::fvec3(5.1, 5.1 + (5.1 * i), 0));
 
@@ -360,8 +363,11 @@ void Engine::mainLoop(int resolutionIndex)
 	uiwm.addWindow(createResolutionWindow());
 	uiwm.addWindow(createRenderConfigWindow());
 	uiwm.addWindow(createCameraConfigWindow());
+	uiwm.addWindow(createProfilingWindow());
 
 	cfg.render.ssao.sampleRadius = 10.f;
+
+	qpc.start();
 
 	while (engineState != Quitting) {
 		if (!window.processMessages()) 
@@ -444,7 +450,7 @@ void Engine::mainLoop(int resolutionIndex)
 
 void Engine::processGameFrame()
 {
-	qpc.start();
+	auto beginFrameTime = qpc.now();
 
 	if (window.mouse.rightDown)
 	{
@@ -467,18 +473,23 @@ void Engine::processGameFrame()
 
 	cam.targetPos.y -= cfg.world.camSpeed * dt.getSeconds() * float(window.keyboard.isKeyPressed('F'));
 
+	physicsTime = qpc.now();
+
 	if (doPhysics)
 	{
 		physics.step(dt);
 		physics.updateModels();
 	}
 
+	physicsTime = qpc.now() - physicsTime;
+
 	uiwm.updateUIWindows();
 	cam.update(dt);
 
 	r->render();
 
-	dt.setMicroSeconds(qpc.getElapsedTime());
+	frameTime = qpc.now() - beginFrameTime;
+	dt.setMicroSeconds(frameTime);
 	programTime += dt.getSecondsf();
 }
 

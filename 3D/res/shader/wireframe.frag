@@ -5,10 +5,12 @@ out layout(location = 0) vec4 outColour;
 
 in float logz;
 
+uniform vec4 wireColour;
+
 void main() 
 {
 	const float FCHalf = 1.0 / log2(FAR + 1.0);
 	gl_FragDepth = log2(logz) * FCHalf;
 
-	outColour = vec4(1.f,1.f,1.f,1.f);
+	outColour = wireColour;
 };

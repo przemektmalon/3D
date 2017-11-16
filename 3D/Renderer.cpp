@@ -22,14 +22,10 @@
 
 void MasterRenderer::render()
 {
-	static auto restOfProgram = Engine::qpc.getElapsedTime();
-
-	restOfProgram = Engine::qpc.getElapsedTime() - restOfProgram;
+	auto beginRenderTime = Engine::qpc.getElapsedTime();
 
 	world->updateDrawBuffer(); // For LOD
 
-	auto beginRenderTime = Engine::qpc.getElapsedTime();
-	
 	for (int i = 0; i < lightManager.spotLights.size(); ++i)
 	{
 		lightManager.spotLightsGPUData[i].position = glm::fvec3(std::cos(Engine::programTime*0.2*(i + 1) + (i*PI*0.5))*50.f, 50.f, std::sin(Engine::programTime*0.2*(i + 1) + (i*PI*0.5))*50.f);
@@ -64,7 +60,9 @@ void MasterRenderer::render()
 	const GPUModelManager& modelManager = Engine::assets.modelManager;
 
 	glFinish();
-	auto lightUpdateTime = Engine::qpc.getElapsedTime() - beginRenderTime;
+	gpuBufferTime = Engine::qpc.getElapsedTime() - beginRenderTime;
+
+	auto beginGBufferTime = Engine::qpc.getElapsedTime();
 
 	// *********************************************************** G-BUFFER PASS *********************************************************** //
 
@@ -104,10 +102,13 @@ void MasterRenderer::render()
 		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
 	}
 
-	glFinish();
-	auto gBufferTime = Engine::qpc.getElapsedTime() - lightUpdateTime;
+	
 
 	// *********************************************************** G-BUFFER PASS *********************************************************** //
+
+	glFinish();
+	gBufferTime = Engine::qpc.getElapsedTime() - beginGBufferTime;
+	auto beginShadowTime = Engine::qpc.getElapsedTime();
 
 	// *********************************************************** SHADOW PASS *********************************************************** //
 
@@ -176,10 +177,11 @@ void MasterRenderer::render()
 		glBindVertexArray(0);
 	}
 
-	glFinish();
-	auto shadowTime = Engine::qpc.getElapsedTime() - gBufferTime;
-
 	// *********************************************************** SHADOW PASS *********************************************************** //
+
+	glFinish();
+	shadowTime = Engine::qpc.getElapsedTime() - beginShadowTime;
+	auto beginSSAOTime = Engine::qpc.getElapsedTime();
 
 	// *********************************************************** SSAO PASS *********************************************************** //
 
@@ -239,7 +241,8 @@ void MasterRenderer::render()
 	// *********************************************************** SSAO-BLUR PASS *********************************************************** //
 
 	glFinish();
-	auto ssaoTime = Engine::qpc.getElapsedTime() - shadowTime;
+	ssaoTime = Engine::qpc.getElapsedTime() - beginSSAOTime;
+	auto beginLightPassTime = Engine::qpc.getElapsedTime();
 
 	// *********************************************************** LIGHT PASS *********************************************************** //
 
@@ -282,10 +285,11 @@ void MasterRenderer::render()
 
 	// *********************************************************** LIGHT PASS *********************************************************** //
 
-	// *********************************************************** SCREEN PASS *********************************************************** //
-
 	glFinish();
-	auto lightPassTime = Engine::qpc.getElapsedTime() - ssaoTime;
+	lightPassTime = Engine::qpc.getElapsedTime() - beginLightPassTime;
+	auto beginScreenPassTime = Engine::qpc.getElapsedTime();
+
+	// *********************************************************** SCREEN PASS *********************************************************** //
 
 	fboDefault.bind();
 	fboDefault.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -301,7 +305,7 @@ void MasterRenderer::render()
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	glDisable(GL_CULL_FACE);
-	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 
 	if (Engine::cfg.render.drawWireframe)
@@ -312,6 +316,9 @@ void MasterRenderer::render()
 		wireShader->use();
 		wireShader->setUniform("proj", &activeCam->proj);
 		wireShader->setUniform("view", &activeCam->view);
+		float col = std::sin(Engine::programTime*10.f) + 1.f; col *= 0.05; col += 0.05f;
+		glm::fvec4 col4(1.f, 1.f, 1.f, col);
+		wireShader->setUniform("wireColour", &col4);
 		wireShader->sendUniforms();
 
 		glBindVertexArray(modelManager.shadowVAO);
@@ -335,19 +342,7 @@ void MasterRenderer::render()
 	window->swapBuffers();
 
 	glFinish();
-	auto screenTime = Engine::qpc.getElapsedTime() - lightPassTime;
-
-	auto toms = [](long long time) -> double { return ((double)time) / 1000.0; };
-	
-	/*std::cout << "Light update: " << toms(lightUpdateTime) << std::endl;
-	std::cout << "GBuffer:      " << toms(gBufferTime) << std::endl;
-	std::cout << "Shadows:      " << toms(shadowTime) << std::endl;
-	std::cout << "SSAO:         " << toms(ssaoTime) << std::endl;
-	std::cout << "Light:        " << toms(lightPassTime) << std::endl;
-	std::cout << "Screen:       " << toms(screenTime) << std::endl;
-	std::cout << "Rest:         " << toms(restOfProgram) << std::endl;*/
-
-	restOfProgram = Engine::qpc.getElapsedTime();
+	screenTime = Engine::qpc.getElapsedTime() - beginScreenPassTime;
 }
 
 void MasterRenderer::initialiseRenderer(Window * pwin, Camera & cam)

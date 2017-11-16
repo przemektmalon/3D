@@ -114,8 +114,6 @@ public:
 
 	GLBufferObject shadowMatrixBuffer;
 
-	//GLTextureArray2D texArr;
-
 	TextBillboard* tb;
 
 	//Shaders
@@ -146,4 +144,9 @@ public:
 	Sampler textSampler;
 	Sampler shadowSampler;
 	Sampler shadowCubeSampler;
+
+	// Profiling
+
+	u64 gpuBufferTime, gBufferTime, shadowTime, ssaoTime, lightPassTime, screenTime;
+
 };

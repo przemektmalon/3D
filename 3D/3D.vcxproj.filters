@@ -380,5 +380,8 @@
     <ClInclude Include="CameraConfigWindow.hpp">
       <Filter>Header Files\UI Elements\Windows</Filter>
     </ClInclude>
+    <ClInclude Include="ProfilingWindow.hpp">
+      <Filter>Header Files\UI Elements\Windows</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
