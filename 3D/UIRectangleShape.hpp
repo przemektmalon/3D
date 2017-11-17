@@ -18,7 +18,6 @@ public:
 		shader->setColour(colour);
 		shader->sendUniforms();
 		glBindVertexArray(vao);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glDrawArrays(GL_QUADS, 0, 4);
 		glBindVertexArray(0);
 	}

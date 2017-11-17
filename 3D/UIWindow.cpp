@@ -84,7 +84,7 @@ void UIWindow::draw()
 
 	glBindVertexArray(0);
 
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
 
 	if(hasTitle)
 		title->draw();
@@ -249,7 +249,6 @@ void UIWindow::setTitle(std::string pTitle)
 	title->setFont(Engine::assets.getFont("clearsansb"));
 	title->setCharSize(14);
 	title->setColour(glm::fvec3(0.f, 1.f, 1.f));
-	title->setWindowSize(glm::ivec2(windowArea.width, windowArea.height));
 	String<512> tit; tit.setToChars(name.c_str());
 	title->setString(tit);
 	title->setTextOrigin(Text2D::TopMiddle);
@@ -276,23 +275,10 @@ void UIWindow::updateWindowVBO()
 
 	float windowVerts[40] = {
 		//OUTSIDE AREA
-		/*windowArea.left, parentWindow->getSizeY() - windowArea.top,0.f,  0.0f, 1.0f,//TL
-		windowArea.left + windowArea.width, parentWindow->getSizeY() - windowArea.top,0.f,  1.0f, 1.0f,//TR
-		windowArea.left + windowArea.width, parentWindow->getSizeY() - windowArea.top - windowArea.height,0.f,  1.0f, 0.0f,//BR
-		windowArea.left, parentWindow->getSizeY() - windowArea.top - windowArea.height,0.f,  0.0f, 0.0f,//BL
-
-		//INSIDE AREA
-		borderWidth, windowArea.height - borderWidth - titleWidth ,0.f,0,1,
-		windowArea.width - borderWidth, windowArea.height - borderWidth - titleWidth,0.f,1,1,
-		windowArea.width - borderWidth, borderWidth,0.f,1,0,
-		borderWidth,borderWidth,0.f,0,0*/
-
 		windowArea.left, windowArea.top, 0.f, 0.0f, 1.0f,//TL
 		windowArea.left + windowArea.width, windowArea.top, 0.f, 1.0f, 1.0f,//TR
 		windowArea.left + windowArea.width, windowArea.top + windowArea.height, 0.f, 1.0f, 0.0f,//BR
 		windowArea.left, windowArea.top + windowArea.height, 0.f, 0.0f, 0.0f,//BL
-
-		//0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 
 		//INSIDE AREA
 		
@@ -302,11 +288,6 @@ void UIWindow::updateWindowVBO()
 		windowArea.width - borderWidth, borderWidth + titleWidth,0.f,1,1,//TR
 		windowArea.width - borderWidth, windowArea.height - borderWidth,0.f,1,0,//BR
 		borderWidth, windowArea.height - borderWidth,0.f,0,0//BL
-
-		/*borderWidth,	windowArea.height - borderWidth - 20,  0.0f, 1.0f,//TL
-		windowArea.width - borderWidth, windowArea.height - 20 - borderWidth,  1.0f, 1.0f,//TR
-		windowArea.width - borderWidth, borderWidth,  1.0f, 0.0f,//BR
-		borderWidth, borderWidth,  0.0f, 0.0f,//BL*/
 	};
 
 	glBindVertexArray(vao);
@@ -315,7 +296,4 @@ void UIWindow::updateWindowVBO()
 
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	//glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(windowVerts), windowVerts);
-	//glBufferSubData(GL_ARRAY_BUFFER, sizeof(windowVerts), sizeof(elementVerts), elementVerts);
 }
