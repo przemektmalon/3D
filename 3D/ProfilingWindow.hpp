@@ -8,7 +8,7 @@
 
 UIWindow* createProfilingWindow()
 {
-	auto win = new UIWindow("Profiling", irect(1920-246, 0, 246, 345), 4, &Engine::window);
+	auto win = new UIWindow("Profiling", irect(1920-246, 0, 246, 350), 4, &Engine::window);
 
 	Text2D::TextStyle styleA(Engine::assets.getFont("clearsansb"), 16);
 

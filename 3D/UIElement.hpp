@@ -10,7 +10,7 @@ class UIElement
 {
 	friend class UIWindow;
 public:
-	enum ElementType { Label, Button, Slider, SwitchButton, Console };
+	enum ElementType { Label, Button, Slider, SwitchButton, InputField, Console };
 
 	UIElement(ElementType elType, UIWindow* pParent);
 	virtual ~UIElement();
@@ -143,6 +143,11 @@ public:
 		return offClick;
 	}
 
+	bool isFocused()
+	{
+		return focused;
+	}
+
 	void setHovered(bool state)
 	{
 		hovered = state;
@@ -156,6 +161,11 @@ public:
 	void setOffClick(bool state)
 	{
 		offClick = state;
+	}
+
+	void setFocused(bool state)
+	{
+		focused = state;
 	}
 
 protected:
@@ -172,6 +182,7 @@ protected:
 	bool clicked;
 	bool hovered;
 	bool offClick;
+	bool focused;
 
 	const ElementType elementType;
 

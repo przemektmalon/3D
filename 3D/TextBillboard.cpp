@@ -2,7 +2,7 @@
 #include "Engine.hpp"
 #include "Renderer.hpp"
 #include "Camera.hpp"
-#include "Text3D.hpp"
+#include "Text.hpp"
 #include "AssetManager.hpp"
 
 void TextBillboard::initGL()

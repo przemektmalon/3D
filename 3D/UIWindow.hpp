@@ -1,6 +1,7 @@
 #pragma once
 #include "Framebuffer.hpp"
 #include "Shape2DShader.hpp"
+#include "Shape2DShaderNoTex.hpp"
 #include "Window.hpp"
 #include "Event.hpp"
 #include "Rect.hpp"
@@ -104,6 +105,7 @@ public:
 	UILabel* title;
 
 	Shape2DShader* shader;
+	Shape2DShaderNoTex* shaderNoTex;
 
 	GLuint vao;
 	GLuint vbo;

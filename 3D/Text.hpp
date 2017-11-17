@@ -43,7 +43,7 @@ public:
 		font = nullptr;
 		glyphs = nullptr;
 		initt = false;
-		string.expand(64);
+		string.resize(64);
 		hasCustomOrigin = true;
 	}
 	~Text2D()
@@ -53,8 +53,8 @@ public:
 	}
 	void setFont(Font* pFont) { font = pFont; update(); }
 	void setCharSize(u8 pSize) { charSize = pSize; update(); }
-	void setString(std::string pStr) { string.setToChars(pStr.c_str()); update(); }
-	void setString(StringGeneric& pStr) { string.overwrite(pStr); update(); }
+	void setString(std::string pStr) { string = pStr; update(); }
+	void setString(StringGeneric& pStr) { string = pStr.getString(); update(); }
 	void setPosition(glm::fvec2 pPos) { position = pPos; update(); }
 	u8 getCharSize() { return charSize;}
 	u16 getHeight() { return boundingBox.height; }
@@ -65,7 +65,7 @@ public:
 	glm::fvec2 getPosition() { return position; }
 	void setColour(glm::fvec3 pCol) { colour = pCol; }
 	glm::fvec3 getColour() { return colour; }
-	String<HEAP>& getString() { return string; }
+	std::string& getString() { return string; }
 	Font* getFont() { return font; }
 
 	void setStyle(TextStyle& pStyle)
@@ -93,7 +93,7 @@ public:
 		initt = true;
 
 		//string = "ABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz\n1234567890!@#$%^&*()_\n-=+[]{};':\"\\|<>,./~`";
-		string.setToChars("\0");
+		string = "\0";
 		charSize = 85;
 		colour = glm::fvec3(1.f, 1.f, 1.f);
 		setTextOrigin(TopLeft);
@@ -165,12 +165,6 @@ public:
 	void setWindowOrigin(Origin pO)
 	{
 		windowOrigin = pO;
-		updateVBO();
-	}
-
-	void setWindowSize(glm::ivec2 pSize)
-	{	
-		windowSize = pSize;
 		updateVBO();
 	}
 
@@ -284,13 +278,13 @@ private:
 	{
 		boundingBox.zero();
 		if (charSize == 0) { return; }
-		if (string.getLength() == 0) { return; }
+		if (string.length() == 0) { return; }
 		if (font == nullptr) { return; }
 
 		glyphs = font->requestGlyphs(charSize, this);
 		auto glyphsTex = glyphs->getTexture();
 
-		auto p = string.getString();
+		auto p = string.c_str();
 
 		auto tpos = position - glm::fvec2(textOrigin);
 
@@ -302,8 +296,8 @@ private:
 
 		float ascender = glyphs->getAscender();
 
-		glm::uvec2 glyphPos = glyphs->getPosition(*p);
-		glm::uvec2 glyphSize = glyphs->getSize(*p);
+		glm::ivec2 glyphPos = glyphs->getPosition(*p);
+		glm::ivec2 glyphSize = glyphs->getSize(*p);
 
 		glm::fvec2 botLeft(rgp.x + glyphPos.x, rgp.y + ascender + (glyphSize.y - glyphPos.y));
 		glm::fvec2 topRight(rgp.x + glyphPos.x + glyphSize.x, rgp.y + ascender - glyphPos.y);
@@ -321,8 +315,8 @@ private:
 			}
 			else
 			{
-				glm::uvec2 glyphPos = glyphs->getPosition(*p);
-				glm::uvec2 glyphSize = glyphs->getSize(*p);
+				glm::ivec2 glyphPos = glyphs->getPosition(*p);
+				glm::ivec2 glyphSize = glyphs->getSize(*p);
 
 				glm::fvec2 botLeft(rgp.x + glyphPos.x, rgp.y + ascender + (glyphSize.y - glyphPos.y));
 				glm::fvec2 botRight(rgp.x + glyphPos.x + glyphSize.x, rgp.y + ascender + (glyphSize.y - glyphPos.y));
@@ -368,10 +362,10 @@ private:
 	{
 		boundingBox.zero(); vboSize = 0;
 		if (charSize == 0) { return; }
-		if (string.getLength() == 0) { return; }
+		if (string.length() == 0) { return; }
 		if (font == nullptr) { return; }
 
-		int vboNumQuad = string.getLength();
+		int vboNumQuad = string.length();
 		int vboNumVert = vboNumQuad * 4;
 		int sizeOfVert = 5;
 		vboSize = vboNumVert;
@@ -384,7 +378,7 @@ private:
 		auto glyphsTex = glyphs->getTexture();
 
 		int index = 0;
-		auto p = string.getString();
+		auto p = string.c_str();
 
 		auto tpos = position - glm::fvec2(textOrigin);
 
@@ -417,8 +411,8 @@ private:
 
 		float ascender = glyphs->getAscender();
 
-		glm::uvec2 glyphPos = glyphs->getPosition(*p);
-		glm::uvec2 glyphSize = glyphs->getSize(*p);
+		glm::ivec2 glyphPos = glyphs->getPosition(*p);
+		glm::ivec2 glyphSize = glyphs->getSize(*p);
 
 		glm::fvec2 botLeft(rgp.x + glyphPos.x, rgp.y + ascender + (glyphSize.y - glyphPos.y));
 		glm::fvec2 topRight(rgp.x + glyphPos.x + glyphSize.x, rgp.y + ascender - glyphPos.y);
@@ -436,8 +430,8 @@ private:
 			}
 			else
 			{
-				glm::uvec2 glyphPos = glyphs->getPosition(*p);
-				glm::uvec2 glyphSize = glyphs->getSize(*p);
+				glm::ivec2 glyphPos = glyphs->getPosition(*p);
+				glm::ivec2 glyphSize = glyphs->getSize(*p);
 				glm::fvec2 glyphCoords = glyphs->getCoords(*p);
 
 				auto cOffset = glm::fvec2(glyphSize) / glm::fvec2(glyphsTex->getWidth(), glyphsTex->getHeight());
@@ -500,7 +494,6 @@ private:
 protected:
 
 	Origin windowOrigin;
-	glm::ivec2 windowSize;
 
 	Origin textOriginPreDef;
 	bool hasCustomOrigin;
@@ -519,7 +512,7 @@ protected:
 	GLuint vao;
 	GLuint vaoBBox;
 	//std::string string;
-	String<HEAP> string;
+	std::string string;
 	u16 charSize;
 	Font* font;
 	GlyphContainer* glyphs;

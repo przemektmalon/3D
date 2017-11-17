@@ -19,9 +19,9 @@ UISlider::UISlider(UIWindow* pParent) : UIElement(Slider,pParent)
 	descText.setStyle(style);
 	descText.setTextOrigin(Text2D::TopLeft);
 
-	sliderColour = glm::fvec4(0.7, 0.7, 0.7, 0.8);
+	sliderColour = glm::fvec4(0.7, 0.7, 0.7, 0.9);
 	sliderClickColour = glm::fvec4(0.9, 0.9, 0.9, 0.9);
-	sliderHoverColour = glm::fvec4(0.9, 1.0, 0.9, 0.8);
+	sliderHoverColour = glm::fvec4(0.9, 1.0, 0.9, 0.9);
 	rangeColour = glm::fvec4(0.3, 0.3, 0.3, 0.9);
 
 	slider.setColour(sliderColour);

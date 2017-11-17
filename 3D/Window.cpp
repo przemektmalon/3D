@@ -70,7 +70,6 @@ void Window::createWindow(HINSTANCE pHInstance, LPCTSTR pWindowName, int pXPos, 
 
 	windowHandle = CreateWindowEx(0, LPCSTR(windowClass.lpszClassName), "WINDOW_WINDOW_NAME", pWindowStyle, pXPos, pYPos, pWidth, pHeight, 0, 0, pHInstance, 0);
 
-
 	RECT ca = getClientArea();
 	actualClientArea.x = ca.right;
 	actualClientArea.y = ca.bottom;

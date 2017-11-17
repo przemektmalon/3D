@@ -6,8 +6,6 @@
 #include "Sampler.hpp"
 #include "Billboard.hpp"
 
-
-
 struct DirectLightData
 {
 	DirectLightData() {}

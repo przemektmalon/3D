@@ -26,7 +26,7 @@ void reloadAllShaders()
 
 std::map<String32, u32> Console::funcIDs;
 
-void Console::submitCommand(StringGeneric& command)
+void Console::submitCommand(std::string& command)
 {
 	//INTERPRET COMMAND
 	//IGNORE LEADING SPACES
@@ -43,8 +43,8 @@ void Console::submitCommand(StringGeneric& command)
 	//IF '['
 	//GET FOLLOWING PARAMS (SAME TYPES)
 
-	String32 funcName;
-	char* cc = command.getString();
+	/*String32 funcName;
+	char* cc = command.c_str();
 
 	//CNumber numParam;
 	//CVector vecParam;
@@ -129,7 +129,7 @@ void Console::submitCommand(StringGeneric& command)
 		CHECK_CONSOLE_CALLABLE(2, listShaders, 0);
 		CHECK_CONSOLE_CALLABLE(3, reloadShader, 1);
 		CHECK_CONSOLE_CALLABLE(4, reloadAllShaders, 0);
-	END_FUNC_SWITCH
+	END_FUNC_SWITCH*/
 }
 
 void Console::registerConsoleFuncs()
@@ -141,7 +141,6 @@ void Console::registerConsoleFuncs()
 
 void Console::textInput(Key code)
 {
-	
 	switch (code.code)
 	{
 	case VK_LEFT:
@@ -151,7 +150,7 @@ void Console::textInput(Key code)
 	}
 	case VK_RIGHT:
 	{
-		cursor = cursor + 2 < cmd.getString().getLength() ? cursor + 1 : cursor;
+		cursor = cursor + 2 < cmd.getString().length() ? cursor + 1 : cursor;
 		break;
 	}
 	case VK_BACK: //Backspace
@@ -159,15 +158,15 @@ void Console::textInput(Key code)
 		if (cursor == 0)
 			break;
 		--cursor;
-		cmd.getString().shrinkBy(1);
+		cmd.getString().erase(cmd.getString().length()-1,1);
 		cmd.forceUpdate();
 		break;
 	}
 	case VK_DELETE: //Delete
 	{
-		if (cursor + 2 == cmd.getString().getLength())
+		if (cursor + 2 == cmd.getString().length())
 			break;
-		cmd.getString().removeAt(cursor+2, 1);
+		cmd.getString().erase(cursor+2, 1);
 		cmd.forceUpdate();
 		break;
 	}
@@ -186,7 +185,7 @@ void Console::textInput(Key code)
 		else
 		{
 			char c = '~';
-			cmd.getString().append(c);
+			cmd.getString().append(&c);
 			cmd.forceUpdate();
 			++cursor;
 			break;
@@ -194,9 +193,9 @@ void Console::textInput(Key code)
 	}
 	case VK_RETURN: //Enter / carriage return
 	{
-		String<HEAP> submit;
-		submit.overwrite(cmd.getString());
-		submit.removeAt(0, 2);
+		std::string submit;
+		submit = cmd.getString();
+		submit.erase(0, 2);
 		consoleHistory.push_back(new Text2D());
 		consoleHistory.back()->init();
 		consoleHistory.back()->setFont(Engine::assets.getFont(String32("consola")));
@@ -293,7 +292,7 @@ void Console::textInput(Key code)
 				}
 			}
 
-			cmd.getString().append(c);
+			//cmd.getString().append(c);
 			cmd.forceUpdate();
 			++cursor;
 		}

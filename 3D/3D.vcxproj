@@ -223,6 +223,7 @@
     <ClCompile Include="Font.cpp" />
     <ClCompile Include="GPUModelManager.cpp" />
     <ClCompile Include="ImageData.cpp" />
+    <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="Lights.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Mouse.cpp" />
@@ -235,6 +236,7 @@
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="UIButton.cpp" />
     <ClCompile Include="UIElement.cpp" />
+    <ClCompile Include="UIInputField.cpp" />
     <ClCompile Include="UILabel.cpp" />
     <ClCompile Include="UISlider.cpp" />
     <ClCompile Include="UIRectangleShape.cpp" />
@@ -270,6 +272,8 @@
     <ClInclude Include="GPUModelManager.hpp" />
     <ClInclude Include="ImageData.hpp" />
     <ClInclude Include="Include.hpp" />
+    <ClInclude Include="Shape2DShaderNoTex.hpp" />
+    <ClInclude Include="UIInputField.hpp" />
     <ClInclude Include="Keyboard.hpp" />
     <ClInclude Include="Lights.hpp" />
     <ClInclude Include="List.hpp" />
@@ -300,7 +304,6 @@
     <ClInclude Include="StringGenerics.hpp" />
     <ClInclude Include="Strings.hpp" />
     <ClInclude Include="Text.hpp" />
-    <ClInclude Include="Text3D.hpp" />
     <ClInclude Include="TextBillboard.hpp" />
     <ClInclude Include="TextShader.hpp" />
     <ClInclude Include="Texture.hpp" />

@@ -62,7 +62,7 @@ public:
 	void setResolution(glm::ivec2 pRes){
 		desiredClientArea = pRes;
 		forceClientAreaToDesired();
-		orthoProj = glm::ortho(0.f, (float)pRes.x, 0.f, (float)pRes.y, -1.f, 100.f); }
+		orthoProj = glm::ortho(0.f, (float)pRes.x, (float)pRes.y, 0.f, -1.f, 100.f); }
 
 	RECT getClientArea(){
 		RECT wr2;
@@ -106,7 +106,7 @@ public:
 	HWND windowHandle;
 	WNDCLASS windowClass;
 	HDC deviceContextHandle;
-	KeyboardState keyboard;
+	Keyboard keyboard;
 	MouseState mouse;
 	
 	EventQ eventQ;

@@ -368,35 +368,35 @@ public:
 		Type type;
 	};
 
-	void submitCommand(StringGeneric& command);
-	void postMessage(StringGeneric& post, char prompt = '>')
+	void submitCommand(std::string& command);
+	void postMessage(std::string& post, char prompt = '>')
 	{
 		std::vector<String<HEAP>*> lines;
 
 		int beg = 0;
-		for (auto i = 0; i < post.getLength(); ++i)
+		for (auto i = 0; i < post.length(); ++i)
 		{
-			if (post.getString()[i] == '\n')
+			if (post.c_str()[i] == '\n')
 			{
-				lines.push_back(new String<HEAP>(post.getString() + (beg == 0 ? beg : beg + 1), post.getString() + i));
+				//lines.push_back(new std::string(post.c_str() + (beg == 0 ? beg : beg + 1), post.c_str() + i));
 				beg = i;
 			}
-			if (i == post.getLength() - 1)
+			if (i == post.length() - 1)
 			{
-				lines.push_back(new String<HEAP>(post.getString() + (beg == 0 ? beg : beg + 1), post.getString() + i + 1));
+				//lines.push_back(new String<HEAP>(post.c_str() + (beg == 0 ? beg : beg + 1), post.c_str() + i + 1));
 			}
 		}
 
 		for (auto itr = lines.begin(); itr != lines.end(); ++itr)
 		{
-			auto newPost = new Text2D();
+			/*auto newPost = new Text2D();
 			newPost->init();
 			newPost->setFont(cmd.getFont());
 			newPost->setCharSize(25);
 			newPost->setString(String<2>(prompt));
-			newPost->getString().append(' ');
+			newPost->getString().append(" ");
 			newPost->getString().append(*(*itr));
-			consoleHistory.push_back(newPost);
+			consoleHistory.push_back(newPost);*/
 		}
 
 		for (auto itr = lines.begin(); itr != lines.end(); ++itr)
@@ -408,11 +408,11 @@ public:
 	}
 	void postResult(StringGeneric& result)
 	{
-		postMessage(result, '#');
+		//postMessage(result, '#');
 	}
 	void postError(StringGeneric& error)
 	{
-		postMessage(error, '!');
+		//postMessage(error, '!');
 	}
 	void textInput(Key code);
 	

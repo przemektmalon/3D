@@ -18,13 +18,15 @@ public:
 		shader->setColour(colour);
 		shader->sendUniforms();
 		glBindVertexArray(vao);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glDrawArrays(GL_QUADS, 0, 4);
 		glBindVertexArray(0);
 	}
 
 	void initOGL()
 	{
-		shader = (Shape2DShader*)Engine::r->shaderStore.getShader(String<32>("Shape2DShader"));
+		shader = (Shape2DShader*)Engine::r->shaderStore.getShader(String<32>("Shape2DShaderNoTex"));
 		shader->use();
 
 		glCreateVertexArrays(1, &vao);

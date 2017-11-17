@@ -74,7 +74,7 @@ public:
 		}
 	}
 
-	void keyHolds(KeyboardState& keyStates)
+	void keyHolds(Keyboard& keyStates)
 	{
 		//TODO: change to linked list of active holds instead of scanning all keys
 		for (int i = 0; i < 256; ++i)

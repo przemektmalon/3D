@@ -94,7 +94,7 @@ class KeyEvent : private Event
 {
 public:
 
-	Key getCode() { return key.code; }
+	Key getKey() { return key.code; }
 	bool getShift() { return key.shift; }
 	bool getAlt() { return key.alt; }
 	bool getSys() { return key.sys; }

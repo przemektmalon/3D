@@ -20,6 +20,7 @@
 #include "Sampler.hpp"
 #include "ShaderStore.hpp"
 #include "Shape3DShader.hpp"
+#include "Shape2DShaderNoTex.hpp"
 #include "TextBillboard.hpp"
 #include "Window.hpp"
 #include "Model.hpp"
@@ -129,6 +130,7 @@ public:
 	SpotShadowPassShader spotShadowPassShader;
 	PointShadowPassShader pointShadowPassShader;
 	Shape2DShader shape2DShader;
+	Shape2DShaderNoTex shape2DShaderNoTex;
 	Shape3DShader shape3DShader;
 	TextShader textShader;
 	

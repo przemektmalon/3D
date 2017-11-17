@@ -24,11 +24,6 @@ public:
 
 	glm::ivec2 getPosition() { return text.getPosition(); }
 
-	void onParentWindowResize(WindowEvent& pWindowEvent)
-	{
-		text.setWindowSize(pWindowEvent.getSize());
-	}
-
 	void setStyle(Text2D::TextStyle& pStyle)
 	{
 		text.setStyle(pStyle);
@@ -68,11 +63,6 @@ public:
 	void setOrigin(glm::ivec2 pOr)
 	{
 		text.setTextOrigin(pOr);
-	}
-
-	void setWindowSize(glm::ivec2 pWS)
-	{
-		text.setWindowSize(pWS);
 	}
 
 	void setWindowOrigin(Text2D::Origin pOrigin)

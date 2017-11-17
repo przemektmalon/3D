@@ -9,7 +9,6 @@
 #include "AssetManager.hpp"
 #include "World.hpp"
 #include "Text.hpp"
-#include "Text3D.hpp"
 #include "GPUModelManager.hpp"
 
 #include "Console.hpp"
@@ -608,6 +607,7 @@ void MasterRenderer::initialiseShaders()
 	shaderStore.loadShader(&spotShadowPassShader);
 	shaderStore.loadShader(&pointShadowPassShader);
 	shaderStore.loadShader(&shape2DShader);
+	shaderStore.loadShader(&shape2DShaderNoTex);
 	shaderStore.loadShader(&shape3DShader);
 	shaderStore.loadShader(&textShader);
 

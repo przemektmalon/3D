@@ -20,6 +20,7 @@ UIWindow::UIWindow(std::string pName, irect pWindowArea, int pBorderWidth, const
 	title->setParentWindow(this);
 
 	shader = (Shape2DShader*)Engine::r->shaderStore.getShader(String32("Shape2DShader"));
+	shaderNoTex = (Shape2DShaderNoTex*)Engine::r->shaderStore.getShader(String32("Shape2DShaderNoTex"));
 
 	glCreateVertexArrays(1, &vao);
 	glCreateBuffers(1, &vbo);
@@ -45,7 +46,6 @@ UIWindow::UIWindow(std::string pName, irect pWindowArea, int pBorderWidth, const
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	proj = glm::ortho(0.f, float(windowArea.width), float(windowArea.height), 0.f, -1.f, 100.f);
-	//proj = glm::ortho(0.f, float(windowArea.width), float(windowArea.height), 0.f, 0.f, 100.f);
 
 	setTitle(name);
 }
@@ -57,34 +57,22 @@ UIWindow::~UIWindow()
 
 void UIWindow::draw()
 {
-	//glm::fmat4 m = glm::ortho(0.f, float(parentWindow->getSizeX()), 0.f, float(parentWindow->getSizeY()), 0.f, 100.f);
-
 	glViewport(0, 0, windowArea.width, windowArea.height);
 
 	renderTarget.bind();
-	//renderTarget.textureAttachments[0].bind();
-	renderTarget.clear(GL_COLOR_BUFFER_BIT, glm::fvec4(0.1, 0.1, 0.1, 0.9f));
+	renderTarget.clear(GL_COLOR_BUFFER_BIT, glm::fvec4(0.1f, 0.1f, 0.1f, 0.6f));
 
 	glBindVertexArray(vao);
-	//glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-	glm::fvec4 col(0.2f, 0.2f, 0.2f, 0.0f);
-
-	shader->use();
-	shader->setColour(col);
-	shader->setProjModel(proj);
-	shader->sendUniforms();
 	
-	float innerAlpha = 0.9f;
+	glm::fvec4 col(0.2f, 0.2f, 0.2f, 0.85f);
 
-	glBlendColor(0.f, 0.f, 0.f, innerAlpha); //Alpha is absolute alpha for inner area. RGB are not used.
-	glBlendFunc(GL_SRC_ALPHA, GL_ZERO);
-	glBindTextureUnit(0, 0);
+	shaderNoTex->use();
+	shaderNoTex->setColour(col);
+	shaderNoTex->setProjModel(proj);
+	shaderNoTex->sendUniforms();
+	
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDrawArrays(GL_QUADS, 4, 4);
-
-	glBindVertexArray(0);
-
-	glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
 
 	if(hasTitle)
 		title->draw();
@@ -98,11 +86,8 @@ void UIWindow::draw()
 	glViewport(0, 0, Engine::window.getSizeX(), Engine::window.getSizeY());
 	shader->use();
 
-	col = glm::fvec4(0.f,0.f,0.f,0.9f);
-	auto m = glm::ortho(0.f, (float)Engine::window.getSizeX(), (float)Engine::window.getSizeY(), 0.f, 0.f, 100.f);
-	//auto m = glm::fmat4(0.f);
-	shader->setColour(col);
-	shader->setProjModel(m);
+	shader->setColour(glm::fvec4(0, 0, 0, 0));
+	shader->setProjModel(parentWindow->getOrthoProj());
 	shader->sendUniforms();
 	
 	renderTarget.textureAttachments[0].bind(0);
@@ -110,10 +95,10 @@ void UIWindow::draw()
 	glBindVertexArray(vao);
 
 	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_SRC_COLOR);
+	//glBlendFunc(GL_SRC_COLOR, GL_SRC_ALPHA);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glDrawArrays(GL_QUADS, 0, 4);
-
 
 	glBindVertexArray(0);
 }
@@ -128,15 +113,16 @@ void UIWindow::update()
 	if (dragging)
 	{
 		auto mp = Engine::window.getMousePosition();
-		//mp.y = parentWindow->getSizeY() - mp.y;
 		setWindowPosition(mp-clickedPos);
 	}
 }
 
 void UIWindow::mouseDown(MouseEvent& pMouseEvent)
 {
+	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
+		itr->second->setFocused(false);
+
 	auto mp = pMouseEvent.getPosition();
-	//mp.y = parentWindow->getSizeY() - mp.y;
 	if (!windowArea.contains(mp))
 	{
 		dragging = false;
@@ -148,13 +134,13 @@ void UIWindow::mouseDown(MouseEvent& pMouseEvent)
 	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
 	{
 		auto rect = (*itr).second->getBounds();
-		//auto mp = glm::ivec2(pMouseEvent.getUIWindowPosition((*itr).second->getParentWindow()).x, (*itr).second->getParentWindow()->getWindowRect().bot() - pMouseEvent.getUIWindowPosition((*itr).second->getParentWindow()).y);
-
+		
 		auto winMP = pMouseEvent.getUIWindowPosition((*itr).second->getParentWindow());
 
 		if (!rect.contains(winMP))
 			continue;
 
+		(*itr).second->setFocused(true);
 		(*itr).second->setClicked(true);
 		(*itr).second->onMouseDown(pMouseEvent);
 		canDrag = false;
@@ -201,12 +187,10 @@ void UIWindow::keyUp(KeyEvent & pKeyEvent)
 void UIWindow::checkMouseEnter(MouseEvent& pMouseEvent)
 {
 	auto mp = pMouseEvent.getPosition();
-	//mp.y = parentWindow->getSizeY() - mp.y;
 
 	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
 	{
 		auto rect = (*itr).second->getBounds();
-		//auto mp = glm::ivec2(pMouseEvent.getUIWindowPosition((*itr).second->getParentWindow()).x, (*itr).second->getParentWindow()->getWindowRect().height - pMouseEvent.getUIWindowPosition((*itr).second->getParentWindow()).y);
 
 		auto winMP = pMouseEvent.getUIWindowPosition((*itr).second->getParentWindow());
 

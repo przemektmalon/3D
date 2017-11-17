@@ -153,6 +153,12 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UIInputField.cpp">
+      <Filter>Source Files\UIElements</Filter>
+    </ClCompile>
+    <ClCompile Include="Keyboard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Asset.hpp">
@@ -341,9 +347,6 @@
     <ClInclude Include="Text.hpp">
       <Filter>Header Files\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Text3D.hpp">
-      <Filter>Header Files\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="TextBillboard.hpp">
       <Filter>Header Files\Renderer</Filter>
     </ClInclude>
@@ -385,6 +388,12 @@
     </ClInclude>
     <ClInclude Include="RenderModeWindow.hpp">
       <Filter>Header Files\UI Elements\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="UIInputField.hpp">
+      <Filter>Header Files\UI Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="Shape2DShaderNoTex.hpp">
+      <Filter>Header Files\Shaders</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

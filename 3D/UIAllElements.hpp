@@ -3,6 +3,7 @@
 #include "UILabel.hpp"
 #include "UISlider.hpp"
 #include "UISwitchButton.hpp"
+#include "UIInputField.hpp"
 
 #define C_LABEL(name,window) \
 UILabel* ##name##Ptr = new UILabel(window); \
@@ -15,3 +16,7 @@ UIButton& ##name## = *##name##Ptr;
 #define C_SLIDER(name,window) \
 UISlider* ##name##Ptr = new UISlider(window); \
 UISlider& ##name## = *##name##Ptr;
+
+#define C_INPUT(name,window) \
+UIInputField* ##name##Ptr = new UIInputField(window); \
+UIInputField& ##name## = *##name##Ptr;

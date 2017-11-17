@@ -16,8 +16,12 @@ public:
 
 		KC_NULL = 0,
 
-		KC_BACK = 0x08,
-		KC_TAB = 0x09,
+		KC_BACK = VK_BACK,
+		KC_DELETE = VK_DELETE,
+		KC_ENTER = VK_RETURN,
+		KC_TAB = VK_TAB,
+		KC_LEFT = VK_LEFT,
+		KC_RIGHT = VK_RIGHT,
 
 		KC_SYS = VK_LWIN,
 		KC_RETURN = VK_RETURN,
@@ -28,13 +32,28 @@ public:
 		KC_ESCAPE = VK_ESCAPE
 	};
 	KeyCode code;
+
+	static bool isNum(char c)
+	{
+		return c > 47 && c < 58;
+	}
+
+	static bool isAlpha(char c)
+	{
+		return (c > 64 && c < 91) || (c > 96 && c < 123);
+	}
+
+	static bool isPrintable(char c)
+	{
+		return (c > 31 && c < 127);
+	}
 };
 
-class KeyboardState
+class Keyboard
 {
 public:
-	KeyboardState() {}
-	~KeyboardState() {}
+	Keyboard() {}
+	~Keyboard() {}
 
 	void updateKeyState()
 	{
@@ -46,6 +65,8 @@ public:
 		return (keyState[keyCode.code] >> 1) != 0;
 	}
 
+	char convertToASCII(Key key);
+	
 	unsigned char keyState[256];
 };
 
