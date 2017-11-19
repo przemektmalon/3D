@@ -113,5 +113,3 @@ public:
 
 	bool windowHasFocus;
 };
-
-

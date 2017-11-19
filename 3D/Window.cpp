@@ -112,8 +112,33 @@ void Window::createGLContext()
 	letWindowsChooseThisPixelFormat = ChoosePixelFormat(deviceContextHandle, &pfd);
 	SetPixelFormat(deviceContextHandle, letWindowsChooseThisPixelFormat, &pfd);
 
-	HGLRC ourOpenGLRenderingContext = wglCreateContext(deviceContextHandle);
-	wglMakeCurrent(deviceContextHandle, ourOpenGLRenderingContext);
+	HGLRC renderContext;
+	//HGLRC ourOpenGLRenderingContext = wglCreateContext(deviceContextHandle);
+	//wglMakeCurrent(deviceContextHandle, ourOpenGLRenderingContext);
+
+	renderContext = wglCreateContext(deviceContextHandle);
+
+	wglMakeCurrent(deviceContextHandle, renderContext);
+
+	typedef HGLRC(APIENTRY * PFNWGLCREATECONTEXTATTRIBSARBPROC)(HDC hDC, HGLRC hShareContext, const int *attribList);
+	static PFNWGLCREATECONTEXTATTRIBSARBPROC pfnCreateContextAttribsARB = 0;
+
+	int attriblist[] = { 
+		WGL_CONTEXT_MAJOR_VERSION_ARB, 4, 
+		WGL_CONTEXT_MINOR_VERSION_ARB, 5,
+		WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
+		0, 0 };
+
+	pfnCreateContextAttribsARB = reinterpret_cast<PFNWGLCREATECONTEXTATTRIBSARBPROC>(wglGetProcAddress("wglCreateContextAttribsARB"));
+	auto newRenderContext = pfnCreateContextAttribsARB(deviceContextHandle, 0, attriblist);
+
+	wglMakeCurrent(deviceContextHandle, 0);
+	wglDeleteContext(renderContext);
+
+	if (!wglMakeCurrent(deviceContextHandle, newRenderContext))
+	{
+		std::cout << "ERR" << std::endl;
+	}
 
 	std::cout << "GL context created" << std::endl;
 
