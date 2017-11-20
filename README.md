@@ -8,6 +8,8 @@
 
 -Deferred HDR rendering using half-z tile light culling through OGL compute shader. Supports normal, specular and tone mapping.
 
+-Realistic PBR lighting model
+
 -Frustum culling on GPU compute shader
 
 -Shader hot-loading & preprocessing
