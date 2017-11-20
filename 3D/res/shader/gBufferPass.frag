@@ -72,5 +72,12 @@ void main()
 
     gAlbedoSpec.a = texture(sampler2D(texHandle[6*DrawID+2]), texCoord).r;
 
-    gPBR.rgba = vec4(1.f,1.f,0.f);
+    if (texHandle[6*DrawID+3] != 0)
+    {
+        gPBR.rgba = vec4(texture(sampler2D(texHandle[6*DrawID+3]), texCoord).r, 1.f, 0.f, 1.f);
+    }
+    else
+    {
+        gPBR.rgba = vec4(256.f/256.f,1.f,0.f,1.f);
+    }
 }

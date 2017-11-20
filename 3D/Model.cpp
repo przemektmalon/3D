@@ -100,11 +100,11 @@ void Model::loadMaterialTextures(aiMaterial * material, aiTextureType type, Tria
 	{
 		triList.matMeta.albedo.name.setToChars("null_D");
 		triList.matMeta.normal.name.setToChars("null_N");
-		triList.matMeta.specular.name.setToChars("null_S");
+		triList.matMeta.specularMetallic.name.setToChars("null_S");
 
 		triList.matMeta.albedo.glTex = Engine::assets.get2DTexGL("null_D");
 		triList.matMeta.normal.glTex = Engine::assets.get2DTexGL("null_N");
-		triList.matMeta.specular.glTex = Engine::assets.get2DTexGL("null_S");
+		triList.matMeta.specularMetallic.glTex = Engine::assets.get2DTexGL("null_S");
 	}
 
 	for (u32 i = 0; i < count; ++i)
@@ -163,10 +163,10 @@ void Model::loadMaterialTextures(aiMaterial * material, aiTextureType type, Tria
 		case(aiTextureType_SPECULAR):
 		case(aiTextureType_SHININESS):
 		{
-			triList.matMeta.specular.name.setToChars(toks2.front().c_str());
+			triList.matMeta.specularMetallic.name.setToChars(toks2.front().c_str());
 			std::cout << "Model: \"" << name.getString() << "\" has specular texture: \"" << toks2.front() << "\"" << std::endl;
 
-			triList.matMeta.specular.glTex = Engine::assets.get2DTexGL(triList.matMeta.specular.name);
+			triList.matMeta.specularMetallic.glTex = Engine::assets.get2DTexGL(triList.matMeta.specularMetallic.name);
 
 			//auto texMeta = Engine::assets.textureManager.getTextureMeta(triList.matMeta.specular[i].name);
 			//triList.matMeta.specular[i].glTex = texMeta.texArr;

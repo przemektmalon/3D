@@ -17,7 +17,8 @@
 #include "UIConsole.hpp"
 #include "UIButton.hpp"
 
-#define NUM_POINT_LIGHTS 4
+#define NUM_POINT_LIGHTS 3
+#define NUM_SPOT_LIGHTS 2
 
 void MasterRenderer::render()
 {
@@ -56,61 +57,88 @@ void MasterRenderer::render()
 	lightManager.updateAllPointLights();
 	lightManager.updateAllSpotLights();
 
-	const GPUModelManager& modelManager = Engine::assets.modelManager;
-
 	glFinish();
 	gpuBufferTime = Engine::qpc.now() - beginRenderTime;
 
 	auto beginGBufferTime = Engine::qpc.now();
 
-	// *********************************************************** G-BUFFER PASS *********************************************************** //
-
-	{
-		glViewport(0, 0, Engine::cfg.render.resolution.x, Engine::cfg.render.resolution.y);
-		fboGBuffer.bind();
-
-		glDepthRangedNV(-1.f, 1.f);
-
-		fboGBuffer.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		glm::ivec4 clearC(-1, -1, -1, -1);
-		glClearBufferiv(GL_COLOR, GL_COLOR_ATTACHMENT2, &clearC.x); // Clear IDs buffer
-
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-		glDisable(GL_BLEND);
-		glCullFace(GL_BACK);
-
-		gBufferShader.use();
-
-		gBufferShader.setView(activeCam->view);
-		gBufferShader.setCamPos(activeCam->pos);
-
-		gBufferShader.sendView();
-		gBufferShader.sendCamPos();
-
-		gBufferShader.sendUniforms();
-
-		glBindVertexArray(modelManager.regularBatch.vaoID);
-
-		world->texHandleBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 3);
-		world->instanceTransformsBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 4);
-		world->drawIndirectBuffer[Regular].bind(GL_DRAW_INDIRECT_BUFFER);
-
-		glMultiDrawArraysIndirect(GL_TRIANGLES, 0, world->modelInstances.size(), 0);
-		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
-	}
-
+		gBufferPass();
 	
-
-	// *********************************************************** G-BUFFER PASS *********************************************************** //
-
 	glFinish();
 	gBufferTime = Engine::qpc.now() - beginGBufferTime;
 	auto beginShadowTime = Engine::qpc.now();
-	
-	// *********************************************************** SHADOW PASS *********************************************************** //
 
+		shadowPass();
+
+	glFinish();
+	shadowTime = Engine::qpc.now() - beginShadowTime;
+	auto beginSSAOTime = Engine::qpc.now();
+
+		ssaoPass();
+
+	glFinish();
+	ssaoTime = Engine::qpc.now() - beginSSAOTime;
+	auto beginLightPassTime = Engine::qpc.now();
+
+		shadingPass();
+
+	glFinish();
+	lightPassTime = Engine::qpc.now() - beginLightPassTime;
+	auto beginScreenPassTime = Engine::qpc.now();
+
+		screenPass();
+
+	lightManager.drawLightIcons();
+
+	Engine::uiwm.drawUIWindows(); //UI Window Manager
+
+	Engine::console.draw();
+
+	window->swapBuffers();
+
+	glFinish();
+	screenTime = Engine::qpc.now() - beginScreenPassTime;
+}
+
+void MasterRenderer::gBufferPass()
+{
+	glViewport(0, 0, Engine::cfg.render.resolution.x, Engine::cfg.render.resolution.y);
+	fboGBuffer.bind();
+
+	glDepthRangedNV(-1.f, 1.f);
+
+	fboGBuffer.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glm::ivec4 clearC(-1, -1, -1, -1);
+	glClearBufferiv(GL_COLOR, GL_COLOR_ATTACHMENT2, &clearC.x); // Clear IDs buffer
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	glDisable(GL_BLEND);
+	glCullFace(GL_BACK);
+
+	gBufferShader.use();
+
+	gBufferShader.setView(activeCam->view);
+	gBufferShader.setCamPos(activeCam->pos);
+
+	gBufferShader.sendView();
+	gBufferShader.sendCamPos();
+
+	gBufferShader.sendUniforms();
+
+	glBindVertexArray(Engine::assets.modelManager.regularBatch.vaoID);
+
+	world->texHandleBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 3);
+	world->instanceTransformsBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 4);
+	world->drawIndirectBuffer[Regular].bind(GL_DRAW_INDIRECT_BUFFER);
+
+	glMultiDrawArraysIndirect(GL_TRIANGLES, 0, world->modelInstances.size(), 0);
+	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
+}
+
+void MasterRenderer::shadowPass()
+{
 	pointShadowPassShader.use();
 
 	glDepthRange(0.f, 1.f);
@@ -138,7 +166,7 @@ void MasterRenderer::render()
 		pointShadowPassShader.setLightPos(itr->gpuData->position);
 		pointShadowPassShader.sendUniforms();
 
-		glBindVertexArray(modelManager.shadowVAO);
+		glBindVertexArray(Engine::assets.modelManager.shadowVAO);
 		world->drawIndirectBuffer[Regular].bind(GL_DRAW_INDIRECT_BUFFER);
 		world->instanceTransformsBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 1);
 
@@ -166,7 +194,7 @@ void MasterRenderer::render()
 		spotShadowPassShader.setView(itr->view);
 		spotShadowPassShader.sendUniforms();
 
-		glBindVertexArray(modelManager.shadowVAO);
+		glBindVertexArray(Engine::assets.modelManager.shadowVAO);
 		world->drawIndirectBuffer[Regular].bind(GL_DRAW_INDIRECT_BUFFER);
 		world->instanceTransformsBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 1);
 
@@ -175,40 +203,29 @@ void MasterRenderer::render()
 
 		glBindVertexArray(0);
 	}
+}
 
-	// *********************************************************** SHADOW PASS *********************************************************** //
+void MasterRenderer::ssaoPass()
+{
+	Engine::cfg.render.frameScale = 1.f;
+	glViewport(0, 0, Engine::cfg.render.resolution.x * Engine::cfg.render.frameScale, Engine::cfg.render.resolution.y * Engine::cfg.render.frameScale);
 
-	glFinish();
-	shadowTime = Engine::qpc.now() - beginShadowTime;
-	auto beginSSAOTime = Engine::qpc.now();
+	fboSSAO.bind();
+	fboSSAO.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//fboDefault.bind();
+	//fboDefault.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// *********************************************************** SSAO PASS *********************************************************** //
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+	glCullFace(GL_FRONT);
 
-	{
-		Engine::cfg.render.frameScale = 1.f;
-		glViewport(0, 0, Engine::cfg.render.resolution.x * Engine::cfg.render.frameScale, Engine::cfg.render.resolution.y * Engine::cfg.render.frameScale);
+	ssaoShader.use();
+	ssaoShader.sendUniforms();
 
-		fboSSAO.bind();
-		fboSSAO.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		//fboDefault.bind();
-		//fboDefault.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_CULL_FACE);
-		glCullFace(GL_FRONT);
-
-		ssaoShader.use();
-		ssaoShader.sendUniforms();
-
-		glBindVertexArray(vaoQuad);
-		fboGBuffer.textureAttachments[3].bind(0);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		glDisable(GL_BLEND);
-	}
-
-	// *********************************************************** SSAO PASS *********************************************************** //
-
-	// *********************************************************** SSAO-BLUR PASS *********************************************************** //
+	glBindVertexArray(vaoQuad);
+	fboGBuffer.textureAttachments[3].bind(0);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glDisable(GL_BLEND);
 
 	fboSSAOBlur.bind();
 	fboSSAOBlur.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -237,14 +254,10 @@ void MasterRenderer::render()
 	fboSSAOBlur.bindRead();
 	glBlitFramebuffer(0, 0, Engine::cfg.render.resolution.x * Engine::cfg.render.frameScale, Engine::cfg.render.resolution.y * Engine::cfg.render.frameScale, 0, 0, Engine::cfg.render.resolution.x * Engine::cfg.render.frameScale, Engine::cfg.render.resolution.y * Engine::cfg.render.frameScale, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
-	// *********************************************************** SSAO-BLUR PASS *********************************************************** //
-	
-	glFinish();
-	ssaoTime = Engine::qpc.now() - beginSSAOTime;
-	auto beginLightPassTime = Engine::qpc.now();
-	
-	// *********************************************************** LIGHT PASS *********************************************************** //
+}
 
+void MasterRenderer::shadingPass()
+{
 	tileCullShader.use();
 	glBindTextureUnit(2, lightPassTex.getGLID());
 	glBindImageTexture(2, lightPassTex.getGLID(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
@@ -254,6 +267,7 @@ void MasterRenderer::render()
 
 	fboGBuffer.textureAttachments[0].bindImage(3, GL_READ_ONLY);
 	fboGBuffer.textureAttachments[1].bindImage(4, GL_READ_ONLY);
+	fboGBuffer.textureAttachments[2].bindImage(7, GL_READ_ONLY);
 	fboGBuffer.textureAttachments[3].bind(5);
 	fboSSAO.textureAttachments[0].bindImage(6, GL_READ_ONLY);
 	glActiveTexture(GL_TEXTURE15);
@@ -281,15 +295,10 @@ void MasterRenderer::render()
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 	lightManager.pointLightsBuffer.unbind();
 	lightManager.spotLightsBuffer.unbind();
+}
 
-	// *********************************************************** LIGHT PASS *********************************************************** //
-
-	glFinish();
-	lightPassTime = Engine::qpc.now() - beginLightPassTime;
-	auto beginScreenPassTime = Engine::qpc.now();
-
-	// *********************************************************** SCREEN PASS *********************************************************** //
-
+void MasterRenderer::screenPass()
+{
 	fboDefault.bind();
 	fboDefault.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glDisable(GL_DEPTH_TEST);
@@ -320,7 +329,7 @@ void MasterRenderer::render()
 		wireShader->setUniform("wireColour", &col4);
 		wireShader->sendUniforms();
 
-		glBindVertexArray(modelManager.shadowVAO);
+		glBindVertexArray(Engine::assets.modelManager.shadowVAO);
 		world->drawIndirectBuffer[Regular].bind(GL_DRAW_INDIRECT_BUFFER);
 		world->instanceTransformsBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 1);
 
@@ -329,19 +338,6 @@ void MasterRenderer::render()
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
-
-	lightManager.drawLightIcons();
-
-	// *********************************************************** SCREEN PASS *********************************************************** //
-
-	Engine::uiwm.drawUIWindows(); //UI Window Manager
-
-	Engine::console.draw();
-
-	window->swapBuffers();
-
-	glFinish();
-	screenTime = Engine::qpc.now() - beginScreenPassTime;
 }
 
 void MasterRenderer::initialiseRenderer(Window * pwin, Camera & cam)
@@ -420,9 +416,6 @@ inline void MasterRenderer::initialiseSkybox()
 		{ "res/skybox/sky/back.png" }
 	};
 
-	
-	//sk.createFromFiles(&paths[0]);
-
 	faces.push_back(skyboxPath + "right.png");
 	faces.push_back(skyboxPath + "left.png");
 	faces.push_back(skyboxPath + "top.png");
@@ -430,7 +423,6 @@ inline void MasterRenderer::initialiseSkybox()
 	faces.push_back(skyboxPath + "front.png");
 	faces.push_back(skyboxPath + "back.png");
 
-	//glActiveTexture(GL_TEXTURE5);
 	glGenTextures(1, &skyboxTex);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
 	for (GLuint i = 0; i < 6; i++)
@@ -468,6 +460,7 @@ inline void MasterRenderer::initialiseLights()
 			col = glm::fvec3(1.f, 1.f, 1.f);
 			break;
 		}
+		col = glm::fvec3(1.f, 1.f, 1.f);
 		add.setColour(col * 5.5f);
 		add.setLinear(0.00001f);
 		add.setQuadratic(0.005f);
@@ -482,17 +475,17 @@ inline void MasterRenderer::initialiseLights()
 
 	lightManager.updateAllPointLights();
 
-	const int nr2 = 0;
+	const int nr2 = NUM_SPOT_LIGHTS;
 	for (int i = 0; i < nr2; ++i)
 	{
 		auto& add = lightManager.addSpotLight();
 
 		add.setDirection(glm::fvec3(0.f, 0.f, 1.f));
-		add.setColour(glm::fvec3(1.f, 1.f, 1.f));
+		add.setColour(glm::fvec3(2.f, 2.f, 2.f));
 		add.setInnerSpread(glm::radians(10.f));
 		add.setOuterSpread(glm::radians(30.f));
-		add.setLinear(0.0001);
-		add.setQuadratic(0.002);
+		add.setLinear(0.00001);
+		add.setQuadratic(0.005);
 		add.setPosition(glm::fvec3(-100.f + 50.f * i, 10.f, 0.f));
 		add.updateRadius();
 		add.gpuData->fadeLength = 15;
@@ -605,7 +598,7 @@ void MasterRenderer::initialiseShaders()
 	shaderStore.loadShader(&frustCullShader);
 	shaderStore.loadShader(&ssaoShader);
 	shaderStore.loadShader(&gBufferShaderMultiTex);
-	shaderStore.loadShader(&prepMultiTexShader);
+	//shaderStore.loadShader(&prepMultiTexShader);
 	shaderStore.loadShader(&spotShadowPassShader);
 	shaderStore.loadShader(&pointShadowPassShader);
 	shaderStore.loadShader(&shape2DShader);
@@ -613,7 +606,7 @@ void MasterRenderer::initialiseShaders()
 	shaderStore.loadShader(&shape3DShader);
 	shaderStore.loadShader(&textShader);
 
-	shaderStore.loadShader(ShaderProgram::Compute, String32("ssaogenmips"));
+	//shaderStore.loadShader(ShaderProgram::Compute, String32("ssaogenmips"));
 	shaderStore.loadShader(ShaderProgram::VertFrag, String32("wireframe"));
 	shaderStore.loadShader(ShaderProgram::VertFrag, String32("Standard"));
 	shaderStore.loadShader(ShaderProgram::VertFrag, String32("test"));

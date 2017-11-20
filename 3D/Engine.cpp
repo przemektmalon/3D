@@ -317,7 +317,7 @@ void Engine::mainLoop(int resolutionIndex)
 
 	auto i8 = world->addModelInstance("ground", worldRoot);
 	i8->sgNode->transform.scale(5.f);
-	auto col = new btStaticPlaneShape(glm::fvec3(0.f, 1.f, 0.f), 0.f);
+	auto col = new btStaticPlaneShape(glm::fvec3(0.f, 0.f, 1.f), 0.f);
 	i8->makePhysicsObject(s, 0.f);
 
 	auto i7 = world->addModelInstance("colbox", worldRoot);
@@ -335,7 +335,7 @@ void Engine::mainLoop(int resolutionIndex)
 	auto col2 = new btSphereShape(5);
 	boxcol = new btBoxShape(glm::fvec3(5, 5, 5));
 
-	for (int i = 0; i < 5; ++i)
+	for (int i = 0; i < 100; ++i)
 	{
 		auto i2 = world->addModelInstance("colbox", worldRoot);
 		i2->sgNode->transform.scale(5.f);

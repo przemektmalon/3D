@@ -191,7 +191,12 @@ public:
 
 				texHandle[(6 * i)] = itr2->matMeta.albedo.glTex->getHandle(Engine::r->defaultSampler.getGLID());
 				texHandle[(6 * i) + 1] = itr2->matMeta.normal.glTex->getHandle(Engine::r->defaultSampler.getGLID());
-				texHandle[(6 * i) + 2] = itr2->matMeta.specular.glTex->getHandle(Engine::r->defaultSampler.getGLID());
+				texHandle[(6 * i) + 2] = itr2->matMeta.specularMetallic.glTex->getHandle(Engine::r->defaultSampler.getGLID());
+
+				if (itr2->matMeta.roughness.name.getLength() != 0)
+					texHandle[(6 * i) + 3] = itr2->matMeta.roughness.glTex->getHandle(Engine::r->defaultSampler.getGLID());
+				else
+					texHandle[(6 * i) + 3] = 0;
 
 				instanceTransformsRegular[i] = itr->second.sgNode->transform.getTransformMat();
 

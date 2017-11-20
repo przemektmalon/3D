@@ -112,7 +112,7 @@ void AssetManager::AssetLoader::loadAssets(String128 & assetListFilePath)
 			{
 				std::string line;
 				std::getline(file, line);
-				std::string name, path, ext, limit;
+				std::string name, path, ext, limit, albedo, normal, specular, metallic, roughness;
 				std::vector<std::string> paths;
 				std::vector<u32> limits;
 
@@ -135,6 +135,31 @@ void AssetManager::AssetLoader::loadAssets(String128 & assetListFilePath)
 					else if (key == "limit")
 					{
 						limit = value;
+						return true;
+					}
+					else if (key == "albedo")
+					{
+						albedo = value;
+						return true;
+					}
+					else if (key == "normal")
+					{
+						normal = value;
+						return true;
+					}
+					else if (key == "specular")
+					{
+						specular = value;
+						return true;
+					}
+					else if (key == "metallic")
+					{
+						metallic = value;
+						return true;
+					}
+					else if (key == "roughness")
+					{
+						roughness = value;
 						return true;
 					}
 					return false;
@@ -171,6 +196,31 @@ void AssetManager::AssetLoader::loadAssets(String128 & assetListFilePath)
 					model->lodPaths = paths;
 					model->lodLimits = limits;
 					model->load();
+					for (auto itr = model->triLists.begin(); itr != model->triLists.end(); ++itr)
+					{
+						for (auto it = itr->begin(); it != itr->end(); ++it)
+						{
+							it->matMeta.albedo.name.setToChars(albedo.c_str());
+							it->matMeta.normal.name.setToChars(normal.c_str());
+							if (specular.length() != 0)
+								it->matMeta.specularMetallic.name.setToChars(specular.c_str());
+							else
+								it->matMeta.specularMetallic.name.setToChars(metallic.c_str());
+
+							it->matMeta.roughness.name.setToChars(roughness.c_str());
+
+							it->matMeta.albedo.glTex = Engine::assets.get2DTexGL(it->matMeta.albedo.name);
+							it->matMeta.normal.glTex = Engine::assets.get2DTexGL(it->matMeta.normal.name);
+							it->matMeta.specularMetallic.glTex = Engine::assets.get2DTexGL(it->matMeta.specularMetallic.name);
+
+							if (roughness.length() != 0)
+							{
+								it->matMeta.roughness.glTex = Engine::assets.get2DTexGL(it->matMeta.roughness.name);
+							}
+
+							/// TODO: AO texture
+						}
+					}
 					Engine::assets.modelManager.pushModelToBatch(*model);
 				}
 				else

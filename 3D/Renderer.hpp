@@ -87,6 +87,12 @@ public:
 
 	void render();
 
+	void gBufferPass();
+	void shadowPass();
+	void ssaoPass();
+	void shadingPass();
+	void screenPass();
+
 	void bakeStaticLights();
 
 	u32 drawCount[DrawModesCount];
