@@ -44,6 +44,8 @@
 
 # Planned features
 
+-Heightmap tesselation
+
 -Depth of field
 
 -Emissive and parallax mapping
