@@ -35,7 +35,7 @@ struct TextureMeta {
 
 struct MaterialMeta {
 	bool splatted;
-	TextureMeta albedo, normal, specular;
+	TextureMeta albedo, normal, specularMetallic, roughness, ao, height;
 };
 
 class MeshBatch;

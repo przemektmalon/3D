@@ -168,9 +168,9 @@ public:
 		glBindTextureUnit(pTextureUnit, GLID);
 	}
 
-	void bindImage(GLint pImageUnit, GLenum pAccess)
+	void bindImage(GLint pImageUnit, GLenum pAccess, int pMipLevel = 0)
 	{
-		glBindImageTexture(pImageUnit, GLID, 0, GL_FALSE, 0, pAccess, sizedFormat);
+		glBindImageTexture(pImageUnit, GLID, pMipLevel, GL_FALSE, 0, pAccess, sizedFormat);
 	}
 
 	void assignTexture(Texture2D* pTexture)
@@ -205,7 +205,7 @@ public:
 		//glGenerateMipmap(GL_TEXTURE_2D);
 	}
 
-	void createFromStream(GLint pSizedFormat, s32 pWidth, s32 pHeight, GLint pFormat, GLenum pType, const void* pPixels, GLint pTextureUnit = 0, GLint pPixelAlignment = 4)
+	void createFromStream(GLint pSizedFormat, s32 pWidth, s32 pHeight, GLint pFormat, GLenum pType, const void* pPixels, GLint pTextureUnit = 0, GLint pPixelAlignment = 4, int pMipLevels = -1)
 	{
 		streamImageData = new ImageData();
 		sizedFormat = pSizedFormat;
@@ -224,21 +224,29 @@ public:
 		glCreateTextures(GL_TEXTURE_2D, 1, &GLID);
 		glBindTexture(GL_TEXTURE_2D, GLID);
 
-		mipLevels = glm::floor(std::log2(glm::max(width, height))) + 1;
-		//mipLevels = 0;
-		
-		//if (mFormat == ImageData::ALPHA || mFormat == ImageData::DEPTH)
-		//	mipLevels = 0;
+		auto err = glGetError();
+
+		int maxMipLevels = glm::floor(std::log2(glm::max(width, height))) + 1;
+
+		if (pMipLevels == -1 || pMipLevels > maxMipLevels)
+			mipLevels = maxMipLevels;
+		else
+			mipLevels = pMipLevels;
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, mipLevels);
 		glTexStorage2D(GL_TEXTURE_2D, mipLevels, pSizedFormat, width, height);
 		//glTexImage2D(GL_TEXTURE_2D, 0, sizedFormat, width, height, 0, format, type, 0);
+
+		err = glGetError();
+
 		if (streamImageData->getData())
 		{
 			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, sizedToBaseFormat(sizedFormat), type, streamImageData->getData());
 		}
 		glGenerateMipmap(GL_TEXTURE_2D);
+
+		err = glGetError();
 	}
 
 	s32 getWidth() { return width; }

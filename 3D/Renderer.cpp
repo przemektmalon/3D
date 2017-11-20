@@ -108,7 +108,7 @@ void MasterRenderer::render()
 	glFinish();
 	gBufferTime = Engine::qpc.now() - beginGBufferTime;
 	auto beginShadowTime = Engine::qpc.now();
-
+	
 	// *********************************************************** SHADOW PASS *********************************************************** //
 
 	pointShadowPassShader.use();
@@ -201,7 +201,7 @@ void MasterRenderer::render()
 		ssaoShader.sendUniforms();
 
 		glBindVertexArray(vaoQuad);
-		fboGBuffer.textureAttachments[2].bind(0);
+		fboGBuffer.textureAttachments[3].bind(0);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glDisable(GL_BLEND);
 	}
@@ -238,11 +238,11 @@ void MasterRenderer::render()
 	glBlitFramebuffer(0, 0, Engine::cfg.render.resolution.x * Engine::cfg.render.frameScale, Engine::cfg.render.resolution.y * Engine::cfg.render.frameScale, 0, 0, Engine::cfg.render.resolution.x * Engine::cfg.render.frameScale, Engine::cfg.render.resolution.y * Engine::cfg.render.frameScale, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
 	// *********************************************************** SSAO-BLUR PASS *********************************************************** //
-
+	
 	glFinish();
 	ssaoTime = Engine::qpc.now() - beginSSAOTime;
 	auto beginLightPassTime = Engine::qpc.now();
-
+	
 	// *********************************************************** LIGHT PASS *********************************************************** //
 
 	tileCullShader.use();
@@ -254,7 +254,7 @@ void MasterRenderer::render()
 
 	fboGBuffer.textureAttachments[0].bindImage(3, GL_READ_ONLY);
 	fboGBuffer.textureAttachments[1].bindImage(4, GL_READ_ONLY);
-	fboGBuffer.textureAttachments[2].bind(5);
+	fboGBuffer.textureAttachments[3].bind(5);
 	fboSSAO.textureAttachments[0].bindImage(6, GL_READ_ONLY);
 	glActiveTexture(GL_TEXTURE15);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
@@ -371,9 +371,11 @@ void MasterRenderer::initialiseRenderer(Window * pwin, Camera & cam)
 inline void MasterRenderer::initialiseGBuffer()
 {
 	fboGBuffer.setResolution(Engine::cfg.render.resolution);
-	fboGBuffer.attachTexture(GL_RG16F, GL_RG, GL_HALF_FLOAT, GL_COLOR_ATTACHMENT0);//NORMAL
-	fboGBuffer.attachTexture(GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT1);//ALBEDO_SPEC
-	fboGBuffer.attachTexture(GL_DEPTH_COMPONENT32F_NV, GL_DEPTH_COMPONENT, GL_FLOAT, GL_DEPTH_ATTACHMENT);//DEPTH
+	fboGBuffer.attachTexture(GL_RG16F, GL_RG, GL_HALF_FLOAT, GL_COLOR_ATTACHMENT0);							// NORMAL
+	fboGBuffer.attachTexture(GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT1);					// ALBEDO_SPEC
+	fboGBuffer.attachTexture(GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT2);					// PBR
+	fboGBuffer.attachTexture(GL_DEPTH_COMPONENT32F_NV, GL_DEPTH_COMPONENT, GL_FLOAT, GL_DEPTH_ATTACHMENT);	// DEPTH
+	
 
 	fboGBuffer.checkStatus();
 
@@ -611,6 +613,7 @@ void MasterRenderer::initialiseShaders()
 	shaderStore.loadShader(&shape3DShader);
 	shaderStore.loadShader(&textShader);
 
+	shaderStore.loadShader(ShaderProgram::Compute, String32("ssaogenmips"));
 	shaderStore.loadShader(ShaderProgram::VertFrag, String32("wireframe"));
 	shaderStore.loadShader(ShaderProgram::VertFrag, String32("Standard"));
 	shaderStore.loadShader(ShaderProgram::VertFrag, String32("test"));

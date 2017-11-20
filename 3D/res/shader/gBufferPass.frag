@@ -5,7 +5,7 @@
 
 layout (location = 0) out f16vec2 gNormal;
 layout (location = 1) out vec4 gAlbedoSpec;
-layout (location = 2) out uint gID;
+layout (location = 2) out vec4 gPBR;
 
 in vec2 TexCoord;
 in vec3 Normal;
@@ -49,7 +49,7 @@ mat3 cotangent_frame( vec3 N, vec3 p, vec2 uv )
 
 vec3 perturb_normal( vec3 N, vec3 V, vec2 texcoord)
 {
-    vec3 map = texture2D(sampler2D(texHandle[3*DrawID+1]), texcoord).xyz * 2.f - 1.f;
+    vec3 map = texture2D(sampler2D(texHandle[6*DrawID+1]), texcoord).xyz * 2.f - 1.f;
     mat3 TBN = cotangent_frame( N, -V, texcoord );
     return normalize( TBN * map );
 }
@@ -68,9 +68,9 @@ void main()
 
     gNormal = encode(normalize(mappedNormal));
 
-    gAlbedoSpec.rgb = texture(sampler2D(texHandle[3*DrawID]), TexCoord).rgb;
+    gAlbedoSpec.rgb = texture(sampler2D(texHandle[6*DrawID]), TexCoord).rgb;
 
-    gAlbedoSpec.a = texture(sampler2D(texHandle[3*DrawID+2]), texCoord).r;
+    gAlbedoSpec.a = texture(sampler2D(texHandle[6*DrawID+2]), texCoord).r;
 
-    gID = DrawID;
+    gPBR.rgba = vec4(1.f,1.f,0.f);
 }

@@ -48,12 +48,10 @@ layout(local_size_x=16, local_size_y=16, local_size_z=1) in;
 #define MAX_LIGHTS_PER_TILE 128
 
 layout(binding=2, rgba32f) uniform writeonly image2D outColour;
-
 layout(binding=3, rg16f) uniform readonly image2D gNormal;
+
 layout(binding=4, rgba8) uniform readonly image2D gAlbedoSpec;
 layout(binding=5) uniform sampler2D gDepth;
-layout(binding=6, rgba8) uniform readonly image2D gPBR;
-
 layout(binding=15) uniform samplerCube skybox;
 layout(binding=6, rgba8) uniform readonly image2D ssao;
 

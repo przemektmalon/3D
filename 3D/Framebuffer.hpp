@@ -118,6 +118,7 @@ public:
 		{
 			//itr->release();
 		}
+		textureAttachments.clear();
 	}
 
 	GLuint checkStatus()

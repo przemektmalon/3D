@@ -93,18 +93,18 @@ public:
 		auto maxRegular = objectScopes.maxRegular;
 		auto maxMultiTextured = objectScopes.maxMultiTextured;
 
-		texHandleBuffer[Regular].bufferData(maxRegular * sizeof(u64) * 3, 0, GL_STATIC_READ);
+		texHandleBuffer[Regular].bufferData(maxRegular * sizeof(u64) * 6, 0, GL_STATIC_READ);
 		drawIndirectBuffer[Regular].bufferData(maxRegular * sizeof(GLCMD), 0, GL_STREAM_DRAW);
 		instanceTransformsBuffer[Regular].bufferData(maxRegular * sizeof(float) * 16, 0, GL_STATIC_READ);
 
-		texHandleBuffer[MultiTextured].bufferData(maxMultiTextured * sizeof(u64) * 13 , 0, GL_STATIC_READ);
-		drawIndirectBuffer[MultiTextured].bufferData(maxMultiTextured * sizeof(GLCMD), 0, GL_STREAM_DRAW);
-		instanceTransformsBuffer[MultiTextured].bufferData(maxMultiTextured * sizeof(float) * 16, 0, GL_STATIC_READ);
+		//texHandleBuffer[MultiTextured].bufferData(maxMultiTextured * sizeof(u64) * 13 , 0, GL_STATIC_READ);
+		//drawIndirectBuffer[MultiTextured].bufferData(maxMultiTextured * sizeof(GLCMD), 0, GL_STREAM_DRAW);
+		//instanceTransformsBuffer[MultiTextured].bufferData(maxMultiTextured * sizeof(float) * 16, 0, GL_STATIC_READ);
 
 		drawIndirectBuffer[Shadow].bufferData((maxRegular + maxMultiTextured) * sizeof(GLCMD), 0, GL_STATIC_READ);
 		instanceTransformsBuffer[Shadow].bufferData((maxRegular + maxMultiTextured) * sizeof(u32), 0, GL_STATIC_READ);
 
-		instanceIDBuffer.bufferData(objectScopes.getTotalMaxObjects() * sizeof(u32), 0, GL_DYNAMIC_READ);
+		//instanceIDBuffer.bufferData(objectScopes.getTotalMaxObjects() * sizeof(u32), 0, GL_DYNAMIC_READ);
 	}
 
 	/// TODO: updateInstanceRange, updateInstanceList
@@ -156,7 +156,7 @@ public:
 	{
 		GLCMD* indirectReg = (GLCMD*)drawIndirectBuffer[Regular].mapRange(0, numTriLists[Regular] * sizeof(GLCMD), GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_WRITE_BIT);
 		glm::fmat4* instanceTransformsRegular = (glm::fmat4*)instanceTransformsBuffer[Regular].mapRange(0, numTriLists[Regular] * sizeof(float) * 16, GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_WRITE_BIT);
-		auto texHandle = (u64*)texHandleBuffer[Regular].mapRange(0, numTriLists[Regular] * sizeof(u64) * 3, GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_WRITE_BIT);
+		auto texHandle = (u64*)texHandleBuffer[Regular].mapRange(0, numTriLists[Regular] * sizeof(u64) * 6, GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_WRITE_BIT);
 		u32 i = 0;
 
 		const GPUModelManager& mm = Engine::assets.modelManager;
@@ -189,9 +189,9 @@ public:
 				indirectReg[i].first = bptr->firsts[bindex];
 				indirectReg[i].baseInstance = 0;
 
-				texHandle[(3 * i)] = itr2->matMeta.albedo.glTex->getHandle(Engine::r->defaultSampler.getGLID());
-				texHandle[(3 * i) + 1] = itr2->matMeta.normal.glTex->getHandle(Engine::r->defaultSampler.getGLID());
-				texHandle[(3 * i) + 2] = itr2->matMeta.specular.glTex->getHandle(Engine::r->defaultSampler.getGLID());
+				texHandle[(6 * i)] = itr2->matMeta.albedo.glTex->getHandle(Engine::r->defaultSampler.getGLID());
+				texHandle[(6 * i) + 1] = itr2->matMeta.normal.glTex->getHandle(Engine::r->defaultSampler.getGLID());
+				texHandle[(6 * i) + 2] = itr2->matMeta.specular.glTex->getHandle(Engine::r->defaultSampler.getGLID());
 
 				instanceTransformsRegular[i] = itr->second.sgNode->transform.getTransformMat();
 

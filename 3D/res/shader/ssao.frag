@@ -8,15 +8,6 @@ in vec2 TexCoord;
 //#define NUM_SAMPLES (50)
 uniform int samples = 50;
 
-// If using depth mip levels, the log of the maximum pixel offset before we need to switch to a lower 
-// miplevel to maintain reasonable spatial locality in the cache
-// If this number is too small (< 3), too many taps will land in the same pixel, and we'll get bad variance that manifests as flashing.
-// If it is too high (> 5), we'll get bad performance because we're not using the MIP levels effectively
-#define LOG_MAX_OFFSET (3)
-
-// This must be less than or equal to the MAX_MIP_LEVEL defined in SSAO.cpp
-#define MAX_MIP_LEVEL (5)
-
 /** Used for preventing AO computation on the sky (at infinite depth) and defining the CS Z to bilateral depth key scaling. 
     This need not match the real far plane*/
 #define FAR 1000000.f // projection matrix's far plane
@@ -33,7 +24,7 @@ uniform int spiralTurns;
     You can compute it from your projection matrix.  The actual value is just
     a scale factor on radius; you can simply hardcode this to a constant (~500)
     and make your radius value unitless (...but resolution dependent.)  */
-uniform float           projScale = 1000.f;
+uniform float           projScale = 500.f;
 
 /** Negative, "linear" values in world-space units */
 uniform sampler2D       depthBuffer;
@@ -144,30 +135,16 @@ vec3 getPosition(ivec2 ssP) {
 
 /** Read the camera-space position of the point at screen-space pixel ssP + unitOffset * ssR.  Assumes length(unitOffset) == 1 */
 vec3 getOffsetPosition(ivec2 ssC, vec2 unitOffset, float ssR) {
-    // Derivation:
-    //  mipLevel = floor(log(ssR / MAX_OFFSET));
-#   ifdef GL_EXT_gpu_shader5
-        int mipLevel = clamp(findMSB(int(ssR)) - LOG_MAX_OFFSET, 0, MAX_MIP_LEVEL);
-#   else
-        int mipLevel = clamp(int(floor(log2(ssR))) - LOG_MAX_OFFSET, 0, MAX_MIP_LEVEL);
-#   endif
 
     ivec2 ssP = ivec2(ssR * unitOffset) + ssC;
     
     vec3 P;
-
-    // We need to divide by 2^mipLevel to read the appropriately scaled coordinate from a MIP-map.  
-    // Manually clamp to the texture size because texelFetch bypasses the texture unit
-    
-    //ivec2 mipP = clamp(ssP >> mipLevel, ivec2(0), textureSize(depthBuffer, mipLevel) - ivec2(1));
-    //P.z = texelFetch(depthBuffer, mipP, mipLevel).r;
 
     ivec2 mipP = clamp(ssP, ivec2(0), textureSize(depthBuffer, 0) - ivec2(1));
     P.z = texelFetch(depthBuffer, mipP, 0).r;
     
 
     float depth = -(exp2(P.z * log2(FAR + 1.0)) - 1.f);
-    //float depth = P.z;
 
     P = reconstructCSPosition(vec2(ssP) + vec2(0.5), depth);
 
