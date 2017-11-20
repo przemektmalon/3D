@@ -1,17 +1,19 @@
 #version 450
 #extension GL_NV_gpu_shader5 : require
 #extension GL_ARB_bindless_texture : require
-//#extension GL_ARB_shader_draw_parameters : require
 
 layout (location = 0) out f16vec2 gNormal;
 layout (location = 1) out vec4 gAlbedoSpec;
 layout (location = 2) out vec4 gPBR;
 
-in vec2 TexCoord;
 in vec3 Normal;
 in vec3 ViewVec;
 in vec3 WorldPos;
 flat in uint DrawID;
+
+uniform vec3 colour;
+uniform float roughness;
+uniform float metallic;
 
 layout(std430, binding=3) buffer TextureHandleBuffer
 {
@@ -64,20 +66,17 @@ void main()
 
 	gl_FragDepth = log2(logz) * FCHalf;
 
-    vec3 mappedNormal = perturb_normal(normalize(Normal), normalize(viewVec), texCoord);
+    vec3 mappedNormal;
+    if ( texHandle[6*DrawID+1] != 0)
+        mappedNormal = perturb_normal(normalize(Normal), normalize(viewVec), texCoord);
+    else
+        mappedNormal = normal;
 
     gNormal = encode(normalize(mappedNormal));
 
-    gAlbedoSpec.rgb = texture(sampler2D(texHandle[6*DrawID]), TexCoord).rgb;
+    gAlbedoSpec.rgb = colour;
 
-    gAlbedoSpec.a = texture(sampler2D(texHandle[6*DrawID+2]), texCoord).r;
+    gAlbedoSpec.a = metallic;
 
-    if (texHandle[6*DrawID+3] != 0)
-    {
-        gPBR.rgba = vec4(texture(sampler2D(texHandle[6*DrawID+3]), texCoord).r, 1.f, 0.f, 1.f);
-    }
-    else
-    {
-        gPBR.rgba = vec4(256.f/256.f,1.f,0.f,1.f);
-    }
+    gPBR.r = roughness;
 }

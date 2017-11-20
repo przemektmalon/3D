@@ -236,9 +236,6 @@
     <ClInclude Include="FrustCullShader.hpp">
       <Filter>Header Files\Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="GBufferShader.hpp">
-      <Filter>Header Files\Shaders</Filter>
-    </ClInclude>
     <ClInclude Include="GBufferShaderMultiTex.hpp">
       <Filter>Header Files\Shaders</Filter>
     </ClInclude>
@@ -393,6 +390,12 @@
       <Filter>Header Files\UI Elements</Filter>
     </ClInclude>
     <ClInclude Include="Shape2DShaderNoTex.hpp">
+      <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="GBufferShaderTex.hpp">
+      <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="GBufferShaderClay.hpp">
       <Filter>Header Files\Shaders</Filter>
     </ClInclude>
   </ItemGroup>

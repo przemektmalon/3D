@@ -21,14 +21,15 @@ inline float PointLight::calculateRadius(float linear, float quad)
 
 void SpotLight::updateRadius()
 {
-	gpuData->radius = (0.5 * (std::sqrtf(gpuData->linear*gpuData->linear + (Engine::cfg.render.minimumLightConstant * gpuData->quadratic) - gpuData->linear))) / (gpuData->quadratic * 2.f);
+	//gpuData->radius = (0.5 * (std::sqrtf(gpuData->linear*gpuData->linear + (Engine::cfg.render.minimumLightConstant * gpuData->quadratic) - gpuData->linear))) / (gpuData->quadratic * 2.f);
+	gpuData->radius = calculateRadius(gpuData->linear, gpuData->quadratic);
 	updateProj();
 	updateProjView();
 }
 
 inline float SpotLight::calculateRadius(float linear, float quad)
 {
-	return (0.5 * (std::sqrtf(linear*linear + (Engine::cfg.render.minimumLightConstant* quad) - linear))) / (quad * 2.f);
+	return (0.5 * (std::sqrtf(linear*linear + (Engine::cfg.render.minimumLightConstant * quad) - linear))) / (quad * 2.f);
 }
 
 PointLight & LightManager::addPointLight(PointLight::GPUData& data)

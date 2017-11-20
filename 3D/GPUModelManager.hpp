@@ -27,7 +27,7 @@ public:
 
 	void init()
 	{
-		auto program = &Engine::r->gBufferShader;
+		auto program = &Engine::r->gBufferShaderTex;
 
 		program->use();
 

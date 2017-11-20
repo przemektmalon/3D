@@ -265,7 +265,8 @@
     <ClInclude Include="Font.hpp" />
     <ClInclude Include="Framebuffer.hpp" />
     <ClInclude Include="FrustCullShader.hpp" />
-    <ClInclude Include="GBufferShader.hpp" />
+    <ClInclude Include="GBufferShaderClay.hpp" />
+    <ClInclude Include="GBufferShaderTex.hpp" />
     <ClInclude Include="GBufferShaderBase.hpp" />
     <ClInclude Include="GBufferShaderMultiTex.hpp" />
     <ClInclude Include="GBufferShaderNonBindlessRegular.hpp" />

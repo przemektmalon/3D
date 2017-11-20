@@ -23,8 +23,6 @@ flat out uint DrawID;
 
 out float logz;
 
-#define FAR 1000000.f
-
 void main()
 {
 	mat4 transform = transforms[gl_DrawIDARB];

@@ -354,7 +354,7 @@ void main()
 
 		bool inFrustum = sphereVsAABB(lightPos.xyz, rad, AABBFarCenter, AABBFarHalfSize) || sphereVsAABB(lightPos.xyz, rad, AABBNearCenter, AABBNearHalfSize);
 
-		if (inFrustum)
+		//if (inFrustum)
 		{
 			uint nextTileLightIndex = atomicAdd(currentTileSpotLightIndex,1);
 			tileSpotLightIndices[nextTileLightIndex] = lightIndex;
@@ -520,6 +520,8 @@ void main()
 
 			float shadow = 0.f;
 
+			uvec2 handle = uvec2(floatBitsToUint(linQuadTex.z),floatBitsToUint(linQuadTex.w));
+
 			if (camToLight < (float)fadeStart + (float)fadeLength)
 			{
 				vec2 texelSize = vec2(1.0 / 512.f);
@@ -527,8 +529,6 @@ void main()
 				{
 				    for(int y = -pres; y <= pres; ++y)
 				    {
-				    	uvec2 handle = uvec2(floatBitsToUint(linQuadTex.z),floatBitsToUint(linQuadTex.w));
-
 						float pcfDepth = texture(sampler2D(handle), projCoords.xy + vec2(x, y) * texelSize).r; 
 				        shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
 				    }

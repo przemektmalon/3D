@@ -17,8 +17,8 @@
 #include "UIConsole.hpp"
 #include "UIButton.hpp"
 
-#define NUM_POINT_LIGHTS 3
-#define NUM_SPOT_LIGHTS 2
+#define NUM_POINT_LIGHTS 1
+#define NUM_SPOT_LIGHTS 0
 
 void MasterRenderer::render()
 {
@@ -31,6 +31,7 @@ void MasterRenderer::render()
 		lightManager.spotLightsGPUData[i].position = glm::fvec3(std::cos(Engine::programTime*0.2*(i + 1) + (i*PI*0.5))*50.f, 50.f, std::sin(Engine::programTime*0.2*(i + 1) + (i*PI*0.5))*50.f);
 		lightManager.spotLightsGPUData[i].direction = -glm::normalize(lightManager.spotLightsGPUData[i].position + glm::fvec3(0.f,20.f,0.f));
 
+		lightManager.spotLights[i].updateRadius();
 		lightManager.spotLights[i].updateProj();
 		lightManager.spotLights[i].updateView();
 		lightManager.spotLights[i].updateProjView();
@@ -117,15 +118,15 @@ void MasterRenderer::gBufferPass()
 	glDisable(GL_BLEND);
 	glCullFace(GL_BACK);
 
-	gBufferShader.use();
+	gBufferShaderTex.use();
 
-	gBufferShader.setView(activeCam->view);
-	gBufferShader.setCamPos(activeCam->pos);
+	gBufferShaderTex.setView(activeCam->view);
+	gBufferShaderTex.setCamPos(activeCam->pos);
 
-	gBufferShader.sendView();
-	gBufferShader.sendCamPos();
+	gBufferShaderTex.sendView();
+	gBufferShaderTex.sendCamPos();
 
-	gBufferShader.sendUniforms();
+	gBufferShaderTex.sendUniforms();
 
 	glBindVertexArray(Engine::assets.modelManager.regularBatch.vaoID);
 
@@ -593,7 +594,7 @@ inline void MasterRenderer::initialiseSamplers()
 void MasterRenderer::initialiseShaders()
 {
 	shaderStore.loadShader(&tileCullShader);
-	shaderStore.loadShader(&gBufferShader);
+	shaderStore.loadShader(&gBufferShaderTex);
 	shaderStore.loadShader(&bilatBlurShader);
 	shaderStore.loadShader(&frustCullShader);
 	shaderStore.loadShader(&ssaoShader);
@@ -671,7 +672,7 @@ void MasterRenderer::setActiveCam(Camera & pCam)
 
 void MasterRenderer::cameraProjUpdated()
 {
-	gBufferShader.setProj(activeCam->proj);
+	gBufferShaderTex.setProj(activeCam->proj);
 	gBufferShaderMultiTex.setProj(activeCam->proj);
 	ssaoShader.setProj(activeCam->proj);
 	ssaoShader.setViewport(glm::ivec2(viewport.width, viewport.height));

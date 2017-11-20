@@ -320,25 +320,24 @@ void Engine::mainLoop(int resolutionIndex)
 	auto col = new btStaticPlaneShape(glm::fvec3(0.f, 0.f, 1.f), 0.f);
 	i8->makePhysicsObject(s, 0.f);
 
-	auto i7 = world->addModelInstance("colbox", worldRoot);
-	i7->sgNode->transform.scale(8.f);
-	i7->sgNode->transform.translate(glm::fvec3(50, 50, 0));
-	auto boxcol = new btBoxShape(glm::fvec3(8, 8, 8));
-	i7->makePhysicsObject(boxcol, 42.f);
+	float scale = 20.f;
 
-	auto i = world->addModelInstance("colbox", worldRoot);
-	i->sgNode->transform.scale(glm::fvec3(4, 6,3));
-	i->sgNode->transform.translate(glm::fvec3(50, 50, 0));
-	boxcol = new btBoxShape(glm::fvec3(4, 6, 3));
-	i->makePhysicsObject(boxcol, 30.f);
+	auto col2 = new btSphereShape(scale);
+	auto boxcol = new btBoxShape(glm::fvec3(scale));
 
-	auto col2 = new btSphereShape(5);
-	boxcol = new btBoxShape(glm::fvec3(5, 5, 5));
+	for (int i = 0; i < 100; ++i)
+	{
+		auto i2 = world->addModelInstance("pbrsphere", worldRoot);
+		i2->sgNode->transform.scale(scale);
+		i2->sgNode->transform.translate(glm::fvec3(5.1, 5.1 + (5.1 * i), 0));
+
+		i2->makePhysicsObject(col2, 10.f);
+	}
 
 	for (int i = 0; i < 100; ++i)
 	{
 		auto i2 = world->addModelInstance("colbox", worldRoot);
-		i2->sgNode->transform.scale(5.f);
+		i2->sgNode->transform.scale(scale);
 		i2->sgNode->transform.translate(glm::fvec3(5.1, 5.1 + (5.1 * i), 0));
 
 		i2->makePhysicsObject(boxcol, 10.f);

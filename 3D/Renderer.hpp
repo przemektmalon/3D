@@ -2,7 +2,8 @@
 #include <unordered_map>
 #include "Transform.hpp"
 #include "SAOShader.hpp"
-#include "GBufferShader.hpp"
+#include "GBufferShaderTex.hpp"
+#include "GBufferShaderClay.hpp"
 #include "Framebuffer.hpp"
 #include "BufferObjects.hpp"
 #include <chrono>
@@ -126,7 +127,8 @@ public:
 	//Shaders
 	ShaderStore shaderStore;
 
-	GBufferShader gBufferShader;
+	GBufferShaderTex gBufferShaderTex;
+	GBufferShaderClay gBufferShaderClay;
 	GBufferShaderMultiTex gBufferShaderMultiTex;
 	DeferredTileCullComputeShader tileCullShader;
 	BilateralBlurShader bilatBlurShader;
