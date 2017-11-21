@@ -246,8 +246,8 @@ void Engine::mainLoop(int resolutionIndex)
 	glewExperimental = GL_TRUE;
 	glewInit();
 	
-	wglSwapIntervalEXT(0);
-	
+	cfg.render.setVSync(false);
+
 	cfg.keyBinds.initialiseFunctionBindingConfig();
 	cfg.keyBinds.loadKeyBinds();
 

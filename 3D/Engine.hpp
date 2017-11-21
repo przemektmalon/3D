@@ -74,6 +74,10 @@ public:
 		void setFrameScale(float set) { frameScale = set; }
 		glm::ivec2 getResolution() { return resolution; }
 
+		bool vSync;
+		void setVSync(bool set) { vSync = set; wglSwapIntervalEXT(vSync); }
+		void toggleVSync() { setVSync(!vSync); }
+
 		bool drawWireframe;
 		void setDrawWireFrame(bool set) { drawWireframe = set; }
 		void toggleDrawWireframe() { drawWireframe = !drawWireframe; }
@@ -164,7 +168,6 @@ public:
 	static Time dt;
 	static MasterRenderer* r;
 	static QPC qpc;
-	static glm::ivec2 lastM;
 	static UIM uim;
 
 	static UIWindowManager uiwm;

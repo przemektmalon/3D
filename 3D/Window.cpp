@@ -266,20 +266,20 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 
 		if (raw->header.dwType == RIM_TYPEMOUSE)
 		{
+			const auto buttonFlag = raw->data.mouse.usButtonFlags;
+
+			const auto anyMouseClick = (RI_MOUSE_LEFT_BUTTON_DOWN | RI_MOUSE_RIGHT_BUTTON_DOWN | RI_MOUSE_MIDDLE_BUTTON_DOWN) & buttonFlag;
+			const auto lMouseClick = RI_MOUSE_LEFT_BUTTON_DOWN & buttonFlag;
+			const auto rMouseClick = RI_MOUSE_RIGHT_BUTTON_DOWN & buttonFlag;
+			const auto mMouseClick = RI_MOUSE_MIDDLE_BUTTON_DOWN & buttonFlag;
+
+			const auto anyMouseRelease = (RI_MOUSE_LEFT_BUTTON_UP | RI_MOUSE_RIGHT_BUTTON_UP | RI_MOUSE_MIDDLE_BUTTON_UP) & buttonFlag;
+			const auto lMouseRelease = RI_MOUSE_LEFT_BUTTON_UP & buttonFlag;
+			const auto rMouseRelease = RI_MOUSE_RIGHT_BUTTON_UP & buttonFlag;
+			const auto mMouseRelease = RI_MOUSE_MIDDLE_BUTTON_UP & buttonFlag;
+
 			if (engineWindow->hasFocus())
 			{
-				const auto buttonFlag = raw->data.mouse.usButtonFlags;
-
-				const auto anyMouseClick = (RI_MOUSE_LEFT_BUTTON_DOWN | RI_MOUSE_RIGHT_BUTTON_DOWN | RI_MOUSE_MIDDLE_BUTTON_DOWN) & buttonFlag;
-				const auto lMouseClick = RI_MOUSE_LEFT_BUTTON_DOWN & buttonFlag;
-				const auto rMouseClick = RI_MOUSE_RIGHT_BUTTON_DOWN & buttonFlag;
-				const auto mMouseClick = RI_MOUSE_MIDDLE_BUTTON_DOWN & buttonFlag;
-				
-				const auto anyMouseRelease = (RI_MOUSE_LEFT_BUTTON_UP | RI_MOUSE_RIGHT_BUTTON_UP | RI_MOUSE_MIDDLE_BUTTON_UP) & buttonFlag;
-				const auto lMouseRelease = RI_MOUSE_LEFT_BUTTON_UP & buttonFlag;
-				const auto rMouseRelease = RI_MOUSE_RIGHT_BUTTON_UP & buttonFlag;
-				const auto mMouseRelease = RI_MOUSE_MIDDLE_BUTTON_UP & buttonFlag;
-
 				glm::ivec2 mPos; mPos = engineWindow->mouse.getWindowPosition(engineWindow);
 
 				if (lMouseClick)
@@ -327,6 +327,11 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 					moveEvent.mouse.move = mouseMove;
 					engineWindow->eventQ.pushEvent(moveEvent);		// Send mouse move event
 				}
+			}
+			else
+			{
+				if (anyMouseClick || engineWindow->isMouseInClientArea())
+					engineWindow->captureMouseFocus();
 			}
 		}
 
