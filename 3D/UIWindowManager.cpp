@@ -4,7 +4,7 @@
 void UIWindowManager::checkMouseHovers()
 {
 	Event ev;
-	ev.constructMouse(MouseCode::Code::M_NONE, Engine::window.getMousePosition(), 0);
+	ev.constructMouse(Mouse::M_NONE, Engine::window.getMousePosition(), 0);
 	for (auto w : windows)
 	{
 		w.second->checkMouseEnter((MouseEvent&)ev);

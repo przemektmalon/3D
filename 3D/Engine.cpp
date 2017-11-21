@@ -235,16 +235,6 @@ void printlog()
 	Engine::engineLog.printLog(Engine::engineLog);
 }
 
-void mouseDown()
-{
-
-}
-
-void mouseUp()
-{
-
-}
-
 void toggleConsole()
 {
 	Engine::console.toggle();
@@ -262,9 +252,6 @@ void Engine::mainLoop(int resolutionIndex)
 	cfg.keyBinds.initialiseFunctionBindingConfig();
 	cfg.keyBinds.loadKeyBinds();
 
-	Engine::uim.mapToMouseDown(0, mouseDown);
-	Engine::uim.mapToMouseUp(0, mouseUp);
-
 	r = new MasterRenderer();
 
 	physics.create();
@@ -280,7 +267,7 @@ void Engine::mainLoop(int resolutionIndex)
 
 	assets.modelManager.init();
 
-	assets.loader.loadAssets(String128("res/resources.txt"));
+	assets.loadAssets(String128("res/resources.txt"));
 	assets.pushTexturesToGPU();
 
 	const GPUModelManager& mm = Engine::assets.modelManager;
@@ -320,12 +307,12 @@ void Engine::mainLoop(int resolutionIndex)
 	auto col = new btStaticPlaneShape(glm::fvec3(0.f, 0.f, 1.f), 0.f);
 	i8->makePhysicsObject(s, 0.f);
 
-	float scale = 20.f;
+	float scale = 8.f;
 
 	auto col2 = new btSphereShape(scale);
 	auto boxcol = new btBoxShape(glm::fvec3(scale));
 
-	for (int i = 0; i < 100; ++i)
+	for (int i = 0; i < 3; ++i)
 	{
 		auto i2 = world->addModelInstance("pbrsphere", worldRoot);
 		i2->sgNode->transform.scale(scale);
@@ -334,7 +321,7 @@ void Engine::mainLoop(int resolutionIndex)
 		i2->makePhysicsObject(col2, 10.f);
 	}
 
-	for (int i = 0; i < 100; ++i)
+	for (int i = 0; i < 3; ++i)
 	{
 		auto i2 = world->addModelInstance("colbox", worldRoot);
 		i2->sgNode->transform.scale(scale);
@@ -380,11 +367,23 @@ void Engine::mainLoop(int resolutionIndex)
 
 				switch (ev.type)
 				{
+				case(Event::MouseMove):
+				{
+					if (ev.mouse.code & Mouse::M_RIGHT)
+					{
+						const float mouseX_Sensitivity = 0.004f;
+						const float mouseY_Sensitivity = 0.004f;
+
+						cam.targetYaw += mouseX_Sensitivity * ev.mouse.move.x;
+						cam.targetPitch += mouseY_Sensitivity * ev.mouse.move.y;
+					}
+					break;
+				}
 				case(Event::MouseDown):
 				{
 					uim.mouseDown(ev.mouse.code);
 
-					if (ev.mouse.code.code == MouseCode::M_LEFT)
+					if (ev.mouse.code & Mouse::M_LEFT)
 					{
 						glm::fvec3 p = r->activeCam->pos;
 						btVector3 camPos(p.x, p.y, p.z);
@@ -400,7 +399,6 @@ void Engine::mainLoop(int resolutionIndex)
 				case(Event::MouseUp):
 				{
 					uim.mouseUp(ev.mouse.code);
-
 					removePickingConstraint();
 
 					break;
@@ -423,7 +421,7 @@ void Engine::mainLoop(int resolutionIndex)
 			}
 
 			uiwm.checkMouseHovers();
-			ev.constructMouse(MouseCode::M_NONE, Engine::window.getMousePosition(), 0);
+			ev.constructMouse(Mouse::M_NONE, Engine::window.getMousePosition(), 0);
 			mouseMoveCallback(ev.mouse.position.x, ev.mouse.position.y);
 
 			if(console.stateFlags == 0)
@@ -451,7 +449,7 @@ void Engine::processGameFrame()
 {
 	auto beginFrameTime = qpc.now();
 
-	if (window.mouse.rightDown)
+	if (window.mouse.state & Mouse::M_RIGHT)
 	{
 		SetCursorPos(window.getPosX() + (window.getSizeX() / 2), window.getPosY() + (window.getSizeY() / 2));
 	}
@@ -469,7 +467,6 @@ void Engine::processGameFrame()
 	cam.targetPos -= move * float(window.keyboard.isKeyPressed('D'));
 
 	cam.targetPos.y += cfg.world.camSpeed * dt.getSeconds() * float(window.keyboard.isKeyPressed('R'));
-
 	cam.targetPos.y -= cfg.world.camSpeed * dt.getSeconds() * float(window.keyboard.isKeyPressed('F'));
 
 	physicsTime = qpc.now();

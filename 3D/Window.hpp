@@ -24,10 +24,7 @@
 #include "Mouse.hpp"
 #include "UserInputManager.hpp"
 
-#include "StringGenerics.hpp"
 #include "Event.hpp"
-
-#define MM_CREATE_GL_CONTEXT 3001
 
 class Window
 {
@@ -45,18 +42,14 @@ public:
 
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-	void setUpNewWindow()
-	{
-
-	}
 	void deleteWindow();
 	void createWindow(HINSTANCE pHInstance, LPCTSTR pWindowName, int pXPos, int pYPos, int pWidth, int pHeight, DWORD pWindowStyle);
 	void createGLContext();
 
-	bool hasFocus(){
+	bool hasFocus() {
 		return windowHasFocus; }
 
-	void escapePressed(){
+	void escapePressed() {
 		PostMessage(windowHandle, WM_CLOSE, 0, 0); }
 
 	void setResolution(glm::ivec2 pRes){
@@ -75,7 +68,7 @@ public:
 
 	void registerInputDevices();
 	void screenshot();
-	void screenshot(StringGeneric& fileName);
+	void screenshot(std::string fileName);
 
 	inline void swapBuffers() const {
 		wglSwapLayerBuffers(deviceContextHandle, WGL_SWAP_MAIN_PLANE);}
@@ -106,8 +99,9 @@ public:
 	HWND windowHandle;
 	WNDCLASS windowClass;
 	HDC deviceContextHandle;
+
 	Keyboard keyboard;
-	MouseState mouse;
+	Mouse mouse;
 	
 	EventQ eventQ;
 

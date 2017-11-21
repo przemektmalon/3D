@@ -252,96 +252,22 @@ public:
 	s32 getWidth() { return width; }
 	s32 getHeight() { return height; }
 
-	void saveToFile(std::string fileName = "___AUTO_GENERATE_NAME___", bool flipY = false)
+	void saveToFile(std::string fileName)
 	{
 		const int w = width, h = height;
-		//u32 sourcePixelSize = 4;
-		//const u32 targetPixelSize = 3;
 
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
-		//u32 targetImageSize = h * w * targetPixelSize;
 		u32 sourceImageSize = h * w * 4;
 
-		//u32 targetRowSize = w * targetPixelSize;
-		//u32 sourceRowSize = w * sourcePixelSize;
-
 		u8* screenshot = new u8[sourceImageSize];
-		//u8* flipped = new u8[targetImageSize];
 
 		std::string filepath = "screenshot/" + fileName + ".bmp";
 
-		while (glGetError()) {}
-
 		glReadBuffer(GL_COLOR_ATTACHMENT0);
-		//glBindTexture(GL_TEXTURE_2D, GLID);
-		//glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, screenshot);
 		glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, screenshot);
 
-		auto err = glGetError();
-
 		SOIL_save_image(filepath.c_str(), SOIL_SAVE_TYPE_BMP, w, h, 4, screenshot);
-
-		/*float flipSign = flipY == true ? -1.f : 1.f;
-		float flip = flipY == true ? sourceImageSize - sourceRowSize : 0;
-
-
-
-		int src = 0;
-		int dst = 0;
-		for (int y = 0; y < h; ++y)
-		{
-			for (int x = 0; x < w; ++x)
-			{
-				u32 sourceOffset = flip + (flipSign * (y * sourceRowSize) + (x * sourcePixelSize));
-				u32 targetOffset = (y * targetRowSize) + (x * targetPixelSize);
-				//std::cout << screenshot[sourceOffset];
-				flipped[targetOffset] = screenshot[sourceOffset];
-				flipped[targetOffset + 1] = screenshot[sourceOffset + (sourcePixelSize == 1 ? 0 : 1)];
-				flipped[targetOffset + 2] = screenshot[sourceOffset + (sourcePixelSize == 1 ? 0 : 2)];
-
-				src = (y * sourceRowSize) + (x * 4);
-				dst = (y * targetRowSize)
-
-				flipped[dst] = screenshot[src];
-				flipped[dst + 1] = screenshot[src + 1];
-				flipped[dst + 2] = screenshot[src + 2];
-			}
-		}
-
-		FILE *f;
-		int filesize = 54 + targetImageSize;
-
-		unsigned char bmpfileheader[14] = { 'B','M', 0,0,0,0, 0,0, 0,0, 54,0,0,0 };
-		unsigned char bmpinfoheader[40] = { 40,0,0,0, 0,0,0,0, 0,0,0,0, 1,0, 24,0 };
-		unsigned char bmppad[3] = { 0,0,0 };
-
-		bmpfileheader[2] = (unsigned char)(filesize);
-		bmpfileheader[3] = (unsigned char)(filesize >> 8);
-		bmpfileheader[4] = (unsigned char)(filesize >> 16);
-		bmpfileheader[5] = (unsigned char)(filesize >> 24);
-
-		//int w = w; int h = h;
-
-		bmpinfoheader[4] = (unsigned char)(w);
-		bmpinfoheader[5] = (unsigned char)(w >> 8);
-		bmpinfoheader[6] = (unsigned char)(w >> 16);
-		bmpinfoheader[7] = (unsigned char)(w >> 24);
-		bmpinfoheader[8] = (unsigned char)(h);
-		bmpinfoheader[9] = (unsigned char)(h >> 8);
-		bmpinfoheader[10] = (unsigned char)(h >> 16);
-		bmpinfoheader[11] = (unsigned char)(h >> 24);
-
-		auto er = fopen_s(&f, filepath.c_str(), "wb");
-		fwrite(bmpfileheader, 1, 14, f);
-		fwrite(bmpinfoheader, 1, 40, f);
-
-		fwrite(flipped, 3, w * h, f);
-
-		fclose(f);
-
-		delete[] screenshot;
-		delete[] flipped;*/
 	}
 
 	Texture2D* texture;

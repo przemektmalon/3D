@@ -1,5 +1,6 @@
 #pragma once
 #include "Keyboard.hpp"
+#include "Mouse.hpp"
 #include "glm\common.hpp"
 #include <queue>
 
@@ -7,7 +8,7 @@ class UIWindow;
 
 struct Event
 {
-	enum Type { MouseDown, MouseUp, MouseWheel, KeyDown, KeyUp, WindowResized, WindowMoved };
+	enum Type { MouseMove, MouseDown, MouseUp, MouseWheel, KeyDown, KeyUp, WindowResized, WindowMoved };
 	Type type;
 
 	Event() {}
@@ -17,6 +18,7 @@ struct Event
 		struct mouse {
 			MouseCode code;
 			glm::ivec2 position;
+			glm::ivec2 move;
 			int delta;
 		} mouse;
 		struct key {

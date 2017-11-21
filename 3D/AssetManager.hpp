@@ -116,8 +116,6 @@ public:
 		fontList.erase(pName);
 	}
 
-	GPUModelManager modelManager;
-
 	std::map<String32, Font>& getFontList()
 	{
 		return fontList;
@@ -130,25 +128,14 @@ public:
 
 	void pushTexturesToGPU();
 
+	void loadAssets(String128& assetListFilePath);
+
+	GPUModelManager modelManager;
+
 private:
-
-	class AssetLoader
-	{
-	public:
-		AssetLoader() {}
-		~AssetLoader() {}
-
-		void loadAssets(String128& assetListFilePath);
-	};
-
-
 
 	std::map<String32, Font> fontList;
 	std::map<String32, Model> modelList;
 	std::map<String32, Texture2D> texture2DList;
 	std::map<String32, GLTextureCube> textureCubeList;
-
-public:
-
-	AssetLoader loader;
 };

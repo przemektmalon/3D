@@ -1,10 +1,10 @@
 #pragma once
 #include <functional>
 #include "Keyboard.hpp"
+#include "Mouse.hpp"
 #include <queue>
 
 void escapePress();
-
 
 struct ControlArray
 {
@@ -42,12 +42,12 @@ public:
 
 	void mapToMouseDown(MouseCode mouseCode, std::function<void(void)> fnc)
 	{
-		ca->mouseDownFunctions[mouseCode.code] = fnc;
+		ca->mouseDownFunctions[mouseCode] = fnc;
 	}
 
 	void mapToMouseUp(MouseCode mouseCode, std::function<void(void)> fnc)
 	{
-		ca->mouseUpFunctions[mouseCode.code] = fnc;
+		ca->mouseUpFunctions[mouseCode] = fnc;
 	}
 
 	void keyDown(Key keyCode)
@@ -88,7 +88,7 @@ public:
 
 	void mouseDown(MouseCode mouseCode)
 	{
-		auto fnc = ca->mouseDownFunctions[mouseCode.code];
+		auto fnc = ca->mouseDownFunctions[mouseCode];
 		if (fnc != nullptr)
 		{
 			fnc();
@@ -97,7 +97,7 @@ public:
 
 	void mouseUp(MouseCode mouseCode)
 	{
-		auto fnc = ca->mouseUpFunctions[mouseCode.code];
+		auto fnc = ca->mouseUpFunctions[mouseCode];
 		if (fnc != nullptr)
 		{
 			fnc();

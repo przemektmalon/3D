@@ -365,12 +365,14 @@ void main()
 
 	vec3 oCol = vec3(0.0);
 
+	float ambient = 0.01;
+
 	vec4 albedoSpec = vec4(0.0);
 	float ssaoVal = 1.0;
 
 	if(depth == 1.f)
 	{
-		oCol += texture(skybox, -viewRay).rgb * 0.03;
+		oCol += texture(skybox, -viewRay).rgb * 0.05;
 	}
 	else if (length(normal) > 0.8)
 	{
@@ -382,7 +384,7 @@ void main()
 
 		albedoSpec.xyz = albedoSpec.xyz * ssaoVal;
 		
-		oCol += albedoSpec.xyz * 0.01;
+		oCol += albedoSpec.xyz * ambient;
 
 		float metallic = albedoSpec.a;
 		vec3 V = normalize(viewPos - worldPos);

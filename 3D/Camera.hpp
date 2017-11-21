@@ -88,6 +88,9 @@ public:
 		glm::fmat4 translate = glm::fmat4(1.0f);
 		translate = glm::translate(translate, -pos);
 
+		qRot = glm::angleAxis(targetPitch, glm::vec3(1.0f, 0.0f, 0.0f));
+		qRot *= glm::angleAxis(targetYaw, glm::vec3(0.0f, 1.0f, 0.0f));
+
 		rotation = glm::fmat4(qRot);
 		view = rotation * translate;
 

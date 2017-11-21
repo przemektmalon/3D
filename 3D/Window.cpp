@@ -44,10 +44,10 @@ void Window::createWindow(HINSTANCE pHInstance, LPCTSTR pWindowName, int pXPos, 
 	windowClass.lpfnWndProc = WndProc;
 	windowClass.hInstance = pHInstance;
 	windowClass.hbrBackground = (HBRUSH)(COLOR_BACKGROUND);
-	windowClass.lpszClassName = LPCSTR("WINDOW_CLASS_NAME");
+	windowClass.lpszClassName = LPCSTR(pWindowName);
 	windowClass.style = CS_OWNDC;
 	if (!RegisterClass(&windowClass))
-		int x = 10;
+		std::cout << "Error: window class not registered" << std::endl;
 
 	RECT desktop;
 	const HWND hDesktop = GetDesktopWindow();
@@ -68,7 +68,7 @@ void Window::createWindow(HINSTANCE pHInstance, LPCTSTR pWindowName, int pXPos, 
 		posX = 0; posY = 0;
 	}
 
-	windowHandle = CreateWindowEx(0, LPCSTR(windowClass.lpszClassName), "WINDOW_WINDOW_NAME", pWindowStyle, pXPos, pYPos, pWidth, pHeight, 0, 0, pHInstance, 0);
+	windowHandle = CreateWindowEx(0, LPCSTR(windowClass.lpszClassName), pWindowName, pWindowStyle, pXPos, pYPos, pWidth, pHeight, 0, 0, pHInstance, 0);
 
 	RECT ca = getClientArea();
 	actualClientArea.x = ca.right;
@@ -80,8 +80,6 @@ void Window::createWindow(HINSTANCE pHInstance, LPCTSTR pWindowName, int pXPos, 
 	ShowWindow(windowHandle, 1);
 
 	std::cout << "Screen Resolution: " << desiredClientArea.x << "x" << desiredClientArea.y << std::endl;
-
-	//SWAP INTERVAL VSYNC
 }
 
 void Window::createGLContext()
@@ -108,17 +106,11 @@ void Window::createGLContext()
 
 	deviceContextHandle = GetDC(windowHandle);
 
-	int  letWindowsChooseThisPixelFormat;
-	letWindowsChooseThisPixelFormat = ChoosePixelFormat(deviceContextHandle, &pfd);
-	SetPixelFormat(deviceContextHandle, letWindowsChooseThisPixelFormat, &pfd);
+	int  pixelFormat = ChoosePixelFormat(deviceContextHandle, &pfd);
+	SetPixelFormat(deviceContextHandle, pixelFormat, &pfd);
 
-	HGLRC renderContext;
-	//HGLRC ourOpenGLRenderingContext = wglCreateContext(deviceContextHandle);
-	//wglMakeCurrent(deviceContextHandle, ourOpenGLRenderingContext);
-
-	renderContext = wglCreateContext(deviceContextHandle);
-
-	wglMakeCurrent(deviceContextHandle, renderContext);
+	HGLRC dummyContext = wglCreateContext(deviceContextHandle);
+	wglMakeCurrent(deviceContextHandle, dummyContext);
 
 	typedef HGLRC(APIENTRY * PFNWGLCREATECONTEXTATTRIBSARBPROC)(HDC hDC, HGLRC hShareContext, const int *attribList);
 	static PFNWGLCREATECONTEXTATTRIBSARBPROC pfnCreateContextAttribsARB = 0;
@@ -133,12 +125,11 @@ void Window::createGLContext()
 	auto newRenderContext = pfnCreateContextAttribsARB(deviceContextHandle, 0, attriblist);
 
 	wglMakeCurrent(deviceContextHandle, 0);
-	wglDeleteContext(renderContext);
+	wglDeleteContext(dummyContext);
 
-	if (!wglMakeCurrent(deviceContextHandle, newRenderContext))
-	{
-		std::cout << "ERR" << std::endl;
-	}
+	wglMakeCurrent(deviceContextHandle, newRenderContext);
+
+	glContextHandle = newRenderContext;
 
 	std::cout << "GL context created" << std::endl;
 
@@ -162,11 +153,9 @@ void Window::forceClientAreaToDesired()
 	if (wr2.right != desiredClientArea.x || wr2.bottom != desiredClientArea.y)
 	{
 		glm::ivec2 windowSpaceToAdd = desiredClientArea - glm::ivec2(wr2.right, wr2.bottom);
-		//windowSpaceToAdd = glm::ivec2(0);
 		RECT wr3;
 		wr3.left = wr.left; wr3.top = wr.top;
 		wr3.right = (wr.right - wr.left) + windowSpaceToAdd.x; wr3.bottom = (wr.bottom - wr.top) + windowSpaceToAdd.y;
-		//AdjustWindowRectEx(&wr, WS_OVERLAPPEDWINDOW, false, 0);
 		MoveWindow(windowHandle, wr3.left, wr3.top, wr3.right, wr3.bottom, 0);
 	}
 	actualClientArea.x = desiredClientArea.x;
@@ -207,55 +196,22 @@ void Window::registerInputDevices()
 
 	if (!RegisterRawInputDevices(Rid, 1, sizeof(Rid[0]))) {
 		//registration failed. Call GetLastError for the cause of the error
-		int x = 10;
+		std::cout << "Error: mouse raw input not registered" << std::endl;
 	}
 }
 
-void Window::screenshot(StringGeneric& fileName)
+void Window::screenshot(std::string fileName)
 {
 	u32 imageSize = getSizeX() * getSizeY() * 3;
 	u32 rowSize = getSizeX() * 3;
 	u8* screenshot = new u8[imageSize];
 
-	//String128 filepath = String128("screenshot/");
-	fileName.append(String128(".bmp"));
-	fileName.append('\0');
+	fileName.append(".bmp");
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	glReadBuffer(GL_BACK);
 	glReadPixels(0, 0, getSizeX(), getSizeY(), GL_BGR, GL_UNSIGNED_BYTE, screenshot);
 
-
-	FILE *f;
-	int filesize = 54 + imageSize;
-
-	unsigned char bmpfileheader[14] = { 'B','M', 0,0,0,0, 0,0, 0,0, 54,0,0,0 };
-	unsigned char bmpinfoheader[40] = { 40,0,0,0, 0,0,0,0, 0,0,0,0, 1,0, 24,0 };
-	unsigned char bmppad[3] = { 0,0,0 };
-
-	bmpfileheader[2] = (unsigned char)(filesize);
-	bmpfileheader[3] = (unsigned char)(filesize >> 8);
-	bmpfileheader[4] = (unsigned char)(filesize >> 16);
-	bmpfileheader[5] = (unsigned char)(filesize >> 24);
-
-	int w = getSizeX(); int h = getSizeY();
-
-	bmpinfoheader[4] = (unsigned char)(w);
-	bmpinfoheader[5] = (unsigned char)(w >> 8);
-	bmpinfoheader[6] = (unsigned char)(w >> 16);
-	bmpinfoheader[7] = (unsigned char)(w >> 24);
-	bmpinfoheader[8] = (unsigned char)(h);
-	bmpinfoheader[9] = (unsigned char)(h >> 8);
-	bmpinfoheader[10] = (unsigned char)(h >> 16);
-	bmpinfoheader[11] = (unsigned char)(h >> 24);
-
-	auto er = fopen_s(&f, fileName.getString(), "wb");
-	fwrite(bmpfileheader, 1, 14, f);
-	fwrite(bmpinfoheader, 1, 40, f);
-
-	fwrite(screenshot, 3, w * h, f);
-
-
-	fclose(f);
+	SOIL_save_image(fileName.c_str(), SOIL_SAVE_TYPE_BMP, getSizeX(), getSizeY(), 3, screenshot);
 
 	delete[] screenshot;
 }
@@ -266,30 +222,17 @@ void Window::screenshot()
 	tm  tstruct;
 	char buf[80];
 	localtime_s(&tstruct, &now);
-	//OutputDebugString("SCREENSHOT");
 	strftime(buf, sizeof(buf), "%F %H,%M,%S", &tstruct);
-	String128 fileName = String128("screenshot/").append(String64(buf));
-	screenshot(fileName);
+	screenshot("screenshot/" + std::string(buf));
 }
 
 LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	//Window* me = (Window*)(GetWindowLongPtr(hWnd, GWLP_USERDATA));
-	//if (me) return me->realWndProc(hWnd, message, wParam, lParam);
-	//return DefWindowProc(hWnd, message, wParam, lParam);
-
-	int i, g, a;
 	switch (message)
 	{
-	case WM_SIZE:
-	{
-		PWINDOWPOS data = PWINDOWPOS(lParam);
-		//SetWindowPos(engineWindow->windowHandle, HWND_TOP, data->x, data->y, data->cx, data->cy, data->flags);
-		return 0;
-	}
 	case WM_KEYDOWN:
 	{
-		engineWindow->keyboard.keyState[wParam] = false;
+		engineWindow->keyboard.keyState[wParam] = true;
 		auto check = [](u8 pKey) -> bool { return engineWindow->keyboard.isKeyPressed(pKey); };
 		Event newEvent(Event::KeyDown); newEvent.constructKey(wParam, check(Key::KC_SHIFT), check(Key::KC_ALT), check(Key::KC_SYS), check(Key::KC_CAPS), check(Key::KC_CTRL));
 		engineWindow->eventQ.pushEvent(newEvent);
@@ -297,7 +240,7 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 	}
 	case WM_KEYUP:
 	{
-		engineWindow->keyboard.keyState[wParam] = true;
+		engineWindow->keyboard.keyState[wParam] = false;
 		auto check = [](u8 pKey) -> bool { return engineWindow->keyboard.isKeyPressed(pKey); };
 		Event newEvent(Event::KeyUp); newEvent.constructKey(wParam, check(Key::KC_SHIFT), check(Key::KC_ALT), check(Key::KC_SYS), check(Key::KC_CAPS), check(Key::KC_CTRL));
 		engineWindow->eventQ.pushEvent(newEvent);
@@ -311,9 +254,7 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 		sizeof(RAWINPUTHEADER));
 		LPBYTE lpb = new BYTE[dwSize];
 		if (lpb == NULL)
-		{
-		return 0;
-		}
+			return 0;
 
 		if (GetRawInputData((HRAWINPUT)lParam, RID_INPUT, lpb, &dwSize, sizeof(RAWINPUTHEADER)) != dwSize)
 			OutputDebugString(TEXT("GetRawInputData does not return correct size !\n"));
@@ -323,11 +264,7 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 		STRSAFE_LPSTR szTempOutput = new char[1000];
 		HRESULT hResult;
 
-		if (raw->header.dwType == RIM_TYPEKEYBOARD)
-		{
-
-		}
-		else if (raw->header.dwType == RIM_TYPEMOUSE)
+		if (raw->header.dwType == RIM_TYPEMOUSE)
 		{
 			if (engineWindow->hasFocus())
 			{
@@ -345,87 +282,60 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 
 				glm::ivec2 mPos; mPos = engineWindow->mouse.getWindowPosition(engineWindow);
 
-				if (lMouseClick){
-					engineWindow->mouse.leftDown = true;
-					Event newEvent(Event::MouseDown); newEvent.constructMouse(0, mPos, 0);
-					engineWindow->eventQ.pushEvent(newEvent);
-					std::string mp;
-					mp = std::to_string(engineWindow->mouse.getWindowPosition(engineWindow).x)  + " : " + std::to_string(engineWindow->mouse.getWindowPosition(engineWindow).y) + '\n';
-				}
-				else if (lMouseRelease){
-					engineWindow->mouse.leftDown = false;
-					Event newEvent(Event::MouseUp); newEvent.constructMouse(0, mPos, 0);
-					engineWindow->eventQ.pushEvent(newEvent);
-				}
+				if (lMouseClick)
+					engineWindow->mouse.state |= Mouse::M_LEFT;
+				else if (lMouseRelease)
+					engineWindow->mouse.state &= ~Mouse::M_LEFT;
 
-				if (rMouseClick){
-					engineWindow->mouse.rightDown = true;
-					Event newEvent(Event::MouseDown); newEvent.constructMouse(1, mPos, 0);
-					engineWindow->eventQ.pushEvent(newEvent);
-					//TODO: IF MOUSE DISAPPEAR WHEN CLICKED
-					ShowCursor(false);
-				}
-				else if (rMouseRelease){
-					engineWindow->mouse.rightDown = false;
-					Event newEvent(Event::MouseUp); newEvent.constructMouse(1, mPos, 0);
-					engineWindow->eventQ.pushEvent(newEvent);
-					ShowCursor(true);
-				}
+				if (rMouseClick)
+					engineWindow->mouse.state |= Mouse::M_RIGHT;
+				else if (rMouseRelease)
+					engineWindow->mouse.state &= ~Mouse::M_RIGHT;
 
-				if (mMouseClick) {
-					engineWindow->mouse.middleDown = true;
-				}
-				else if (mMouseRelease) {
-					engineWindow->mouse.middleDown = false;
-				}
+				if (mMouseClick)
+					engineWindow->mouse.state |= Mouse::M_MIDDLE;
+				else if (mMouseRelease)
+					engineWindow->mouse.state &= ~Mouse::M_MIDDLE;
 
-				glm::ivec2 mouseDelta;
-				mouseDelta.x = raw->data.mouse.lLastX;
-				mouseDelta.y = raw->data.mouse.lLastY;
+				MouseCode mouseCode = engineWindow->mouse.state;
 
-				if (engineWindow->mouse.rightDown)
+				Event::Type eventType;
+
+				if (anyMouseClick)
 				{
-					const float mouseX_Sensitivity = 0.004f;
-					const float mouseY_Sensitivity = 0.004f;
-
-					Engine::cam.targetYaw += mouseX_Sensitivity * mouseDelta.x;
-					Engine::cam.targetPitch += mouseY_Sensitivity * mouseDelta.y;
-
-					glm::quat rotation(glm::angleAxis(Engine::cam.targetPitch, glm::vec3(1.0f, 0.0f, 0.0f)));
-					rotation = rotation * glm::angleAxis(Engine::cam.targetYaw, glm::vec3(0.0f, 1.0f, 0.0f));
-
-					Engine::cam.qRot = rotation;
+					eventType = Event::MouseDown;
+					Event mouseEvent(eventType);
+					mouseEvent.constructMouse(mouseCode, mPos, 0);
+					engineWindow->eventQ.pushEvent(mouseEvent);		// Send mouse down event
 				}
-				
-				engineWindow->mouse.setDelta(mouseDelta);
-
-				//Engine::select();
-			}
-			else
-			{
-				const auto anyMouseClick = RI_MOUSE_LEFT_BUTTON_DOWN | RI_MOUSE_RIGHT_BUTTON_DOWN | RI_MOUSE_MIDDLE_BUTTON_DOWN;
-				if (raw->data.mouse.usButtonFlags | anyMouseClick == anyMouseClick && raw->data.mouse.usButtonFlags != 0)
+				else if (anyMouseRelease)
 				{
-					if (engineWindow->isMouseInClientArea())
-					{
-						
-						engineWindow->captureMouseFocus();
-					}
+					eventType = Event::MouseUp;
+					Event mouseEvent(eventType);
+					mouseEvent.constructMouse(mouseCode, mPos, 0);
+					engineWindow->eventQ.pushEvent(mouseEvent);		// Send mouse up event
+				}
+
+				glm::ivec2 mouseMove;
+				mouseMove.x = raw->data.mouse.lLastX;
+				mouseMove.y = raw->data.mouse.lLastY;
+
+				if (mouseMove != glm::ivec2(0, 0))
+				{
+					Event moveEvent(Event::MouseMove);
+					moveEvent.constructMouse(mouseCode, mPos, 0);
+					moveEvent.mouse.move = mouseMove;
+					engineWindow->eventQ.pushEvent(moveEvent);		// Send mouse move event
 				}
 			}
 		}
 
 		delete[] lpb;
-		return 0;
-	}
-	case WM_COMMAND:
-	{
-
 		break;
 	}
 	case WM_ACTIVATE:
 	{
-		if (wParam != 0)
+		if (wParam == WA_ACTIVE || wParam == WA_CLICKACTIVE)
 		{
 			RECT wr;
 			auto er = GetWindowRect(engineWindow->windowHandle, &wr);
@@ -444,21 +354,17 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 			if (mouse.y > clientRect.top && mouse.y < clientRect.bottom && mouse.x > clientRect.left && mouse.x < clientRect.right)
 			{
 				engineWindow->captureMouseFocus();
-			}
+			}		
 		}
 		else
 		{
 			engineWindow->windowHasFocus = false;
-			//ShowCursor(true);
-			//OutputDebugString("SHOW CURSOR\n");
 		}
 		break;
 	}
 	case WM_KILLFOCUS:
 	{
-		//PAUSE
 		engineWindow->windowHasFocus = false;
-		//ShowCursor(true);
 		break;
 	}
 	case WM_WINDOWPOSCHANGED:
@@ -466,34 +372,31 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 		PWINDOWPOS data = PWINDOWPOS(lParam);
 		engineWindow->posX = data->x;
 		engineWindow->posY = data->y;
-		
-		//SetWindowPos(engineWindow->windowHandle, HWND_TOP, data->x, data->y, data->cx, data->cy, data->flags);
-
 		break;
 	}
 	case WM_CREATE:
 	{
-		engineWindow->setUpNewWindow();
 		engineWindow->registerInputDevices();
 		break;
 	}
 	case WM_DESTROY:
 	{
+		// Delete the window
+
 		engineWindow->deleteWindow();
-		//PostQuitMessage(0);
-		//Engine::stop();
-		SendMessage(hWnd, WM_QUIT, wParam, lParam);
-		//DefWindowProc(hWnd, message, wParam, lParam);
+		SendMessage(hWnd, WM_QUIT, wParam, lParam); // Quit the engine
+
 		break;
 	}
 	case WM_QUIT:
 	{
+		// Quit the engine
 		Engine::stop();
-		//DefWindowProc(hWnd, message, wParam, lParam);
 		break;
 	}
 	case WM_CLOSE:
 	{
+		// Close the window
 		DestroyWindow(engineWindow->windowHandle);
 		break;
 	}

@@ -27,7 +27,7 @@ Asset* AssetManager::prepareAsset(Asset::Type pType, String<128>& pPath, String<
 	}
 }
 
-void AssetManager::AssetLoader::loadAssets(String128 & assetListFilePath)
+void AssetManager::loadAssets(String128 & assetListFilePath)
 {
 	std::ifstream file;
 	file.open(assetListFilePath.getString());
@@ -42,8 +42,6 @@ void AssetManager::AssetLoader::loadAssets(String128 & assetListFilePath)
 			if (line.length() < 3)
 				continue;
 
-			
-			//std::istringstream istempline(line);
 			std::string key;
 			std::string value;
 
@@ -67,8 +65,6 @@ void AssetManager::AssetLoader::loadAssets(String128 & assetListFilePath)
 				std::getline(file, value);
 				mip = value;
 
-				std::cout << path << std::endl;
-
 				auto find = Engine::assets.texture2DList.find(String32(name.c_str()));
 				if (find != Engine::assets.texture2DList.end())
 				{
@@ -87,7 +83,6 @@ void AssetManager::AssetLoader::loadAssets(String128 & assetListFilePath)
 					{
 						std::cout << "Texture at " << path << " does not exist" << std::endl;
 					}
-					//tex->gpuMeta = Engine::assets.textureManager.pushToGPU(tex);
 					tex->makeGLAsset();
 					tex->glData->loadToGPU();
 				}
@@ -102,7 +97,6 @@ void AssetManager::AssetLoader::loadAssets(String128 & assetListFilePath)
 					{
 						std::cout << "Texture at \"" << path << "\" does not exist" << std::endl;
 					}
-					//tex->gpuMeta = Engine::assets.textureManager.pushToGPU(tex);
 					tex->makeGLAsset();
 					tex->glData->loadToGPU();
 				}

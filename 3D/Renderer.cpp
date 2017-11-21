@@ -17,7 +17,7 @@
 #include "UIConsole.hpp"
 #include "UIButton.hpp"
 
-#define NUM_POINT_LIGHTS 1
+#define NUM_POINT_LIGHTS 8
 #define NUM_SPOT_LIGHTS 0
 
 void MasterRenderer::render()
@@ -355,14 +355,14 @@ void MasterRenderer::initialiseRenderer(Window * pwin, Camera & cam)
 	initialiseSkybox();
 	initialiseLights();
 
-	initialiseFramebuffers();
+	if (Engine::cfg.render.resolution != glm::ivec2(0, 0))
+	{
+		initialiseFramebuffers();
+		lightPassTex.createFromStream(GL_RGBA32F, Engine::cfg.render.resolution.x, Engine::cfg.render.resolution.y, GL_RGBA, GL_FLOAT, NULL);
+	}
 
 	shadowMatrixBuffer.bufferData(sizeof(glm::fmat4) * 6, nullptr, GL_STREAM_DRAW);
-
-	//tb = new TextBillboard(glm::fvec3(0, 20, 0), "Welcome to the 3D Game Engine! :D");
-
 	fboGBuffer.setClearDepth(0.f);
-	lightPassTex.createFromStream(GL_RGBA32F, Engine::cfg.render.resolution.x, Engine::cfg.render.resolution.y, GL_RGBA, GL_FLOAT, NULL);
 }
 
 inline void MasterRenderer::initialiseGBuffer()
@@ -373,7 +373,6 @@ inline void MasterRenderer::initialiseGBuffer()
 	fboGBuffer.attachTexture(GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT2);					// PBR
 	fboGBuffer.attachTexture(GL_DEPTH_COMPONENT32F_NV, GL_DEPTH_COMPONENT, GL_FLOAT, GL_DEPTH_ATTACHMENT);	// DEPTH
 	
-
 	fboGBuffer.checkStatus();
 
 	GLuint attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
@@ -599,7 +598,6 @@ void MasterRenderer::initialiseShaders()
 	shaderStore.loadShader(&frustCullShader);
 	shaderStore.loadShader(&ssaoShader);
 	shaderStore.loadShader(&gBufferShaderMultiTex);
-	//shaderStore.loadShader(&prepMultiTexShader);
 	shaderStore.loadShader(&spotShadowPassShader);
 	shaderStore.loadShader(&pointShadowPassShader);
 	shaderStore.loadShader(&shape2DShader);
@@ -607,7 +605,6 @@ void MasterRenderer::initialiseShaders()
 	shaderStore.loadShader(&shape3DShader);
 	shaderStore.loadShader(&textShader);
 
-	//shaderStore.loadShader(ShaderProgram::Compute, String32("ssaogenmips"));
 	shaderStore.loadShader(ShaderProgram::VertFrag, String32("wireframe"));
 	shaderStore.loadShader(ShaderProgram::VertFrag, String32("Standard"));
 	shaderStore.loadShader(ShaderProgram::VertFrag, String32("test"));
@@ -626,7 +623,6 @@ void MasterRenderer::reInitialiseFramebuffers()
 	initialiseFramebuffers();
 	lightPassTex.release();
 	lightPassTex.createFromStream(GL_RGBA32F, Engine::cfg.render.resolution.x, Engine::cfg.render.resolution.y, GL_RGBA, GL_FLOAT, NULL);
-	
 }
 
 void MasterRenderer::destroyFramebufferTextures()

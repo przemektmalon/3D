@@ -102,23 +102,6 @@ public:
 
 				glBufferSubData(GL_ARRAY_BUFFER, size, batch.dataSizeInBytes[batch.length], batch.data[batch.length]);
 
-				/*for (int i = 0; i < batch.dataSizeInBytes[batch.length] / 4; i+=8)
-				{
-					std::cout << std::endl << std::endl;
-					std::cout << "VERTEX " << i / 8 << std::endl;
-
-					std::cout << "V: " << batch.data[batch.length][i] << std::endl;
-					std::cout << "V: " << batch.data[batch.length][i+1] << std::endl;
-					std::cout << "V: " << batch.data[batch.length][i+2] << std::endl;
-
-					std::cout << "N: " << batch.data[batch.length][i+3] << std::endl;
-					std::cout << "N: " << batch.data[batch.length][i+4] << std::endl;
-					std::cout << "N: " << batch.data[batch.length][i+5] << std::endl;
-
-					std::cout << "U: " << batch.data[batch.length][i+6] << std::endl;
-					std::cout << "U: " << batch.data[batch.length][i+7] << std::endl;
-				}*/
-
 				glBindBuffer(GL_ARRAY_BUFFER, 0);
 				glBindVertexArray(0);
 

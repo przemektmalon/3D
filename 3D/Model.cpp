@@ -136,7 +136,7 @@ void Model::loadMaterialTextures(aiMaterial * material, aiTextureType type, Tria
 		case(aiTextureType_DIFFUSE):
 		{
 			triList.matMeta.albedo.name.setToChars(toks2.front().c_str());
-			std::cout << "Model: \"" << name.getString() << "\" has diffuse texture: \"" << toks2.front() << "\"" << std::endl;
+			//std::cout << "Model: \"" << name.getString() << "\" has diffuse texture: \"" << toks2.front() << "\"" << std::endl;
 
 			triList.matMeta.albedo.glTex = Engine::assets.get2DTexGL(triList.matMeta.albedo.name);
 
@@ -150,7 +150,7 @@ void Model::loadMaterialTextures(aiMaterial * material, aiTextureType type, Tria
 		case(aiTextureType_NORMALS):
 		{
 			triList.matMeta.normal.name.setToChars(toks2.front().c_str());
-			std::cout << "Model: \"" << name.getString() << "\" has normal texture: \"" << toks2.front() << "\"" << std::endl;
+			//std::cout << "Model: \"" << name.getString() << "\" has normal texture: \"" << toks2.front() << "\"" << std::endl;
 
 			triList.matMeta.normal.glTex = Engine::assets.get2DTexGL(triList.matMeta.normal.name);
 
@@ -164,7 +164,7 @@ void Model::loadMaterialTextures(aiMaterial * material, aiTextureType type, Tria
 		case(aiTextureType_SHININESS):
 		{
 			triList.matMeta.specularMetallic.name.setToChars(toks2.front().c_str());
-			std::cout << "Model: \"" << name.getString() << "\" has specular texture: \"" << toks2.front() << "\"" << std::endl;
+			//std::cout << "Model: \"" << name.getString() << "\" has specular texture: \"" << toks2.front() << "\"" << std::endl;
 
 			triList.matMeta.specularMetallic.glTex = Engine::assets.get2DTexGL(triList.matMeta.specularMetallic.name);
 

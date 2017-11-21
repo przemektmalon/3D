@@ -1,4 +1,24 @@
 [Texture]
+path=res/tex/plastic_D.png
+name=plastic_D
+mip=true
+
+[Texture]
+path=res/tex/plastic_N.png
+name=plastic_N
+mip=true
+
+[Texture]
+path=res/tex/plastic_S.png
+name=plastic_S
+mip=true
+
+[Texture]
+path=res/tex/plastic_R.png
+name=plastic_R
+mip=true
+
+[Texture]
 path=res/tex/dirt_D.png
 name=dirt_D
 mip=true
@@ -112,10 +132,7 @@ metallic=dirt_S
 roughness=dirt_R
 
 [Model]
-path=res/model/ball1.obj
-limit=100
 path=res/model/ball2.obj
-limit=100000
 name=pbrsphere
 ext=obj
 albedo=rustediron_D

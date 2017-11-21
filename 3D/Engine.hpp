@@ -23,7 +23,7 @@ class AssetManager;
 class World;
 class Console;
 
-#define BORDERLESS true
+#define BORDERLESS false
 #define NUM_VALID_RESOLUTIONS 9
 
 class EngineConfig

@@ -122,8 +122,6 @@ public:
 
 	GLBufferObject shadowMatrixBuffer;
 
-	TextBillboard* tb;
-
 	//Shaders
 	ShaderStore shaderStore;
 

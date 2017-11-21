@@ -69,17 +69,3 @@ public:
 	
 	unsigned char keyState[256];
 };
-
-class MouseCode
-{
-public:
-	MouseCode(unsigned char pButton) : code(Code(pButton)) {}
-	enum Code
-	{
-		M_LEFT,
-		M_RIGHT,
-		M_MIDDLE,
-		M_NONE
-	};
-	Code code;
-};
