@@ -253,11 +253,3 @@ void AssetManager::loadAssets(String128 & assetListFilePath)
 	}
 	file.close();
 }
-
-void AssetManager::pushTexturesToGPU()
-{
-	for (auto tex : texture2DList)
-	{
-		std::cout << const_cast<String32&>(tex.first).getString() << std::endl;
-	}
-}

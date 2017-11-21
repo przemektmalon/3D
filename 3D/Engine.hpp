@@ -23,7 +23,7 @@ class AssetManager;
 class World;
 class Console;
 
-#define BORDERLESS false
+#define BORDERLESS true
 #define NUM_VALID_RESOLUTIONS 9
 
 class EngineConfig
@@ -128,6 +128,10 @@ public:
 		void loadKeyBinds();
 	
 	} keyBinds;
+
+	struct MouseConfig {
+		glm::fvec2 sensitivity;
+	} mouse;
 };
 
 class Engine

@@ -23,9 +23,9 @@ public:
 		setTextureLODBias(0.f);
 		setTextureMinFilter(GL_NEAREST_MIPMAP_LINEAR);
 		setTextureMagFilter(GL_LINEAR);
-		setTextureMinLOD(-1000);
-		setTextureMaxLOD(1000);
-		setTextureMaxLevel(1000);
+		setTextureMinLOD(0);
+		setTextureMaxLOD(20);
+		setTextureMaxLevel(20);
 		setTextureSwizzle(GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA);
 		setTextureWrapS(GL_REPEAT);
 		setTextureWrapT(GL_REPEAT);

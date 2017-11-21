@@ -17,7 +17,7 @@
 #include "UIConsole.hpp"
 #include "UIButton.hpp"
 
-#define NUM_POINT_LIGHTS 8
+#define NUM_POINT_LIGHTS 3
 #define NUM_SPOT_LIGHTS 0
 
 void MasterRenderer::render()

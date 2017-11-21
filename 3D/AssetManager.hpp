@@ -126,8 +126,6 @@ public:
 		return texture2DList;
 	}
 
-	void pushTexturesToGPU();
-
 	void loadAssets(String128& assetListFilePath);
 
 	GPUModelManager modelManager;

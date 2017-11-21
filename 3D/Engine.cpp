@@ -38,7 +38,6 @@ Camera Engine::cam;
 Time Engine::dt;
 MasterRenderer* Engine::r;
 QPC Engine::qpc;
-glm::ivec2 Engine::lastM;
 UIM Engine::uim;
 char Engine::workingDirectory[MAX_PATH];
 u32 Engine::workingDirectoryLength;
@@ -268,7 +267,6 @@ void Engine::mainLoop(int resolutionIndex)
 	assets.modelManager.init();
 
 	assets.loadAssets(String128("res/resources.txt"));
-	assets.pushTexturesToGPU();
 
 	const GPUModelManager& mm = Engine::assets.modelManager;
 
@@ -312,7 +310,7 @@ void Engine::mainLoop(int resolutionIndex)
 	auto col2 = new btSphereShape(scale);
 	auto boxcol = new btBoxShape(glm::fvec3(scale));
 
-	for (int i = 0; i < 3; ++i)
+	for (int i = 0; i < 50; ++i)
 	{
 		auto i2 = world->addModelInstance("pbrsphere", worldRoot);
 		i2->sgNode->transform.scale(scale);
@@ -321,7 +319,7 @@ void Engine::mainLoop(int resolutionIndex)
 		i2->makePhysicsObject(col2, 10.f);
 	}
 
-	for (int i = 0; i < 3; ++i)
+	for (int i = 0; i < 50; ++i)
 	{
 		auto i2 = world->addModelInstance("colbox", worldRoot);
 		i2->sgNode->transform.scale(scale);
@@ -354,6 +352,7 @@ void Engine::mainLoop(int resolutionIndex)
 	uiwm.addWindow(createRenderModeWindow());
 
 	cfg.render.ssao.sampleRadius = 10.f;
+	cfg.mouse.sensitivity = glm::fvec2(0.0035, 0.0035);
 
 	while (engineState != Quitting) {
 		if (!window.processMessages()) 
@@ -371,11 +370,9 @@ void Engine::mainLoop(int resolutionIndex)
 				{
 					if (ev.mouse.code & Mouse::M_RIGHT)
 					{
-						const float mouseX_Sensitivity = 0.004f;
-						const float mouseY_Sensitivity = 0.004f;
-
-						cam.targetYaw += mouseX_Sensitivity * ev.mouse.move.x;
-						cam.targetPitch += mouseY_Sensitivity * ev.mouse.move.y;
+						cam.targetYaw += cfg.mouse.sensitivity.x * ev.mouse.move.x;
+						cam.targetPitch += cfg.mouse.sensitivity.y * ev.mouse.move.y;
+						SetCursorPos(window.getPosX() + (window.getSizeX() / 2), window.getPosY() + (window.getSizeY() / 2));
 					}
 					break;
 				}
@@ -448,11 +445,6 @@ void Engine::mainLoop(int resolutionIndex)
 void Engine::processGameFrame()
 {
 	auto beginFrameTime = qpc.now();
-
-	if (window.mouse.state & Mouse::M_RIGHT)
-	{
-		SetCursorPos(window.getPosX() + (window.getSizeX() / 2), window.getPosY() + (window.getSizeY() / 2));
-	}
 
 	auto move = glm::fvec3(glm::fvec4(0, 0, cfg.world.camSpeed * dt.getSeconds(), 1) * cam.matYaw);
 	cam.targetPos -= move * float(window.keyboard.isKeyPressed('W'));
