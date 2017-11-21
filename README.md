@@ -6,7 +6,7 @@
 
 # Current features
 
--Deferred HDR rendering using half-z tile light culling through OGL compute shader. Supports normal, specular and tone mapping.
+-Deferred HDR rendering using half-z tile light culling through OGL compute shader. Supports normal and tone mapping. Uses metallic and roughness maps for PBR calculations.
 
 -Realistic PBR lighting model
 
