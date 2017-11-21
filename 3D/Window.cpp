@@ -377,6 +377,7 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 	case WM_CREATE:
 	{
 		engineWindow->registerInputDevices();
+		SetActiveWindow(engineWindow->windowHandle);
 		break;
 	}
 	case WM_DESTROY:
