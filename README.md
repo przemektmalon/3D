@@ -46,11 +46,21 @@
 
 # Planned features
 
+## Render Engine
+
 -Heightmap tesselation
 
--Depth of field
+-Light rays
+
+-Anti-aliasing
+
+-Bloom
+
+-Image based lighting
 
 -Emissive and parallax mapping
+
+-Depth of field
 
 -Fog
 
@@ -60,13 +70,25 @@
 
 -Reflections
 
--Day/night cycles
+-Skeletal animation and inverse kinematics
+
+## Game Engine
 
 -Scripting language (or at least support for one)
 
 -Markup language for UI design
 
--Skeletal animation and inverse kinematics
+-Terrain system
+
+-Day/night cycles
+
+-Character system
+
+## General
+
+-Networking
+
+-Platform independence
 
 # Dependencies
 
