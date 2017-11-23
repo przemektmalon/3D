@@ -55,11 +55,11 @@ enum DrawMode { Regular, MultiTextured, Water, Reflective, Shadow, DrawModesCoun
 //Multi-textured : Splattered textures with 4x regular textures
 
 
-class MasterRenderer
+class Renderer
 {
 public:
-	MasterRenderer() {}
-	~MasterRenderer() {}
+	Renderer() {}
+	~Renderer() {}
 
 	inline void initialiseScreenQuad();
 

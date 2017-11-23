@@ -149,6 +149,15 @@ normal=bamboo_N
 metallic=bamboo_S
 roughness=bamboo_R
 
+[Model]
+path=res/model/hollowbox.obj
+name=hollowbox
+ext=obj
+albedo=bamboo_D
+normal=bamboo_N
+metallic=bamboo_S
+roughness=bamboo_R
+
 [Font]
 path=res/fonts/clear-sans/ClearSans-Regular.ttf
 name=clearsans

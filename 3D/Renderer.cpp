@@ -20,7 +20,7 @@
 #define NUM_POINT_LIGHTS 3
 #define NUM_SPOT_LIGHTS 0
 
-void MasterRenderer::render()
+void Renderer::render()
 {
 	auto beginRenderTime = Engine::qpc.now();
 
@@ -101,7 +101,7 @@ void MasterRenderer::render()
 	screenTime = Engine::qpc.now() - beginScreenPassTime;
 }
 
-void MasterRenderer::gBufferPass()
+void Renderer::gBufferPass()
 {
 	glViewport(0, 0, Engine::cfg.render.resolution.x, Engine::cfg.render.resolution.y);
 	fboGBuffer.bind();
@@ -138,7 +138,7 @@ void MasterRenderer::gBufferPass()
 	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
 }
 
-void MasterRenderer::shadowPass()
+void Renderer::shadowPass()
 {
 	pointShadowPassShader.use();
 
@@ -206,7 +206,7 @@ void MasterRenderer::shadowPass()
 	}
 }
 
-void MasterRenderer::ssaoPass()
+void Renderer::ssaoPass()
 {
 	Engine::cfg.render.frameScale = 1.f;
 	glViewport(0, 0, Engine::cfg.render.resolution.x * Engine::cfg.render.frameScale, Engine::cfg.render.resolution.y * Engine::cfg.render.frameScale);
@@ -257,7 +257,7 @@ void MasterRenderer::ssaoPass()
 
 }
 
-void MasterRenderer::shadingPass()
+void Renderer::shadingPass()
 {
 	tileCullShader.use();
 	glBindTextureUnit(2, lightPassTex.getGLID());
@@ -298,7 +298,7 @@ void MasterRenderer::shadingPass()
 	lightManager.spotLightsBuffer.unbind();
 }
 
-void MasterRenderer::screenPass()
+void Renderer::screenPass()
 {
 	fboDefault.bind();
 	fboDefault.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -341,7 +341,7 @@ void MasterRenderer::screenPass()
 	}
 }
 
-void MasterRenderer::initialiseRenderer(Window * pwin, Camera & cam)
+void Renderer::initialiseRenderer(Window * pwin, Camera & cam)
 {
 	window = pwin;
 	viewport.top = 0; viewport.left = 0; viewport.width = window->getSizeX(); viewport.height = window->getSizeY();
@@ -365,7 +365,7 @@ void MasterRenderer::initialiseRenderer(Window * pwin, Camera & cam)
 	fboGBuffer.setClearDepth(0.f);
 }
 
-inline void MasterRenderer::initialiseGBuffer()
+inline void Renderer::initialiseGBuffer()
 {
 	fboGBuffer.setResolution(Engine::cfg.render.resolution);
 	fboGBuffer.attachTexture(GL_RG16F, GL_RG, GL_HALF_FLOAT, GL_COLOR_ATTACHMENT0);							// NORMAL
@@ -379,7 +379,7 @@ inline void MasterRenderer::initialiseGBuffer()
 	glDrawBuffers(3, attachments);
 }
 
-inline void MasterRenderer::initialiseSSAOBuffer()
+inline void Renderer::initialiseSSAOBuffer()
 {
 	fboSSAO.setResolution(Engine::cfg.render.resolution);
 	fboSSAO.attachTexture(GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT0, glm::fvec2(Engine::cfg.render.frameScale));
@@ -390,14 +390,14 @@ inline void MasterRenderer::initialiseSSAOBuffer()
 	fboSSAOBlur.checkStatus();
 }
 
-inline void MasterRenderer::initialiseScreenFramebuffer()
+inline void Renderer::initialiseScreenFramebuffer()
 {
 	fboScreen.setResolution(Engine::cfg.render.resolution);
 	fboScreen.attachTexture(GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT0);
 	fboScreen.checkStatus();
 }
 
-inline void MasterRenderer::initialiseSkybox()
+inline void Renderer::initialiseSkybox()
 {
 	int width, height;
 	unsigned char* image;
@@ -434,7 +434,7 @@ inline void MasterRenderer::initialiseSkybox()
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
-inline void MasterRenderer::initialiseLights()
+inline void Renderer::initialiseLights()
 {
 	const int nr = NUM_POINT_LIGHTS;
 	for (int i = 0; i < nr; ++i)
@@ -511,7 +511,7 @@ inline void MasterRenderer::initialiseLights()
 	glReadBuffer(GL_NONE);
 }
 
-inline void MasterRenderer::initialiseSamplers()
+inline void Renderer::initialiseSamplers()
 {
 	defaultSampler.initialiseDefaults();
 	defaultSampler.setTextureWrapS(GL_REPEAT);
@@ -590,7 +590,7 @@ inline void MasterRenderer::initialiseSamplers()
 	}
 }
 
-void MasterRenderer::initialiseShaders()
+void Renderer::initialiseShaders()
 {
 	shaderStore.loadShader(&tileCullShader);
 	shaderStore.loadShader(&gBufferShaderTex);
@@ -610,14 +610,14 @@ void MasterRenderer::initialiseShaders()
 	shaderStore.loadShader(ShaderProgram::VertFrag, String32("test"));
 }
 
-void MasterRenderer::initialiseFramebuffers()
+void Renderer::initialiseFramebuffers()
 {
 	initialiseGBuffer();
 	initialiseSSAOBuffer();
 	initialiseScreenFramebuffer();
 }
 
-void MasterRenderer::reInitialiseFramebuffers()
+void Renderer::reInitialiseFramebuffers()
 {
 	destroyFramebufferTextures();
 	initialiseFramebuffers();
@@ -625,7 +625,7 @@ void MasterRenderer::reInitialiseFramebuffers()
 	lightPassTex.createFromStream(GL_RGBA32F, Engine::cfg.render.resolution.x, Engine::cfg.render.resolution.y, GL_RGBA, GL_FLOAT, NULL);
 }
 
-void MasterRenderer::destroyFramebufferTextures()
+void Renderer::destroyFramebufferTextures()
 {
 	fboGBuffer.destroyAllAttachments();
 	fboScreen.destroyAllAttachments();
@@ -633,7 +633,7 @@ void MasterRenderer::destroyFramebufferTextures()
 	fboSSAOBlur.destroyAllAttachments();
 }
 
-void MasterRenderer::setActiveCam(Camera & pCam)
+void Renderer::setActiveCam(Camera & pCam)
 {
 	activeCam = &pCam;
 	cameraProjUpdated();
@@ -666,7 +666,7 @@ void MasterRenderer::setActiveCam(Camera & pCam)
 	quadVerticesViewRays[35] = activeCam->viewRays2[3].y;
 }
 
-void MasterRenderer::cameraProjUpdated()
+void Renderer::cameraProjUpdated()
 {
 	gBufferShaderTex.setProj(activeCam->proj);
 	gBufferShaderMultiTex.setProj(activeCam->proj);
@@ -675,14 +675,14 @@ void MasterRenderer::cameraProjUpdated()
 	frustCullShader.setProj(activeCam->proj);
 }
 
-void MasterRenderer::bakeStaticLights()
+void Renderer::bakeStaticLights()
 {
 	//for (auto itr = lightManager.staticPointLightsGPUData.begin(); itr != lightManager.staticPointLightsGPUData.end(); ++itr)
 	//{
 	//}
 }
 
-inline void MasterRenderer::initialiseScreenQuad()
+inline void Renderer::initialiseScreenQuad()
 {
 	glGenVertexArrays(1, &vaoQuad);
 	glGenBuffers(1, &vboQuad);

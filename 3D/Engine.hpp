@@ -17,7 +17,7 @@
 class FontStore;
 class Camera;
 class Time;
-class MasterRenderer;
+class Renderer;
 class QPC;
 class AssetManager;
 class World;
@@ -166,7 +166,7 @@ public:
 	static bool movingLight;
 	static Camera cam;
 	static Time dt;
-	static MasterRenderer* r;
+	static Renderer* r;
 	static QPC qpc;
 	static UIM uim;
 

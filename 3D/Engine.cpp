@@ -36,7 +36,7 @@ bool Engine::movingLight;
 Engine::EngineState Engine::engineState;
 Camera Engine::cam;
 Time Engine::dt;
-MasterRenderer* Engine::r;
+Renderer* Engine::r;
 QPC Engine::qpc;
 UIM Engine::uim;
 char Engine::workingDirectory[MAX_PATH];
@@ -251,7 +251,7 @@ void Engine::mainLoop(int resolutionIndex)
 	cfg.keyBinds.initialiseFunctionBindingConfig();
 	cfg.keyBinds.loadKeyBinds();
 
-	r = new MasterRenderer();
+	r = new Renderer();
 
 	physics.create();
 
@@ -279,6 +279,24 @@ void Engine::mainLoop(int resolutionIndex)
 	world = new World();
 	world->initialiseGLBuffers();
 
+	float scale = 20.f;
+
+	auto b1 = new btBoxShape(glm::fvec3(0.1, 0.8, 0.1) * scale);
+	auto b2 = new btBoxShape(glm::fvec3(1.0, 0.1, 1.0) * scale);
+
+	btQuaternion norot(0,0,0);
+
+	auto boxc = new btCompoundShape();
+	boxc->addChildShape(btTransform(norot, glm::fvec3(0, 0.9, 0) * scale), b2);
+	boxc->addChildShape(btTransform(norot, glm::fvec3(0, -0.9, 0) * scale), b2);
+
+	boxc->addChildShape(btTransform(norot, glm::fvec3(0.9, 0, 0.9)* scale), b1);
+	boxc->addChildShape(btTransform(norot, glm::fvec3(0.9, 0, -0.9)* scale), b1);
+	boxc->addChildShape(btTransform(norot, glm::fvec3(-0.9, 0, 0.9)* scale), b1);
+	boxc->addChildShape(btTransform(norot, glm::fvec3(-0.9, 0, -0.9)* scale), b1);
+
+
+
 	auto c1 = new btStaticPlaneShape(glm::fvec3(0.f, 1.f, 0.f), 0.f);
 	auto c2 = new btStaticPlaneShape(btVector3(1.f, 0.f, 0.f), -250.f);
 	auto c3 = new btStaticPlaneShape(btVector3(-1.f, 0.f, 0.f), -250.f);
@@ -301,31 +319,30 @@ void Engine::mainLoop(int resolutionIndex)
 	auto worldRoot = world->getWorldRootNode();
 
 	auto i8 = world->addModelInstance("ground", worldRoot);
-	i8->sgNode->transform.scale(5.f);
+	i8->sgNode->transform.scale(10.f);
 	auto col = new btStaticPlaneShape(glm::fvec3(0.f, 0.f, 1.f), 0.f);
 	i8->makePhysicsObject(s, 0.f);
 
-	float scale = 8.f;
-
-	auto col2 = new btSphereShape(scale);
+	auto col2 = new btSphereShape(scale / 4.f);
 	auto boxcol = new btBoxShape(glm::fvec3(scale));
 
 	for (int i = 0; i < 50; ++i)
 	{
 		auto i2 = world->addModelInstance("pbrsphere", worldRoot);
-		i2->sgNode->transform.scale(scale);
-		i2->sgNode->transform.translate(glm::fvec3(5.1, 5.1 + (5.1 * i), 0));
+		i2->sgNode->transform.scale(scale / 4.f);
+		i2->sgNode->transform.translate(glm::fvec3(50.1, 5.1 + (5.1 * i), 0));
 
 		i2->makePhysicsObject(col2, 10.f);
 	}
 
 	for (int i = 0; i < 50; ++i)
 	{
-		auto i2 = world->addModelInstance("colbox", worldRoot);
+		auto i2 = world->addModelInstance("hollowbox", worldRoot);
 		i2->sgNode->transform.scale(scale);
-		i2->sgNode->transform.translate(glm::fvec3(5.1, 5.1 + (5.1 * i), 0));
+		i2->sgNode->transform.translate(glm::fvec3(5, 20.1 + (15.1 * i), 0));
 
-		i2->makePhysicsObject(boxcol, 10.f);
+		i2->makePhysicsObject(boxc, 10.f);
+		i2->physicsObject->setRestitution(0.1);
 	}
 
 	world->sg.updateAll();
