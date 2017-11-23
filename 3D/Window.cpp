@@ -209,7 +209,7 @@ void Window::screenshot(std::string fileName)
 	fileName.append(".bmp");
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	glReadBuffer(GL_BACK);
-	glReadPixels(0, 0, getSizeX(), getSizeY(), GL_BGR, GL_UNSIGNED_BYTE, screenshot);
+	glReadPixels(0, 0, getSizeX(), getSizeY(), GL_RGB, GL_UNSIGNED_BYTE, screenshot);
 
 	SOIL_save_image(fileName.c_str(), SOIL_SAVE_TYPE_BMP, getSizeX(), getSizeY(), 3, screenshot);
 
@@ -250,19 +250,14 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 	{
 		UINT dwSize;
 
-		GetRawInputData((HRAWINPUT)lParam, RID_INPUT, NULL, &dwSize,
-		sizeof(RAWINPUTHEADER));
-		LPBYTE lpb = new BYTE[dwSize];
-		if (lpb == NULL)
-			return 0;
+		GetRawInputData((HRAWINPUT)lParam, RID_INPUT, NULL, &dwSize, sizeof(RAWINPUTHEADER));
 
+		LPBYTE lpb = new BYTE[dwSize];
+		
 		if (GetRawInputData((HRAWINPUT)lParam, RID_INPUT, lpb, &dwSize, sizeof(RAWINPUTHEADER)) != dwSize)
 			OutputDebugString(TEXT("GetRawInputData does not return correct size !\n"));
 
 		RAWINPUT* raw = (RAWINPUT*)lpb;
-
-		STRSAFE_LPSTR szTempOutput = new char[1000];
-		HRESULT hResult;
 
 		if (raw->header.dwType == RIM_TYPEMOUSE)
 		{
