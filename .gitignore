@@ -71,8 +71,6 @@ artifacts/
 *.scc
 
 *.jpg
-*.png
-*.shader
 *.tga
 *.7z
 *.bin
@@ -84,11 +82,9 @@ artifacts/
 *.blend1
 
 3D/res/tex/
+3D/res/skybox/
+3D/res/fonts/
 3D/screenshot/
-Release/res/tex/
-Release/screenshot/
-Debug/res/tex/
-Debug/screenshot/
 
 # Chutzpah Test files
 _Chutzpah*
