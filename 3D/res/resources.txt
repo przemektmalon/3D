@@ -59,6 +59,26 @@ name=bamboo_R
 mip=true
 
 [Texture]
+path=res/tex/mahog_D.png
+name=mahog_D
+mip=true
+
+[Texture]
+path=res/tex/mahog_N.png
+name=mahog_N
+mip=true
+
+[Texture]
+path=res/tex/mahog_R.png
+name=mahog_R
+mip=true
+
+[Texture]
+path=res/tex/bamboo_S.png
+name=bamboo_S
+mip=true
+
+[Texture]
 path=res/tex/rustediron_D.png
 name=rustediron_D
 mip=true

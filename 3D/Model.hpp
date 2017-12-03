@@ -28,6 +28,7 @@ struct Vertex {
 };
 
 struct TextureMeta {
+	TextureMeta() : glTex(nullptr) {}
 	String32 name;
 	GLTexture* glTex;
 	//s32 gpuIndex;
@@ -36,6 +37,25 @@ struct TextureMeta {
 struct MaterialMeta {
 	bool splatted;
 	TextureMeta albedo, normal, specularMetallic, roughness, ao, height;
+
+	MaterialMeta& operator=(MaterialMeta& rhs)
+	{
+		albedo.name.setToChars(rhs.albedo.name.getString());
+		normal.name.setToChars(rhs.normal.name.getString());
+		specularMetallic.name.setToChars(rhs.specularMetallic.name.getString());
+		roughness.name.setToChars(rhs.roughness.name.getString());
+		ao.name.setToChars(rhs.ao.name.getString());
+		height.name.setToChars(rhs.height.name.getString());
+
+		albedo.glTex = rhs.albedo.glTex;
+		normal.glTex = rhs.normal.glTex;
+		specularMetallic.glTex = rhs.specularMetallic.glTex;
+		roughness.glTex = rhs.roughness.glTex;
+		ao.glTex = rhs.ao.glTex;
+		height.glTex = rhs.height.glTex;
+		
+		return *this;
+	}
 };
 
 class MeshBatch;
@@ -138,11 +158,38 @@ class ModelInstance
 {
 public:
 
+	void setModel(Model* m)
+	{
+		materialOverwrite.clear();
+		model = m;
+		for (int i = 0; i < model->triLists.size(); ++i)
+		{
+			materialOverwrite.push_back(std::vector<MaterialMeta>());
+			for (int j = 0; j < model->triLists[i].size(); ++j)
+			{
+				materialOverwrite.back().push_back(MaterialMeta());
+			}
+		}
+	}
+
 	void makePhysicsObject(btCollisionShape* collisionShape, float mass);
+
+	void overwriteMaterial(int lod, int triList, MaterialMeta& material)
+	{
+		if (materialOverwrite.size() < lod)
+			return; /// TODO: log ?
+
+		auto& lodTris = materialOverwrite[lod];
+
+		if (lodTris.size() < triList)
+			return; /// TODO: log ?
+
+		lodTris[triList] = material;
+	}
 
 	Model* model;
 	SGNode* sgNode;
 	PhysicsObject* physicsObject;
 
-
+	std::vector<std::vector<MaterialMeta>> materialOverwrite;
 };

@@ -66,7 +66,7 @@ public:
 		numTriLists[Regular] += model->triLists.size();
 
 		auto inst = modelInstances.insert(std::make_pair(instanceID, ModelInstance())).first;
-		inst->second.model = model;
+		inst->second.setModel(model);
 		inst->second.sgNode = parent->addChild(SGNode());
 
 		return &inst->second;
@@ -179,6 +179,8 @@ public:
 			//while (lodLevel > model->lodLimits.size())
 			//	lodLevel--;
 
+			int triList = 0;
+
 			for (auto itr2 = model->triLists[lodLevel].begin(); itr2 != model->triLists[lodLevel].end(); ++itr2)
 			{
 				auto bptr = itr2->renderMeta.batchPtr; //If render meta is missing, then most likely the mesh has not been pushed to a gpu batch
@@ -189,18 +191,35 @@ public:
 				indirectReg[i].first = bptr->firsts[bindex];
 				indirectReg[i].baseInstance = 0;
 
-				texHandle[(6 * i)] = itr2->matMeta.albedo.glTex->getHandle(Engine::r->defaultSampler.getGLID());
-				texHandle[(6 * i) + 1] = itr2->matMeta.normal.glTex->getHandle(Engine::r->defaultSampler.getGLID());
-				texHandle[(6 * i) + 2] = itr2->matMeta.specularMetallic.glTex->getHandle(Engine::r->defaultSampler.getGLID());
+				const auto& matOverwrite = itr->second.materialOverwrite[lodLevel][triList];
+
+				if (matOverwrite.albedo.glTex)
+					texHandle[(6 * i)] = matOverwrite.albedo.glTex->getHandle(Engine::r->defaultSampler.getGLID());
+				else
+					texHandle[(6 * i)] = itr2->matMeta.albedo.glTex->getHandle(Engine::r->defaultSampler.getGLID());
+
+				if (matOverwrite.normal.glTex)
+					texHandle[(6 * i) + 1] = matOverwrite.normal.glTex->getHandle(Engine::r->defaultSampler.getGLID());
+				else
+					texHandle[(6 * i) + 1] = itr2->matMeta.normal.glTex->getHandle(Engine::r->defaultSampler.getGLID());
+
+				if (matOverwrite.specularMetallic.glTex)
+					texHandle[(6 * i) + 2] = matOverwrite.specularMetallic.glTex->getHandle(Engine::r->defaultSampler.getGLID());
+				else
+					texHandle[(6 * i) + 2] = itr2->matMeta.specularMetallic.glTex->getHandle(Engine::r->defaultSampler.getGLID());
 
 				if (itr2->matMeta.roughness.name.getLength() != 0)
 					texHandle[(6 * i) + 3] = itr2->matMeta.roughness.glTex->getHandle(Engine::r->defaultSampler.getGLID());
 				else
 					texHandle[(6 * i) + 3] = 0;
 
+				if (matOverwrite.roughness.glTex)
+					texHandle[(6 * i) + 3] = matOverwrite.roughness.glTex->getHandle(Engine::r->defaultSampler.getGLID());
+
 				instanceTransformsRegular[i] = itr->second.sgNode->transform.getTransformMat();
 
 				++i;
+				++triList;
 			}
 		}
 
