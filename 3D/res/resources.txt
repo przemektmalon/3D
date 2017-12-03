@@ -165,12 +165,28 @@ name=greasymetal_S
 path=res/tex/greasymetal_R.png
 name=greasymetal_R
 
+[Texture]
+path=res/tex/marble_D.png
+name=marble_D
+
+[Texture]
+path=res/tex/marble_N.png
+name=marble_N
+
+[Texture]
+path=res/tex/marble_R.png
+name=marble_R
+
+[Texture]
+path=res/tex/marble_S.png
+name=marble_S
+
 [Material]
-name=plastic
-albedo=plastic_D
-normal=plastic_N
-metallic=plastic_S
-roughness=plastic_R
+name=marble
+albedo=marble_D
+normal=marble_N
+metallic=marble_S
+roughness=marble_R
 
 [Material]
 name=copper

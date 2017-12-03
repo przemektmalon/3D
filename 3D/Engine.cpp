@@ -330,7 +330,7 @@ void Engine::mainLoop(int resolutionIndex)
 	auto col2 = new btSphereShape(scale / 2.f);
 	auto boxcol = new btBoxShape(glm::fvec3(scale));
 
-	for (int i = 0; i < 12; ++i)
+	for (int i = 0; i < 48; ++i)
 	{
 		auto i2 = world->addModelInstance("pbrsphere", worldRoot);
 		i2->sgNode->transform.scale(scale / 2.f);
@@ -344,7 +344,7 @@ void Engine::mainLoop(int resolutionIndex)
 			i2->overwriteMaterial(0,0,assets.getMaterial("greasymetal"));
 	}
 
-	for (int i = 0; i < 12; ++i)
+	for (int i = 0; i < 48; ++i)
 	{
 		auto i2 = world->addModelInstance("hollowbox", worldRoot);
 		i2->sgNode->transform.scale(scale);
@@ -356,7 +356,7 @@ void Engine::mainLoop(int resolutionIndex)
 		if (i % 3 == 0)
 			i2->overwriteMaterial(0, 0, assets.getMaterial("mahogany"));
 		else if (i % 3 == 1)
-			i2->overwriteMaterial(0, 0, assets.getMaterial("plastic"));
+			i2->overwriteMaterial(0, 0, assets.getMaterial("marble"));
 	}
 
 	world->sg.updateAll();
