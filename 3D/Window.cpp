@@ -211,9 +211,31 @@ void Window::screenshot(std::string fileName)
 	glReadBuffer(GL_BACK);
 	glReadPixels(0, 0, getSizeX(), getSizeY(), GL_RGB, GL_UNSIGNED_BYTE, screenshot);
 
-	SOIL_save_image(fileName.c_str(), SOIL_SAVE_TYPE_BMP, getSizeX(), getSizeY(), 3, screenshot);
+	struct pixel {
+		u8 r, g, b;
+	};
+
+	u8* flipped = new u8[imageSize];
+
+	float flipSign = -1.f;
+	float flip = imageSize - (getSizeX() * 3);
+
+	for (int y = 0; y < getSizeY(); ++y)
+	{
+		for (int x = 0; x < getSizeX(); ++x)
+		{
+			u32 sourceOffset = flip + (flipSign * (y * getSizeX() * 3) + (x * 3));
+			u32 targetOffset = (y * getSizeX() * 3) + (x * 3);
+			flipped[targetOffset] = screenshot[sourceOffset];
+			flipped[targetOffset + 1] = screenshot[sourceOffset + 1];
+			flipped[targetOffset + 2] = screenshot[sourceOffset + 2];
+		}
+	}
+
+	SOIL_save_image(fileName.c_str(), SOIL_SAVE_TYPE_BMP, getSizeX(), getSizeY(), 3, (u8*)flipped);
 
 	delete[] screenshot;
+	delete[] flipped;
 }
 
 void Window::screenshot()
