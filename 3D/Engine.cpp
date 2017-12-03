@@ -327,31 +327,36 @@ void Engine::mainLoop(int resolutionIndex)
 	auto col = new btStaticPlaneShape(glm::fvec3(0.f, 0.f, 1.f), 0.f);
 	i8->makePhysicsObject(s, 0.f);
 
-	auto col2 = new btSphereShape(scale / 4.f);
+	auto col2 = new btSphereShape(scale / 2.f);
 	auto boxcol = new btBoxShape(glm::fvec3(scale));
 
-	for (int i = 0; i < 5; ++i)
+	for (int i = 0; i < 12; ++i)
 	{
 		auto i2 = world->addModelInstance("pbrsphere", worldRoot);
-		i2->sgNode->transform.scale(scale / 4.f);
+		i2->sgNode->transform.scale(scale / 2.f);
 		i2->sgNode->transform.translate(glm::fvec3(50.1, 5.1 + (5.1 * i), 0));
 
 		i2->makePhysicsObject(col2, 10.f);
+
+		if (i % 3 == 0)
+			i2->overwriteMaterial(0,0,assets.getMaterial("copper"));
+		else if (i % 3 == 1)
+			i2->overwriteMaterial(0,0,assets.getMaterial("greasymetal"));
 	}
 
-	for (int i = 0; i < 5; ++i)
+	for (int i = 0; i < 12; ++i)
 	{
 		auto i2 = world->addModelInstance("hollowbox", worldRoot);
 		i2->sgNode->transform.scale(scale);
-		i2->sgNode->transform.translate(glm::fvec3(5, 20.1 + (15.1 * i), 0));
+		i2->sgNode->transform.translate(glm::fvec3(5, 20.1 + (30.1 * i), 0));
 
 		i2->makePhysicsObject(boxc, 10.f);
 		i2->physicsObject->setRestitution(0.1);
 
-		if (i % 2 == 0)
-		{
+		if (i % 3 == 0)
 			i2->overwriteMaterial(0, 0, assets.getMaterial("mahogany"));
-		}
+		else if (i % 3 == 1)
+			i2->overwriteMaterial(0, 0, assets.getMaterial("plastic"));
 	}
 
 	world->sg.updateAll();
