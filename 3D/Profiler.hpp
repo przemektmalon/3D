@@ -20,6 +20,13 @@ public:
 		return times[id].second;
 	}
 
+	void timeThis(std::function<void(void)> func, std::string id)
+	{
+		start(id);
+		func();
+		end(id);
+	}
+
 private:
 
 	std::unordered_map<std::string, std::pair<Time,Time>> times;
