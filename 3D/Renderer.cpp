@@ -20,9 +20,11 @@
 #define NUM_POINT_LIGHTS 3
 #define NUM_SPOT_LIGHTS 0
 
+#define CALL(name) []() -> void { Engine::r->##name##(); }
+
 void Renderer::render()
 {
-	auto beginRenderTime = Engine::qpc.now();
+	Engine::profiler.start("gpuBuffer");
 
 	world->updateDrawBuffer(); // For LOD
 
@@ -58,36 +60,23 @@ void Renderer::render()
 	lightManager.updateAllPointLights();
 	lightManager.updateAllSpotLights();
 
-	glFinish();
-	gpuBufferTime = Engine::qpc.now() - beginRenderTime;
+	Engine::profiler.glEnd("gpuBuffer");
 
-	auto beginGBufferTime = Engine::qpc.now();
-
-		gBufferPass();
+	Engine::profiler.glTimeThis(
+		CALL(gBufferPass), "gBuffer");
 	
-	glFinish();
-	gBufferTime = Engine::qpc.now() - beginGBufferTime;
-	auto beginShadowTime = Engine::qpc.now();
+	Engine::profiler.glTimeThis(
+		CALL(shadowPass), "shadow");
 
-		shadowPass();
+	Engine::profiler.glTimeThis(
+		CALL(ssaoPass), "ssao");
 
-	glFinish();
-	shadowTime = Engine::qpc.now() - beginShadowTime;
-	auto beginSSAOTime = Engine::qpc.now();
+	Engine::profiler.glTimeThis(
+		CALL(shadingPass), "light");
+	
+	Engine::profiler.start("screen");
 
-		ssaoPass();
-
-	glFinish();
-	ssaoTime = Engine::qpc.now() - beginSSAOTime;
-	auto beginLightPassTime = Engine::qpc.now();
-
-		shadingPass();
-
-	glFinish();
-	lightPassTime = Engine::qpc.now() - beginLightPassTime;
-	auto beginScreenPassTime = Engine::qpc.now();
-
-		screenPass();
+	screenPass();
 
 	lightManager.drawLightIcons();
 
@@ -97,8 +86,7 @@ void Renderer::render()
 
 	window->swapBuffers();
 
-	glFinish();
-	screenTime = Engine::qpc.now() - beginScreenPassTime;
+	Engine::profiler.glEnd("screen");
 }
 
 void Renderer::gBufferPass()
@@ -763,3 +751,4 @@ inline void Renderer::initialiseScreenQuad()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
+#undef CALL

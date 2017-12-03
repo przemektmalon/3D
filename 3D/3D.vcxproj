@@ -228,6 +228,7 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Mouse.cpp" />
     <ClCompile Include="PhysicsWorld.cpp" />
+    <ClCompile Include="Profiler.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Console.cpp" />
@@ -273,6 +274,7 @@
     <ClInclude Include="GPUModelManager.hpp" />
     <ClInclude Include="ImageData.hpp" />
     <ClInclude Include="Include.hpp" />
+    <ClInclude Include="Profiler.hpp" />
     <ClInclude Include="Shape2DShaderNoTex.hpp" />
     <ClInclude Include="UIInputField.hpp" />
     <ClInclude Include="Keyboard.hpp" />

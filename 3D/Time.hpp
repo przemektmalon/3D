@@ -40,6 +40,11 @@ public:
 		seconds += rhs.getSeconds();
 	}
 
+	void operator=(Time& rhs)
+	{
+		setMicroSeconds(rhs.getMicroSeconds());
+	}
+
 private:
 
 	s64 microSeconds;

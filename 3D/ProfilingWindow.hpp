@@ -22,7 +22,7 @@ UIWindow* createProfilingWindow()
 		[](UIWindow * win, UIElement* __this) -> void {
 		UILabel* _this = (UILabel*)__this;
 
-		_this->text.setString(std::string("Light update: ") + std::to_string((double)Engine::r->gpuBufferTime / 1000.f) + " ms");
+		_this->text.setString(std::string("Light update: ") + std::to_string((double)Engine::profiler.getTime("gpuBuffer").getMilliSeconds()) + " ms");
 	});
 
 	C_LABEL(lblGBuffer, win);
@@ -35,7 +35,7 @@ UIWindow* createProfilingWindow()
 		[](UIWindow * win, UIElement* __this) -> void {
 		UILabel* _this = (UILabel*)__this;
 
-		_this->text.setString(std::string("Gbuffer pass: ") + std::to_string((double)Engine::r->gBufferTime / 1000.f) + " ms");
+		_this->text.setString(std::string("Gbuffer pass: ") + std::to_string((double)Engine::profiler.getTime("gBuffer").getMilliSeconds()) + " ms");
 	});
 
 	C_LABEL(lblShadow, win);
@@ -48,7 +48,7 @@ UIWindow* createProfilingWindow()
 		[](UIWindow * win, UIElement* __this) -> void {
 		UILabel* _this = (UILabel*)__this;
 
-		_this->text.setString(std::string("Shadow pass: ") + std::to_string((double)Engine::r->shadowTime / 1000.f) + " ms");
+		_this->text.setString(std::string("Shadow pass: ") + std::to_string((double)Engine::profiler.getTime("shadow").getMilliSeconds()) + " ms");
 	});
 
 	C_LABEL(lblSSAO, win);
@@ -61,7 +61,7 @@ UIWindow* createProfilingWindow()
 		[](UIWindow * win, UIElement* __this) -> void {
 		UILabel* _this = (UILabel*)__this;
 
-		_this->text.setString(std::string("SSAO pass: ") + std::to_string((double)Engine::r->ssaoTime / 1000.f) + " ms");
+		_this->text.setString(std::string("SSAO pass: ") + std::to_string((double)Engine::profiler.getTime("ssao").getMilliSeconds()) + " ms");
 	});
 
 	C_LABEL(lblLightPass, win);
@@ -74,7 +74,7 @@ UIWindow* createProfilingWindow()
 		[](UIWindow * win, UIElement* __this) -> void {
 		UILabel* _this = (UILabel*)__this;
 
-		_this->text.setString(std::string("Shading pass: ") + std::to_string((double)Engine::r->lightPassTime / 1000.f) + " ms");
+		_this->text.setString(std::string("Shading pass: ") + std::to_string((double)Engine::profiler.getTime("light").getMilliSeconds()) + " ms");
 	});
 
 	C_LABEL(lblScreen, win);
@@ -87,7 +87,7 @@ UIWindow* createProfilingWindow()
 		[](UIWindow * win, UIElement* __this) -> void {
 		UILabel* _this = (UILabel*)__this;
 
-		_this->text.setString(std::string("Screen pass: ") + std::to_string((double)Engine::r->screenTime / 1000.f) + " ms");
+		_this->text.setString(std::string("Screen pass: ") + std::to_string((double)Engine::profiler.getTime("screen").getMilliSeconds()) + " ms");
 	});
 
 	C_LABEL(lblPhysics, win);
@@ -100,7 +100,7 @@ UIWindow* createProfilingWindow()
 		[](UIWindow * win, UIElement* __this) -> void {
 		UILabel* _this = (UILabel*)__this;
 
-		_this->text.setString(std::string("Physics: ") + std::to_string((double)Engine::physicsTime / 1000.f) + " ms");
+		_this->text.setString(std::string("Physics: ") + std::to_string((double)Engine::profiler.getTime("physics").getMilliSeconds()) + " ms");
 	});
 
 	C_LABEL(lblRest, win);
@@ -113,7 +113,7 @@ UIWindow* createProfilingWindow()
 		[](UIWindow * win, UIElement* __this) -> void {
 		UILabel* _this = (UILabel*)__this;
 
-		_this->text.setString(std::string("Frame time: ") + std::to_string((double)Engine::frameTime / 1000.f) + " ms");
+		_this->text.setString(std::string("Frame time: ") + std::to_string((double)Engine::profiler.getTime("frame").getMilliSeconds()) + " ms");
 	});
 
 	win->setMovable(true);

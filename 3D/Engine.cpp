@@ -58,6 +58,10 @@ int Engine::doPhysics = 1;
 u64 Engine::physicsTime = 0;
 u64 Engine::frameTime = 0;
 
+Profiler Engine::profiler;
+
+#define CALL(name) []() -> void { Engine::##name##(); }
+
 float Engine::tau;
 float Engine::damping;
 
@@ -446,7 +450,10 @@ void Engine::mainLoop(int resolutionIndex)
 			case(InGame):
 			{
 				tweak.updateTweaks();
-				processGameFrame();
+				profiler.timeThis(
+					CALL(processGameFrame), "frame");
+				dt = profiler.getTime("frame");
+				programTime += dt.getSecondsf();
 				break;
 			}
 			case(Menu):
@@ -461,8 +468,6 @@ void Engine::mainLoop(int resolutionIndex)
 
 void Engine::processGameFrame()
 {
-	auto beginFrameTime = qpc.now();
-
 	auto move = glm::fvec3(glm::fvec4(0, 0, cfg.world.camSpeed * dt.getSeconds(), 1) * cam.matYaw);
 	cam.targetPos -= move * float(window.keyboard.isKeyPressed('W'));
 
@@ -478,7 +483,7 @@ void Engine::processGameFrame()
 	cam.targetPos.y += cfg.world.camSpeed * dt.getSeconds() * float(window.keyboard.isKeyPressed('R'));
 	cam.targetPos.y -= cfg.world.camSpeed * dt.getSeconds() * float(window.keyboard.isKeyPressed('F'));
 
-	physicsTime = qpc.now();
+	profiler.start("physics");
 
 	if (doPhysics)
 	{
@@ -486,16 +491,13 @@ void Engine::processGameFrame()
 		physics.updateModels();
 	}
 
-	physicsTime = qpc.now() - physicsTime;
+	profiler.end("physics");
 
 	uiwm.updateUIWindows();
 	cam.update(dt);
 
-	r->render();
-
-	frameTime = qpc.now() - beginFrameTime;
-	dt.setMicroSeconds(frameTime);
-	programTime += dt.getSecondsf();
+	profiler.glTimeThis(
+		CALL(r->render), "render");
 }
 
 void Engine::processMenuFrame()
@@ -684,3 +686,5 @@ void EngineConfig::RenderConfig::CameraConfig::setFOV(float set)
 	fov = set;
 	Engine::r->activeCam->setFOV(fov);
 }
+
+#undef CALL

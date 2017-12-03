@@ -14,6 +14,8 @@
 
 #include "UIWindowManager.hpp"
 
+#include "Profiler.hpp"
+
 class FontStore;
 class Camera;
 class Time;
@@ -184,6 +186,8 @@ public:
 	static float tau, damping;
 
 	static EngineConfig cfg;
+
+	static Profiler profiler;
 
 	static u64 physicsTime;
 	static u64 frameTime;
