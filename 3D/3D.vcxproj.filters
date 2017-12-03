@@ -162,6 +162,9 @@
     <ClCompile Include="Profiler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MaterialLibrary.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Asset.hpp">
@@ -403,6 +406,12 @@
     </ClInclude>
     <ClInclude Include="Profiler.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MaterialLibrary.hpp">
+      <Filter>Header Files\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.hpp">
+      <Filter>Header Files\Assets</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

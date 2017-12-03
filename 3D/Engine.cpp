@@ -350,18 +350,7 @@ void Engine::mainLoop(int resolutionIndex)
 
 		if (i % 2 == 0)
 		{
-			MaterialMeta mat;
-			mat.albedo.glTex = assets.get2DTexGL(String32("mahog_D"));
-			mat.normal.glTex = assets.get2DTexGL(String32("mahog_N"));
-			mat.roughness.glTex = assets.get2DTexGL(String32("mahog_R"));
-			mat.specularMetallic.glTex = assets.get2DTexGL(String32("bamboo_S"));
-
-			mat.albedo.name.setToChars("mahog_D");
-			mat.normal.name.setToChars("mahog_N");
-			mat.roughness.name.setToChars("mahog_R");
-			mat.specularMetallic.name.setToChars("bamboo_S");
-
-			i2->overwriteMaterial(0, 0, mat);
+			i2->overwriteMaterial(0, 0, assets.getMaterial("mahogany"));
 		}
 	}
 

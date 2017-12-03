@@ -21,42 +21,7 @@
 
 #include <string>
 
-struct Vertex {
-	glm::vec3 position;
-	glm::vec3 normal;
-	glm::vec2 texCoords;
-};
-
-struct TextureMeta {
-	TextureMeta() : glTex(nullptr) {}
-	String32 name;
-	GLTexture* glTex;
-	//s32 gpuIndex;
-};
-
-struct MaterialMeta {
-	bool splatted;
-	TextureMeta albedo, normal, specularMetallic, roughness, ao, height;
-
-	MaterialMeta& operator=(MaterialMeta& rhs)
-	{
-		albedo.name.setToChars(rhs.albedo.name.getString());
-		normal.name.setToChars(rhs.normal.name.getString());
-		specularMetallic.name.setToChars(rhs.specularMetallic.name.getString());
-		roughness.name.setToChars(rhs.roughness.name.getString());
-		ao.name.setToChars(rhs.ao.name.getString());
-		height.name.setToChars(rhs.height.name.getString());
-
-		albedo.glTex = rhs.albedo.glTex;
-		normal.glTex = rhs.normal.glTex;
-		specularMetallic.glTex = rhs.specularMetallic.glTex;
-		roughness.glTex = rhs.roughness.glTex;
-		ao.glTex = rhs.ao.glTex;
-		height.glTex = rhs.height.glTex;
-		
-		return *this;
-	}
-};
+#include "Material.hpp"
 
 class MeshBatch;
 

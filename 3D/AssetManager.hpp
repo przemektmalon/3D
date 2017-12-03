@@ -7,6 +7,7 @@
 #include <Windows.h>
 
 #include "GPUModelManager.hpp"
+#include "MaterialLibrary.hpp"
 
 class AssetManager
 {
@@ -93,6 +94,11 @@ public:
 		return get2DTexGL(pName);
 	}
 
+	GLTexture2D* get2DTexGL(std::string pName)
+	{
+		return get2DTexGL(String32(pName.c_str()));
+	}
+
 	GLTextureCube getCubeTex(String32& pName);
 
 	Model* getModel(String32& pName)
@@ -128,7 +134,13 @@ public:
 
 	void loadAssets(String128& assetListFilePath);
 
+	MaterialMeta& getMaterial(std::string pName)
+	{
+		return materialLibrary.getMaterial(pName);
+	}
+
 	GPUModelManager modelManager;
+	MaterialLibrary materialLibrary;
 
 private:
 

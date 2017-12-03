@@ -208,7 +208,7 @@ public:
 				else
 					texHandle[(6 * i) + 2] = itr2->matMeta.specularMetallic.glTex->getHandle(Engine::r->defaultSampler.getGLID());
 
-				if (itr2->matMeta.roughness.name.getLength() != 0)
+				if (itr2->matMeta.roughness.name.length() != 0)
 					texHandle[(6 * i) + 3] = itr2->matMeta.roughness.glTex->getHandle(Engine::r->defaultSampler.getGLID());
 				else
 					texHandle[(6 * i) + 3] = 0;

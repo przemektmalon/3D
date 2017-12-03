@@ -106,7 +106,7 @@ void AssetManager::loadAssets(String128 & assetListFilePath)
 			{
 				std::string line;
 				std::getline(file, line);
-				std::string name, path, ext, limit, albedo, normal, specular, metallic, roughness;
+				std::string name, path, ext, limit, albedo, normal, specular, metallic, roughness, material;
 				std::vector<std::string> paths;
 				std::vector<u32> limits;
 
@@ -156,6 +156,11 @@ void AssetManager::loadAssets(String128 & assetListFilePath)
 						roughness = value;
 						return true;
 					}
+					else if (key == "material")
+					{
+						material = value;
+						return true;
+					}
 					return false;
 				};
 
@@ -194,22 +199,27 @@ void AssetManager::loadAssets(String128 & assetListFilePath)
 					{
 						for (auto it = itr->begin(); it != itr->end(); ++it)
 						{
-							it->matMeta.albedo.name.setToChars(albedo.c_str());
-							it->matMeta.normal.name.setToChars(normal.c_str());
-							if (specular.length() != 0)
-								it->matMeta.specularMetallic.name.setToChars(specular.c_str());
+							if (material.length() != 0)
+								it->matMeta = getMaterial(material);
 							else
-								it->matMeta.specularMetallic.name.setToChars(metallic.c_str());
-
-							it->matMeta.roughness.name.setToChars(roughness.c_str());
-
-							it->matMeta.albedo.glTex = Engine::assets.get2DTexGL(it->matMeta.albedo.name);
-							it->matMeta.normal.glTex = Engine::assets.get2DTexGL(it->matMeta.normal.name);
-							it->matMeta.specularMetallic.glTex = Engine::assets.get2DTexGL(it->matMeta.specularMetallic.name);
-
-							if (roughness.length() != 0)
 							{
-								it->matMeta.roughness.glTex = Engine::assets.get2DTexGL(it->matMeta.roughness.name);
+								it->matMeta.albedo.name = albedo;
+								it->matMeta.normal.name = normal;
+								if (specular.length() != 0)
+									it->matMeta.specularMetallic.name = specular;
+								else
+									it->matMeta.specularMetallic.name = metallic;
+
+								it->matMeta.roughness.name = roughness;
+
+								it->matMeta.albedo.glTex = Engine::assets.get2DTexGL(it->matMeta.albedo.name);
+								it->matMeta.normal.glTex = Engine::assets.get2DTexGL(it->matMeta.normal.name);
+								it->matMeta.specularMetallic.glTex = Engine::assets.get2DTexGL(it->matMeta.specularMetallic.name);
+
+								if (roughness.length() != 0)
+								{
+									it->matMeta.roughness.glTex = Engine::assets.get2DTexGL(it->matMeta.roughness.name);
+								}
 							}
 
 							/// TODO: AO texture
@@ -221,6 +231,69 @@ void AssetManager::loadAssets(String128 & assetListFilePath)
 				{
 					std::cout << "Mesh at \"" << path << "\" does not exist" << std::endl;
 				}
+			}
+			else if (line == "[Material]")
+			{
+				std::string line;
+				std::getline(file, line);
+				std::string name, albedo, normal, specMetal, roughness, ao, height;
+
+				auto place = [&](std::string key, std::string value) -> bool {
+					if (key == "name")
+					{
+						name = value;
+						return true;
+					}
+					else if (key == "albedo")
+					{
+						albedo = value;
+						return true;
+					}
+					else if (key == "normal")
+					{
+						normal = value;
+						return true;
+					}
+					else if (key == "specular")
+					{
+						specMetal = value;
+						return true;
+					}
+					else if (key == "metallic")
+					{
+						specMetal = value;
+						return true;
+					}
+					else if (key == "roughness")
+					{
+						roughness = value;
+						return true;
+					}
+					else if (key == "ao")
+					{
+						ao = value;
+						return true;
+					}
+					else if (key == "height")
+					{
+						height = value;
+						return true;
+					}
+					return false;
+				};
+
+				key = getUntil(line, '=');
+
+				while (key != "")
+				{
+					value = line;
+					place(key, value);
+					std::getline(file, line);
+
+					key = getUntil(line, '=');
+				}
+
+				Engine::assets.materialLibrary.addMaterial(name, albedo, normal, specMetal, roughness, ao, height);
 			}
 			else if (line == "[Font]")
 			{
