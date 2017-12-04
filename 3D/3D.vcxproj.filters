@@ -165,6 +165,9 @@
     <ClCompile Include="MaterialLibrary.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UIMultiTab.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Asset.hpp">
@@ -412,6 +415,12 @@
     </ClInclude>
     <ClInclude Include="Material.hpp">
       <Filter>Header Files\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="WorldEditWindow.hpp">
+      <Filter>Header Files\UI Elements\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="UIMultiTab.hpp">
+      <Filter>Header Files\UI Elements</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

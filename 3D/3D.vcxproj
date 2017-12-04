@@ -240,6 +240,7 @@
     <ClCompile Include="UIElement.cpp" />
     <ClCompile Include="UIInputField.cpp" />
     <ClCompile Include="UILabel.cpp" />
+    <ClCompile Include="UIMultiTab.cpp" />
     <ClCompile Include="UISlider.cpp" />
     <ClCompile Include="UIRectangleShape.cpp" />
     <ClCompile Include="UISwitchButton.cpp" />
@@ -322,6 +323,7 @@
     <ClInclude Include="UIConsole.hpp" />
     <ClInclude Include="UIElement.hpp" />
     <ClInclude Include="UILabel.hpp" />
+    <ClInclude Include="UIMultiTab.hpp" />
     <ClInclude Include="UIRectangleShape.hpp" />
     <ClInclude Include="UISlider.hpp" />
     <ClInclude Include="UISwitchButton.hpp" />
@@ -332,6 +334,7 @@
     <ClInclude Include="Util.hpp" />
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="World.hpp" />
+    <ClInclude Include="WorldEditWindow.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Libs\bullet3\build\src\BulletCollision\BulletCollision.vcxproj">

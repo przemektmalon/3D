@@ -4,6 +4,7 @@
 #include "UISlider.hpp"
 #include "UISwitchButton.hpp"
 #include "UIInputField.hpp"
+#include "UIMultiTab.hpp"
 
 #define C_LABEL(name,window) \
 UILabel* ##name##Ptr = new UILabel(window); \
@@ -20,3 +21,7 @@ UISlider& ##name## = *##name##Ptr;
 #define C_INPUT(name,window) \
 UIInputField* ##name##Ptr = new UIInputField(window); \
 UIInputField& ##name## = *##name##Ptr;
+
+#define C_MULTITAB(name,window) \
+UIMultiTab* ##name##Ptr = new UIMultiTab(window); \
+UIMultiTab& ##name = *##name##Ptr;

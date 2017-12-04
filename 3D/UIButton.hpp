@@ -6,6 +6,7 @@
 class UIButton : public UIElement
 {
 public:
+	UIButton() : UIElement(Button, nullptr) {}
 	UIButton(UIWindow* pParent);
 	~UIButton();
 	
@@ -13,7 +14,7 @@ public:
 	{
 		if (onMouseDownImpl)
 			onMouseDownImpl(parentWindow, this, pMouseEvent);
-
+		
 		setRectColour(backClickColour);
 	}
 
@@ -63,6 +64,12 @@ public:
 	}
 
 	void setString(StringGeneric& str)
+	{
+		text.setString(str);
+		updateBounds();
+	}
+
+	void setString(std::string& str)
 	{
 		text.setString(str);
 		updateBounds();

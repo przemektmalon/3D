@@ -8,6 +8,7 @@
 #include "Text.hpp"
 #include "AssetManager.hpp"
 #include "Mouse.hpp"
+#include "UIMultiTab.hpp"
 
 UIWindow::UIWindow(std::string pName, irect pWindowArea, int pBorderWidth, const Window* pParentWindow) : name(pName), parentWindow(pParentWindow), title(new UILabel(this)), borderWidth(pBorderWidth)
 {
@@ -48,6 +49,7 @@ UIWindow::UIWindow(std::string pName, irect pWindowArea, int pBorderWidth, const
 	proj = glm::ortho(0.f, float(windowArea.width), float(windowArea.height), 0.f, -1.f, 100.f);
 
 	setTitle(name);
+	movable = true;
 }
 
 UIWindow::~UIWindow()
@@ -133,6 +135,11 @@ void UIWindow::mouseDown(MouseEvent& pMouseEvent)
 
 	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
 	{
+		if (itr->second->elementType == UIElement::MultiTab)
+		{
+			((UIMultiTab*)itr->second)->mouseDown(pMouseEvent);
+		}
+
 		auto rect = (*itr).second->getBounds();
 		
 		auto winMP = pMouseEvent.getUIWindowPosition((*itr).second->getParentWindow());
@@ -159,6 +166,11 @@ void UIWindow::mouseUp(MouseEvent& pMouseEvent)
 {
 	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
 	{
+		if (itr->second->elementType == UIElement::MultiTab)
+		{
+			((UIMultiTab*)itr->second)->mouseUp(pMouseEvent);
+		}
+
 		if ((*itr).second->isClicked())
 		{
 			(*itr).second->setClicked(false);
@@ -172,6 +184,10 @@ void UIWindow::keyDown(KeyEvent & pKeyEvent)
 {
 	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
 	{
+		if (itr->second->elementType == UIElement::MultiTab)
+		{
+			((UIMultiTab*)itr->second)->keyDown(pKeyEvent);
+		}
 		(*itr).second->onKeyDown(pKeyEvent);
 	}
 }
@@ -180,6 +196,10 @@ void UIWindow::keyUp(KeyEvent & pKeyEvent)
 {
 	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
 	{
+		if (itr->second->elementType == UIElement::MultiTab)
+		{
+			((UIMultiTab*)itr->second)->keyUp(pKeyEvent);
+		}
 		(*itr).second->onKeyUp(pKeyEvent);
 	}
 }
@@ -193,6 +213,11 @@ void UIWindow::checkMouseEnter(MouseEvent& pMouseEvent)
 		auto rect = (*itr).second->getBounds();
 
 		auto winMP = pMouseEvent.getUIWindowPosition((*itr).second->getParentWindow());
+
+		if (itr->second->elementType == UIElement::MultiTab)
+		{
+			((UIMultiTab*)(itr->second))->checkMouseEnter(pMouseEvent);
+		}
 
 		if (!rect.contains(winMP))
 		{

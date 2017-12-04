@@ -10,7 +10,7 @@ class UIElement
 {
 	friend class UIWindow;
 public:
-	enum ElementType { Label, Button, Slider, SwitchButton, InputField, Console };
+	enum ElementType { Label, Button, Slider, SwitchButton, InputField, MultiTab, Console };
 
 	UIElement(ElementType elType, UIWindow* pParent);
 	virtual ~UIElement();
@@ -71,6 +71,9 @@ public:
 			onMouseLeaveImpl(parentWindow, this, pMouseEvent);
 		}
 	}
+
+	void setPosition(glm::fvec2 pPos) { position = pPos; }
+	void setDimensions(glm::fvec2 pDim) { dimensions = pDim; }
 
 	virtual void onEngineWindowResize(WindowEvent& pWindowEvent) {}
 	virtual void onParentWindowResize(WindowEvent& pWindowEvent) {}
@@ -171,8 +174,6 @@ public:
 protected:
 
 	std::string name;
-	//UIVariable elementVar;
-	//u32 varCount;
 	
 	UIWindow* parentWindow;
 	

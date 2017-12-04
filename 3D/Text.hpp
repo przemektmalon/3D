@@ -94,7 +94,7 @@ public:
 
 		//string = "ABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz\n1234567890!@#$%^&*()_\n-=+[]{};':\"\\|<>,./~`";
 		string = "\0";
-		charSize = 85;
+		charSize = 12;
 		colour = glm::fvec3(1.f, 1.f, 1.f);
 		setTextOrigin(TopLeft);
 

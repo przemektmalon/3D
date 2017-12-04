@@ -27,6 +27,7 @@
 #include "CameraConfigWindow.hpp"
 #include "ProfilingWindow.hpp"
 #include "RenderModeWindow.hpp"
+#include "WorldEditWindow.hpp"
 
 FT_Library Engine::ftLib;
 HINSTANCE Engine::instance;
@@ -54,9 +55,6 @@ PhysicsWorld Engine::physics;
 EngineConfig Engine::cfg;
 float Engine::linear = 0.001;
 float Engine::quad = 0.001;
-int Engine::doPhysics = 1;
-u64 Engine::physicsTime = 0;
-u64 Engine::frameTime = 0;
 
 Profiler Engine::profiler;
 
@@ -330,7 +328,7 @@ void Engine::mainLoop(int resolutionIndex)
 	auto col2 = new btSphereShape(scale / 2.f);
 	auto boxcol = new btBoxShape(glm::fvec3(scale));
 
-	for (int i = 0; i < 48; ++i)
+	for (int i = 0; i < 3; ++i)
 	{
 		auto i2 = world->addModelInstance("pbrsphere", worldRoot);
 		i2->sgNode->transform.scale(scale / 2.f);
@@ -344,11 +342,11 @@ void Engine::mainLoop(int resolutionIndex)
 			i2->overwriteMaterial(0,0,assets.getMaterial("greasymetal"));
 	}
 
-	for (int i = 0; i < 48; ++i)
+	for (int i = 0; i < 3; ++i)
 	{
 		auto i2 = world->addModelInstance("hollowbox", worldRoot);
 		i2->sgNode->transform.scale(scale);
-		i2->sgNode->transform.translate(glm::fvec3(5, 20.1 + (30.1 * i), 0));
+		i2->sgNode->transform.translate(glm::fvec3(5, 20.1 + (50.1 * i), 0));
 
 		i2->makePhysicsObject(boxc, 10.f);
 		i2->physicsObject->setRestitution(0.1);
@@ -374,13 +372,13 @@ void Engine::mainLoop(int resolutionIndex)
 	tweak.bindVariable(Engine::damping, "damping", Tweaks::Floating);
 	tweak.bindVariable(Engine::linear, "linear", Tweaks::Floating);
 	tweak.bindVariable(Engine::quad, "quad", Tweaks::Floating);
-	tweak.bindVariable(Engine::doPhysics, "doPhysics", Tweaks::Integer);
 
 	uiwm.addWindow(createResolutionWindow());
 	uiwm.addWindow(createRenderConfigWindow());
 	uiwm.addWindow(createCameraConfigWindow());
 	uiwm.addWindow(createProfilingWindow());
 	uiwm.addWindow(createRenderModeWindow());
+	uiwm.addWindow(createWorldEditWindow());
 
 	cfg.render.ssao.sampleRadius = 10.f;
 	cfg.mouse.sensitivity = glm::fvec2(0.0035, 0.0035);
@@ -495,7 +493,7 @@ void Engine::processGameFrame()
 
 	profiler.start("physics");
 
-	if (doPhysics)
+	if (cfg.world.doPhysics)
 	{
 		physics.step(dt);
 		physics.updateModels();

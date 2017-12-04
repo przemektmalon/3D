@@ -3,4 +3,3 @@ tau=1.90
 damping=1.10
 linear=0.005
 quad=0.005
-doPhysics=1

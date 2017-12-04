@@ -116,6 +116,11 @@ public:
 
 	struct WorldConfig {
 
+		void setDoPhysics(bool set) { doPhysics = set; }
+		bool getDoPhysics() { return doPhysics; }
+		void togglePhysics() { doPhysics = !doPhysics; }
+
+		bool doPhysics;
 		float camSpeed;
 
 	} world;
@@ -155,7 +160,6 @@ public:
 	static World* world;
 
 	static float linear, quad;
-	static int doPhysics;
 
 	static float programTime;
 
@@ -188,9 +192,6 @@ public:
 	static EngineConfig cfg;
 
 	static Profiler profiler;
-
-	static u64 physicsTime;
-	static u64 frameTime;
 
 //private:
 
