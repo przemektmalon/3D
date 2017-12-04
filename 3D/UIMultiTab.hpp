@@ -12,7 +12,7 @@ public:
 
 	void addTabElement(std::string tab, UIElement* el)
 	{
-
+		tabElements[tab].push_back(el);
 	}
 
 	void setPosition(glm::fvec2 pos)
@@ -32,6 +32,12 @@ public:
 	{
 		for (auto& but : tabButtons)
 			but.second->update();
+
+		if (tabElements.find(currentTab) == tabElements.end())
+			return;
+
+		for (auto& el : tabElements[currentTab])
+			el->update();
 	}
 
 	void mouseDown(MouseEvent& pMouseEvent)
@@ -188,6 +194,12 @@ public:
 
 		back.setProj(parentWindow->getProj());
 		back.draw();
+
+		if (tabElements.find(currentTab) == tabElements.end())
+			return;
+
+		for (auto& el : tabElements[currentTab])
+			el->draw();
 	}
 
 private:

@@ -22,6 +22,11 @@ public:
 		windows.insert(std::make_pair(uiw->getName(), uiw));
 	}
 
+	UIWindow* getWindow(std::string pName)
+	{
+		return windows[pName]; /// TODO: if window doesnt exist ?
+	}
+
 	void passEvent(Event& ev)
 	{
 		for (auto w : windows)

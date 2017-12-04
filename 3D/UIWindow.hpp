@@ -34,6 +34,7 @@ public:
 	}
 	void setTitle(std::string pTitle);
 	void addElement(UIElement* pEl);
+	UIElement* getElement(std::string pName) { return elements[pName]; }
 
 	glm::fmat4& getProj() { return proj; }
 
