@@ -2,7 +2,7 @@
 
 3D rendering/game engine using OpenGL by Przemek Malon.
 
-![Engine Image](https://github.com/przemektmalon/3D/blob/master/gitimg/engine.png)
+![Engine Image](https://github.com/przemektmalon/3D/blob/master/gitimg/engineimg.png)
 
 # Current features
 
@@ -36,7 +36,7 @@
 
 -Tweak files for updating engine variables at runtime automatically from a file
 
--Some basic UI elements (window, labels, buttons)
+-Some basic UI elements (window, labels, buttons, sliders, tabs, input fields)
 
 -Asset manager (models, fonts, textures)
 
