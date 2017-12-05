@@ -22,11 +22,8 @@
 #include <io.h>
 #include <fcntl.h>
 
-#include "ResolutionWindow.hpp"
 #include "RenderConfigWindow.hpp"
-#include "CameraConfigWindow.hpp"
 #include "ProfilingWindow.hpp"
-#include "RenderModeWindow.hpp"
 #include "WorldEditWindow.hpp"
 
 FT_Library Engine::ftLib;
@@ -133,6 +130,7 @@ void Engine::mainLoop(int resolutionIndex)
 	cfg.keyBinds.loadKeyBinds();
 	cfg.render.ssao.sampleRadius = 10.f;
 	cfg.mouse.sensitivity = glm::fvec2(0.0035, 0.0035);
+	cfg.render.minimumLightConstant = 15000;
 
 	r = new Renderer();
 	r->initialiseShaders();
@@ -156,7 +154,7 @@ void Engine::mainLoop(int resolutionIndex)
 
 	auto worldRoot = Engine::world->getWorldRootNode();
 
-	for (int i = 0; i < 3; ++i)
+	for (int i = 0; i < 30; ++i)
 	{
 		auto i2 = world->addModelInstance("pbrsphere", worldRoot);
 		i2->sgNode->transform.scale(10.f);
@@ -170,7 +168,7 @@ void Engine::mainLoop(int resolutionIndex)
 			i2->overwriteMaterial(0,0,assets.getMaterial("greasymetal"));
 	}
 
-	for (int i = 0; i < 3; ++i)
+	for (int i = 0; i < 30; ++i)
 	{
 		auto i2 = world->addModelInstance("hollowbox", worldRoot);
 		i2->sgNode->transform.scale(20.f);
@@ -199,11 +197,8 @@ void Engine::mainLoop(int resolutionIndex)
 	tweak.bindVariable(Engine::linear, "linear", Tweaks::Floating);
 	tweak.bindVariable(Engine::quad, "quad", Tweaks::Floating);
 
-	uiwm.addWindow(createResolutionWindow());
 	uiwm.addWindow(createRenderConfigWindow());
-	uiwm.addWindow(createCameraConfigWindow());
 	uiwm.addWindow(createProfilingWindow());
-	uiwm.addWindow(createRenderModeWindow());
 	uiwm.addWindow(createWorldEditWindow());
 
 	while (engineState != Quitting) {

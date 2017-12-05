@@ -258,7 +258,6 @@
     <ClInclude Include="Bounds3D.hpp" />
     <ClInclude Include="BufferObjects.hpp" />
     <ClInclude Include="Camera.hpp" />
-    <ClInclude Include="CameraConfigWindow.hpp" />
     <ClInclude Include="ConfigParser.hpp" />
     <ClInclude Include="Console.hpp" />
     <ClInclude Include="DeferredTileCullComputeShader.hpp" />
@@ -288,8 +287,6 @@
     <ClInclude Include="MathIncludes.hpp" />
     <ClInclude Include="ProfilingWindow.hpp" />
     <ClInclude Include="RenderConfigWindow.hpp" />
-    <ClInclude Include="RenderModeWindow.hpp" />
-    <ClInclude Include="ResolutionWindow.hpp" />
     <ClInclude Include="Mouse.hpp" />
     <ClInclude Include="Model.hpp" />
     <ClInclude Include="PhysicsObject.hpp" />

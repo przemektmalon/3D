@@ -25,7 +25,14 @@ public:
 	void setDimensions(glm::fvec2 dim)
 	{
 		dimensions = dim;
-		back.setBounds(irect(position.x, position.y + 18, dimensions.x, dimensions.y));
+		back.setBounds(irect(position.x, position.y + 18, dimensions.x, dimensions.y - 18));
+	}
+
+	void forceUpdateAll()
+	{
+		for (auto& tab : tabElements)
+			for (auto& el : tab.second)
+				el->update();
 	}
 
 	void update()

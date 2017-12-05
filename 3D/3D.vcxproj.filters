@@ -380,19 +380,10 @@
     <ClInclude Include="Framebuffer.hpp">
       <Filter>Header Files\GL</Filter>
     </ClInclude>
-    <ClInclude Include="ResolutionWindow.hpp">
-      <Filter>Header Files\UI Elements\Windows</Filter>
-    </ClInclude>
     <ClInclude Include="RenderConfigWindow.hpp">
       <Filter>Header Files\UI Elements\Windows</Filter>
     </ClInclude>
-    <ClInclude Include="CameraConfigWindow.hpp">
-      <Filter>Header Files\UI Elements\Windows</Filter>
-    </ClInclude>
     <ClInclude Include="ProfilingWindow.hpp">
-      <Filter>Header Files\UI Elements\Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderModeWindow.hpp">
       <Filter>Header Files\UI Elements\Windows</Filter>
     </ClInclude>
     <ClInclude Include="UIInputField.hpp">
