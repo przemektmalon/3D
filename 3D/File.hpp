@@ -70,6 +70,16 @@ public:
 		return open(meta.fileMode);
 	}
 
+	bool open(std::string& pPath, Mode pFileMode = (File::Mode)(File::binary | File::in | File::out))
+	{
+		if (pPath.length() > 127)
+			return false;
+		meta.path.setToChars(pPath.c_str());
+		meta.fileMode = pFileMode;
+
+		return open(meta.fileMode);
+	}
+
 	bool open(Mode pFileMode = (File::Mode)(File::binary | File::in | File::out))
 	{
 		if (meta.path.getLength() == 0)

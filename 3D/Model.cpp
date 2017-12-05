@@ -3,6 +3,8 @@
 #include "Engine.hpp"
 #include <string>
 
+#include "rapidxml.hpp"
+
 void Model::importModel(std::string pPath, u32 lod)
 {
 	Assimp::Importer import;
@@ -186,4 +188,105 @@ void ModelInstance::makePhysicsObject(btCollisionShape * collisionShape, float m
 	physicsObject->create(sgNode->transform.getTranslation(), sgNode->transform.getQuat(), collisionShape, mass);
 	physicsObject->instance = this;
 	Engine::physicsWorld.addRigidBody(physicsObject);
+}
+
+void ModelInstance::makePhysicsObject()
+{
+	btCollisionShape* colShape = nullptr;
+	float mass;
+
+	auto nodeToFloat = [](rapidxml::xml_node<>* node) -> float {
+		return std::stof(std::string(node->value()));
+	};
+
+	auto generateCollisionShape = [&nodeToFloat](rapidxml::xml_node<>* shapeNode) -> btCollisionShape* {
+		std::string shapeType = shapeNode->first_attribute("type")->value();
+
+		if (shapeType == "sphere")
+		{
+			float radius = nodeToFloat(shapeNode->first_node("radius"));
+			return new btSphereShape(radius);
+		}
+		else if (shapeType == "box")
+		{
+			float halfx = nodeToFloat(shapeNode->first_node("halfx"));
+			float halfy = nodeToFloat(shapeNode->first_node("halfy"));
+			float halfz = nodeToFloat(shapeNode->first_node("halfz"));
+			return new btBoxShape(btVector3(halfx, halfy, halfz));
+		}
+		else
+		{
+
+		}
+	};
+
+	if (model->physicsInfo.length())
+	{
+		File physicsInfoFile;
+		physicsInfoFile.open(model->physicsInfo, File::in);
+		
+		std::string xmlString;
+
+		physicsInfoFile.fstream().seekg(0, std::ios::end);
+		xmlString.reserve(physicsInfoFile.fstream().tellg());
+		physicsInfoFile.fstream().seekg(0, std::ios::beg);
+
+		xmlString.assign((std::istreambuf_iterator<char>(physicsInfoFile.fstream())), std::istreambuf_iterator<char>());
+
+		rapidxml::xml_document<> doc;
+		doc.parse<0>(const_cast<char*>(xmlString.c_str()));
+
+		rapidxml::xml_node<>* root = doc.first_node("physics");
+
+		mass = nodeToFloat(root->first_node("mass"));
+
+		std::string compound = std::string(root->first_node("compound")->value());
+		if (compound == "true")
+		{
+			colShape = new btCompoundShape();
+			btCompoundShape* compound = (btCompoundShape*)colShape;
+			rapidxml::xml_node<>* shapeNode = root->first_node("shape");
+			while (shapeNode)
+			{
+				auto shape = generateCollisionShape(shapeNode);
+
+				btQuaternion rotation(0, 0, 0);
+				btVector3 offset(0, 0, 0);
+
+				if (shapeNode->first_node("posx"))
+				{
+					float posx, posy, posz;
+					posx = nodeToFloat(shapeNode->first_node("posx"));
+					posy = nodeToFloat(shapeNode->first_node("posy"));
+					posz = nodeToFloat(shapeNode->first_node("posz"));
+					offset = btVector3(posx, posy, posz);
+				}
+
+				if (shapeNode->first_node("rotx"))
+				{
+					/// TODO: get rotation values
+				}
+
+				btTransform transform(rotation, offset);
+
+				compound->addChildShape(transform, shape);
+				shapeNode = shapeNode->next_sibling();
+			}
+		}
+		else
+		{
+			colShape = generateCollisionShape(root->first_node("shape"));
+		}
+	}
+	else
+	{
+		colShape = new btBoxShape(btVector3(10, 10, 10));
+		mass = 1;
+	}
+
+	physicsObject = new PhysicsObject();
+	physicsObject->create(sgNode->transform.getTranslation(), sgNode->transform.getQuat(), colShape, mass);
+	physicsObject->instance = this;
+	Engine::physicsWorld.addRigidBody(physicsObject);
+
 }

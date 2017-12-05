@@ -160,36 +160,17 @@ void Engine::mainLoop(int resolutionIndex)
 	world = new World();
 	world->initialiseGLBuffers();
 
-	float scale = 20.f;
-
-	auto b1 = new btBoxShape(glm::fvec3(0.1, 0.8, 0.1) * scale);
-	auto b2 = new btBoxShape(glm::fvec3(1.0, 0.1, 1.0) * scale);
-
-	btQuaternion norot(0, 0, 0);
-
-	auto boxc = new btCompoundShape();
-	boxc->addChildShape(btTransform(norot, glm::fvec3(0, 0.9, 0) * scale), b2);
-	boxc->addChildShape(btTransform(norot, glm::fvec3(0, -0.9, 0) * scale), b2);
-
-	boxc->addChildShape(btTransform(norot, glm::fvec3(0.9, 0, 0.9)* scale), b1);
-	boxc->addChildShape(btTransform(norot, glm::fvec3(0.9, 0, -0.9)* scale), b1);
-	boxc->addChildShape(btTransform(norot, glm::fvec3(-0.9, 0, 0.9)* scale), b1);
-	boxc->addChildShape(btTransform(norot, glm::fvec3(-0.9, 0, -0.9)* scale), b1);
-
 	physicsWorld.createGroundPlane();
 
 	auto worldRoot = Engine::world->getWorldRootNode();
 
-	auto col2 = new btSphereShape(scale / 2.f);
-	auto boxcol = new btBoxShape(glm::fvec3(scale));
-
 	for (int i = 0; i < 3; ++i)
 	{
 		auto i2 = world->addModelInstance("pbrsphere", worldRoot);
-		i2->sgNode->transform.scale(scale / 2.f);
+		i2->sgNode->transform.scale(10.f);
 		i2->sgNode->transform.translate(glm::fvec3(50.1, 5.1 + (5.1 * i), 0));
 
-		i2->makePhysicsObject(col2, 10.f);
+		i2->makePhysicsObject();
 
 		if (i % 3 == 0)
 			i2->overwriteMaterial(0,0,assets.getMaterial("copper"));
@@ -200,10 +181,10 @@ void Engine::mainLoop(int resolutionIndex)
 	for (int i = 0; i < 3; ++i)
 	{
 		auto i2 = world->addModelInstance("hollowbox", worldRoot);
-		i2->sgNode->transform.scale(scale);
+		i2->sgNode->transform.scale(20.f);
 		i2->sgNode->transform.translate(glm::fvec3(5, 20.1 + (50.1 * i), 0));
 
-		i2->makePhysicsObject(boxc, 10.f);
+		i2->makePhysicsObject();
 		i2->physicsObject->setRestitution(0.1);
 
 		if (i % 3 == 0)

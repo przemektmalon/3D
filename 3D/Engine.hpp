@@ -171,7 +171,7 @@ public:
 	static Console console;
 	static bool movingLight;
 	static Camera cam;
-	static Time dt;
+	static Time deltaTime;
 	static Renderer* r;
 	static QPC qpc;
 	static UIM uim;

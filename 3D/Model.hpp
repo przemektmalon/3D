@@ -23,8 +23,6 @@
 
 #include "Material.hpp"
 
-#include "rapidxml.hpp"
-
 class MeshBatch;
 
 class ModelRenderMeta
@@ -109,6 +107,8 @@ public:
 		return length;
 	}
 
+	std::string physicsInfo;
+
 private:
 
 	void importModel(std::string pPath, u32 lod);
@@ -142,6 +142,7 @@ public:
 	}
 
 	void makePhysicsObject(btCollisionShape* collisionShape, float mass);
+	void makePhysicsObject();
 
 	void overwriteMaterial(int lod, int triList, MaterialMeta& material)
 	{

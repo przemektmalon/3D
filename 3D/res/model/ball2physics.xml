@@ -1,0 +1,9 @@
+<physics>
+
+	<mass>10</mass>
+	<compound>false</compound>
+	<shape type="sphere">
+		<radius>10</radius>
+	</shape>
+
+</physics>

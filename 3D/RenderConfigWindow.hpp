@@ -22,7 +22,7 @@ UIWindow* createRenderConfigWindow()
 		[](UIWindow * win, UIElement* __this) -> void {
 		UILabel* _this = (UILabel*)__this;
 
-		_this->text.setString(std::string("FPS: ") + std::to_string(1.f / Engine::dt.getSecondsf()));
+		_this->text.setString(std::string("FPS: ") + std::to_string(1.f / Engine::deltaTime.getSecondsf()));
 	});
 
 	C_SLIDER(sliSSAORad, win);

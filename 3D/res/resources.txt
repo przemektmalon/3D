@@ -217,6 +217,7 @@ material=dirt
 path=res/model/ball2.obj
 name=pbrsphere
 material=rustediron
+physics=res/model/ball2physics.xml
 
 [Model]
 path=res/model/stand.obj
@@ -227,6 +228,7 @@ material=bamboo
 path=res/model/hollowbox.obj
 name=hollowbox
 material=bamboo
+physics=res/model/hollowboxphysics.xml
 
 [Font]
 path=res/fonts/clear-sans/ClearSans-Regular.ttf

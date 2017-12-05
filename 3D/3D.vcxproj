@@ -107,7 +107,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Programming\libs\GLEW-1.13.0\include;C:\Programming\libs\GLM;C:\Programming\libs\SOIL\src;C:\Programming\libs\FreeType-2.6.2\include;C:\Programming\Libs\Assimp\include\;C:\Programming\Libs\boost_1_64_0\;C:\Programming\Libs\bullet3\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Programming\libs\GLEW-1.13.0\include;C:\Programming\libs\GLM;C:\Programming\libs\SOIL\src;C:\Programming\libs\FreeType-2.6.2\include;C:\Programming\Libs\Assimp\include\;C:\Programming\Libs\boost_1_64_0\;C:\Programming\Libs\bullet3\src;C:\Programming\Libs\rapidxml-1.13;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CallingConvention>Cdecl</CallingConvention>
       <StructMemberAlignment>Default</StructMemberAlignment>
@@ -142,7 +142,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Programming\libs\GLEW-1.13.0\include;C:\Programming\libs\GLM;C:\Programming\libs\SOIL\src;C:\Programming\libs\FreeType-2.6.2\include;C:\Programming\Libs\Assimp\include\;C:\Programming\Libs\boost_1_64_0\;C:\Programming\Libs\bullet3\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Programming\libs\GLEW-1.13.0\include;C:\Programming\libs\GLM;C:\Programming\libs\SOIL\src;C:\Programming\libs\FreeType-2.6.2\include;C:\Programming\Libs\Assimp\include\;C:\Programming\Libs\boost_1_64_0\;C:\Programming\Libs\bullet3\src;C:\Programming\Libs\rapidxml-1.13;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -165,7 +165,7 @@
       </FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Programming\libs\GLEW-1.13.0\include;C:\Programming\libs\GLM;C:\Programming\libs\SOIL\src;C:\Programming\libs\FreeType-2.6.2\include;C:\Programming\Libs\Assimp\include\;C:\Programming\Libs\boost_1_64_0\;C:\Programming\Libs\bullet3\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Programming\libs\GLEW-1.13.0\include;C:\Programming\libs\GLM;C:\Programming\libs\SOIL\src;C:\Programming\libs\FreeType-2.6.2\include;C:\Programming\Libs\Assimp\include\;C:\Programming\Libs\boost_1_64_0\;C:\Programming\Libs\bullet3\src;C:\Programming\Libs\rapidxml-1.13;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>

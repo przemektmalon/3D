@@ -85,7 +85,7 @@ void AssetManager::loadAssets(String128 & assetListFilePath)
 			{
 				std::string line;
 				std::getline(file, line);
-				std::string name, path, limit, albedo, normal, specular, metallic, roughness, material;
+				std::string name, path, limit, albedo, normal, specular, metallic, roughness, material, physics;
 				std::vector<std::string> paths;
 				std::vector<u32> limits;
 
@@ -135,6 +135,11 @@ void AssetManager::loadAssets(String128 & assetListFilePath)
 						material = value;
 						return true;
 					}
+					else if (key == "physics")
+					{
+						physics = value;
+						return true;
+					}
 					return false;
 				};
 
@@ -166,6 +171,7 @@ void AssetManager::loadAssets(String128 & assetListFilePath)
 				auto model = Engine::assets.prepareModel(String128(path.c_str()), String32(name.c_str()));
 				if (model->doesExist())
 				{
+					model->physicsInfo = physics;
 					model->lodPaths = paths;
 					model->lodLimits = limits;
 					model->load();

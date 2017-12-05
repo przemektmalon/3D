@@ -15,7 +15,7 @@ void UIElement::update()
 {
 	if (updateImpl != nullptr)
 	{
-		updateClock += Engine::dt.getSecondsf();
+		updateClock += Engine::deltaTime.getSecondsf();
 		if (updateClock > updateInterval)
 		{
 			updateImpl(parentWindow, this);

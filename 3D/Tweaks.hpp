@@ -41,7 +41,7 @@ public:
 
 	void updateTweaks()
 	{
-		curTimeMS += Engine::dt.getMilliSeconds();
+		curTimeMS += Engine::deltaTime.getMilliSeconds();
 		if (curTimeMS > updateTimeMS)
 		{
 			updateTweaksInternal();
