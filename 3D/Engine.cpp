@@ -32,8 +32,6 @@
 FT_Library Engine::ftLib;
 HINSTANCE Engine::instance;
 std::mt19937_64 Engine::rand;
-s64 Engine::startTime;
-bool Engine::movingLight;
 Engine::EngineState Engine::engineState;
 Camera Engine::cam;
 Time Engine::deltaTime;
@@ -126,38 +124,32 @@ void Engine::mainLoop(int resolutionIndex)
 {
 	glewExperimental = GL_TRUE;
 	glewInit();
-	
-	cfg.render.setVSync(false);
+	FT_Init_FreeType(&ftLib);
+	rand.seed(rand.default_seed);
+	cam.initialiseProj(float(window.getSizeX()) / float(window.getSizeY()));
 
+	cfg.render.setVSync(false);
 	cfg.keyBinds.initialiseFunctionBindingConfig();
 	cfg.keyBinds.loadKeyBinds();
+	cfg.render.ssao.sampleRadius = 10.f;
+	cfg.mouse.sensitivity = glm::fvec2(0.0035, 0.0035);
 
 	r = new Renderer();
+	r->initialiseShaders();
 
 	physicsWorld.create();
-
-	rand.seed(rand.default_seed);
-
-	startTime = std::chrono::system_clock::now().time_since_epoch().count();
-
-	FT_Init_FreeType(&ftLib);
-
-	r->initialiseShaders();
 	Billboard::initGLVAO();
 
 	assets.modelManager.init();
-
 	assets.loadAssets(String128("res/resources.txt"));
 
-	const GPUModelManager& mm = Engine::assets.modelManager;
-
-	cam.initialiseProj(float(window.getSizeX()) / float(window.getSizeY()));
 	r->initialiseRenderer(&window, cam);
 
 	cfg.render.setResolution(resolutionIndex);
 	cfg.render.setFrameScale(1.f);
 
 	world = new World();
+	r->world = world;
 	world->initialiseGLBuffers();
 
 	physicsWorld.createGroundPlane();
@@ -194,10 +186,8 @@ void Engine::mainLoop(int resolutionIndex)
 	}
 
 	world->sg.updateAll();
-
 	world->updateGLBuffers();
-	r->world = world;
-
+	
 	console.init();
 
 	Tweaks tweak;
@@ -215,9 +205,6 @@ void Engine::mainLoop(int resolutionIndex)
 	uiwm.addWindow(createProfilingWindow());
 	uiwm.addWindow(createRenderModeWindow());
 	uiwm.addWindow(createWorldEditWindow());
-
-	cfg.render.ssao.sampleRadius = 10.f;
-	cfg.mouse.sensitivity = glm::fvec2(0.0035, 0.0035);
 
 	while (engineState != Quitting) {
 		if (!window.processMessages()) 

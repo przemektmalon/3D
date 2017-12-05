@@ -157,41 +157,30 @@ public:
 	static void processMenuFrame();
 	static void stop();
 
-	static World* world;
-
-	static float linear, quad;
-
-	static float programTime;
-
-	static std::mt19937_64 rand;
-
-	static FT_Library ftLib;
-	static s64 startTime;
-
-	static Console console;
-	static bool movingLight;
-	static Camera cam;
-	static Time deltaTime;
-	static Renderer* r;
-	static QPC qpc;
-	static UIM uim;
-
-	static UIWindowManager uiwm;
-	static UIWindow* uiw;
-	static Log engineLog;
-	
-	static AssetManager assets;
-
-	static bool consoleOpen;
-
-	static PhysicsWorld physicsWorld;
-
-	static float tau, damping;
-
 	static EngineConfig cfg;
 
+	static World* world;
+	static Renderer* r;
+	static AssetManager assets;
+	static PhysicsWorld physicsWorld;
+	static UIWindowManager uiwm;
+	static Console console;
+	static Camera cam;
+	static QPC qpc; // Clock
+	static UIM uim; // User input manager
+	static Log engineLog;
 	static Profiler profiler;
-
+	static Time deltaTime;
+	static std::mt19937_64 rand;
+	static FT_Library ftLib;
+	
+	static float programTime;
+	
+	// Temporary controls
+	static float linear, quad;
+	static float tau, damping;
+	static bool consoleOpen;
+	
 //private:
 
 	enum EngineState { InGame, Menu, Quitting };
