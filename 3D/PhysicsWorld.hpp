@@ -9,6 +9,15 @@
 class PhysicsWorld
 {
 public:
+	PhysicsWorld() {}
+	~PhysicsWorld() 
+	{
+		delete dynamicsWorld;
+		delete solver;
+		delete dispatcher;
+		delete collisionConfiguration;
+		delete broadphase;
+	}
 
 	void create()
 	{
@@ -43,6 +52,12 @@ public:
 
 	void updateModels();
 
+	btVector3 getRayTo(int x, int y);
+	bool pickBody(btVector3& rayFromWorld, btVector3& rayToWorld);
+	void removePickingConstraint();
+	bool movePickedBody(const btVector3& rayFromWorld, const btVector3& rayToWorld);
+	bool mouseMoveCallback(int x, int y);
+
 	btBroadphaseInterface* broadphase;
 
 	btDefaultCollisionConfiguration* collisionConfiguration;
@@ -52,52 +67,14 @@ public:
 	btDiscreteDynamicsWorld* dynamicsWorld;
 
 	std::vector<PhysicsObject*> objects;
-};
-
-class Physics
-{
-public:
-
-	Physics()
-	{
-
-	}
-
-	~Physics()
-	{
-		delete dynamicsWorld;
-		delete solver;
-		delete dispatcher;
-		delete collisionConfiguration;
-		delete broadphase;
-	}
-
-	btBroadphaseInterface* broadphase;
-
-	btDefaultCollisionConfiguration* collisionConfiguration;
-	btCollisionDispatcher* dispatcher;
-	btSequentialImpulseConstraintSolver* solver;
-
-	btDiscreteDynamicsWorld* dynamicsWorld;
-
-	btCollisionShape* groundShape;
-	btCollisionShape* fallShape;
-
-	btDefaultMotionState* groundMotionState;
-
-	btRigidBody* groundRigidBody;
-	btRigidBody* fallRigidBody;
-
-	btRigidBody* pickedBody;
 
 	int savedState;
+	btRigidBody* pickedBody;
 	btPoint2PointConstraint* p2p;
 	btPoint2PointConstraint* pickedConstraint;
 
 	btVector3 oldPickingPos;
 	btVector3 hitPos;
 	btScalar oldPickingDist;
-
-
 
 };

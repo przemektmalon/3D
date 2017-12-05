@@ -36,7 +36,7 @@ s64 Engine::startTime;
 bool Engine::movingLight;
 Engine::EngineState Engine::engineState;
 Camera Engine::cam;
-Time Engine::dt;
+Time Engine::deltaTime;
 Renderer* Engine::r;
 QPC Engine::qpc;
 UIM Engine::uim;
@@ -50,8 +50,7 @@ Window Engine::window;
 bool Engine::consoleOpen;
 Log Engine::engineLog;
 Console Engine::console;
-Physics Engine::p;
-PhysicsWorld Engine::physics;
+PhysicsWorld Engine::physicsWorld;
 EngineConfig Engine::cfg;
 float Engine::linear = 0.001;
 float Engine::quad = 0.001;
@@ -123,126 +122,6 @@ void Engine::stop()
 	engineState = Quitting;
 }
 
-//************ TEMPORARY PHYSICS CONTROL *************/
-
-btVector3 getRayTo(int x, int y)
-{
-
-	//x -= Engine::window.getSizeX() / 2;
-	//y -= Engine::window.getSizeY() / 2;
-
-	float ndcx = (2.0f * x) / float(Engine::window.getSizeX()) - 1.0f;
-	float ndcy = 1.0f - (2.0f * y) / float(Engine::window.getSizeY());
-	float ndcz = 1.0f;
-	//vec3 ray_nds = vec3(x, y, z);
-
-	glm::fvec4 ray_clip(ndcx, ndcy, -1.f, 1.f);
-
-	glm::fvec4 ray_eye;
-
-	ray_eye = Engine::r->activeCam->inverseProj * ray_clip;
-	ray_eye = glm::vec4(ray_eye.x, ray_eye.y, -1.f, 0.0);
-
-	glm::fvec4 w = (glm::inverse(Engine::r->activeCam->view) * ray_eye);
-	glm::fvec3 ray_wor(w.x, w.y, w.z);
-
-	ray_wor = glm::normalize(ray_wor) * 10000.f;
-
-	//std::cout << "RAY_WOR: " << ray_wor.x << " " << ray_wor.y << " " << ray_wor.z << std::endl;
-
-	return btVector3(ray_wor.x, ray_wor.y, ray_wor.z);
-}
-
-bool pickBody(btVector3& rayFromWorld, btVector3& rayToWorld)
-{
-	if (Engine::physics.dynamicsWorld == 0)
-		return false;
-
-	static int i = 0;
-
-	rayToWorld = rayFromWorld + (rayToWorld*10000.f);
-
-	btCollisionWorld::ClosestRayResultCallback rayCallback(rayFromWorld, rayToWorld);
-	Engine::physics.dynamicsWorld->rayTest(rayFromWorld, rayToWorld, rayCallback);
-	if (rayCallback.hasHit()) {
-		btVector3 pickPos = rayCallback.m_hitPointWorld;
-		//btRigidBody* body = (btRigidBody*)btRigidBody::upcast(rayCallback.m_collisionObject);
-		btRigidBody* body = (btRigidBody*)btRigidBody::upcast(rayCallback.m_collisionObject);
-		if (body) {
-			if (!(body->isStaticObject() || body->isKinematicObject()))
-			{
-				Engine::p.pickedBody = body;
-				Engine::p.savedState = Engine::p.pickedBody->getActivationState();
-				Engine::p.pickedBody->setActivationState(DISABLE_DEACTIVATION);
-
-				//std::cout << "NEW CONSTRAINT " << ++i << std::endl;
-
-				btVector3 localPivot = body->getCenterOfMassTransform().inverse() * pickPos;
-				Engine::p.p2p = new btPoint2PointConstraint(*body, localPivot);
-				Engine::physics.dynamicsWorld->addConstraint(Engine::p.p2p, true);
-				Engine::p.pickedConstraint = Engine::p.p2p;
-				btScalar mousePickClamping = 3000.f;
-				Engine::p.p2p->m_setting.m_impulseClamp = mousePickClamping;
-				Engine::p.p2p->m_setting.m_tau = Engine::tau;
-				Engine::p.p2p->m_setting.m_damping = Engine::damping;
-			}
-		}
-		Engine::p.oldPickingPos = rayToWorld;
-		Engine::p.hitPos = pickPos;
-		Engine::p.oldPickingDist = (pickPos - rayFromWorld).length();
-	}
-}
-
-void removePickingConstraint() {
-	if (Engine::p.pickedConstraint) {
-		Engine::p.pickedBody->forceActivationState(Engine::p.savedState);
-		Engine::p.pickedBody->activate();
-		Engine::physics.dynamicsWorld->removeConstraint(Engine::p.pickedConstraint);
-		delete Engine::p.pickedConstraint;
-		Engine::p.pickedConstraint = 0;
-		Engine::p.pickedBody = 0;
-	}
-}
-
-bool movePickedBody(const btVector3& rayFromWorld, const btVector3& rayToWorld) {
-	if (Engine::p.pickedBody  && Engine::p.pickedConstraint) {
-		btPoint2PointConstraint* pickCon = static_cast<btPoint2PointConstraint*>(Engine::p.pickedConstraint);
-		if (pickCon) {
-			btVector3 newPivotB;
-			btVector3 dir = rayToWorld - rayFromWorld;
-			dir.normalize();
-			dir *= Engine::p.oldPickingDist;
-			newPivotB = rayFromWorld + dir;
-			pickCon->setPivotB(newPivotB);
-			return true;
-		}
-	}
-	return false;
-}
-
-bool mouseMoveCallback(float x, float y)
-{
-	btVector3 rayTo = getRayTo(int(x), int(y));
-	glm::fvec3 p = Engine::r->activeCam->pos;
-	btVector3 rayFrom(p.x, p.y, p.z);
-
-	movePickedBody(rayFrom, rayTo);
-
-	return false;
-}
-
-void printlog()
-{
-	Engine::engineLog.printLog(Engine::engineLog);
-}
-
-void toggleConsole()
-{
-	Engine::console.toggle();
-}
-
-//************ TEMPORARY PHYSICS CONTROL *************/
-
 void Engine::mainLoop(int resolutionIndex)
 {
 	glewExperimental = GL_TRUE;
@@ -255,7 +134,7 @@ void Engine::mainLoop(int resolutionIndex)
 
 	r = new Renderer();
 
-	physics.create();
+	physicsWorld.create();
 
 	rand.seed(rand.default_seed);
 
@@ -415,9 +294,9 @@ void Engine::mainLoop(int resolutionIndex)
 						btVector3 camPos(p.x, p.y, p.z);
 
 						btVector3 rayFrom = camPos;
-						btVector3 rayTo = getRayTo(int(ev.mouse.position.x), int(ev.mouse.position.y));
+						btVector3 rayTo = physicsWorld.getRayTo(int(ev.mouse.position.x), int(ev.mouse.position.y));
 
-						pickBody(rayFrom, rayTo);
+						physicsWorld.pickBody(rayFrom, rayTo);
 					}
 
 					break;
@@ -425,7 +304,7 @@ void Engine::mainLoop(int resolutionIndex)
 				case(Event::MouseUp):
 				{
 					uim.mouseUp(ev.mouse.code);
-					removePickingConstraint();
+					physicsWorld.removePickingConstraint();
 
 					break;
 				}
@@ -448,7 +327,7 @@ void Engine::mainLoop(int resolutionIndex)
 
 			uiwm.checkMouseHovers();
 			ev.constructMouse(Mouse::M_NONE, Engine::window.getMousePosition(), 0);
-			mouseMoveCallback(ev.mouse.position.x, ev.mouse.position.y);
+			physicsWorld.mouseMoveCallback(ev.mouse.position.x, ev.mouse.position.y);
 
 			if(console.stateFlags == 0)
 				uim.keyHolds(window.keyboard);
@@ -460,8 +339,8 @@ void Engine::mainLoop(int resolutionIndex)
 				tweak.updateTweaks();
 				profiler.timeThis(
 					CALL(processGameFrame), "frame");
-				dt = profiler.getTime("frame");
-				programTime += dt.getSecondsf();
+				deltaTime = profiler.getTime("frame");
+				programTime += deltaTime.getSecondsf();
 				break;
 			}
 			case(Menu):
@@ -476,33 +355,33 @@ void Engine::mainLoop(int resolutionIndex)
 
 void Engine::processGameFrame()
 {
-	auto move = glm::fvec3(glm::fvec4(0, 0, cfg.world.camSpeed * dt.getSeconds(), 1) * cam.matYaw);
+	auto move = glm::fvec3(glm::fvec4(0, 0, cfg.world.camSpeed * deltaTime.getSeconds(), 1) * cam.matYaw);
 	cam.targetPos -= move * float(window.keyboard.isKeyPressed('W'));
 
-	move = glm::cross(glm::fvec3(glm::fvec4(0, 0, cfg.world.camSpeed * dt.getSeconds(), 1) * cam.matYaw), glm::fvec3(0, 1, 0));
+	move = glm::cross(glm::fvec3(glm::fvec4(0, 0, cfg.world.camSpeed * deltaTime.getSeconds(), 1) * cam.matYaw), glm::fvec3(0, 1, 0));
 	cam.targetPos += move * float(window.keyboard.isKeyPressed('A'));
 
-	move = glm::fvec3(glm::fvec4(0, 0, cfg.world.camSpeed * dt.getSeconds(), 1) * cam.matYaw);
+	move = glm::fvec3(glm::fvec4(0, 0, cfg.world.camSpeed * deltaTime.getSeconds(), 1) * cam.matYaw);
 	cam.targetPos += move * float(window.keyboard.isKeyPressed('S'));
 
-	move = glm::cross(glm::fvec3(glm::fvec4(0, 0, cfg.world.camSpeed * dt.getSeconds(), 1) * cam.matYaw), glm::fvec3(0, 1, 0));
+	move = glm::cross(glm::fvec3(glm::fvec4(0, 0, cfg.world.camSpeed * deltaTime.getSeconds(), 1) * cam.matYaw), glm::fvec3(0, 1, 0));
 	cam.targetPos -= move * float(window.keyboard.isKeyPressed('D'));
 
-	cam.targetPos.y += cfg.world.camSpeed * dt.getSeconds() * float(window.keyboard.isKeyPressed('R'));
-	cam.targetPos.y -= cfg.world.camSpeed * dt.getSeconds() * float(window.keyboard.isKeyPressed('F'));
+	cam.targetPos.y += cfg.world.camSpeed * deltaTime.getSeconds() * float(window.keyboard.isKeyPressed('R'));
+	cam.targetPos.y -= cfg.world.camSpeed * deltaTime.getSeconds() * float(window.keyboard.isKeyPressed('F'));
 
 	profiler.start("physics");
 
 	if (cfg.world.doPhysics)
 	{
-		physics.step(dt);
-		physics.updateModels();
+		physicsWorld.step(deltaTime);
+		physicsWorld.updateModels();
 	}
 
 	profiler.end("physics");
 
 	uiwm.updateUIWindows();
-	cam.update(dt);
+	cam.update(deltaTime);
 
 	profiler.glTimeThis(
 		CALL(r->render), "render");
@@ -544,6 +423,15 @@ void EngineConfig::RenderConfig::setRenderMode(int set)
 	Engine::r->tileCullShader.setRenderMode(renderMode);
 }
 
+void printlog()
+{
+	Engine::engineLog.printLog(Engine::engineLog);
+}
+
+void toggleConsole()
+{
+	Engine::console.toggle();
+}
 
 #define CFG_FUNC(name) []() -> void { Engine::cfg.##name##(); }
 void EngineConfig::KeyBindConfig::loadKeyBinds()

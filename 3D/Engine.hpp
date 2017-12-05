@@ -184,8 +184,7 @@ public:
 
 	static bool consoleOpen;
 
-	static Physics p;
-	static PhysicsWorld physics;
+	static PhysicsWorld physicsWorld;
 
 	static float tau, damping;
 

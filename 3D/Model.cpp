@@ -185,5 +185,5 @@ void ModelInstance::makePhysicsObject(btCollisionShape * collisionShape, float m
 	physicsObject = new PhysicsObject();
 	physicsObject->create(sgNode->transform.getTranslation(), sgNode->transform.getQuat(), collisionShape, mass);
 	physicsObject->instance = this;
-	Engine::physics.addRigidBody(physicsObject);
+	Engine::physicsWorld.addRigidBody(physicsObject);
 }
