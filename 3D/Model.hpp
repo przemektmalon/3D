@@ -23,6 +23,8 @@
 
 #include "Material.hpp"
 
+#include "rapidxml.hpp"
+
 class MeshBatch;
 
 class ModelRenderMeta
@@ -53,6 +55,8 @@ public:
 		{
 			importModel(lodPaths[i], i);
 		}
+
+
 	}
 
 	struct TriangleList {

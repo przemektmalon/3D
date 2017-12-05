@@ -61,9 +61,6 @@ void AssetManager::loadAssets(String128 & assetListFilePath)
 				std::getline(file, key, '=');
 				std::getline(file, value);
 				name = value;
-				std::getline(file, key, '=');
-				std::getline(file, value);
-				mip = value;
 
 				auto find = Engine::assets.texture2DList.find(String32(name.c_str()));
 				if (find != Engine::assets.texture2DList.end())
@@ -72,41 +69,23 @@ void AssetManager::loadAssets(String128 & assetListFilePath)
 					continue;
 				}
 
-				if (mip == "true")
+				auto tex = Engine::assets.prepareTexture(String128(path.c_str()), String128(name.c_str()));
+				if (tex->doesExist())
 				{
-					auto tex = Engine::assets.prepareTexture(String128(path.c_str()), String128(name.c_str()));
-					if (tex->doesExist())
-					{
-						tex->load();
-					}
-					else
-					{
-						std::cout << "Texture at " << path << " does not exist" << std::endl;
-					}
-					tex->makeGLAsset();
-					tex->glData->loadToGPU();
+					tex->load();
 				}
 				else
 				{
-					auto tex = Engine::assets.prepareTexture(String128(path.c_str()), String128(name.c_str()));
-					if (tex->doesExist())
-					{
-						tex->load();
-					}
-					else
-					{
-						std::cout << "Texture at \"" << path << "\" does not exist" << std::endl;
-					}
-					tex->makeGLAsset();
-					tex->glData->loadToGPU();
+					std::cout << "Texture at " << path << " does not exist" << std::endl;
 				}
-				
+				tex->makeGLAsset();
+				tex->glData->loadToGPU();
 			}
 			else if (line == "[Model]")
 			{
 				std::string line;
 				std::getline(file, line);
-				std::string name, path, ext, limit, albedo, normal, specular, metallic, roughness, material;
+				std::string name, path, limit, albedo, normal, specular, metallic, roughness, material;
 				std::vector<std::string> paths;
 				std::vector<u32> limits;
 
@@ -119,11 +98,6 @@ void AssetManager::loadAssets(String128 & assetListFilePath)
 					else if (key == "name")
 					{
 						name = value;
-						return true;
-					}
-					else if (key == "ext")
-					{
-						ext = value;
 						return true;
 					}
 					else if (key == "limit")

@@ -1,137 +1,110 @@
 [Texture]
 path=res/tex/plastic_D.png
 name=plastic_D
-mip=true
 
 [Texture]
 path=res/tex/plastic_N.png
 name=plastic_N
-mip=true
 
 [Texture]
 path=res/tex/plastic_S.png
 name=plastic_S
-mip=true
 
 [Texture]
 path=res/tex/plastic_R.png
 name=plastic_R
-mip=true
 
 [Texture]
 path=res/tex/dirt_D.png
 name=dirt_D
-mip=true
 
 [Texture]
 path=res/tex/dirt_N.png
 name=dirt_N
-mip=true
 
 [Texture]
 path=res/tex/dirt_S.png
 name=dirt_S
-mip=true
 
 [Texture]
 path=res/tex/dirt_R.png
 name=dirt_R
-mip=true
 
 [Texture]
 path=res/tex/bamboo_D.png
 name=bamboo_D
-mip=true
 
 [Texture]
 path=res/tex/bamboo_N.png
 name=bamboo_N
-mip=true
 
 [Texture]
 path=res/tex/bamboo_S.png
 name=bamboo_S
-mip=true
 
 [Texture]
 path=res/tex/bamboo_R.png
 name=bamboo_R
-mip=true
 
 [Texture]
 path=res/tex/mahog_D.png
 name=mahog_D
-mip=true
 
 [Texture]
 path=res/tex/mahog_N.png
 name=mahog_N
-mip=true
 
 [Texture]
 path=res/tex/mahog_R.png
 name=mahog_R
-mip=true
 
 [Texture]
 path=res/tex/bamboo_S.png
 name=bamboo_S
-mip=true
 
 [Texture]
 path=res/tex/rustediron_D.png
 name=rustediron_D
-mip=true
 
 [Texture]
 path=res/tex/rustediron_N.png
 name=rustediron_N
-mip=true
 
 [Texture]
 path=res/tex/rustediron_S.png
 name=rustediron_S
-mip=true
 
 [Texture]
 path=res/tex/rustediron_R.png
 name=rustediron_R
-mip=true
 
 [Texture]
 path=res/tex/light.png
 name=light
-mip=true
 
 [Texture]
 path=res/tex/null_D.png
 name=null_D
-mip=true
 
 [Texture]
 path=res/tex/null_N.png
 name=null_N
-mip=true
 
 [Texture]
 path=res/tex/null_S.png
 name=null_S
-mip=true
 
 [Texture]
 path=res/tex/g_D.jpg
 name=g_D
-mip=true
 
 [Texture]
 path=res/tex/g_N.jpg
 name=g_N
-mip=true
 
 [Texture]
 path=res/tex/g_S.jpg
 name=g_S
-mip=true
 
 [Texture]
 path=res/tex/copper_D.png
@@ -233,31 +206,26 @@ roughness=dirt_R
 [Model]
 path=res/model/COLBOX.dae
 name=colbox
-ext=dae
 material=bamboo
 
 [Model]
 path=res/model/ground.obj
 name=ground
-ext=obj
 material=dirt
 
 [Model]
 path=res/model/ball2.obj
 name=pbrsphere
-ext=obj
 material=rustediron
 
 [Model]
 path=res/model/stand.obj
 name=stand
-ext=obj
 material=bamboo
 
 [Model]
 path=res/model/hollowbox.obj
 name=hollowbox
-ext=obj
 material=bamboo
 
 [Font]
