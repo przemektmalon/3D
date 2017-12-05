@@ -33,6 +33,8 @@ public:
 		dynamicsWorld->setGravity(btVector3(0, -2, 0));
 	}
 
+	void createGroundPlane();
+
 	void addRigidBody(PhysicsObject* body)
 	{
 		dynamicsWorld->addRigidBody(body->rigidBody);

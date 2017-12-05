@@ -165,7 +165,7 @@ void Engine::mainLoop(int resolutionIndex)
 	auto b1 = new btBoxShape(glm::fvec3(0.1, 0.8, 0.1) * scale);
 	auto b2 = new btBoxShape(glm::fvec3(1.0, 0.1, 1.0) * scale);
 
-	btQuaternion norot(0,0,0);
+	btQuaternion norot(0, 0, 0);
 
 	auto boxc = new btCompoundShape();
 	boxc->addChildShape(btTransform(norot, glm::fvec3(0, 0.9, 0) * scale), b2);
@@ -176,33 +176,9 @@ void Engine::mainLoop(int resolutionIndex)
 	boxc->addChildShape(btTransform(norot, glm::fvec3(-0.9, 0, 0.9)* scale), b1);
 	boxc->addChildShape(btTransform(norot, glm::fvec3(-0.9, 0, -0.9)* scale), b1);
 
+	physicsWorld.createGroundPlane();
 
-
-	auto c1 = new btStaticPlaneShape(glm::fvec3(0.f, 1.f, 0.f), 0.f);
-	auto c2 = new btStaticPlaneShape(btVector3(1.f, 0.f, 0.f), -250.f);
-	auto c3 = new btStaticPlaneShape(btVector3(-1.f, 0.f, 0.f), -250.f);
-	auto c4 = new btStaticPlaneShape(btVector3(0.f, 0.f, 1.f), -250.f);
-	auto c5 = new btStaticPlaneShape(btVector3(0.f, 0.f, -1.f), -250.f);
-	auto c6 = new btStaticPlaneShape(btVector3(0.f, -1.f, 0.f), -500.f);
-
-	auto trans = btTransform(btMatrix3x3(1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f));
-
-	auto s = new btCompoundShape();
-	s->addChildShape(trans, c1);
-	s->addChildShape(trans, c2);
-	s->addChildShape(trans, c3);
-	s->addChildShape(trans, c4);
-	s->addChildShape(trans, c5);
-	s->addChildShape(trans, c6);
-
-	float damping = 0.1;
-
-	auto worldRoot = world->getWorldRootNode();
-
-	auto i8 = world->addModelInstance("ground", worldRoot);
-	i8->sgNode->transform.scale(10.f);
-	auto col = new btStaticPlaneShape(glm::fvec3(0.f, 0.f, 1.f), 0.f);
-	i8->makePhysicsObject(s, 0.f);
+	auto worldRoot = Engine::world->getWorldRootNode();
 
 	auto col2 = new btSphereShape(scale / 2.f);
 	auto boxcol = new btBoxShape(glm::fvec3(scale));
