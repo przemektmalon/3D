@@ -100,6 +100,8 @@
 
 -Boost
 
+-rapidxml
+
 -GLM
 
 -GLEW
