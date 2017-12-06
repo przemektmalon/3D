@@ -21,10 +21,10 @@ void PhysicsWorld::createGroundPlane()
 	s->addChildShape(trans, c5);
 	s->addChildShape(trans, c6);
 
-	auto i8 = Engine::world->addModelInstance("ground", Engine::world->getWorldRootNode());
-	i8->sgNode->transform.scale(10.f);
-	auto col = new btStaticPlaneShape(glm::fvec3(0.f, 0.f, 1.f), 0.f);
-	i8->makePhysicsObject(s, 0.f);
+	auto i = Engine::world->addModelInstance("ground", Engine::world->getWorldRootNode());
+	i->makePhysicsObject(s, 0.f);
+	i->setScale(10.f);
+	i->physicsObject->setRestitution(0.5);
 }
 
 void PhysicsWorld::updateModels()

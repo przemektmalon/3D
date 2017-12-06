@@ -1,7 +1,13 @@
 <physics>
 
 	<mass>10</mass>
+	<friction>0.8</friction>
+	<restitution>0.1</restitution>
+	<lineardamping>0.025</lineardamping>
+	<angulardamping>0.05</angulardamping>
+
 	<compound>true</compound>
+
 	<shape type="box">
 		<halfx>0.1</halfx>
 		<halfy>0.8</halfy>

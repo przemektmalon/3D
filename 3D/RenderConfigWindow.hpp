@@ -357,6 +357,8 @@ UIWindow* createRenderConfigWindow()
 	tab.addTabElement("Resolution", butRes7Ptr);
 	tab.addTabElement("Resolution", butRes8Ptr);
 
+	tab.setCurrentTab("Render");
+
 	win->addElement(tabPtr);
 
 	tab.forceUpdateAll();

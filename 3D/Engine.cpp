@@ -174,8 +174,6 @@ void Engine::mainLoop(int resolutionIndex)
 		instance->makePhysicsObject();
 		instance->setScale(rand() % 15 + 10);
 		
-		instance->physicsObject->setRestitution(0.1);
-
 		if (i % 3 == 0)
 			instance->overwriteMaterial(0, 0, assets.getMaterial("mahogany"));
 		else if (i % 3 == 1)

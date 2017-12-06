@@ -209,6 +209,11 @@ public:
 			el->draw();
 	}
 
+	void setCurrentTab(std::string tab)
+	{
+		currentTab = tab;
+	}
+
 private:
 
 	int maxRightTab;

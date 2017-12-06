@@ -193,10 +193,13 @@ void ModelInstance::makePhysicsObject(btCollisionShape * collisionShape, float m
 void ModelInstance::makePhysicsObject()
 {
 	btCollisionShape* colShape = nullptr;
-	float mass;
+	float mass = 10.0, friction = 0.5, restitution = 0.2, linearDamping = 0.05, angularDamping = 0.05;
 
 	auto nodeToFloat = [](rapidxml::xml_node<>* node) -> float {
-		return std::stof(std::string(node->value()));
+		if (node)
+			return std::stof(std::string(node->value()));
+		else
+			return 0.f; /// TODO: more appropriate default values and logging missing values
 	};
 
 	auto generateCollisionShape = [&nodeToFloat](rapidxml::xml_node<>* shapeNode) -> btCollisionShape* {
@@ -216,7 +219,7 @@ void ModelInstance::makePhysicsObject()
 		}
 		else
 		{
-
+			/// TODO: more collision shapes
 		}
 	};
 
@@ -239,6 +242,10 @@ void ModelInstance::makePhysicsObject()
 		rapidxml::xml_node<>* root = doc.first_node("physics");
 
 		mass = nodeToFloat(root->first_node("mass"));
+		friction = nodeToFloat(root->first_node("friction"));
+		restitution = nodeToFloat(root->first_node("restitution"));
+		linearDamping = nodeToFloat(root->first_node("lineardamping"));
+		angularDamping = nodeToFloat(root->first_node("angulardamping"));
 
 		std::string compound = std::string(root->first_node("compound")->value());
 		if (compound == "true")
@@ -281,12 +288,13 @@ void ModelInstance::makePhysicsObject()
 	else
 	{
 		colShape = new btBoxShape(btVector3(10, 10, 10));
-		mass = 1;
 	}
 
 	physicsObject = new PhysicsObject();
 	physicsObject->create(sgNode->transform.getTranslation(), sgNode->transform.getQuat(), colShape, mass);
+	physicsObject->setDamping(linearDamping, angularDamping);
+	physicsObject->setFriction(friction);
+	physicsObject->setRestitution(restitution);
 	physicsObject->instance = this;
 	Engine::physicsWorld.addRigidBody(physicsObject);
-
 }

@@ -56,10 +56,10 @@ UIWindow* createWorldEditWindow()
 	butShootBall.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& me) -> void {
 		UIButton* _this = (UIButton*)__this;
 		auto i = Engine::world->addModelInstance("pbrsphere", Engine::world->getWorldRootNode());
-		i->sgNode->transform.scale(10.f);
-		i->sgNode->transform.setTranslation(Engine::cam.pos);
-		auto col = new btSphereShape(10.f);
-		i->makePhysicsObject(col, 10.f);
+		i->setInitialPosition(Engine::cam.pos);
+		i->makePhysicsObject();
+		i->setScale(10.f);
+
 		glm::fvec3 dir = Engine::cam.getDirectionVector();
 		float force = 400.f;
 		i->physicsObject->rigidBody->applyImpulse(btVector3(force * dir.x, force * dir.y, force * dir.z), btVector3(0.f, 0.f, 0.f));
@@ -82,10 +82,10 @@ UIWindow* createWorldEditWindow()
 	butShootBox.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& me) -> void {
 		UIButton* _this = (UIButton*)__this;
 		auto i = Engine::world->addModelInstance("hollowbox", Engine::world->getWorldRootNode());
-		i->sgNode->transform.scale(10.f);
-		i->sgNode->transform.setTranslation(Engine::cam.pos);
-		auto col = new btBoxShape(glm::fvec3(10.f));
-		i->makePhysicsObject(col, 10.f);
+		i->setInitialPosition(Engine::cam.pos);
+		i->makePhysicsObject();
+		i->setScale(10.f);
+
 		glm::fvec3 dir = Engine::cam.getDirectionVector();
 		float force = 400.f;
 		i->physicsObject->rigidBody->applyImpulse(btVector3(force * dir.x, force * dir.y, force * dir.z), btVector3(0.f, 0.f, 0.f));
@@ -100,6 +100,8 @@ UIWindow* createWorldEditWindow()
 
 	tabEdits.addTabElement("First", butShootBallPtr);
 	tabEdits.addTabElement("Second", butShootBoxPtr);
+
+	tabEdits.setCurrentTab("First");
 
 	win->addElement(butToggleEditPtr);
 	win->addElement(butTogglePhysicsPtr);
