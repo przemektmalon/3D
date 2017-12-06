@@ -2,6 +2,7 @@
 #include "UIElement.hpp"
 #include "UIButton.hpp"
 #include <unordered_map>
+#include "UIElementContainer.hpp"
 
 class UIMultiTab : public UIElement
 {
@@ -12,7 +13,7 @@ public:
 
 	void addTabElement(std::string tab, UIElement* el)
 	{
-		tabElements[tab].push_back(el);
+		tabElements[tab].elements.insert(std::make_pair(el->getName(), el));
 	}
 
 	void setPosition(glm::fvec2 pos)
@@ -31,105 +32,7 @@ public:
 	void forceUpdateAll()
 	{
 		for (auto& tab : tabElements)
-			for (auto& el : tab.second)
-				el->update();
-	}
-
-	void update()
-	{
-		for (auto& but : tabButtons)
-			but.second->update();
-
-		if (tabElements.find(currentTab) == tabElements.end())
-			return;
-
-		for (auto& el : tabElements[currentTab])
-			el->update();
-	}
-
-	void mouseDown(MouseEvent& pMouseEvent)
-	{
-		for (auto itr = tabButtons.begin(); itr != tabButtons.end(); ++itr)
-		{
-			auto rect = (itr)->second->getBounds();
-
-			auto winMP = pMouseEvent.getUIWindowPosition((itr)->second->getParentWindow());
-
-			if (!rect.contains(winMP))
-				continue;
-
-			(itr)->second->setFocused(true);
-			(itr)->second->setClicked(true);
-			(itr)->second->onMouseDown(pMouseEvent);
-		}
-
-		if (tabElements.find(currentTab) == tabElements.end())
-			return;
-
-		for (auto itr = tabElements[currentTab].begin(); itr != tabElements[currentTab].end(); ++itr)
-			(*itr)->setFocused(false);
-
-		auto mp = pMouseEvent.getPosition();
-
-		for (auto itr = tabElements[currentTab].begin(); itr != tabElements[currentTab].end(); ++itr)
-		{
-			auto rect = (*itr)->getBounds();
-
-			auto winMP = pMouseEvent.getUIWindowPosition((*itr)->getParentWindow());
-
-			if (!rect.contains(winMP))
-				continue;
-
-			(*itr)->setFocused(true);
-			(*itr)->setClicked(true);
-			(*itr)->onMouseDown(pMouseEvent);
-		}
-	}
-
-	void mouseUp(MouseEvent& pMouseEvent)
-	{
-		for (auto itr = tabButtons.begin(); itr != tabButtons.end(); ++itr)
-		{
-			if ((itr)->second->isClicked())
-			{
-				(itr)->second->setClicked(false);
-				(itr)->second->onMouseUp(pMouseEvent);
-			}
-		}
-
-		if (tabElements.find(currentTab) == tabElements.end())
-			return;
-
-		for (auto itr = tabElements[currentTab].begin(); itr != tabElements[currentTab].end(); ++itr)
-		{
-			if ((*itr)->isClicked())
-			{
-				(*itr)->setClicked(false);
-				(*itr)->onMouseUp(pMouseEvent);
-			}
-		}
-	}
-
-	void keyDown(KeyEvent & pKeyEvent)
-	{
-		if (tabElements.find(currentTab) == tabElements.end())
-			return;
-
-		for (auto itr = tabElements[currentTab].begin(); itr != tabElements[currentTab].end(); ++itr)
-		{
-			(*itr)->onKeyDown(pKeyEvent);
-		}
-	}
-
-	void keyUp(KeyEvent & pKeyEvent)
-	{
-		if (tabElements.find(currentTab) == tabElements.end())
-			return;
-
-		for (auto itr = tabElements[currentTab].begin(); itr != tabElements[currentTab].end(); ++itr)
-		{
-			(*itr)->onKeyUp(pKeyEvent);
-		}
+			tab.second.update();
 	}
 
 	void checkMouseEnter(MouseEvent& pMouseEvent)
@@ -166,32 +69,7 @@ public:
 		if (tabElements.find(currentTab) == tabElements.end())
 			return;
 
-		for (auto itr = tabElements[currentTab].begin(); itr != tabElements[currentTab].end(); ++itr)
-		{
-			auto rect = (*itr)->getBounds();
-
-			auto winMP = pMouseEvent.getUIWindowPosition((*itr)->getParentWindow());
-
-			if (!rect.contains(winMP))
-			{
-				if ((*itr)->isHovered())
-				{
-					(*itr)->setHovered(false);
-					(*itr)->onMouseLeave(pMouseEvent);
-					if ((*itr)->isClicked())
-						(*itr)->setOffClick(true);
-				}
-				continue;
-			}
-
-			if (!(*itr)->isHovered())
-			{
-				(*itr)->setHovered(true);
-				(*itr)->onMouseEnter(pMouseEvent);
-				if ((*itr)->isClicked())
-					(*itr)->setOffClick(false);
-			}
-		}
+		tabElements[currentTab].checkMouseEnter(pMouseEvent);
 	}
 
 	void draw()
@@ -205,8 +83,7 @@ public:
 		if (tabElements.find(currentTab) == tabElements.end())
 			return;
 
-		for (auto& el : tabElements[currentTab])
-			el->draw();
+		tabElements[currentTab].draw();
 	}
 
 	void setCurrentTab(std::string tab)
@@ -219,7 +96,9 @@ private:
 	int maxRightTab;
 	RectangleShape back;
 
+	std::unordered_map<std::string, UIElementContainer> tabElements;
+
 	std::string currentTab;
 	std::unordered_map<std::string, UIButton*> tabButtons;
-	std::unordered_map<std::string, std::vector<UIElement*>> tabElements;
+	//std::unordered_map<std::string, std::vector<UIElement*>> tabElements;
 };

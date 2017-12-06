@@ -73,6 +73,14 @@ public:
 		font = pStyle.font;
 		charSize = pStyle.charSize;
 		colour = pStyle.colour;
+		update();
+	}
+
+	void setStyleAndOrigin(TextStyle& pStyle)
+	{
+		font = pStyle.font;
+		charSize = pStyle.charSize;
+		colour = pStyle.colour;
 		hasCustomOrigin = pStyle.hasCustomOrigin;
 		if (hasCustomOrigin)
 		{

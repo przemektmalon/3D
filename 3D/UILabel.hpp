@@ -14,6 +14,7 @@ public:
 	void init()
 	{
 		text.init();
+		text.setTextOrigin(Text2D::TopLeft);
 	}
 
 	void draw()

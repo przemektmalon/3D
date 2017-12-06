@@ -10,6 +10,7 @@ UIWindow* createWorldEditWindow()
 	auto win = new UIWindow("World Edit", irect(1920-325, 1080-600, 325, 600), 4, &Engine::window);
 
 	Text2D::TextStyle styleA(Engine::assets.getFont("clearsansb"), 16);
+	styleA.textOriginPreDef = Text2D::MiddleMiddle;
 
 	C_BUTTON(butTogglePhysics, win);
 	butTogglePhysics.setName("togglephysics");

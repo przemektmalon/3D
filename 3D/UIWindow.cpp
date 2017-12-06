@@ -79,10 +79,7 @@ void UIWindow::draw()
 	if(hasTitle)
 		title->draw();
 
-	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
-	{
-		(*itr).second->draw();
-	}
+	UIElementContainer::draw();
 	
 	Engine::r->fboDefault.bind();
 	glViewport(0, 0, Engine::window.getSizeX(), Engine::window.getSizeY());
@@ -107,10 +104,7 @@ void UIWindow::draw()
 
 void UIWindow::update()
 {
-	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
-	{
-		(*itr).second->update();
-	}
+	UIElementContainer::update();
 
 	if (dragging)
 	{
@@ -119,39 +113,16 @@ void UIWindow::update()
 	}
 }
 
-void UIWindow::mouseDown(MouseEvent& pMouseEvent)
+bool UIWindow::mouseDown(MouseEvent& pMouseEvent)
 {
-	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
-		itr->second->setFocused(false);
-
 	auto mp = pMouseEvent.getPosition();
 	if (!windowArea.contains(mp))
 	{
 		dragging = false;
-		return;
+		return false;
 	}
 
-	bool canDrag = true;
-
-	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
-	{
-		if (itr->second->elementType == UIElement::MultiTab)
-		{
-			((UIMultiTab*)itr->second)->mouseDown(pMouseEvent);
-		}
-
-		auto rect = (*itr).second->getBounds();
-		
-		auto winMP = pMouseEvent.getUIWindowPosition((*itr).second->getParentWindow());
-
-		if (!rect.contains(winMP))
-			continue;
-
-		(*itr).second->setFocused(true);
-		(*itr).second->setClicked(true);
-		(*itr).second->onMouseDown(pMouseEvent);
-		canDrag = false;
-	}
+	bool canDrag = UIElementContainer::mouseDown(pMouseEvent);
 
 	if (canDrag)
 	{
@@ -160,85 +131,13 @@ void UIWindow::mouseDown(MouseEvent& pMouseEvent)
 	}
 	else
 		dragging = false;
+	return dragging;
 }
 
 void UIWindow::mouseUp(MouseEvent& pMouseEvent)
 {
-	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
-	{
-		if (itr->second->elementType == UIElement::MultiTab)
-		{
-			((UIMultiTab*)itr->second)->mouseUp(pMouseEvent);
-		}
-
-		if ((*itr).second->isClicked())
-		{
-			(*itr).second->setClicked(false);
-			(*itr).second->onMouseUp(pMouseEvent);
-		}
-	}
+	UIElementContainer::mouseUp(pMouseEvent);
 	dragging = false;
-}
-
-void UIWindow::keyDown(KeyEvent & pKeyEvent)
-{
-	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
-	{
-		if (itr->second->elementType == UIElement::MultiTab)
-		{
-			((UIMultiTab*)itr->second)->keyDown(pKeyEvent);
-		}
-		(*itr).second->onKeyDown(pKeyEvent);
-	}
-}
-
-void UIWindow::keyUp(KeyEvent & pKeyEvent)
-{
-	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
-	{
-		if (itr->second->elementType == UIElement::MultiTab)
-		{
-			((UIMultiTab*)itr->second)->keyUp(pKeyEvent);
-		}
-		(*itr).second->onKeyUp(pKeyEvent);
-	}
-}
-
-void UIWindow::checkMouseEnter(MouseEvent& pMouseEvent)
-{
-	auto mp = pMouseEvent.getPosition();
-
-	for (auto itr = elements.begin(); itr != elements.end(); ++itr)
-	{
-		auto rect = (*itr).second->getBounds();
-
-		auto winMP = pMouseEvent.getUIWindowPosition((*itr).second->getParentWindow());
-
-		if (itr->second->elementType == UIElement::MultiTab)
-		{
-			((UIMultiTab*)(itr->second))->checkMouseEnter(pMouseEvent);
-		}
-
-		if (!rect.contains(winMP))
-		{
-			if ((*itr).second->isHovered())
-			{
-				(*itr).second->setHovered(false);
-				(*itr).second->onMouseLeave(pMouseEvent);
-				if ((*itr).second->isClicked())
-					(*itr).second->setOffClick(true);
-			}
-			continue;
-		}
-		
-		if (!(*itr).second->isHovered())
-		{
-			(*itr).second->setHovered(true);
-			(*itr).second->onMouseEnter(pMouseEvent);
-			if ((*itr).second->isClicked())
-				(*itr).second->setOffClick(false);
-		}
-	}
 }
 
 void UIWindow::setTitle(std::string pTitle)

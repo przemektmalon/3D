@@ -118,9 +118,6 @@ private:
 	void processMesh(aiMesh *mesh, const aiScene *scene, std::vector<TriangleList>& triListVec);
 
 	void loadMaterialTextures(aiMaterial *material, aiTextureType type, TriangleList& triList);
-
-
-
 };
 
 class ModelInstance
@@ -170,6 +167,51 @@ public:
 	void setInitialPosition(glm::fvec3 position)
 	{
 		sgNode->transform.setTranslation(position);
+	}
+
+	void setPosition(glm::fvec3 position)
+	{
+		auto oldRigid = physicsObject->rigidBody;
+		auto oldMotion = physicsObject->motionState;
+
+		Engine::physicsWorld.removeRigidBody(physicsObject);
+		btTransform t;
+		oldMotion->getWorldTransform(t);
+		auto rot = t.getRotation();
+
+		physicsObject->create(position, glm::fquat(rot.w(), rot.x(), rot.y(), rot.z()), physicsObject->collisionShape, physicsObject->mass);
+		Engine::physicsWorld.addRigidBody(physicsObject);
+
+		delete oldRigid;
+		delete oldMotion;
+	}
+
+	void setRotation(glm::fquat rotation)
+	{
+		auto oldRigid = physicsObject->rigidBody;
+		auto oldMotion = physicsObject->motionState;
+
+		Engine::physicsWorld.removeRigidBody(physicsObject);
+		btTransform t;
+		oldMotion->getWorldTransform(t);
+		auto pos = t.getOrigin();
+
+		physicsObject->create(glm::fvec3(pos.x(),pos.y(),pos.z()), rotation, physicsObject->collisionShape, physicsObject->mass);
+		Engine::physicsWorld.addRigidBody(physicsObject);
+
+		delete oldRigid;
+		delete oldMotion;
+	}
+
+	void setPositionRotation(glm::fvec3 position, glm::fquat rotation)
+	{
+		auto oldRigid = physicsObject->rigidBody;
+		auto oldMotion = physicsObject->motionState;
+		Engine::physicsWorld.removeRigidBody(physicsObject);
+		physicsObject->create(position, rotation, physicsObject->collisionShape, physicsObject->mass);
+		Engine::physicsWorld.addRigidBody(physicsObject);
+		delete oldRigid;
+		delete oldMotion;
 	}
 
 	Model* model;

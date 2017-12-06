@@ -6,25 +6,23 @@
 #include "Event.hpp"
 #include "Rect.hpp"
 #include <unordered_map>
+#include "UIElementContainer.hpp"
 
 class Font;
 class UIElement;
 class UILabel;
 
-class UIWindow
+class UIWindow : public UIElementContainer
 {
 public:
 	UIWindow(std::string pName, irect pWindowArea, int pBorderWidth, const Window* pParentWindow);
 	~UIWindow();
 
-	void draw();
+	void draw();							 // Override
+	void update();							 // Override
+	bool mouseDown(MouseEvent& pMouseEvent); // Override
+	void mouseUp(MouseEvent& pMouseEvent);	 // Override
 
-	void update();
-	void mouseDown(MouseEvent& pMouseEvent);
-	void mouseUp(MouseEvent& pMouseEvent);
-	void keyDown(KeyEvent& pMouseEvent);
-	void keyUp(KeyEvent& pMouseEvent);
-	void checkMouseEnter(MouseEvent & pMouseEvent);
 	const GLTexture2D& getTexture() { return renderTarget.textureAttachments[0]; }
 
 	void setBorderWidth(u32 pWidth)
@@ -102,7 +100,6 @@ public:
 
 	Framebuffer renderTarget;
 
-	std::unordered_map<std::string,UIElement*> elements;
 	UILabel* title;
 
 	Shape2DShader* shader;

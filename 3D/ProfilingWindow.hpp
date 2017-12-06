@@ -11,6 +11,7 @@ UIWindow* createProfilingWindow()
 	auto win = new UIWindow("Profiling", irect(1920-246, 0, 246, 350), 4, &Engine::window);
 
 	Text2D::TextStyle styleA(Engine::assets.getFont("clearsansb"), 16);
+	styleA.textOriginPreDef = Text2D::MiddleMiddle;
 
 	C_LABEL(lblGPUUpdate, win);
 	lblGPUUpdate.setName("lightupdate");

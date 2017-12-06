@@ -413,5 +413,8 @@
     <ClInclude Include="UIMultiTab.hpp">
       <Filter>Header Files\UI Elements</Filter>
     </ClInclude>
+    <ClInclude Include="UIElementContainer.hpp">
+      <Filter>Header Files\UI Elements</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

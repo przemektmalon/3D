@@ -6,6 +6,7 @@
 # some special characters have special three letter codes explained the the end of the file
 
 ESC escape
+P   toggle_physics
 I   toggle_textbounds
 TIL toggle_console
 

@@ -5,6 +5,7 @@
 UIButton::UIButton(UIWindow* pParent) : UIElement(Button,pParent)
 {
 	text.init();
+	text.setTextOrigin(Text2D::MiddleMiddle);
 	rect.initOGL();
 
 	backColour = glm::fvec4(0.3, 0.3, 0.3, 0.8);

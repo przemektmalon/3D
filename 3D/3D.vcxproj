@@ -279,6 +279,7 @@
     <ClInclude Include="MaterialLibrary.hpp" />
     <ClInclude Include="Profiler.hpp" />
     <ClInclude Include="Shape2DShaderNoTex.hpp" />
+    <ClInclude Include="UIElementContainer.hpp" />
     <ClInclude Include="UIInputField.hpp" />
     <ClInclude Include="Keyboard.hpp" />
     <ClInclude Include="Lights.hpp" />

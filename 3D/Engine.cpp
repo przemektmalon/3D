@@ -154,7 +154,7 @@ void Engine::mainLoop(int resolutionIndex)
 
 	auto worldRoot = Engine::world->getWorldRootNode();
 
-	for (int i = 0; i < 10; ++i)
+	for (int i = 0; i < 50; ++i)
 	{
 		auto instance = world->addModelInstance("pbrsphere", worldRoot);
 		instance->setInitialPosition(glm::fvec3(50, 10 + (25 * i), 0));
@@ -167,7 +167,7 @@ void Engine::mainLoop(int resolutionIndex)
 			instance->overwriteMaterial(0,0,assets.getMaterial("greasymetal"));
 	}
 
-	for (int i = 0; i < 10; ++i)
+	for (int i = 0; i < 50; ++i)
 	{
 		auto instance = world->addModelInstance("hollowbox", worldRoot);
 		instance->setInitialPosition(glm::fvec3(-50, 20 + (50 * i), 0));
@@ -196,7 +196,8 @@ void Engine::mainLoop(int resolutionIndex)
 
 	uiwm.addWindow(createRenderConfigWindow());
 	uiwm.addWindow(createProfilingWindow());
-	uiwm.addWindow(createWorldEditWindow());
+	//uiwm.addWindow(createWorldEditWindow());
+	cfg.world.togglePhysics();
 
 	while (engineState != Quitting) {
 		if (!window.processMessages()) 
@@ -470,6 +471,7 @@ void EngineConfig::KeyBindConfig::initialiseFunctionBindingConfig()
 	functionNames["escape"] = escapePress;
 	functionNames["toggle_textbounds"] = CFG_FUNC(render.toggleDrawTextBounds);
 	functionNames["toggle_console"] = CFG_FUNC(render.toggleDrawConsole);
+	functionNames["toggle_physics"] = CFG_FUNC(world.togglePhysics);
 }
 
 void EngineConfig::RenderConfig::SSSAOConfig::setFrameScale(float set)
