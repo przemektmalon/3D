@@ -9,7 +9,7 @@ void PhysicsWorld::createGroundPlane()
 	auto c3 = new btStaticPlaneShape(btVector3(-1.f, 0.f, 0.f), -250.f);
 	auto c4 = new btStaticPlaneShape(btVector3(0.f, 0.f, 1.f), -250.f);
 	auto c5 = new btStaticPlaneShape(btVector3(0.f, 0.f, -1.f), -250.f);
-	auto c6 = new btStaticPlaneShape(btVector3(0.f, -1.f, 0.f), -500.f);
+	auto c6 = new btStaticPlaneShape(btVector3(0.f, -1.f, 0.f), -5000.f);
 
 	auto trans = btTransform(btMatrix3x3(1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f));
 

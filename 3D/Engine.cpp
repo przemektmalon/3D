@@ -154,33 +154,32 @@ void Engine::mainLoop(int resolutionIndex)
 
 	auto worldRoot = Engine::world->getWorldRootNode();
 
-	for (int i = 0; i < 30; ++i)
+	for (int i = 0; i < 10; ++i)
 	{
-		auto i2 = world->addModelInstance("pbrsphere", worldRoot);
-		i2->sgNode->transform.scale(10.f);
-		i2->sgNode->transform.translate(glm::fvec3(50.1, 5.1 + (5.1 * i), 0));
-
-		i2->makePhysicsObject();
-
+		auto instance = world->addModelInstance("pbrsphere", worldRoot);
+		instance->setInitialPosition(glm::fvec3(50, 10 + (25 * i), 0));
+		instance->makePhysicsObject();
+		instance->setScale(rand() % 10 + 5);
+		
 		if (i % 3 == 0)
-			i2->overwriteMaterial(0,0,assets.getMaterial("copper"));
+			instance->overwriteMaterial(0,0,assets.getMaterial("copper"));
 		else if (i % 3 == 1)
-			i2->overwriteMaterial(0,0,assets.getMaterial("greasymetal"));
+			instance->overwriteMaterial(0,0,assets.getMaterial("greasymetal"));
 	}
 
-	for (int i = 0; i < 30; ++i)
+	for (int i = 0; i < 10; ++i)
 	{
-		auto i2 = world->addModelInstance("hollowbox", worldRoot);
-		i2->sgNode->transform.scale(20.f);
-		i2->sgNode->transform.translate(glm::fvec3(5, 20.1 + (50.1 * i), 0));
-
-		i2->makePhysicsObject();
-		i2->physicsObject->setRestitution(0.1);
+		auto instance = world->addModelInstance("hollowbox", worldRoot);
+		instance->setInitialPosition(glm::fvec3(-50, 20 + (50 * i), 0));
+		instance->makePhysicsObject();
+		instance->setScale(rand() % 15 + 10);
+		
+		instance->physicsObject->setRestitution(0.1);
 
 		if (i % 3 == 0)
-			i2->overwriteMaterial(0, 0, assets.getMaterial("mahogany"));
+			instance->overwriteMaterial(0, 0, assets.getMaterial("mahogany"));
 		else if (i % 3 == 1)
-			i2->overwriteMaterial(0, 0, assets.getMaterial("marble"));
+			instance->overwriteMaterial(0, 0, assets.getMaterial("marble"));
 	}
 
 	world->sg.updateAll();

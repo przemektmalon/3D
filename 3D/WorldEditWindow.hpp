@@ -7,7 +7,7 @@
 
 UIWindow* createWorldEditWindow()
 {
-	auto win = new UIWindow("World Edit", irect(300, 300, 325, 600), 4, &Engine::window);
+	auto win = new UIWindow("World Edit", irect(1920-325, 1080-600, 325, 600), 4, &Engine::window);
 
 	Text2D::TextStyle styleA(Engine::assets.getFont("clearsansb"), 16);
 
@@ -40,7 +40,7 @@ UIWindow* createWorldEditWindow()
 	C_MULTITAB(tabEdits, win);
 	tabEdits.setName("tab");
 	tabEdits.setPosition(glm::fvec2(10, 70));
-	tabEdits.setDimensions(glm::fvec2(305, 565));
+	tabEdits.setDimensions(glm::fvec2(305, 525));
 	tabEdits.addTab("First");
 	tabEdits.addTab("Second");
 	tabEdits.addTab("Third");

@@ -3,7 +3,7 @@
 	<mass>10</mass>
 	<compound>false</compound>
 	<shape type="sphere">
-		<radius>10</radius>
+		<radius>1</radius>
 	</shape>
 
 </physics>

@@ -157,6 +157,21 @@ public:
 		lodTris[triList] = material;
 	}
 
+	void setScale(float scale)
+	{
+		if (physicsObject)
+		{
+			physicsObject->collisionShape->setLocalScaling(btVector3(scale, scale, scale));
+			physicsObject->setMass(physicsObject->mass);
+		}
+		sgNode->transform.setScale(glm::fvec3(scale));
+	}
+
+	void setInitialPosition(glm::fvec3 position)
+	{
+		sgNode->transform.setTranslation(position);
+	}
+
 	Model* model;
 	SGNode* sgNode;
 	PhysicsObject* physicsObject;
