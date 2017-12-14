@@ -52,6 +52,10 @@
 
 -Light rays
 
+-Global illumination and lightmap baking
+
+-Translucent shadow maps
+
 -Anti-aliasing
 
 -Bloom
