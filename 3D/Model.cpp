@@ -217,6 +217,16 @@ void ModelInstance::makePhysicsObject()
 			float halfz = nodeToFloat(shapeNode->first_node("halfz"));
 			return new btBoxShape(btVector3(halfx, halfy, halfz));
 		}
+		else if (shapeType == "plane")
+		{
+			float nx = nodeToFloat(shapeNode->first_node("nx"));
+			float ny = nodeToFloat(shapeNode->first_node("ny"));
+			float nz = nodeToFloat(shapeNode->first_node("nz"));
+			float k = nodeToFloat(shapeNode->first_node("k"));
+			auto trans = btTransform(btMatrix3x3(1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f));
+
+			return new btStaticPlaneShape(btVector3(nx, ny, nz), k);
+		}
 		else
 		{
 			/// TODO: more collision shapes

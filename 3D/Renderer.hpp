@@ -69,8 +69,6 @@ public:
 
 	inline void initialiseScreenFramebuffer();
 
-	inline void initialiseSkybox();
-
 	inline void initialiseLights();
 
 	inline void initialiseSamplers();
@@ -94,32 +92,31 @@ public:
 	void shadingPass();
 	void screenPass();
 
-	void bakeStaticLights();
+	/// TODO: this
+	// void bakeStaticLights();
 
 	u32 drawCount[DrawModesCount];
-
-	irect viewport;
 
 	Window* window;
 	World* world;
 	
+	irect viewport;
+
+	// Framebuffers
 	DefaultFramebuffer fboDefault;
 	Framebuffer fboSSAOBlur;
 	Framebuffer fboSSAO;
 	Framebuffer fboGBuffer;
 	Framebuffer fboScreen;
-
-	Framebuffer fboLight[4];
+	Framebuffer fboShadow;
 	
+	// Vertex storage for rendering to window
 	GLuint vaoQuad;
 	GLuint vboQuad;
-
 	GLuint vaoQuadViewRays;
 	GLuint vboQuadViewRays;
 
-	GLBufferObject shadowMatrixBuffer;
-
-	//Shaders
+	// Shaders
 	ShaderStore shaderStore;
 
 	GBufferShaderTex gBufferShaderTex;
@@ -137,11 +134,15 @@ public:
 	Shape3DShader shape3DShader;
 	TextShader textShader;
 	
+	// Light stuff
 	LightManager lightManager;
-	
 	GLTexture2D lightPassTex;
+	GLBufferObject shadowMatrixBuffer;
+
+	// Camera
 	Camera* activeCam;
 
+	// Samplers
 	Sampler defaultSampler;
 	Sampler billboardSampler;
 	Sampler postSampler;
@@ -150,10 +151,5 @@ public:
 	Sampler shadowSampler;
 	Sampler shadowCubeSampler;
 
-	// Profiling
-
-	u64 gpuBufferTime, gBufferTime, shadowTime, ssaoTime, lightPassTime, screenTime;
-
 	enum RenderMode { Shaded, Albedo, Normal, SSAO, Depth } renderMode;
-
 };

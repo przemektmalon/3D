@@ -19,10 +19,6 @@ public:
 		collisionShape->calculateLocalInertia(mass, inertia);
 
 		rigidBody = new btRigidBody(mass, motionState, collisionShape, inertia);
-
-		//setFriction(0.5f);
-		//setRestitution(0.2f);
-		//setDamping(0.05, 0.05);
 	}
 
 	void setMass(float pMass)

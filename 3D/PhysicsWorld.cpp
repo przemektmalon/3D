@@ -4,27 +4,9 @@
 
 void PhysicsWorld::createGroundPlane()
 {
-	auto c1 = new btStaticPlaneShape(btVector3(0.f, 1.f, 0.f), 0.f);
-	auto c2 = new btStaticPlaneShape(btVector3(1.f, 0.f, 0.f), -250.f);
-	auto c3 = new btStaticPlaneShape(btVector3(-1.f, 0.f, 0.f), -250.f);
-	auto c4 = new btStaticPlaneShape(btVector3(0.f, 0.f, 1.f), -250.f);
-	auto c5 = new btStaticPlaneShape(btVector3(0.f, 0.f, -1.f), -250.f);
-	auto c6 = new btStaticPlaneShape(btVector3(0.f, -1.f, 0.f), -5000.f);
-
-	auto trans = btTransform(btMatrix3x3(1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f));
-
-	auto s = new btCompoundShape();
-	s->addChildShape(trans, c1);
-	s->addChildShape(trans, c2);
-	s->addChildShape(trans, c3);
-	s->addChildShape(trans, c4);
-	s->addChildShape(trans, c5);
-	s->addChildShape(trans, c6);
-
-	auto i = Engine::world->addModelInstance("ground", Engine::world->getWorldRootNode());
-	i->makePhysicsObject(s, 0.f);
+	auto i = Engine::world->addModelInstance("ground");
+	i->makePhysicsObject();
 	i->setScale(10.f);
-	i->physicsObject->setRestitution(0.5);
 }
 
 void PhysicsWorld::updateModels()

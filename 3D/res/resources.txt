@@ -59,10 +59,6 @@ path=res/tex/mahog_R.png
 name=mahog_R
 
 [Texture]
-path=res/tex/bamboo_S.png
-name=bamboo_S
-
-[Texture]
 path=res/tex/rustediron_D.png
 name=rustediron_D
 
@@ -187,7 +183,7 @@ name=bamboo
 albedo=bamboo_D
 normal=bamboo_N
 metallic=bamboo_S
-roughness=mahog_R
+roughness=bamboo_R
 
 [Material]
 name=rustediron
@@ -212,6 +208,7 @@ material=bamboo
 path=res/model/ground.obj
 name=ground
 material=dirt
+physics=res/model/groundphysics.xml
 
 [Model]
 path=res/model/ball2.obj

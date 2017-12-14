@@ -153,11 +153,9 @@ void Engine::mainLoop(int resolutionIndex)
 
 	physicsWorld.createGroundPlane();
 
-	auto worldRoot = Engine::world->getWorldRootNode();
-
-	for (int i = 0; i < 10; ++i)
+	for (int i = 0; i < 40; ++i)
 	{
-		auto instance = world->addModelInstance("pbrsphere", worldRoot);
+		auto instance = world->addModelInstance("pbrsphere");
 		instance->setInitialPosition(glm::fvec3(50, 10 + (25 * i), 0));
 		instance->makePhysicsObject();
 		instance->setScale(rand() % 10 + 5);
@@ -168,9 +166,9 @@ void Engine::mainLoop(int resolutionIndex)
 			instance->overwriteMaterial(0,0,assets.getMaterial("greasymetal"));
 	}
 
-	for (int i = 0; i < 10; ++i)
+	for (int i = 0; i < 40; ++i)
 	{
-		auto instance = world->addModelInstance("hollowbox", worldRoot);
+		auto instance = world->addModelInstance("hollowbox");
 		instance->setInitialPosition(glm::fvec3(-50, 20 + (50 * i), 0));
 		instance->makePhysicsObject();
 		instance->setScale(rand() % 15 + 10);

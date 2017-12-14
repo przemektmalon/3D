@@ -53,7 +53,7 @@ vec3 perturb_normal( vec3 N, vec3 V, vec2 texcoord)
 {
     vec3 map = texture2D(sampler2D(texHandle[6*DrawID+1]), texcoord).xyz * 2.f - 1.f;
     mat3 TBN = cotangent_frame( N, -V, texcoord );
-    return normalize( N );
+    return normalize( TBN * map );
 }
 
 void main()

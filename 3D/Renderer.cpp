@@ -45,8 +45,8 @@ void Renderer::render()
 		lightManager.pointLightsGPUData[i].position.x = 40.f * std::sin(Engine::programTime * 0.4f + ((i + 1) * 2 * PI / NUM_POINT_LIGHTS));
 		lightManager.pointLightsGPUData[i].position.z = 40.f * std::cos(Engine::programTime * 0.4f + ((i + 1) * 2 * PI / NUM_POINT_LIGHTS));
 		
-		lightManager.pointLightsGPUData[i].position.x *= (2.f + std::sin(Engine::programTime * 0.8f)) * 1.1f;
-		lightManager.pointLightsGPUData[i].position.z *= (2.f + std::sin(Engine::programTime * 0.8f)) * 1.1f;
+		lightManager.pointLightsGPUData[i].position.x *= (2.f + std::sin(Engine::programTime * 0.8f)) * 1.4f;
+		lightManager.pointLightsGPUData[i].position.z *= (2.f + std::sin(Engine::programTime * 0.8f)) * 1.4f;
 
 		lightManager.pointLightsGPUData[i].linear = Engine::linear;
 		lightManager.pointLightsGPUData[i].quadratic = Engine::quad;
@@ -143,8 +143,8 @@ void Renderer::shadowPass()
 
 		glViewport(0, 0, itr->shadowTex.getWidth(), itr->shadowTex.getHeight());
 
-		fboLight[0].bind();
-		fboLight[0].attachForeignCubeTexture(&itr->shadowTex, GL_DEPTH_ATTACHMENT);
+		fboShadow.bind();
+		fboShadow.attachForeignCubeTexture(&itr->shadowTex, GL_DEPTH_ATTACHMENT);
 
 		glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -174,8 +174,8 @@ void Renderer::shadowPass()
 
 		glViewport(0, 0, itr->shadowTex.getWidth(), itr->shadowTex.getHeight());
 
-		fboLight[0].bind();
-		fboLight[0].attachForeignTexture(&itr->shadowTex, GL_DEPTH_ATTACHMENT);
+		fboShadow.bind();
+		fboShadow.attachForeignTexture(&itr->shadowTex, GL_DEPTH_ATTACHMENT);
 
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
@@ -455,7 +455,7 @@ inline void Renderer::initialiseLights()
 
 	DirectLightData dir = DirectLightData(ddir, glm::fvec3(0.1f, 0.1f, 0.125f));
 
-	fboLight[0].bind();
+	fboShadow.bind();
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 }
@@ -624,12 +624,10 @@ void Renderer::cameraProjUpdated()
 	frustCullShader.setProj(activeCam->proj);
 }
 
-void Renderer::bakeStaticLights()
+/*void Renderer::bakeStaticLights()
 {
-	//for (auto itr = lightManager.staticPointLightsGPUData.begin(); itr != lightManager.staticPointLightsGPUData.end(); ++itr)
-	//{
-	//}
-}
+	For each light render the scene to depth texture
+} */
 
 inline void Renderer::initialiseScreenQuad()
 {

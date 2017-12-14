@@ -52,6 +52,11 @@ public:
 		return addModelInstance(model, &sg.rootNode);
 	}
 
+	ModelInstance* addModelInstance(std::string modelName)
+	{
+		return addModelInstance(modelName, &sg.rootNode);
+	}
+
 	ModelInstance* getModelInstance(u32 pInstanceID)
 	{
 		auto find = modelInstances.find(pInstanceID);
