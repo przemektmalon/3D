@@ -23,12 +23,15 @@ in float logz;
 
 f16vec2 encode (vec3 n)
 {
+    if (n.z < -0.999)
+        n = normalize(vec3(0.001,0.001,-1)); // Temp fix for encoding bug when n.z < ~ -0.999, though this has no visible performace impact, maybe find a better fix
     float16_t p = sqrt((float16_t)n.z*(float16_t)8.f+(float16_t)8.f);
     return f16vec2((f16vec2)n.xy/p + (float16_t)0.5f);
 }
 
 mat3 cotangent_frame( vec3 N, vec3 p, vec2 uv )
 {
+
     // get edge vectors of the pixel triangle
     vec3 dp1 = dFdx( p );
     vec3 dp2 = dFdy( p );
@@ -50,7 +53,7 @@ vec3 perturb_normal( vec3 N, vec3 V, vec2 texcoord)
 {
     vec3 map = texture2D(sampler2D(texHandle[6*DrawID+1]), texcoord).xyz * 2.f - 1.f;
     mat3 TBN = cotangent_frame( N, -V, texcoord );
-    return normalize( TBN * map );
+    return normalize( N );
 }
 
 void main()
