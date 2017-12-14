@@ -148,13 +148,14 @@ void Engine::mainLoop(int resolutionIndex)
 
 	world = new World();
 	r->world = world;
+	r->world->setSkybox("res/skybox/sky/");
 	world->initialiseGLBuffers();
 
 	physicsWorld.createGroundPlane();
 
 	auto worldRoot = Engine::world->getWorldRootNode();
 
-	for (int i = 0; i < 50; ++i)
+	for (int i = 0; i < 10; ++i)
 	{
 		auto instance = world->addModelInstance("pbrsphere", worldRoot);
 		instance->setInitialPosition(glm::fvec3(50, 10 + (25 * i), 0));
@@ -167,7 +168,7 @@ void Engine::mainLoop(int resolutionIndex)
 			instance->overwriteMaterial(0,0,assets.getMaterial("greasymetal"));
 	}
 
-	for (int i = 0; i < 50; ++i)
+	for (int i = 0; i < 10; ++i)
 	{
 		auto instance = world->addModelInstance("hollowbox", worldRoot);
 		instance->setInitialPosition(glm::fvec3(-50, 20 + (50 * i), 0));

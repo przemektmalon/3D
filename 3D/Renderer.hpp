@@ -117,9 +117,6 @@ public:
 	GLuint vaoQuadViewRays;
 	GLuint vboQuadViewRays;
 
-	GLuint skyboxTex;
-	GLTextureCube shadow;
-
 	GLBufferObject shadowMatrixBuffer;
 
 	//Shaders

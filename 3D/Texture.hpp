@@ -390,15 +390,18 @@ public:
 		return handle;
 	}
 
-	void createFromFiles(const char* pFilePaths[6])
+	void createFromFiles(const std::vector<std::string>& pFilePaths)
 	{
+		if (pFilePaths.size() < 6)
+			return;
+
 		glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &GLID);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, GLID);
 		unsigned char* image;
-		int tHeight;
 		for (int i = 0; i < 6; ++i)
 		{
-			image = SOIL_load_image(pFilePaths[i], &width, &tHeight, 0, SOIL_LOAD_RGB);
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, width, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+			image = SOIL_load_image(pFilePaths[i].c_str(), &width, &height, 0, SOIL_LOAD_RGB);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB8, width, width, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 			SOIL_free_image_data(image);
 		}
 	}

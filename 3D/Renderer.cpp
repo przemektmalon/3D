@@ -201,9 +201,7 @@ void Renderer::ssaoPass()
 
 	fboSSAO.bind();
 	fboSSAO.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//fboDefault.bind();
-	//fboDefault.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+	
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
@@ -260,7 +258,8 @@ void Renderer::shadingPass()
 	fboGBuffer.textureAttachments[3].bind(5);
 	fboSSAO.textureAttachments[0].bindImage(6, GL_READ_ONLY);
 	glActiveTexture(GL_TEXTURE15);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, world->skybox.getGLID());
+	//world->skybox.bind(15);
 
 	glm::fvec4 vrays;
 	vrays.x = activeCam->viewRays2[2].x;
@@ -340,7 +339,6 @@ void Renderer::initialiseRenderer(Window * pwin, Camera & cam)
 	setActiveCam(cam);
 
 	initialiseScreenQuad();
-	initialiseSkybox();
 	initialiseLights();
 
 	if (Engine::cfg.render.resolution != glm::ivec2(0, 0))
@@ -385,43 +383,6 @@ inline void Renderer::initialiseScreenFramebuffer()
 	fboScreen.checkStatus();
 }
 
-inline void Renderer::initialiseSkybox()
-{
-	int width, height;
-	unsigned char* image;
-
-	std::string skyboxPath = "res/skybox/sky/";
-
-	std::vector<std::string> faces;
-
-	const char* paths[6] = 
-	{
-		{ "res/skybox/sky/right.png" },
-		{ "res/skybox/sky/left.png" },
-		{ "res/skybox/sky/top.png" },
-		{ "res/skybox/sky/bottom.png" },
-		{ "res/skybox/sky/front.png" },
-		{ "res/skybox/sky/back.png" }
-	};
-
-	faces.push_back(skyboxPath + "right.png");
-	faces.push_back(skyboxPath + "left.png");
-	faces.push_back(skyboxPath + "top.png");
-	faces.push_back(skyboxPath + "bottom.png");
-	faces.push_back(skyboxPath + "front.png");
-	faces.push_back(skyboxPath + "back.png");
-
-	glGenTextures(1, &skyboxTex);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
-	for (GLuint i = 0; i < 6; i++)
-	{
-		image = SOIL_load_image(faces[i].c_str(), &width, &height, 0, SOIL_LOAD_RGB);
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-		SOIL_free_image_data(image);
-	}
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-}
-
 inline void Renderer::initialiseLights()
 {
 	const int nr = NUM_POINT_LIGHTS;
@@ -454,8 +415,8 @@ inline void Renderer::initialiseLights()
 		add.setQuadratic(0.005f);
 		add.setPosition(glm::fvec3(0.f, 20.f, 0.f));
 		add.updateRadius();
-		add.gpuData->fadeLength = 15;
-		add.gpuData->fadeStart = 500;
+		add.gpuData->fadeLength = 50;
+		add.gpuData->fadeStart = 1000;
 		add.initTexture(shadowCubeSampler);
 	}
 
@@ -476,8 +437,8 @@ inline void Renderer::initialiseLights()
 		add.setQuadratic(0.005);
 		add.setPosition(glm::fvec3(-100.f + 50.f * i, 10.f, 0.f));
 		add.updateRadius();
-		add.gpuData->fadeLength = 15;
-		add.gpuData->fadeStart = 100;
+		add.gpuData->fadeLength = 50;
+		add.gpuData->fadeStart = 1000;
 		add.initTexture(shadowSampler);
 	}
 
