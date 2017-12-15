@@ -1,5 +1,5 @@
-#include "UISlider.hpp"
-#include "UIWindow.hpp"
+#include "ui/UISlider.hpp"
+#include "ui/UIWindow.hpp"
 #include "Engine.hpp"
 #include "Window.hpp"
 #include "AssetManager.hpp"

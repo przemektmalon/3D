@@ -1,6 +1,6 @@
 #include "GPUModelManager.hpp"
 #include "Engine.hpp"
-#include "ShaderStore.hpp"
+#include "shaders/ShaderStore.hpp"
 #include "Renderer.hpp"
 
 void GPUModelManager::newBatch()

@@ -1,5 +1,5 @@
 #include "Event.hpp"
-#include "UIWindow.hpp"
+#include "ui/UIWindow.hpp"
 
 glm::ivec2 MouseEvent::getUIWindowPosition(UIWindow* uiw)
 {

@@ -3,7 +3,7 @@
 #include "Rect.hpp"
 #include "Engine.hpp"
 #include "Renderer.hpp"
-#include "Shape2DShader.hpp"
+#include "shaders/Shape2DShader.hpp"
 
 class RectangleShape
 {

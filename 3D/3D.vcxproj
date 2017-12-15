@@ -107,7 +107,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Programming\libs\GLEW-1.13.0\include;C:\Programming\libs\GLM;C:\Programming\libs\SOIL\src;C:\Programming\libs\FreeType-2.6.2\include;C:\Programming\Libs\Assimp\include\;C:\Programming\Libs\boost_1_64_0\;C:\Programming\Libs\bullet3\src;C:\Programming\Libs\rapidxml-1.13;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Programming\libs\GLEW-1.13.0\include;C:\Programming\libs\GLM;C:\Programming\libs\SOIL\src;C:\Programming\libs\FreeType-2.6.2\include;C:\Programming\Libs\Assimp\include\;C:\Programming\Libs\boost_1_64_0\;C:\Programming\Libs\bullet3\src;C:\Programming\Libs\rapidxml-1.13;.\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CallingConvention>Cdecl</CallingConvention>
       <StructMemberAlignment>Default</StructMemberAlignment>
@@ -142,7 +142,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Programming\libs\GLEW-1.13.0\include;C:\Programming\libs\GLM;C:\Programming\libs\SOIL\src;C:\Programming\libs\FreeType-2.6.2\include;C:\Programming\Libs\Assimp\include\;C:\Programming\Libs\boost_1_64_0\;C:\Programming\Libs\bullet3\src;C:\Programming\Libs\rapidxml-1.13;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Programming\libs\GLEW-1.13.0\include;C:\Programming\libs\GLM;C:\Programming\libs\SOIL\src;C:\Programming\libs\FreeType-2.6.2\include;C:\Programming\Libs\Assimp\include\;C:\Programming\Libs\boost_1_64_0\;C:\Programming\Libs\bullet3\src;C:\Programming\Libs\rapidxml-1.13;.\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -165,7 +165,7 @@
       </FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Programming\libs\GLEW-1.13.0\include;C:\Programming\libs\GLM;C:\Programming\libs\SOIL\src;C:\Programming\libs\FreeType-2.6.2\include;C:\Programming\Libs\Assimp\include\;C:\Programming\Libs\boost_1_64_0\;C:\Programming\Libs\bullet3\src;C:\Programming\Libs\rapidxml-1.13;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Programming\libs\GLEW-1.13.0\include;C:\Programming\libs\GLM;C:\Programming\libs\SOIL\src;C:\Programming\libs\FreeType-2.6.2\include;C:\Programming\Libs\Assimp\include\;C:\Programming\Libs\boost_1_64_0\;C:\Programming\Libs\bullet3\src;C:\Programming\Libs\rapidxml-1.13;.\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -213,126 +213,125 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Asset.cpp" />
-    <ClCompile Include="AssetManager.cpp" />
-    <ClCompile Include="Billboard.cpp" />
-    <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="ConfigParser.cpp" />
-    <ClCompile Include="Engine.cpp" />
-    <ClCompile Include="Event.cpp" />
-    <ClCompile Include="Font.cpp" />
-    <ClCompile Include="GPUModelManager.cpp" />
-    <ClCompile Include="ImageData.cpp" />
-    <ClCompile Include="Keyboard.cpp" />
-    <ClCompile Include="Lights.cpp" />
-    <ClCompile Include="MaterialLibrary.cpp" />
-    <ClCompile Include="Model.cpp" />
-    <ClCompile Include="Mouse.cpp" />
-    <ClCompile Include="PhysicsWorld.cpp" />
-    <ClCompile Include="Profiler.cpp" />
-    <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="Shader.cpp" />
-    <ClCompile Include="Console.cpp" />
-    <ClCompile Include="StringGenerics.cpp" />
-    <ClCompile Include="TextBillboard.cpp" />
-    <ClCompile Include="Texture.cpp" />
-    <ClCompile Include="UIButton.cpp" />
-    <ClCompile Include="UIElement.cpp" />
-    <ClCompile Include="UIInputField.cpp" />
-    <ClCompile Include="UILabel.cpp" />
-    <ClCompile Include="UIMultiTab.cpp" />
-    <ClCompile Include="UISlider.cpp" />
-    <ClCompile Include="UIRectangleShape.cpp" />
-    <ClCompile Include="UISwitchButton.cpp" />
-    <ClCompile Include="UIWindow.cpp" />
-    <ClCompile Include="UIWindowManager.cpp" />
-    <ClCompile Include="UserInputManager.cpp" />
-    <ClCompile Include="Util.cpp" />
-    <ClCompile Include="Window.cpp" />
+    <ClCompile Include="src\Asset.cpp" />
+    <ClCompile Include="src\AssetManager.cpp" />
+    <ClCompile Include="src\Billboard.cpp" />
+    <ClCompile Include="src\Camera.cpp" />
+    <ClCompile Include="src\ConfigParser.cpp" />
+    <ClCompile Include="src\Console.cpp" />
+    <ClCompile Include="src\Engine.cpp" />
+    <ClCompile Include="src\Event.cpp" />
+    <ClCompile Include="src\Font.cpp" />
+    <ClCompile Include="src\GPUModelManager.cpp" />
+    <ClCompile Include="src\ImageData.cpp" />
+    <ClCompile Include="src\Keyboard.cpp" />
+    <ClCompile Include="src\Lights.cpp" />
+    <ClCompile Include="src\MaterialLibrary.cpp" />
+    <ClCompile Include="src\Model.cpp" />
+    <ClCompile Include="src\Mouse.cpp" />
+    <ClCompile Include="src\PhysicsWorld.cpp" />
+    <ClCompile Include="src\Profiler.cpp" />
+    <ClCompile Include="src\Renderer.cpp" />
+    <ClCompile Include="src\Shader.cpp" />
+    <ClCompile Include="src\StringGenerics.cpp" />
+    <ClCompile Include="src\TextBillboard.cpp" />
+    <ClCompile Include="src\Texture.cpp" />
+    <ClCompile Include="src\UIButton.cpp" />
+    <ClCompile Include="src\UIElement.cpp" />
+    <ClCompile Include="src\UIInputField.cpp" />
+    <ClCompile Include="src\UILabel.cpp" />
+    <ClCompile Include="src\UIMultiTab.cpp" />
+    <ClCompile Include="src\UIRectangleShape.cpp" />
+    <ClCompile Include="src\UISlider.cpp" />
+    <ClCompile Include="src\UISwitchButton.cpp" />
+    <ClCompile Include="src\UIWindow.cpp" />
+    <ClCompile Include="src\UIWindowManager.cpp" />
+    <ClCompile Include="src\UserInputManager.cpp" />
+    <ClCompile Include="src\Util.cpp" />
+    <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Asset.hpp" />
-    <ClInclude Include="AssetManager.hpp" />
-    <ClInclude Include="BilateralBlurShader.hpp" />
-    <ClInclude Include="Billboard.hpp" />
-    <ClInclude Include="Bounds3D.hpp" />
-    <ClInclude Include="BufferObjects.hpp" />
-    <ClInclude Include="Camera.hpp" />
-    <ClInclude Include="ConfigParser.hpp" />
-    <ClInclude Include="Console.hpp" />
-    <ClInclude Include="DeferredTileCullComputeShader.hpp" />
-    <ClInclude Include="Engine.hpp" />
-    <ClInclude Include="Event.hpp" />
-    <ClInclude Include="File.hpp" />
-    <ClInclude Include="Font.hpp" />
-    <ClInclude Include="Framebuffer.hpp" />
-    <ClInclude Include="FrustCullShader.hpp" />
-    <ClInclude Include="GBufferShaderClay.hpp" />
-    <ClInclude Include="GBufferShaderTex.hpp" />
-    <ClInclude Include="GBufferShaderBase.hpp" />
-    <ClInclude Include="GBufferShaderMultiTex.hpp" />
-    <ClInclude Include="GBufferShaderNonBindlessRegular.hpp" />
-    <ClInclude Include="GPUModelManager.hpp" />
-    <ClInclude Include="ImageData.hpp" />
-    <ClInclude Include="Include.hpp" />
-    <ClInclude Include="Material.hpp" />
-    <ClInclude Include="MaterialLibrary.hpp" />
-    <ClInclude Include="Profiler.hpp" />
-    <ClInclude Include="Shape2DShaderNoTex.hpp" />
-    <ClInclude Include="UIElementContainer.hpp" />
-    <ClInclude Include="UIInputField.hpp" />
-    <ClInclude Include="Keyboard.hpp" />
-    <ClInclude Include="Lights.hpp" />
-    <ClInclude Include="List.hpp" />
-    <ClInclude Include="Log.hpp" />
-    <ClInclude Include="MathIncludes.hpp" />
-    <ClInclude Include="ProfilingWindow.hpp" />
-    <ClInclude Include="RenderConfigWindow.hpp" />
-    <ClInclude Include="Mouse.hpp" />
-    <ClInclude Include="Model.hpp" />
-    <ClInclude Include="PhysicsObject.hpp" />
-    <ClInclude Include="PhysicsWorld.hpp" />
-    <ClInclude Include="PointShadowPassShader.hpp" />
-    <ClInclude Include="PrepMultiTexShader.hpp" />
-    <ClInclude Include="QPC.hpp" />
-    <ClInclude Include="Rect.hpp" />
-    <ClInclude Include="Renderer.hpp" />
-    <ClInclude Include="RendererData.hpp" />
-    <ClInclude Include="Sampler.hpp" />
-    <ClInclude Include="SAOShader.hpp" />
-    <ClInclude Include="SceneGraph.hpp" />
-    <ClInclude Include="Shader.hpp" />
-    <ClInclude Include="ShaderStore.hpp" />
-    <ClInclude Include="Shape2DShader.hpp" />
-    <ClInclude Include="Shape3DShader.hpp" />
-    <ClInclude Include="SpotShadowPassShader.hpp" />
-    <ClInclude Include="StringGenerics.hpp" />
-    <ClInclude Include="Strings.hpp" />
-    <ClInclude Include="Text.hpp" />
-    <ClInclude Include="TextBillboard.hpp" />
-    <ClInclude Include="TextShader.hpp" />
-    <ClInclude Include="Texture.hpp" />
-    <ClInclude Include="Time.hpp" />
-    <ClInclude Include="Transform.hpp" />
-    <ClInclude Include="Tweaks.hpp" />
-    <ClInclude Include="Types.hpp" />
-    <ClInclude Include="UIAllElements.hpp" />
-    <ClInclude Include="UIButton.hpp" />
-    <ClInclude Include="UIConsole.hpp" />
-    <ClInclude Include="UIElement.hpp" />
-    <ClInclude Include="UILabel.hpp" />
-    <ClInclude Include="UIMultiTab.hpp" />
-    <ClInclude Include="UIRectangleShape.hpp" />
-    <ClInclude Include="UISlider.hpp" />
-    <ClInclude Include="UISwitchButton.hpp" />
-    <ClInclude Include="UIVertexStore.hpp" />
-    <ClInclude Include="UIWindow.hpp" />
-    <ClInclude Include="UIWindowManager.hpp" />
-    <ClInclude Include="UserInputManager.hpp" />
-    <ClInclude Include="Util.hpp" />
-    <ClInclude Include="Window.hpp" />
-    <ClInclude Include="World.hpp" />
-    <ClInclude Include="WorldEditWindow.hpp" />
+    <ClInclude Include="include\Asset.hpp" />
+    <ClInclude Include="include\AssetManager.hpp" />
+    <ClInclude Include="include\Billboard.hpp" />
+    <ClInclude Include="include\Bounds3D.hpp" />
+    <ClInclude Include="include\BufferObjects.hpp" />
+    <ClInclude Include="include\Camera.hpp" />
+    <ClInclude Include="include\ConfigParser.hpp" />
+    <ClInclude Include="include\Console.hpp" />
+    <ClInclude Include="include\Engine.hpp" />
+    <ClInclude Include="include\Event.hpp" />
+    <ClInclude Include="include\File.hpp" />
+    <ClInclude Include="include\Font.hpp" />
+    <ClInclude Include="include\Framebuffer.hpp" />
+    <ClInclude Include="include\GPUModelManager.hpp" />
+    <ClInclude Include="include\ImageData.hpp" />
+    <ClInclude Include="include\Keyboard.hpp" />
+    <ClInclude Include="include\Lights.hpp" />
+    <ClInclude Include="include\List.hpp" />
+    <ClInclude Include="include\Log.hpp" />
+    <ClInclude Include="include\Material.hpp" />
+    <ClInclude Include="include\MaterialLibrary.hpp" />
+    <ClInclude Include="include\MathIncludes.hpp" />
+    <ClInclude Include="include\Model.hpp" />
+    <ClInclude Include="include\Mouse.hpp" />
+    <ClInclude Include="include\PhysicsObject.hpp" />
+    <ClInclude Include="include\PhysicsWorld.hpp" />
+    <ClInclude Include="include\Profiler.hpp" />
+    <ClInclude Include="include\QPC.hpp" />
+    <ClInclude Include="include\Rect.hpp" />
+    <ClInclude Include="include\Renderer.hpp" />
+    <ClInclude Include="include\RendererData.hpp" />
+    <ClInclude Include="include\Sampler.hpp" />
+    <ClInclude Include="include\SceneGraph.hpp" />
+    <ClInclude Include="include\shaders\BilateralBlurShader.hpp" />
+    <ClInclude Include="include\shaders\DeferredTileCullComputeShader.hpp" />
+    <ClInclude Include="include\shaders\FrustCullShader.hpp" />
+    <ClInclude Include="include\shaders\GBufferShaderBase.hpp" />
+    <ClInclude Include="include\shaders\GBufferShaderClay.hpp" />
+    <ClInclude Include="include\shaders\GBufferShaderMultiTex.hpp" />
+    <ClInclude Include="include\shaders\GBufferShaderNonBindlessRegular.hpp" />
+    <ClInclude Include="include\shaders\GBufferShaderTex.hpp" />
+    <ClInclude Include="include\shaders\PointShadowPassShader.hpp" />
+    <ClInclude Include="include\shaders\PrepMultiTexShader.hpp" />
+    <ClInclude Include="include\shaders\SAOShader.hpp" />
+    <ClInclude Include="include\shaders\Shader.hpp" />
+    <ClInclude Include="include\shaders\ShaderStore.hpp" />
+    <ClInclude Include="include\shaders\Shape2DShader.hpp" />
+    <ClInclude Include="include\shaders\Shape2DShaderNoTex.hpp" />
+    <ClInclude Include="include\shaders\Shape3DShader.hpp" />
+    <ClInclude Include="include\shaders\SpotShadowPassShader.hpp" />
+    <ClInclude Include="include\shaders\TextShader.hpp" />
+    <ClInclude Include="include\StringGenerics.hpp" />
+    <ClInclude Include="include\Strings.hpp" />
+    <ClInclude Include="include\Text.hpp" />
+    <ClInclude Include="include\TextBillboard.hpp" />
+    <ClInclude Include="include\Texture.hpp" />
+    <ClInclude Include="include\Time.hpp" />
+    <ClInclude Include="include\Transform.hpp" />
+    <ClInclude Include="include\Tweaks.hpp" />
+    <ClInclude Include="include\Types.hpp" />
+    <ClInclude Include="include\ui\ProfilingWindow.hpp" />
+    <ClInclude Include="include\ui\RenderConfigWindow.hpp" />
+    <ClInclude Include="include\ui\UIAllElements.hpp" />
+    <ClInclude Include="include\ui\UIButton.hpp" />
+    <ClInclude Include="include\ui\UIConsole.hpp" />
+    <ClInclude Include="include\ui\UIElement.hpp" />
+    <ClInclude Include="include\ui\UIElementContainer.hpp" />
+    <ClInclude Include="include\ui\UIInputField.hpp" />
+    <ClInclude Include="include\ui\UILabel.hpp" />
+    <ClInclude Include="include\ui\UIMultiTab.hpp" />
+    <ClInclude Include="include\ui\UIRectangleShape.hpp" />
+    <ClInclude Include="include\ui\UISlider.hpp" />
+    <ClInclude Include="include\ui\UISwitchButton.hpp" />
+    <ClInclude Include="include\ui\UIVertexStore.hpp" />
+    <ClInclude Include="include\ui\UIWindow.hpp" />
+    <ClInclude Include="include\ui\UIWindowManager.hpp" />
+    <ClInclude Include="include\ui\WorldEditWindow.hpp" />
+    <ClInclude Include="include\UserInputManager.hpp" />
+    <ClInclude Include="include\Util.hpp" />
+    <ClInclude Include="include\Window.hpp" />
+    <ClInclude Include="include\World.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Libs\bullet3\build\src\BulletCollision\BulletCollision.vcxproj">

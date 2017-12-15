@@ -25,9 +25,6 @@
     <Filter Include="Header Files\String">
       <UniqueIdentifier>{e06d55dc-1caf-40b4-9c43-761d07c3b47e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files\Shaders">
-      <UniqueIdentifier>{b69c2e19-9b07-437a-b03f-1813520b0b5f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Assets">
       <UniqueIdentifier>{5b84c266-ed3a-4350-b559-0d61521f9da0}</UniqueIdentifier>
     </Filter>
@@ -55,366 +52,360 @@
     <Filter Include="Source Files\GL">
       <UniqueIdentifier>{76db7edb-7d75-49b0-bcf4-ab46986eaf14}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\UI Elements\Compound Elements">
-      <UniqueIdentifier>{0d3b6139-3eb0-45d0-b8f3-13be618c4c16}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Engine.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ConfigParser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Window.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="UserInputManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="UIWindow.cpp">
-      <Filter>Source Files\UIElements</Filter>
-    </ClCompile>
-    <ClCompile Include="UIButton.cpp">
-      <Filter>Source Files\UIElements</Filter>
-    </ClCompile>
-    <ClCompile Include="UIElement.cpp">
-      <Filter>Source Files\UIElements</Filter>
-    </ClCompile>
-    <ClCompile Include="UILabel.cpp">
-      <Filter>Source Files\UIElements</Filter>
-    </ClCompile>
-    <ClCompile Include="UISlider.cpp">
-      <Filter>Source Files\UIElements</Filter>
-    </ClCompile>
-    <ClCompile Include="UISwitchButton.cpp">
-      <Filter>Source Files\UIElements</Filter>
-    </ClCompile>
-    <ClCompile Include="Mouse.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Console.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="UIRectangleShape.cpp">
-      <Filter>Source Files\UIElements</Filter>
-    </ClCompile>
-    <ClCompile Include="Asset.cpp">
+    <ClCompile Include="src\Asset.cpp">
       <Filter>Source Files\Assets</Filter>
     </ClCompile>
-    <ClCompile Include="AssetManager.cpp">
+    <ClCompile Include="src\AssetManager.cpp">
       <Filter>Source Files\Assets</Filter>
     </ClCompile>
-    <ClCompile Include="Font.cpp">
+    <ClCompile Include="src\Font.cpp">
       <Filter>Source Files\Assets</Filter>
     </ClCompile>
-    <ClCompile Include="Shader.cpp">
+    <ClCompile Include="src\ImageData.cpp">
+      <Filter>Source Files\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Model.cpp">
+      <Filter>Source Files\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GPUModelManager.cpp">
+      <Filter>Source Files\GL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Texture.cpp">
+      <Filter>Source Files\GL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Billboard.cpp">
+      <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Lights.cpp">
+      <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Renderer.cpp">
+      <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TextBillboard.cpp">
+      <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Shader.cpp">
       <Filter>Source Files\Shaders</Filter>
     </ClCompile>
-    <ClCompile Include="Event.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Util.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="StringGenerics.cpp">
+    <ClCompile Include="src\StringGenerics.cpp">
       <Filter>Source Files\String</Filter>
     </ClCompile>
-    <ClCompile Include="ImageData.cpp">
-      <Filter>Source Files\Assets</Filter>
-    </ClCompile>
-    <ClCompile Include="Model.cpp">
-      <Filter>Source Files\Assets</Filter>
-    </ClCompile>
-    <ClCompile Include="PhysicsWorld.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Lights.cpp">
-      <Filter>Source Files\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="Billboard.cpp">
-      <Filter>Source Files\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderer.cpp">
-      <Filter>Source Files\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="TextBillboard.cpp">
-      <Filter>Source Files\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="Texture.cpp">
-      <Filter>Source Files\GL</Filter>
-    </ClCompile>
-    <ClCompile Include="GPUModelManager.cpp">
-      <Filter>Source Files\GL</Filter>
-    </ClCompile>
-    <ClCompile Include="UIWindowManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="UIInputField.cpp">
+    <ClCompile Include="src\UIButton.cpp">
       <Filter>Source Files\UIElements</Filter>
     </ClCompile>
-    <ClCompile Include="Keyboard.cpp">
+    <ClCompile Include="src\UIElement.cpp">
+      <Filter>Source Files\UIElements</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UIInputField.cpp">
+      <Filter>Source Files\UIElements</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UILabel.cpp">
+      <Filter>Source Files\UIElements</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UIMultiTab.cpp">
+      <Filter>Source Files\UIElements</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UIRectangleShape.cpp">
+      <Filter>Source Files\UIElements</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UISlider.cpp">
+      <Filter>Source Files\UIElements</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UISwitchButton.cpp">
+      <Filter>Source Files\UIElements</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UIWindow.cpp">
+      <Filter>Source Files\UIElements</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UIWindowManager.cpp">
+      <Filter>Source Files\UIElements</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Profiler.cpp">
+    <ClCompile Include="src\ConfigParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MaterialLibrary.cpp">
+    <ClCompile Include="src\Console.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="UIMultiTab.cpp">
+    <ClCompile Include="src\Engine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Event.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Keyboard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MaterialLibrary.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Mouse.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PhysicsWorld.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Profiler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UserInputManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Util.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Asset.hpp">
+    <ClInclude Include="include\Asset.hpp">
       <Filter>Header Files\Assets</Filter>
     </ClInclude>
-    <ClInclude Include="Bounds3D.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ConfigParser.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Console.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Event.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Keyboard.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="List.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Mouse.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="QPC.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Rect.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SceneGraph.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Time.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Transform.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Types.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="UserInputManager.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Util.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Window.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="World.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AssetManager.hpp">
+    <ClInclude Include="include\AssetManager.hpp">
       <Filter>Header Files\Assets</Filter>
     </ClInclude>
-    <ClInclude Include="BilateralBlurShader.hpp">
+    <ClInclude Include="include\Font.hpp">
+      <Filter>Header Files\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ImageData.hpp">
+      <Filter>Header Files\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Material.hpp">
+      <Filter>Header Files\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MaterialLibrary.hpp">
+      <Filter>Header Files\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Model.hpp">
+      <Filter>Header Files\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BufferObjects.hpp">
+      <Filter>Header Files\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Framebuffer.hpp">
+      <Filter>Header Files\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GPUModelManager.hpp">
+      <Filter>Header Files\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Texture.hpp">
+      <Filter>Header Files\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Billboard.hpp">
+      <Filter>Header Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Lights.hpp">
+      <Filter>Header Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Renderer.hpp">
+      <Filter>Header Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="include\RendererData.hpp">
+      <Filter>Header Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Sampler.hpp">
+      <Filter>Header Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Text.hpp">
+      <Filter>Header Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="include\TextBillboard.hpp">
+      <Filter>Header Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="include\shaders\BilateralBlurShader.hpp">
       <Filter>Header Files\Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="DeferredTileCullComputeShader.hpp">
+    <ClInclude Include="include\shaders\DeferredTileCullComputeShader.hpp">
       <Filter>Header Files\Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="FrustCullShader.hpp">
+    <ClInclude Include="include\shaders\FrustCullShader.hpp">
       <Filter>Header Files\Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="GBufferShaderMultiTex.hpp">
+    <ClInclude Include="include\shaders\GBufferShaderBase.hpp">
       <Filter>Header Files\Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="PointShadowPassShader.hpp">
+    <ClInclude Include="include\shaders\GBufferShaderClay.hpp">
       <Filter>Header Files\Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="PrepMultiTexShader.hpp">
+    <ClInclude Include="include\shaders\GBufferShaderMultiTex.hpp">
       <Filter>Header Files\Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="SAOShader.hpp">
+    <ClInclude Include="include\shaders\GBufferShaderNonBindlessRegular.hpp">
       <Filter>Header Files\Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="Shader.hpp">
+    <ClInclude Include="include\shaders\GBufferShaderTex.hpp">
       <Filter>Header Files\Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="ShaderStore.hpp">
+    <ClInclude Include="include\shaders\PointShadowPassShader.hpp">
       <Filter>Header Files\Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="Shape2DShader.hpp">
+    <ClInclude Include="include\shaders\PrepMultiTexShader.hpp">
       <Filter>Header Files\Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="SpotShadowPassShader.hpp">
+    <ClInclude Include="include\shaders\SAOShader.hpp">
       <Filter>Header Files\Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="TextShader.hpp">
+    <ClInclude Include="include\shaders\Shader.hpp">
       <Filter>Header Files\Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="Strings.hpp">
+    <ClInclude Include="include\shaders\ShaderStore.hpp">
+      <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="include\shaders\Shape2DShader.hpp">
+      <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="include\shaders\Shape2DShaderNoTex.hpp">
+      <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="include\shaders\Shape3DShader.hpp">
+      <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="include\shaders\SpotShadowPassShader.hpp">
+      <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="include\shaders\TextShader.hpp">
+      <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="include\StringGenerics.hpp">
       <Filter>Header Files\String</Filter>
     </ClInclude>
-    <ClInclude Include="StringGenerics.hpp">
+    <ClInclude Include="include\Strings.hpp">
       <Filter>Header Files\String</Filter>
     </ClInclude>
-    <ClInclude Include="Font.hpp">
-      <Filter>Header Files\Assets</Filter>
-    </ClInclude>
-    <ClInclude Include="UIAllElements.hpp">
-      <Filter>Header Files\UI Elements</Filter>
-    </ClInclude>
-    <ClInclude Include="UIButton.hpp">
-      <Filter>Header Files\UI Elements</Filter>
-    </ClInclude>
-    <ClInclude Include="UIConsole.hpp">
-      <Filter>Header Files\UI Elements</Filter>
-    </ClInclude>
-    <ClInclude Include="UIElement.hpp">
-      <Filter>Header Files\UI Elements</Filter>
-    </ClInclude>
-    <ClInclude Include="UILabel.hpp">
-      <Filter>Header Files\UI Elements</Filter>
-    </ClInclude>
-    <ClInclude Include="UIRectangleShape.hpp">
-      <Filter>Header Files\UI Elements</Filter>
-    </ClInclude>
-    <ClInclude Include="UISlider.hpp">
-      <Filter>Header Files\UI Elements</Filter>
-    </ClInclude>
-    <ClInclude Include="UISwitchButton.hpp">
-      <Filter>Header Files\UI Elements</Filter>
-    </ClInclude>
-    <ClInclude Include="UIVertexStore.hpp">
-      <Filter>Header Files\UI Elements</Filter>
-    </ClInclude>
-    <ClInclude Include="UIWindow.hpp">
-      <Filter>Header Files\UI Elements</Filter>
-    </ClInclude>
-    <ClInclude Include="GBufferShaderNonBindlessRegular.hpp">
-      <Filter>Header Files\Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="ImageData.hpp">
-      <Filter>Header Files\Assets</Filter>
-    </ClInclude>
-    <ClInclude Include="GBufferShaderBase.hpp">
-      <Filter>Header Files\Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="Model.hpp">
-      <Filter>Header Files\Assets</Filter>
-    </ClInclude>
-    <ClInclude Include="PhysicsObject.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PhysicsWorld.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MathIncludes.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Shape3DShader.hpp">
-      <Filter>Header Files\Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="Tweaks.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RendererData.hpp">
-      <Filter>Header Files\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer.hpp">
-      <Filter>Header Files\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="Sampler.hpp">
-      <Filter>Header Files\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="Billboard.hpp">
-      <Filter>Header Files\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="Text.hpp">
-      <Filter>Header Files\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="TextBillboard.hpp">
-      <Filter>Header Files\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="BufferObjects.hpp">
-      <Filter>Header Files\GL</Filter>
-    </ClInclude>
-    <ClInclude Include="GPUModelManager.hpp">
-      <Filter>Header Files\GL</Filter>
-    </ClInclude>
-    <ClInclude Include="Lights.hpp">
-      <Filter>Header Files\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="Texture.hpp">
-      <Filter>Header Files\GL</Filter>
-    </ClInclude>
-    <ClInclude Include="File.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Log.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="UIWindowManager.hpp">
-      <Filter>Header Files\UI Elements</Filter>
-    </ClInclude>
-    <ClInclude Include="Framebuffer.hpp">
-      <Filter>Header Files\GL</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderConfigWindow.hpp">
+    <ClInclude Include="include\ui\ProfilingWindow.hpp">
       <Filter>Header Files\UI Elements\Windows</Filter>
     </ClInclude>
-    <ClInclude Include="ProfilingWindow.hpp">
+    <ClInclude Include="include\ui\RenderConfigWindow.hpp">
       <Filter>Header Files\UI Elements\Windows</Filter>
     </ClInclude>
-    <ClInclude Include="UIInputField.hpp">
+    <ClInclude Include="include\ui\WorldEditWindow.hpp">
+      <Filter>Header Files\UI Elements\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ui\UIAllElements.hpp">
       <Filter>Header Files\UI Elements</Filter>
     </ClInclude>
-    <ClInclude Include="Shape2DShaderNoTex.hpp">
-      <Filter>Header Files\Shaders</Filter>
+    <ClInclude Include="include\ui\UIButton.hpp">
+      <Filter>Header Files\UI Elements</Filter>
     </ClInclude>
-    <ClInclude Include="GBufferShaderTex.hpp">
-      <Filter>Header Files\Shaders</Filter>
+    <ClInclude Include="include\ui\UIConsole.hpp">
+      <Filter>Header Files\UI Elements</Filter>
     </ClInclude>
-    <ClInclude Include="GBufferShaderClay.hpp">
-      <Filter>Header Files\Shaders</Filter>
+    <ClInclude Include="include\ui\UIElement.hpp">
+      <Filter>Header Files\UI Elements</Filter>
     </ClInclude>
-    <ClInclude Include="Profiler.hpp">
+    <ClInclude Include="include\ui\UIElementContainer.hpp">
+      <Filter>Header Files\UI Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ui\UIInputField.hpp">
+      <Filter>Header Files\UI Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ui\UILabel.hpp">
+      <Filter>Header Files\UI Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ui\UIMultiTab.hpp">
+      <Filter>Header Files\UI Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ui\UIRectangleShape.hpp">
+      <Filter>Header Files\UI Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ui\UISlider.hpp">
+      <Filter>Header Files\UI Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ui\UISwitchButton.hpp">
+      <Filter>Header Files\UI Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ui\UIVertexStore.hpp">
+      <Filter>Header Files\UI Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ui\UIWindow.hpp">
+      <Filter>Header Files\UI Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ui\UIWindowManager.hpp">
+      <Filter>Header Files\UI Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Bounds3D.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MaterialLibrary.hpp">
-      <Filter>Header Files\Assets</Filter>
+    <ClInclude Include="include\Camera.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Material.hpp">
-      <Filter>Header Files\Assets</Filter>
+    <ClInclude Include="include\ConfigParser.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="WorldEditWindow.hpp">
-      <Filter>Header Files\UI Elements\Windows</Filter>
+    <ClInclude Include="include\Console.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="UIMultiTab.hpp">
-      <Filter>Header Files\UI Elements</Filter>
+    <ClInclude Include="include\Engine.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="UIElementContainer.hpp">
-      <Filter>Header Files\UI Elements</Filter>
+    <ClInclude Include="include\Event.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\File.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Keyboard.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\List.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Log.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MathIncludes.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Mouse.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\PhysicsObject.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\PhysicsWorld.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Profiler.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\QPC.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Rect.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SceneGraph.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Time.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Transform.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Tweaks.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Types.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UserInputManager.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Util.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Window.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\World.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

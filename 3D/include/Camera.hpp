@@ -1,6 +1,6 @@
 #pragma once
 #include "Include.hpp"
-#include "Shader.hpp"
+#include "shaders/Shader.hpp"
 #include "Time.hpp"
 
 class Camera

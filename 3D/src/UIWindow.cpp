@@ -1,14 +1,14 @@
-#include "UIWindow.hpp"
-#include "UIElement.hpp"
+#include "ui/UIWindow.hpp"
+#include "ui/UIElement.hpp"
 #include "Engine.hpp"
 #include "Renderer.hpp"
 #include "Camera.hpp"
 #include "Font.hpp"
-#include "UILabel.hpp"
+#include "ui/UILabel.hpp"
 #include "Text.hpp"
 #include "AssetManager.hpp"
 #include "Mouse.hpp"
-#include "UIMultiTab.hpp"
+#include "ui/UIMultiTab.hpp"
 
 UIWindow::UIWindow(std::string pName, irect pWindowArea, int pBorderWidth, const Window* pParentWindow) : name(pName), parentWindow(pParentWindow), title(new UILabel(this)), borderWidth(pBorderWidth)
 {

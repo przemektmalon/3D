@@ -1,7 +1,7 @@
 #pragma once
 #include "Framebuffer.hpp"
-#include "Shape2DShader.hpp"
-#include "Shape2DShaderNoTex.hpp"
+#include "shaders/Shape2DShader.hpp"
+#include "shaders/Shape2DShaderNoTex.hpp"
 #include "Window.hpp"
 #include "Event.hpp"
 #include "Rect.hpp"

@@ -1,7 +1,6 @@
 #pragma once
 #include "Engine.hpp"
 #include "Include.hpp"
-#include "Shader.hpp"
 #include "Time.hpp"
 #include "QPC.hpp"
 #include "Camera.hpp"
@@ -14,17 +13,17 @@
 #include "Billboard.hpp"
 #include "World.hpp"
 #include "StringGenerics.hpp"
-#include "UILabel.hpp"
-#include "UIButton.hpp"
+#include "ui/UILabel.hpp"
+#include "ui/UIButton.hpp"
 #include "Console.hpp"
 #include "Tweaks.hpp"
 #include <stdio.h>
 #include <io.h>
 #include <fcntl.h>
 
-#include "RenderConfigWindow.hpp"
-#include "ProfilingWindow.hpp"
-#include "WorldEditWindow.hpp"
+#include "ui/RenderConfigWindow.hpp"
+#include "ui/ProfilingWindow.hpp"
+#include "ui/WorldEditWindow.hpp"
 
 FT_Library Engine::ftLib;
 HINSTANCE Engine::instance;

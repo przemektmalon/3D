@@ -2,7 +2,7 @@
 #include "Include.hpp"
 #include "Font.hpp"
 #include "Transform.hpp"
-#include "TextShader.hpp"
+#include "shaders/TextShader.hpp"
 #include "Engine.hpp"
 #include "Window.hpp"
 #include "Renderer.hpp"

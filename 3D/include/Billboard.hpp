@@ -1,6 +1,6 @@
 #pragma once
 #include "Include.hpp"
-#include "Shape3DShader.hpp"
+#include "shaders/Shape3DShader.hpp"
 #include "Texture.hpp"
 
 static const float squareVerts[] = {

@@ -1,5 +1,5 @@
-#include "UISwitchButton.hpp"
-#include "UIWindow.hpp"
+#include "ui/UISwitchButton.hpp"
+#include "ui/UIWindow.hpp"
 
 
 UISwitchButton::UISwitchButton(UIWindow* pParent) : UIElement(SwitchButton,pParent)

@@ -1,18 +1,18 @@
 #pragma once
 
 #include "Window.hpp"
-#include "Shader.hpp"
+#include "shaders/Shader.hpp"
 #include <random>
 #include "UserInputManager.hpp"
 #include "Log.hpp"
-#include "UIWindow.hpp"
+#include "ui/UIWindow.hpp"
 #include <unordered_map>
 #include <ft2build.h>
 #include FT_FREETYPE_H;
 
 #include "PhysicsWorld.hpp"
 
-#include "UIWindowManager.hpp"
+#include "ui/UIWindowManager.hpp"
 
 #include "Profiler.hpp"
 

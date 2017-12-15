@@ -1,4 +1,4 @@
-#include "Shader.hpp"
+#include "shaders/Shader.hpp"
 #include "Engine.hpp"
 
 const int ShaderProgram::typeSizes[ShaderProgram::UniformTypesCount] = {
