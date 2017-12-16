@@ -1,29 +1,21 @@
 #pragma once
-#include "Asset.hpp"
-#include "Include.hpp"
 #include "boost/tokenizer.hpp"
-#include "SceneGraph.hpp"
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
-#include "Texture.hpp"
-#include "PhysicsObject.hpp"
 
+#include "Asset.hpp"
 
-
-#include "shaders/Shader.hpp"
-#include "Transform.hpp"
 #include "Engine.hpp"
 
-#include "Bounds3D.hpp"
-
-#include "File.hpp"
 
 #include <string>
 
 #include "Material.hpp"
 
 class MeshBatch;
+class SGNode;
+class PhysicsObject;
 
 class ModelRenderMeta
 {
@@ -154,65 +146,15 @@ public:
 		lodTris[triList] = material;
 	}
 
-	void setScale(float scale)
-	{
-		if (physicsObject)
-		{
-			physicsObject->collisionShape->setLocalScaling(btVector3(scale, scale, scale));
-			physicsObject->setMass(physicsObject->mass);
-		}
-		sgNode->transform.setScale(glm::fvec3(scale));
-	}
+	void setScale(float scale);
 
-	void setInitialPosition(glm::fvec3 position)
-	{
-		sgNode->transform.setTranslation(position);
-	}
+	void setInitialPosition(glm::fvec3 position);
 
-	void setPosition(glm::fvec3 position)
-	{
-		auto oldRigid = physicsObject->rigidBody;
-		auto oldMotion = physicsObject->motionState;
+	void setPosition(glm::fvec3 position);
 
-		Engine::physicsWorld.removeRigidBody(physicsObject);
-		btTransform t;
-		oldMotion->getWorldTransform(t);
-		auto rot = t.getRotation();
+	void setRotation(glm::fquat rotation);
 
-		physicsObject->create(position, glm::fquat(rot.w(), rot.x(), rot.y(), rot.z()), physicsObject->collisionShape, physicsObject->mass);
-		Engine::physicsWorld.addRigidBody(physicsObject);
-
-		delete oldRigid;
-		delete oldMotion;
-	}
-
-	void setRotation(glm::fquat rotation)
-	{
-		auto oldRigid = physicsObject->rigidBody;
-		auto oldMotion = physicsObject->motionState;
-
-		Engine::physicsWorld.removeRigidBody(physicsObject);
-		btTransform t;
-		oldMotion->getWorldTransform(t);
-		auto pos = t.getOrigin();
-
-		physicsObject->create(glm::fvec3(pos.x(),pos.y(),pos.z()), rotation, physicsObject->collisionShape, physicsObject->mass);
-		Engine::physicsWorld.addRigidBody(physicsObject);
-
-		delete oldRigid;
-		delete oldMotion;
-	}
-
-	void setPositionRotation(glm::fvec3 position, glm::fquat rotation)
-	{
-		auto oldRigid = physicsObject->rigidBody;
-		auto oldMotion = physicsObject->motionState;
-		Engine::physicsWorld.removeRigidBody(physicsObject);
-		physicsObject->create(position, rotation, physicsObject->collisionShape, physicsObject->mass);
-		Engine::physicsWorld.addRigidBody(physicsObject);
-		delete oldRigid;
-		delete oldMotion;
-	}
+	void setPositionRotation(glm::fvec3 position, glm::fquat rotation);
 
 	Model* model;
 	SGNode* sgNode;

@@ -8,15 +8,11 @@
 #include <random>
 #include <functional>
 
-#include <iostream>
 #include <time.h>
 #include <string>
 #include <sstream>
 #include <basetsd.h>
 #include <set>
-
-#include <gl/glew.h>
-#include <GL\GL.h>
 
 #include "MathIncludes.hpp"
 

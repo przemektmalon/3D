@@ -1,12 +1,12 @@
 #include "Font.hpp"
 
-GlyphContainer* Font::requestGlyphs(u16 pCharSize, Text * pUser)
+GlyphContainer* Font::requestGlyphs(u16 pCharSize, Text2D * pUser)
 {
 	auto find = useTrack.find(pCharSize);
 	if (find == useTrack.end())
 	{
 		auto ret = loadGlyphs(pCharSize);
-		useTrack.insert(std::make_pair(pCharSize, std::set<Text*>({ pUser })));
+		useTrack.insert(std::make_pair(pCharSize, std::set<Text2D*>({ pUser })));
 		return ret;
 	}
 	else
@@ -16,7 +16,7 @@ GlyphContainer* Font::requestGlyphs(u16 pCharSize, Text * pUser)
 	}
 }
 
-void Font::releaseGlyphs(u16 pCharSize, Text* pUser)
+void Font::releaseGlyphs(u16 pCharSize, Text2D* pUser)
 {
 	auto find = useTrack.find(pCharSize);
 	if (find == useTrack.end())

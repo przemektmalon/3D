@@ -1,9 +1,10 @@
 #pragma once
-#include "Include.hpp"
 #include "SOIL.h"
 #include "Asset.hpp"
-#include <Windows.h>
 #include "ImageData.hpp"
+#include "GLIncludes.hpp"
+#include "MathIncludes.hpp"
+#include <vector>
 
 #undef max
 #undef min

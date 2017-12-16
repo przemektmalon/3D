@@ -1,4 +1,6 @@
 #include "AssetManager.hpp"
+#include "Model.hpp"
+#include "Asset.hpp"
 
 AssetManager::AssetManager()
 {
@@ -14,16 +16,16 @@ Asset* AssetManager::prepareAsset(Asset::Type pType, String<128>& pPath, String<
 	{
 	case Asset::Font: {
 		auto ins = fontList.insert(std::make_pair(pName, Font(pPath, pName)));
-		return &ins.first->second; }
+		return (Asset*)&ins.first->second; }
 	case Asset::Mesh: {
 		auto ins2 = modelList.try_emplace(pName, pPath, pName);
-		return &ins2.first->second; }
+		return (Asset*)&ins2.first->second; }
 	case Asset::Model: {
 		auto ins3 = modelList.try_emplace(pName, pPath, pName);
-		return &ins3.first->second; }
+		return (Asset*)&ins3.first->second; }
 	case Asset::Texture2D: {
 		auto ins4 = texture2DList.insert(std::make_pair(pName, Texture2D(pPath, pName)));
-		return &ins4.first->second; }
+		return (Asset*)&ins4.first->second; }
 	}
 }
 

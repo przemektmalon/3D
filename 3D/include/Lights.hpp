@@ -1,7 +1,5 @@
 #pragma once
-#include "Include.hpp"
 #include "Texture.hpp"
-#include "Framebuffer.hpp"
 #include "BufferObjects.hpp"
 #include "Sampler.hpp"
 #include "Billboard.hpp"
@@ -14,6 +12,8 @@ struct DirectLightData
 
 	glm::fvec3 direction, colour;
 };
+
+class Framebuffer;
 
 class PointLight
 {

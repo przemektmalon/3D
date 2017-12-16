@@ -1,8 +1,8 @@
 #pragma once
 #include "SOIL.h"
 #include "Types.hpp"
-#include <Windows.h>
-#include "Asset.hpp"
+#include <cstring>
+#include <cstdlib>
 
 class ImageData
 {

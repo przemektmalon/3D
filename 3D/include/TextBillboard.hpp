@@ -1,7 +1,4 @@
 #pragma once
-#include "Include.hpp"
-#include "shaders/Shape3DShader.hpp"
-#include "Texture.hpp"
 #include "Billboard.hpp"
 #include "Framebuffer.hpp"
 

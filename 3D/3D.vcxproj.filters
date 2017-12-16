@@ -52,6 +52,9 @@
     <Filter Include="Source Files\GL">
       <UniqueIdentifier>{76db7edb-7d75-49b0-bcf4-ab46986eaf14}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Includes">
+      <UniqueIdentifier>{a4f0292f-1a7d-4243-bd1d-b690b111289d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Asset.cpp">
@@ -162,6 +165,12 @@
     <ClCompile Include="src\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Text.cpp">
+      <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="World.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Asset.hpp">
@@ -171,9 +180,6 @@
       <Filter>Header Files\Assets</Filter>
     </ClInclude>
     <ClInclude Include="include\Font.hpp">
-      <Filter>Header Files\Assets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ImageData.hpp">
       <Filter>Header Files\Assets</Filter>
     </ClInclude>
     <ClInclude Include="include\Material.hpp">
@@ -353,13 +359,7 @@
     <ClInclude Include="include\Keyboard.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\List.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Log.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\MathIncludes.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Mouse.hpp">
@@ -406,6 +406,21 @@
     </ClInclude>
     <ClInclude Include="include\World.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ImageData.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MathIncludes.hpp">
+      <Filter>Header Files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Include.hpp">
+      <Filter>Header Files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GLIncludes.hpp">
+      <Filter>Header Files\Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DrawModes.hpp">
+      <Filter>Source Files\Renderer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

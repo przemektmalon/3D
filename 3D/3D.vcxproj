@@ -249,6 +249,8 @@
     <ClCompile Include="src\UserInputManager.cpp" />
     <ClCompile Include="src\Util.cpp" />
     <ClCompile Include="src\Window.cpp" />
+    <ClCompile Include="Text.cpp" />
+    <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Asset.hpp" />
@@ -259,16 +261,18 @@
     <ClInclude Include="include\Camera.hpp" />
     <ClInclude Include="include\ConfigParser.hpp" />
     <ClInclude Include="include\Console.hpp" />
+    <ClInclude Include="include\DrawModes.hpp" />
     <ClInclude Include="include\Engine.hpp" />
     <ClInclude Include="include\Event.hpp" />
     <ClInclude Include="include\File.hpp" />
     <ClInclude Include="include\Font.hpp" />
     <ClInclude Include="include\Framebuffer.hpp" />
+    <ClInclude Include="include\GLIncludes.hpp" />
     <ClInclude Include="include\GPUModelManager.hpp" />
     <ClInclude Include="include\ImageData.hpp" />
+    <ClInclude Include="include\Include.hpp" />
     <ClInclude Include="include\Keyboard.hpp" />
     <ClInclude Include="include\Lights.hpp" />
-    <ClInclude Include="include\List.hpp" />
     <ClInclude Include="include\Log.hpp" />
     <ClInclude Include="include\Material.hpp" />
     <ClInclude Include="include\MaterialLibrary.hpp" />

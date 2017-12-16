@@ -1,6 +1,7 @@
 #pragma once
-#include "Texture.hpp"
-#include "StringGenerics.hpp"
+#include <string>
+
+class GLTexture;
 
 struct TextureMeta {
 	TextureMeta() : glTex(nullptr) {}

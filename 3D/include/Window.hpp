@@ -22,7 +22,6 @@
 
 #include "Keyboard.hpp"
 #include "Mouse.hpp"
-#include "UserInputManager.hpp"
 
 #include "Event.hpp"
 

@@ -2,6 +2,8 @@
 #include "Engine.hpp"
 #include "Renderer.hpp"
 #include "Camera.hpp"
+#include "shaders/Shape3DShader.hpp"
+#include "Texture.hpp"
 
 Shape3DShader* Billboard::shader;
 

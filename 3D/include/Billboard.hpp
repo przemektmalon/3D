@@ -1,7 +1,9 @@
 #pragma once
-#include "Include.hpp"
-#include "shaders/Shape3DShader.hpp"
-#include "Texture.hpp"
+#include "MathIncludes.hpp"
+#include "GLIncludes.hpp"
+
+class Shape3DShader;
+class GLTexture2D;
 
 static const float squareVerts[] = {
 	-0.5f, -0.5f, 0.0f, 0.f, 1.f,

@@ -1,6 +1,4 @@
 #pragma once
-#include <Windows.h>
-#include <errno.h>
 #include "Strings.hpp"
 
 class Asset

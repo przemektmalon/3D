@@ -1,5 +1,6 @@
 #pragma once
-#include "Include.hpp"
+#include "Types.hpp"
+#include "GLIncludes.hpp"
 
 class GLBufferObject
 {

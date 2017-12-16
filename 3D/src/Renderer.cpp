@@ -10,8 +10,9 @@
 #include "World.hpp"
 #include "Text.hpp"
 #include "GPUModelManager.hpp"
-
 #include "Console.hpp"
+#include "Rect.hpp"
+#include "MathIncludes.hpp"
 
 #include "ui/UIRectangleShape.hpp"
 #include "ui/UIConsole.hpp"

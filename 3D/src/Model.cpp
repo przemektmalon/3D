@@ -4,6 +4,8 @@
 #include <string>
 
 #include "rapidxml.hpp"
+#include "SceneGraph.hpp"
+#include "File.hpp"
 
 void Model::importModel(std::string pPath, u32 lod)
 {
@@ -180,6 +182,66 @@ void Model::loadMaterialTextures(aiMaterial * material, aiTextureType type, Tria
 		}
 
 	}
+}
+
+void ModelInstance::setInitialPosition(glm::fvec3 position)
+{
+	sgNode->transform.setTranslation(position);
+}
+
+void ModelInstance::setPosition(glm::fvec3 position)
+{
+	auto oldRigid = physicsObject->rigidBody;
+	auto oldMotion = physicsObject->motionState;
+
+	Engine::physicsWorld.removeRigidBody(physicsObject);
+	btTransform t;
+	oldMotion->getWorldTransform(t);
+	auto rot = t.getRotation();
+
+	physicsObject->create(position, glm::fquat(rot.w(), rot.x(), rot.y(), rot.z()), physicsObject->collisionShape, physicsObject->mass);
+	Engine::physicsWorld.addRigidBody(physicsObject);
+
+	delete oldRigid;
+	delete oldMotion;
+}
+
+void ModelInstance::setRotation(glm::fquat rotation)
+{
+	auto oldRigid = physicsObject->rigidBody;
+	auto oldMotion = physicsObject->motionState;
+
+	Engine::physicsWorld.removeRigidBody(physicsObject);
+	btTransform t;
+	oldMotion->getWorldTransform(t);
+	auto pos = t.getOrigin();
+
+	physicsObject->create(glm::fvec3(pos.x(), pos.y(), pos.z()), rotation, physicsObject->collisionShape, physicsObject->mass);
+	Engine::physicsWorld.addRigidBody(physicsObject);
+
+	delete oldRigid;
+	delete oldMotion;
+}
+
+void ModelInstance::setPositionRotation(glm::fvec3 position, glm::fquat rotation)
+{
+	auto oldRigid = physicsObject->rigidBody;
+	auto oldMotion = physicsObject->motionState;
+	Engine::physicsWorld.removeRigidBody(physicsObject);
+	physicsObject->create(position, rotation, physicsObject->collisionShape, physicsObject->mass);
+	Engine::physicsWorld.addRigidBody(physicsObject);
+	delete oldRigid;
+	delete oldMotion;
+}
+
+void ModelInstance::setScale(float scale)
+{
+	if (physicsObject)
+	{
+		physicsObject->collisionShape->setLocalScaling(btVector3(scale, scale, scale));
+		physicsObject->setMass(physicsObject->mass);
+	}
+	sgNode->transform.setScale(glm::fvec3(scale));
 }
 
 void ModelInstance::makePhysicsObject(btCollisionShape * collisionShape, float mass)

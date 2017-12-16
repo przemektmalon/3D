@@ -1,6 +1,9 @@
 #include "PhysicsWorld.hpp"
 #include "Engine.hpp"
 #include "World.hpp"
+#include "Camera.hpp"
+#include "Model.hpp"
+#include "Renderer.hpp"
 
 void PhysicsWorld::createGroundPlane()
 {

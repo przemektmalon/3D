@@ -1,14 +1,18 @@
 #pragma once
 #include <unordered_map>
-#include "Transform.hpp"
+#include <chrono>
+#include <time.h>
+
+#include "Framebuffer.hpp"
+#include "BufferObjects.hpp"
+#include "Lights.hpp"
+#include "Sampler.hpp"
+#include "Rect.hpp"
+#include "DrawModes.hpp"
+
 #include "shaders/SAOShader.hpp"
 #include "shaders/GBufferShaderTex.hpp"
 #include "shaders/GBufferShaderClay.hpp"
-#include "Framebuffer.hpp"
-#include "BufferObjects.hpp"
-#include <chrono>
-#include <time.h>
-#include "Lights.hpp"
 #include "shaders/DeferredTileCullComputeShader.hpp"
 #include "shaders/GBufferShaderMultiTex.hpp"
 #include "shaders/BilateralBlurShader.hpp"
@@ -17,21 +21,16 @@
 #include "shaders/PointShadowPassShader.hpp"
 #include "shaders/SpotShadowPassShader.hpp"
 #include "shaders/TextShader.hpp"
-#include "shaders/GBufferShaderBase.hpp"
-#include "Sampler.hpp"
 #include "shaders/ShaderStore.hpp"
 #include "shaders/Shape3DShader.hpp"
 #include "shaders/Shape2DShaderNoTex.hpp"
-#include "TextBillboard.hpp"
-#include "Window.hpp"
-#include "Model.hpp"
-#include "Camera.hpp"
-#include "TextBillboard.hpp"
-
-#include "shaders/GBufferShaderNonBindlessRegular.hpp"
+#include "shaders/Shape2DShader.hpp"
 
 #define NUM_VALID_RESOLUTIONS 9
 
+class Window;
+class World;
+class Camera;
 class RectangleShape;
 class UIConsole;
 
@@ -40,20 +39,8 @@ typedef struct {
 	u32 count;
 	u32 instanceCount;
 	u32 first;
-	union
-	{
-		u32 baseInstance;
-		float radius;
-	};
+	u32 baseInstance;
 } GLCMD;
-
-enum DrawMode { Regular, MultiTextured, Water, Reflective, Shadow, DrawModesCount };
-///TODO: Maybe add different vertex format draw modes: no-normal, etc
-
-//Draw modes :
-//Regular : Single albedo, normal and specular textures. Normal and/or specular can be 0.
-//Multi-textured : Splattered textures with 4x regular textures
-
 
 class Renderer
 {

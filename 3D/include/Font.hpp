@@ -1,6 +1,6 @@
 #pragma once
-#include "Include.hpp"
 #include <algorithm>
+#include <set>
 #include <ft2build.h>
 #include "Texture.hpp"
 #include "Engine.hpp"
@@ -71,7 +71,7 @@ private:
 
 };
 
-class Text;
+class Text2D;
 
 class Font : public Asset
 {
@@ -83,8 +83,8 @@ public:
 	}
 	~Font() {}
 
-	GlyphContainer* requestGlyphs(u16 pCharSize, Text* pUser);
-	void releaseGlyphs(u16 pCharSize, Text* pUser);
+	GlyphContainer* requestGlyphs(u16 pCharSize, Text2D* pUser);
+	void releaseGlyphs(u16 pCharSize, Text2D* pUser);
 
 	void load()
 	{
@@ -105,7 +105,7 @@ private:
 	}
 
 	FT_Face ftFace;
-	std::map<u16, std::set<Text*>> useTrack;
+	std::map<u16, std::set<Text2D*>> useTrack;
 	std::map<u16, GlyphContainer> glyphContainers;
 	GlyphContainer gl;
 };

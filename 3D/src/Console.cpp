@@ -2,6 +2,7 @@
 #include "Console.hpp"
 #include "AssetManager.hpp"
 #include "World.hpp"
+#include "Renderer.hpp"
 
 void listShaders()
 {

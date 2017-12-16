@@ -1,6 +1,6 @@
 #pragma once
-#include "Include.hpp"
 #include "Texture.hpp"
+#include <iostream>
 
 class DefaultFramebuffer
 {

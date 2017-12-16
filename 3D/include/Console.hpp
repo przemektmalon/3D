@@ -6,9 +6,9 @@
 #include <cmath>
 #include <typeinfo>
 #include <type_traits>
-#include <tuple>
 #include <utility>
 #include <functional>
+#include "shaders\TextShader.hpp"
 
 template <typename> struct FnArgs;
 

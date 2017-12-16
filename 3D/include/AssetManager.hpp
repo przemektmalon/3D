@@ -1,13 +1,12 @@
 #pragma once
 #include "Include.hpp"
-#include "Font.hpp"
 #include "ImageData.hpp"
-#include <unordered_map>
-
-#include <Windows.h>
-
+#include "Font.hpp"
+#include <map>
 #include "GPUModelManager.hpp"
 #include "MaterialLibrary.hpp"
+#include "Asset.hpp"
+#include "Model.hpp"
 
 class AssetManager
 {
@@ -106,7 +105,7 @@ public:
 		auto find = modelList.find(pName);
 		if (find == modelList.end())
 			return nullptr;
-		return &find->second;
+		return (Model*)&find->second;
 	}
 
 	void removeTexture(String32& pName)
