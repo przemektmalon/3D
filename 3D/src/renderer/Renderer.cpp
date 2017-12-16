@@ -210,7 +210,8 @@ void Renderer::ssaoPass()
 	ssaoShader.use();
 	ssaoShader.sendUniforms();
 
-	glBindVertexArray(vaoQuad);
+	//glBindVertexArray(vaoQuad);
+	vaoQuad.bind();
 	fboGBuffer.textureAttachments[3].bind(0);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glDisable(GL_BLEND);
@@ -288,8 +289,8 @@ void Renderer::shadingPass()
 
 void Renderer::screenPass()
 {
-	fboDefault.bind();
-	fboDefault.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	DefaultFBO::bind();
+	DefaultFBO::clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 
@@ -632,7 +633,8 @@ void Renderer::cameraProjUpdated()
 
 inline void Renderer::initialiseScreenQuad()
 {
-	glGenVertexArrays(1, &vaoQuad);
+	vaoQuad.init();
+
 	glGenBuffers(1, &vboQuad);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vboQuad);
@@ -642,28 +644,15 @@ inline void Renderer::initialiseScreenQuad()
 	auto locc = glGetUniformLocation(bilatBlurShader.getGLID(), "source");
 	glUniform1i(locc, 0);
 
-	glBindVertexArray(vaoQuad);
+	vaoQuad.bind();
 	glBindBuffer(GL_ARRAY_BUFFER, vboQuad);
 
-	GLint posAttrib = glGetAttribLocation(bilatBlurShader.getGLID(), "position");
-	glEnableVertexAttribArray(posAttrib);
-	glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
+	vaoQuad.addAttrib("position", 2, GL_FLOAT);
+	vaoQuad.addAttrib("texCoord", 2, GL_FLOAT);
+	vaoQuad.enableFor(bilatBlurShader);
+	vaoQuad.enableFor(ssaoShader);
 
-	GLint texAttrib = glGetAttribLocation(bilatBlurShader.getGLID(), "texCoord");
-	glEnableVertexAttribArray(texAttrib);
-	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
-
-	ssaoShader.use();
-
-	posAttrib = glGetAttribLocation(ssaoShader.getGLID(), "position");
-	glEnableVertexAttribArray(posAttrib);
-	glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
-
-	texAttrib = glGetAttribLocation(ssaoShader.getGLID(), "texCoord");
-	glEnableVertexAttribArray(texAttrib);
-	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
-
-	glGenVertexArrays(1, &vaoQuadViewRays);
+	vaoQuadViewRays.init();
 	glGenBuffers(1, &vboQuadViewRays);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vboQuadViewRays);
@@ -672,40 +661,19 @@ inline void Renderer::initialiseScreenQuad()
 	auto program = shaderStore.getShader("Standard");
 	program->use();
 
-	glBindVertexArray(vaoQuadViewRays);
+	vaoQuadViewRays.bind();
 	glBindBuffer(GL_ARRAY_BUFFER, vboQuadViewRays);
 
-	posAttrib = glGetAttribLocation(program->getGLID(), "position");
-	glEnableVertexAttribArray(posAttrib);
-	glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
-
-	texAttrib = glGetAttribLocation(program->getGLID(), "texCoord");
-	glEnableVertexAttribArray(texAttrib);
-	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
-
-	auto viewAttrib = glGetAttribLocation(program->getGLID(), "viewRay");
-	glEnableVertexAttribArray(viewAttrib);
-	glVertexAttribPointer(viewAttrib, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(4 * sizeof(GLfloat)));
-
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	vaoQuadViewRays.addAttrib("position", 2, GL_FLOAT);
+	vaoQuadViewRays.addAttrib("texCoord", 2, GL_FLOAT);
+	vaoQuadViewRays.addAttrib("viewRay", 2, GL_FLOAT);
+	vaoQuadViewRays.enableFor(*shaderStore.getShader("Standard"));
 
 	program = shaderStore.getShader("test");
 
-	glBindVertexArray(vaoQuadViewRays);
 	glBindBuffer(GL_ARRAY_BUFFER, vboQuadViewRays);
 
-	posAttrib = glGetAttribLocation(program->getGLID(), "p");
-	glEnableVertexAttribArray(posAttrib);
-	glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
-
-	texAttrib = glGetAttribLocation(program->getGLID(), "t");
-	glEnableVertexAttribArray(texAttrib);
-	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
-
-	viewAttrib = glGetAttribLocation(program->getGLID(), "v");
-	glEnableVertexAttribArray(viewAttrib);
-	glVertexAttribPointer(viewAttrib, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(4 * sizeof(GLfloat)));
+	vaoQuadViewRays.enableFor(*shaderStore.getShader("test"));
 
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);

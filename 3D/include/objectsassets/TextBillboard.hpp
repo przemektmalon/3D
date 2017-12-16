@@ -22,5 +22,5 @@ public:
 	std::string string;
 	Text2D* text;
 
-	Framebuffer fbo;
+	FBO fbo;
 };

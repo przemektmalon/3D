@@ -78,42 +78,22 @@ protected:
 class SSBO : public GLBufferObject
 {
 public:
-	SSBO() : GLBufferObject()
+	SSBO() : GLBufferObject() {}
+	~SSBO() {}
+
+	inline void bindBase(GLuint pIndex, GLenum pBuffer = GL_SHADER_STORAGE_BUFFER)
 	{
-	}
-	~SSBO() 
-	{
-	}
-	
-	inline void bufferData(GLsizeiptr pSize, void* pData, GLenum pUsage)
-	{
-		sizeInBytes = pSize;
-		glNamedBufferData(GLID, pSize, pData, pUsage);
+		glBindBufferBase(pBuffer, pIndex, GLID);
 	}
 
-	inline void* mapRange(GLintptr pOffset, GLsizeiptr pLength, GLbitfield pAccess)
+	inline void bind(GLenum pBuffer = GL_SHADER_STORAGE_BUFFER)
 	{
-		return glMapNamedBufferRange(GLID, pOffset, pLength, pAccess);
+		glBindBuffer(pBuffer, GLID);
 	}
 
-	inline void unmap()
+	inline void unbind(GLenum pBuffer = GL_SHADER_STORAGE_BUFFER)
 	{
-		glUnmapNamedBuffer(GLID);
-	}
-
-	inline void bindBase(GLuint pIndex)
-	{
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, pIndex, GLID);
-	}
-
-	inline void bind()
-	{
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, GLID);
-	}
-
-	inline void unbind()
-	{
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+		glBindBuffer(pBuffer, 0);
 	}
 
 };

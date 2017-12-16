@@ -303,6 +303,9 @@
     <ClInclude Include="include\objectsassets\TextBillboard.hpp">
       <Filter>Header Files\ObjectsAssets</Filter>
     </ClInclude>
+    <ClInclude Include="include\renderer\VertexArray.hpp">
+      <Filter>Header Files\Renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\Console.cpp">

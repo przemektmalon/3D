@@ -245,7 +245,7 @@ void Engine::mainLoop(int resolutionIndex)
 				case(Event::KeyDown):
 				{
 					//if (console.stateFlags == 0) //Console closed
-						//uim.keyDown(ev.key.code);
+						uim.keyDown(ev.key.code);
 					//else						 //Console open
 						//console.textInput(ev.key.code.code);
 					break;

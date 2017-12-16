@@ -41,7 +41,7 @@ void TextBillboard::draw()
 	text->draw();
 
 	glViewport(0, 0, Engine::window.getSizeX(), Engine::window.getSizeY());
-	Engine::r->fboDefault.bind();
+	DefaultFBO::bind();
 
 	size.y = (float)tex->getWidth() * 0.04f;
 	size.x = (float)tex->getHeight() * 0.04f;

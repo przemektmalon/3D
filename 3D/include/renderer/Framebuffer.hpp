@@ -2,38 +2,36 @@
 #include "Texture.hpp"
 #include <iostream>
 
-class DefaultFramebuffer
+class DefaultFBO
 {
 public:
-	DefaultFramebuffer() {}
-	~DefaultFramebuffer() {}
+	DefaultFBO() {}
+	~DefaultFBO() {}
 
-	void bind() { glBindFramebuffer(GL_FRAMEBUFFER, GLID); }
-	void bindRead() { glBindFramebuffer(GL_READ_FRAMEBUFFER, GLID); }
-	void bindDraw() { glBindFramebuffer(GL_DRAW_FRAMEBUFFER, GLID); }
+	static void bind() { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
+	static void bindRead() { glBindFramebuffer(GL_READ_FRAMEBUFFER, 0); }
+	static void bindDraw() { glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); }
 
-	void clear(GLbitfield pMask, glm::fvec4 colour = glm::fvec4(0.f))
+	static void clear(GLbitfield pMask, glm::fvec4 colour = glm::fvec4(0.f))
 	{
 		glClearColor(colour.r, colour.g, colour.b, colour.a);
 		glClear(pMask);
 	}
 
-private:
-	const GLuint GLID = 0;
 };
 
-class Framebuffer
+class FBO
 {
 public:
-	Framebuffer() : created(false) 
+	FBO() : created(false) 
 	{
 		glGenFramebuffers(1, &GLID);
 	}
-	Framebuffer(glm::ivec2 res) : resolution(res), created(true) 
+	FBO(glm::ivec2 res) : resolution(res), created(true) 
 	{
 		glGenFramebuffers(1, &GLID);
 	}
-	~Framebuffer() 
+	~FBO() 
 	{
 		glDeleteFramebuffers(1, &GLID);
 	}

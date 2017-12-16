@@ -13,7 +13,7 @@ struct DirectLightData
 	glm::fvec3 direction, colour;
 };
 
-class Framebuffer;
+class FBO;
 
 class PointLight
 {
@@ -120,7 +120,7 @@ public:
 
 	GPUData* gpuData;
 	GLTextureCube shadowTex;
-	Framebuffer* fbo;
+	FBO* fbo;
 
 	float shadowRenderDistance;
 

@@ -250,6 +250,7 @@
     <ClInclude Include="include\renderer\RendererData.hpp" />
     <ClInclude Include="include\renderer\Sampler.hpp" />
     <ClInclude Include="include\renderer\Texture.hpp" />
+    <ClInclude Include="include\renderer\VertexArray.hpp" />
     <ClInclude Include="include\shaders\BilateralBlurShader.hpp" />
     <ClInclude Include="include\shaders\DeferredTileCullComputeShader.hpp" />
     <ClInclude Include="include\shaders\FrustCullShader.hpp" />

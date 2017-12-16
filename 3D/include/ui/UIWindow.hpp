@@ -98,7 +98,7 @@ public:
 	bool hasFocus;
 	std::string name;
 
-	Framebuffer renderTarget;
+	FBO renderTarget;
 
 	UILabel* title;
 

@@ -9,6 +9,7 @@
 #include "Sampler.hpp"
 #include "Rect.hpp"
 #include "DrawModes.hpp"
+#include "VertexArray.hpp"
 
 #include "shaders/SAOShader.hpp"
 #include "shaders/GBufferShaderTex.hpp"
@@ -90,17 +91,17 @@ public:
 	irect viewport;
 
 	// Framebuffers
-	DefaultFramebuffer fboDefault;
-	Framebuffer fboSSAOBlur;
-	Framebuffer fboSSAO;
-	Framebuffer fboGBuffer;
-	Framebuffer fboScreen;
-	Framebuffer fboShadow;
+	FBO fboSSAOBlur;
+	FBO fboSSAO;
+	FBO fboGBuffer;
+	FBO fboScreen;
+	FBO fboShadow;
 	
 	// Vertex storage for rendering to window
-	GLuint vaoQuad;
+	//GLuint vaoQuad;
+	VAO vaoQuad;
 	GLuint vboQuad;
-	GLuint vaoQuadViewRays;
+	VAO vaoQuadViewRays;
 	GLuint vboQuadViewRays;
 
 	// Shaders

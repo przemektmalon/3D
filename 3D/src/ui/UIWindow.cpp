@@ -81,7 +81,7 @@ void UIWindow::draw()
 
 	UIElementContainer::draw();
 	
-	Engine::r->fboDefault.bind();
+	DefaultFBO::bind();
 	glViewport(0, 0, Engine::window.getSizeX(), Engine::window.getSizeY());
 	shader->use();
 
