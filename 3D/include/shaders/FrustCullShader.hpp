@@ -6,7 +6,7 @@ class FrustCullShader : public ShaderProgram
 public:
 	FrustCullShader()
 	{
-		name.overwrite(String32("frustCull"));
+		name = "frustCull";
 		type = Compute;
 	}
 	~FrustCullShader() {}

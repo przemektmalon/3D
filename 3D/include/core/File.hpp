@@ -1,5 +1,5 @@
 #pragma once
-#include "Strings.hpp"
+#include <string>
 #include <fstream>
 #include <io.h>
 
@@ -23,23 +23,18 @@ public:
 
 	struct FileMeta
 	{
-		String<128> path;
-		String<128> status;
+		std::string path;
+		std::string status;
 		Mode fileMode;
 	} meta;
 
 	std::fstream& fstream() { return file; }
 
-	bool create(StringGeneric& pPath, s32 pFileMode)
+	bool create(std::string&& pPath, Mode pFileMode = (File::Mode)(File::binary | File::in | File::out))
 	{
-		return create(pPath, (Mode)pFileMode);
-	}
-
-	bool create(StringGeneric& pPath, Mode pFileMode = (File::Mode)(File::binary | File::in | File::out))
-	{
-		if (pPath.getLength() > 127)
+		if (pPath.length() > 127)
 			return false;
-		meta.path.overwrite(pPath);
+		meta.path = pPath;
 		meta.fileMode = pFileMode;
 
 		return create(meta.fileMode);
@@ -47,34 +42,24 @@ public:
 
 	bool create(Mode pFileMode = (File::Mode)(File::binary | File::in | File::out))
 	{
-		if (meta.path.getLength() == 0)
+		if (meta.path.length() == 0)
 			return false;
 
 		meta.fileMode = pFileMode;
 
-		file.open(meta.path.getString(), meta.fileMode);
+		file.open(meta.path.c_str(), meta.fileMode);
 	}
 
-	bool open(StringGeneric& pPath, s32 pFileMode)
+	bool open(std::string&& pPath, Mode pFileMode = (File::Mode)(File::binary | File::in | File::out))
 	{
-		return open(pPath, (Mode)pFileMode);
-	}
-
-	bool open(StringGeneric& pPath, Mode pFileMode = (File::Mode)(File::binary | File::in | File::out))
-	{
-		if (pPath.getLength() > 127)
-			return false;
-		meta.path.overwrite(pPath);
-		meta.fileMode = pFileMode;
-
-		return open(meta.fileMode);
+		return open(pPath, pFileMode);
 	}
 
 	bool open(std::string& pPath, Mode pFileMode = (File::Mode)(File::binary | File::in | File::out))
 	{
 		if (pPath.length() > 127)
 			return false;
-		meta.path.setToChars(pPath.c_str());
+		meta.path = pPath;
 		meta.fileMode = pFileMode;
 
 		return open(meta.fileMode);
@@ -82,12 +67,12 @@ public:
 
 	bool open(Mode pFileMode = (File::Mode)(File::binary | File::in | File::out))
 	{
-		if (meta.path.getLength() == 0)
+		if (meta.path.length() == 0)
 			return false;
 
 		meta.fileMode = pFileMode;
 
-		file.open(meta.path.getString(), meta.fileMode);
+		file.open(meta.path.c_str(), meta.fileMode);
 
 		if (file.bad())
 		{
@@ -124,17 +109,18 @@ public:
 		file.write((char*)val, sizeof(T)*length);
 	}
 
-	void writeStr(StringGeneric& string, bool includeTerminator = true, bool writeCapacity = true)
+	void writeStr(std::string& string, bool includeTerminator = true, bool writeCapacity = true)
 	{
 		if(!writeCapacity)
-			file.write(string.getString(), string.getLength() + (includeTerminator ? 1 : 0));
+			file.write(string.c_str(), string.length() + (includeTerminator ? 1 : 0));
 		else
-			file.write(string.getString(), string.getCapacity() + (includeTerminator ? 1 : 0));
+			file.write(string.c_str(), string.size() + (includeTerminator ? 1 : 0));
+
 	}
 
-	void writeStr(HeapGeneric& string, bool includeTerminator = true)
+	void writeStr(std::string& string, bool includeTerminator = true)
 	{
-		file.write(string.getString(), string.getLength() + (includeTerminator ? 1 : 0));
+		file.write(string.c_str(), string.length() + (includeTerminator ? 1 : 0));
 	}
 
 	/////////////////////////// WRITING ///////////////////////////
@@ -158,44 +144,24 @@ public:
 		file.read((char*)val, sizeof(T)*length);
 	}
 
-	void read(StringGeneric& string, u32 length)
+	void read(std::string& string, u32 length)
 	{
-		file.read(string.getString(), length);
+		file.read((char*)string.c_str(), length);
 	}
 
-	void readStr(StringGeneric& string, bool readCapacity = true, bool readTerminator = true)
+	void readStr(std::string& string, bool readCapacity = true, bool readTerminator = true)
 	{
 		if (readCapacity)
-			file.read(string.getString(), string.getCapacity() + (readTerminator ? 1 : 0));
+			file.read((char*)string.c_str(), string.size() + (readTerminator ? 1 : 0));
 		else
 		{
 			char lastChar;
 			file.read(&lastChar, 1);
 			while (lastChar != '\0')
 			{
-				string.append(lastChar);
+				string.push_back(lastChar);
 				file.read(&lastChar, 1);
 			}
-		}
-		string.determineLength();
-	}
-
-	void readStr(HeapGeneric& string, int size = -1)
-	{
-		if (size == -1)
-		{
-			char lastChar;
-			file.read(&lastChar, 1);
-			while (lastChar != '\0')
-			{
-				string.append(lastChar);
-				file.read(&lastChar, 1);
-			}
-		}
-		else
-		{
-			string.expand(size);
-			file.read(string.getString(), size);
 		}
 	}
 
@@ -248,14 +214,9 @@ public:
 		
 	}
 
-	void setPath(String<128>& pPath)
-	{
-		meta.path.overwrite(pPath);
-	}
-
 	void setPath(std::string pPath)
 	{
-		meta.path.setToChars(pPath.c_str());
+		meta.path = pPath;
 	}
 
 };

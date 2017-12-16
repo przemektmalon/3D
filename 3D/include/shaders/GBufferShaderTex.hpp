@@ -6,7 +6,7 @@ class GBufferShaderTex : public ShaderProgram
 public:
 	GBufferShaderTex() 
 	{
-		name.overwrite(String32("gBufferPassTex"));
+		name = "gBufferPassTex";
 		type = VertFrag;
 	}
 

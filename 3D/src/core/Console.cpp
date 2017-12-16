@@ -1,4 +1,4 @@
-#pragma once
+/*#pragma once
 #include "Console.hpp"
 #include "AssetManager.hpp"
 #include "World.hpp"
@@ -130,7 +130,7 @@ void Console::submitCommand(std::string& command)
 		CHECK_CONSOLE_CALLABLE(2, listShaders, 0);
 		CHECK_CONSOLE_CALLABLE(3, reloadShader, 1);
 		CHECK_CONSOLE_CALLABLE(4, reloadAllShaders, 0);
-	END_FUNC_SWITCH*/
+	END_FUNC_SWITCH
 }
 
 void Console::registerConsoleFuncs()
@@ -199,7 +199,7 @@ void Console::textInput(Key code)
 		submit.erase(0, 2);
 		consoleHistory.push_back(new Text2D());
 		consoleHistory.back()->init();
-		consoleHistory.back()->setFont(Engine::assets.getFont(String32("consola")));
+		consoleHistory.back()->setFont(Engine::assets.getFont("consola"));
 		consoleHistory.back()->setCharSize(25);
 		consoleHistory.back()->setString(cmd.getString());
 		submitCommand(submit);
@@ -309,10 +309,10 @@ void Console::textInput(Key code)
 void Console::init()
 {
 	cmd.init();
-	cmd.setFont(Engine::assets.getFont(String32("consola")));
+	cmd.setFont(Engine::assets.getFont("consola"));
 	cmd.setCharSize(25);
-	cmd.setString(String<3>("> "));
+	cmd.setString("> ");
 	cmd.setColour(glm::fvec3(1.f, 0.f, 0.f));
 	cmd.setTextOrigin(Text2D::Origin::TopLeft);
 	repositionText();
-}
+}*/

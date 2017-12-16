@@ -17,7 +17,7 @@ UIWindow* createWorldEditWindow()
 	butTogglePhysics.setSize(glm::fvec2(140, 30));
 	butTogglePhysics.getText().setStyle(styleA);
 	butTogglePhysics.getText().setCharSize(18);
-	butTogglePhysics.setString(SSTR("Toggle physics"));
+	butTogglePhysics.setString("Toggle physics");
 	butTogglePhysics.getText().setTextOrigin(Text2D::MiddleMiddle);
 	butTogglePhysics.setPosition(glm::fvec2(15, 30));
 	butTogglePhysics.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
@@ -30,7 +30,7 @@ UIWindow* createWorldEditWindow()
 	butToggleEdit.setSize(glm::fvec2(140, 30));
 	butToggleEdit.getText().setStyle(styleA);
 	butToggleEdit.getText().setCharSize(18);
-	butToggleEdit.setString(SSTR("Toggle editing"));
+	butToggleEdit.setString("Toggle editing");
 	butToggleEdit.getText().setTextOrigin(Text2D::MiddleMiddle);
 	butToggleEdit.setPosition(glm::fvec2(170, 30));
 	butToggleEdit.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
@@ -51,7 +51,7 @@ UIWindow* createWorldEditWindow()
 	butShootBall.setName("shootball");
 	butShootBall.setSize(glm::fvec2(170, 30));
 	butShootBall.getText().setStyle(styleA);
-	butShootBall.setString(SSTR("Shoot Ball"));
+	butShootBall.setString("Shoot Ball");
 	butShootBall.getText().setTextOrigin(Text2D::MiddleMiddle);
 	butShootBall.setPosition(glm::fvec2(20, 93));
 	butShootBall.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& me) -> void {
@@ -77,7 +77,7 @@ UIWindow* createWorldEditWindow()
 	butShootBox.setName("shootbox");
 	butShootBox.setSize(glm::fvec2(170, 30));
 	butShootBox.getText().setStyle(styleA);
-	butShootBox.setString(SSTR("Shoot Box"));
+	butShootBox.setString("Shoot Box");
 	butShootBox.getText().setTextOrigin(Text2D::MiddleMiddle);
 	butShootBox.setPosition(glm::fvec2(20, 93));
 	butShootBox.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& me) -> void {

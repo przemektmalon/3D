@@ -6,7 +6,7 @@ class SpotShadowPassShader : public ShaderProgram
 public:
 	SpotShadowPassShader()
 	{
-		name.overwrite(String32("spotShadowPass"));
+		name = "spotShadowPass";
 		type = VertFrag;
 	}
 

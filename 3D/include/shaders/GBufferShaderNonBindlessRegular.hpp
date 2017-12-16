@@ -6,7 +6,7 @@ class GBufferShaderNonBindlessRegular : public GBufferShaderBase
 public:
 	GBufferShaderNonBindlessRegular()
 	{
-		name.overwrite(String32("gBufferPassNonBindlessRegular"));
+		name = "gBufferPassNonBindlessRegular";
 		type = VertFrag;
 	}
 

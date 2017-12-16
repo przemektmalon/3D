@@ -57,7 +57,7 @@ void GPUModelManager::newBatch()
 {
 	MeshBatch nextBatch;
 
-	auto program = Engine::r->shaderStore.getShader(String<32>("gBufferPass"));
+	auto program = Engine::r->shaderStore.getShader("gBufferPass");
 
 	program->use();
 

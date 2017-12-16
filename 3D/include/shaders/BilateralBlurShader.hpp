@@ -6,7 +6,7 @@ class BilateralBlurShader : public ShaderProgram
 public:
 	BilateralBlurShader()
 	{
-		name.overwrite(String32("bilatBlur"));
+		name = "bilatBlur";
 		type = VertFrag;
 	}
 

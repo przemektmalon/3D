@@ -1,5 +1,4 @@
 #pragma once
-#include "Strings.hpp"
 #include "Types.hpp"
 #include <iostream>
 #include <io.h>
@@ -14,9 +13,9 @@ public:
 	{
 		
 	}
-	Log(String<128>& pName) : timeStamp(true)
+	Log(std::string& pName) : timeStamp(true)
 	{
-		name.overwrite(pName);
+		name = pName;
 	}
 	~Log() {}
 
@@ -25,32 +24,32 @@ public:
 		content.clear();
 	}
 
-	static void printLog(char* log, u32 length, StringGeneric& logName)
+	static void printLog(char* log, u32 length, std::string logName)
 	{
-		logName.insertAt(0, String32("logs/"));
-		std::ofstream ofs(logName.getString());
+		logName.insert(0, "logs/");
+		std::ofstream ofs(logName.c_str());
 		ofs.write(log, length);
 		ofs.close();
 	}
 
 	static void printLog(char* log, u32 length)
 	{
-		String<128> logName;
+		std::string logName;
 		getDateTimeStr(logName);
-		printLog(log, length, logName.append(String32(".log")));
+		printLog(log, length, logName.append(".log"));
 	}
 
-	static void printLog(Log& log, StringGeneric& logName)
+	static void printLog(Log& log, std::string logName)
 	{
 		if (log.getLength() > 0)
 		{
-			printLog(log.getContent(), log.getLength(), logName.append(String<32>(".log")));
+			printLog(log.getContent(), log.getLength(), logName.append(".log"));
 		}
 	}
 
 	static void printLog(Log& log)
 	{
-		String<128> logName;
+		std::string logName;
 		getDateTimeStr(logName);
 		printLog(log, logName);
 	}
@@ -60,12 +59,12 @@ public:
 		printLog(*this);
 	}
 
-	void postMessage(StringGeneric& str, s32 printTimeStamp = -1)
+	void postMessage(std::string& str, s32 printTimeStamp = -1)
 	{
-		postMessage(str.getString(), printTimeStamp);
+		postMessage(str.c_str(), printTimeStamp);
 	}
 
-	void postMessage(char* str, s32 printTimeStamp = -1)
+	void postMessage(const char* str, s32 printTimeStamp = -1)
 	{
 		if (timeStamp && printTimeStamp != 0)
 		{
@@ -94,17 +93,16 @@ public:
 		content.append(str);
 	}
 
-	void setName(String<128>& pName)
+	void setName(std::string& pName)
 	{
-		name.overwrite(pName);
+		name = pName;
 	}
 
 	char* getContent() { return &content[0]; }
 	int getLength() { return content.size(); }
 
 private:
-	//String<HEAP> content;
-	String<128> name;
+	std::string name;
 
 	std::string content;
 

@@ -6,7 +6,7 @@ class DeferredTileCullComputeShader : public ShaderProgram
 public:
 	DeferredTileCullComputeShader() 
 	{
-		name.overwrite(String32("pbrshader")); 
+		name = "pbrshader";
 		type = Compute;
 
 	}

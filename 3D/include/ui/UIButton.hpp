@@ -63,7 +63,7 @@ public:
 		text.draw();
 	}
 
-	void setString(StringGeneric& str)
+	void setString(std::string&& str)
 	{
 		text.setString(str);
 		updateBounds();

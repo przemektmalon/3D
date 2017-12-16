@@ -1,17 +1,17 @@
 #include "Asset.hpp"
 
 Asset::Asset() {}
-Asset::Asset(String<128>& pPath, String<32>& pName) {
+Asset::Asset(std::string& pPath, std::string& pName) {
 	prepare(pPath, pName);
 	existsOnDisk = true;
 }
 
 Asset::~Asset() {}
 
-void Asset::prepare(String<128>& pPath, String<32>& pName)
+void Asset::prepare(std::string& pPath, std::string& pName)
 {
-	diskPath.overwrite(pPath);
-	name.overwrite(pName);
+	diskPath = pPath;
+	name = pName;
 	existsOnDisk = true;
 	if (existsOnDisk)
 	{

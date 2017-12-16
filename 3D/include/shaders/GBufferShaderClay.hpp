@@ -7,7 +7,7 @@ class GBufferShaderClay : public ShaderProgram
 public:
 	GBufferShaderClay()
 	{
-		name.overwrite(String32("gBufferPassClay"));
+		name = "gBufferPassClay";
 		type = VertFrag;
 	}
 

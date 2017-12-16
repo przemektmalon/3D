@@ -1,41 +1,22 @@
-#include "Strings.hpp"
+#include <string>
 #include <time.h>
 
-void getDateTimeStr(StringGeneric& str)
+void getDateTimeStr(std::string& str)
 {
 	time_t now = time(0);
 	tm  tstruct;
-	String128 logName;
+	std::string logName;
 	char buf[80];
 	localtime_s(&tstruct, &now);
 	strftime(buf, sizeof(buf), "%F %H,%M,%S", &tstruct);
-	str.setToChars(buf);
+	str = buf;
 }
 
-void getTimeStr(StringGeneric& str, char delim = ';')
-{
-	time_t now = time(0);
-	tm  tstruct;
-	String128 logName;
-	char buf[80];
-	localtime_s(&tstruct, &now);
-
-	String<9> formatStr;
-	formatStr.append("%H",2);
-	formatStr.append(delim);
-	formatStr.append("%M", 2);
-	formatStr.append(delim);
-	formatStr.append("%S", 2);
-	//strftime(buf, sizeof(buf), "%H;%M;%S", &tstruct);
-	strftime(buf, sizeof(buf), formatStr.getString(), &tstruct);
-	str.setToChars(buf);
-}
 
 void getTimeStr(std::string& str, char delim = ';')
 {
 	time_t now = time(0);
 	tm  tstruct;
-	String128 logName;
 	char buf[80];
 	localtime_s(&tstruct, &now);
 

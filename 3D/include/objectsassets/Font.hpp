@@ -5,6 +5,7 @@
 #include "Texture.hpp"
 #include "Engine.hpp"
 #include "Asset.hpp"
+#include <map>
 #include FT_FREETYPE_H
 
 #define NO_PRINTABLE_CHARS 95
@@ -77,7 +78,7 @@ class Font : public Asset
 {
 	friend class AssetManager;
 public:
-	Font(String128& pPath, String32& pName) : ftFace(nullptr)
+	Font(std::string& pPath, std::string& pName) : ftFace(nullptr)
 	{
 		prepare(pPath, pName);
 	}
@@ -90,7 +91,7 @@ public:
 	{
 		if (ftFace == nullptr)
 		{
-			auto err = FT_New_Face(Engine::ftLib, diskPath.getString(), 0, &ftFace);
+			auto err = FT_New_Face(Engine::ftLib, diskPath.c_str(), 0, &ftFace);
 			if (err)
 				assert(false);
 		}

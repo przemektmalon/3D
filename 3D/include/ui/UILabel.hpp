@@ -31,9 +31,9 @@ public:
 		text.setStyle(pStyle);
 	}
 
-	void setString(StringGeneric& pStr)
+	void setString(std::string&& pStr)
 	{
-		text.setString(pStr);
+		setString(pStr);
 	}
 
 	void setString(std::string& pStr)

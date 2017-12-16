@@ -14,9 +14,7 @@ public:
 
 	void setTweaksFile(std::string fileName)
 	{
-		String<128> fn;
-		fn.setToChars(fileName.c_str()); ///TODO: Think about not using String<> anymore
-		file.open(fn, File::Mode::in); ///TODO: There is no method for just setting file name ?
+		file.open(fileName, File::Mode::in);
 		file.close();
 	}
 

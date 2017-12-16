@@ -19,9 +19,6 @@
     <Filter Include="Header Files\Renderer">
       <UniqueIdentifier>{77f48b0d-58b7-4f2f-bd7f-a03628ef3ed9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\ObjectAssets">
-      <UniqueIdentifier>{5b84c266-ed3a-4350-b559-0d61521f9da0}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Core">
       <UniqueIdentifier>{8acfa90d-fdfc-4380-9420-11bf5493cff9}</UniqueIdentifier>
     </Filter>
@@ -57,6 +54,9 @@
     </Filter>
     <Filter Include="Source Files\Util">
       <UniqueIdentifier>{1a0c011f-b4e3-4034-b411-a5427ca824c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ObjectsAssets">
+      <UniqueIdentifier>{5b84c266-ed3a-4350-b559-0d61521f9da0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -201,30 +201,6 @@
     <ClInclude Include="include\renderer\Texture.hpp">
       <Filter>Header Files\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="include\objectassets\Asset.hpp">
-      <Filter>Header Files\ObjectAssets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\objectassets\AssetManager.hpp">
-      <Filter>Header Files\ObjectAssets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\objectassets\Billboard.hpp">
-      <Filter>Header Files\ObjectAssets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\objectassets\Font.hpp">
-      <Filter>Header Files\ObjectAssets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\objectassets\ImageData.hpp">
-      <Filter>Header Files\ObjectAssets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\objectassets\Model.hpp">
-      <Filter>Header Files\ObjectAssets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\objectassets\Text.hpp">
-      <Filter>Header Files\ObjectAssets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\objectassets\TextBillboard.hpp">
-      <Filter>Header Files\ObjectAssets</Filter>
-    </ClInclude>
     <ClInclude Include="include\util\Bounds3D.hpp">
       <Filter>Header Files\Util</Filter>
     </ClInclude>
@@ -241,12 +217,6 @@
       <Filter>Header Files\Util</Filter>
     </ClInclude>
     <ClInclude Include="include\util\Rect.hpp">
-      <Filter>Header Files\Util</Filter>
-    </ClInclude>
-    <ClInclude Include="include\util\StringGenerics.hpp">
-      <Filter>Header Files\Util</Filter>
-    </ClInclude>
-    <ClInclude Include="include\util\Strings.hpp">
       <Filter>Header Files\Util</Filter>
     </ClInclude>
     <ClInclude Include="include\util\Transform.hpp">
@@ -308,6 +278,30 @@
     </ClInclude>
     <ClInclude Include="include\core\World.hpp">
       <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\objectsassets\Asset.hpp">
+      <Filter>Header Files\ObjectsAssets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\objectsassets\AssetManager.hpp">
+      <Filter>Header Files\ObjectsAssets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\objectsassets\Billboard.hpp">
+      <Filter>Header Files\ObjectsAssets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\objectsassets\Font.hpp">
+      <Filter>Header Files\ObjectsAssets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\objectsassets\ImageData.hpp">
+      <Filter>Header Files\ObjectsAssets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\objectsassets\Model.hpp">
+      <Filter>Header Files\ObjectsAssets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\objectsassets\Text.hpp">
+      <Filter>Header Files\ObjectsAssets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\objectsassets\TextBillboard.hpp">
+      <Filter>Header Files\ObjectsAssets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -415,9 +409,6 @@
     </ClCompile>
     <ClCompile Include="src\ui\UIRectangleShape.cpp">
       <Filter>Source Files\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="src\util\StringGenerics.cpp">
-      <Filter>Source Files\Util</Filter>
     </ClCompile>
     <ClCompile Include="src\util\Util.cpp">
       <Filter>Source Files\Util</Filter>

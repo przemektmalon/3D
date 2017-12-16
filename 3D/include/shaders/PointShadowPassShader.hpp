@@ -6,7 +6,7 @@ class PointShadowPassShader : public ShaderProgram
 public:
 	PointShadowPassShader()
 	{
-		name.overwrite(String32("pointShadowPass"));
+		name = "pointShadowPass";
 		type = VertGeomFrag;
 	}
 

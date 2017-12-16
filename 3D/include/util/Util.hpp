@@ -1,7 +1,6 @@
 #pragma once
 
-class StringGeneric;
+class String;
 
-void getDateTimeStr(StringGeneric& str);
-void getTimeStr(StringGeneric& str, char delim);
+void getDateTimeStr(std::string& str);
 void getTimeStr(std::string& str, char delim);

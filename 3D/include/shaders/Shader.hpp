@@ -10,7 +10,8 @@
 #include "glm\gtc\type_ptr.hpp"
 #include "glm\gtc\matrix_transform.hpp"
 #include "glm\gtx\matrix_transform_2d.hpp"
-#include "Strings.hpp"
+#include "Types.hpp"
+#include <map>
 
 class ShaderProgram
 {
@@ -32,7 +33,7 @@ private:
 	};
 
 	static const int typeSizes[UniformTypesCount];
-	static const String<16> typeGLSLNames[UniformTypesCount];
+	static const char typeGLSLNames[UniformTypesCount][16];
 
 public:
 	ShaderProgram();
@@ -40,9 +41,9 @@ public:
 	~ShaderProgram();
 
 	void destroy();
-	void load(String32&& pName, ShaderType pType, String128& pShaderLocationPath = String128("res/shader/"));
+	void load(std::string&& pName, ShaderType pType, std::string& pShaderLocationPath = std::string("res/shader/"));
 
-	void load(String32& pName, ShaderType pType, String128& pShaderLocationPath = String128("res/shader/"));
+	void load(std::string& pName, ShaderType pType, std::string& pShaderLocationPath = std::string("res/shader/"));
 
 	virtual int initialise() { return  0; }
 
@@ -77,25 +78,25 @@ public:
 
 	void setUniform(std::string pUniformName, const void* pUniformData, s32 pFlags = 0);
 
-	void setVarVal(String32& var, String1024& val);
+	void setVarVal(std::string& var, std::string& val);
 
 	virtual void sendUniforms();
 
-	String32& getName() { return name; }
+	std::string& getName() { return name; }
 
 	ShaderType getType() { return type; }
 
 private:
 
-	void loadVertFrag(String32& pName, String128& pShaderLocationPath);
+	void loadVertFrag(std::string& pName, std::string& pShaderLocationPath);
 
 	void compileVertFrag();
 
-	void loadVertGeomFrag(String32& pName, String128& pShaderLocationPath);
+	void loadVertGeomFrag(std::string& pName, std::string& pShaderLocationPath);
 
 	void compileVertGeomFrag();
 
-	void loadCompute(String32& pName, String128& pShaderLocationPath);
+	void loadCompute(std::string& pName, std::string& pShaderLocationPath);
 
 	void compileCompute();
 
@@ -196,11 +197,11 @@ private:
 
 	union {
 		struct {
-			String128 geomPath;
-			String128 vertexPath;
-			String128 fragmentPath;
+			std::string geomPath;
+			std::string vertexPath;
+			std::string fragmentPath;
 		};
-		String128 computePath;
+		std::string computePath;
 	};
 
 	union {
@@ -223,16 +224,16 @@ private:
 
 	struct VarAndVal
 	{
-		String32 var;
-		String1024 val;
+		std::string var;
+		std::string val;
 	};
 
 	VarAndVal varVals[32];
 	
 protected:
 
-	String32 name;
-	String<HEAP> errorLog;
+	std::string name;
+	std::string errorLog;
 	bool loaded;
 	ShaderType type;
 	GLint GLID;

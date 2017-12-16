@@ -1,32 +1,33 @@
 #pragma once
-#include "Strings.hpp"
+#include <string>
+#include "Types.hpp"
 
 class Asset
 {
 public:
 	Asset();
-	Asset(String128& pPath, String32& pName);
+	Asset(std::string& pPath, std::string& pName);
 	~Asset();
 
 	enum Type { Null, Font, Texture2D, TextureCube, Mesh, Model, NTexture2D };
 
-	void prepare(String128& pPath, String32& pName);
+	void prepare(std::string& pPath, std::string& pName);
 
 	virtual void load() = 0;
 
 	u32 getSize() { return size; }
 	bool doesExist() { return existsOnDisk; }
-	String128& getPath() { return diskPath; }
-	String32& getName() { return name; }
+	std::string& const getPath() { return diskPath; }
+	std::string& const getName() { return name; }
 
 protected:
-	void setPath(String128& pPath)
+	void setPath(std::string& pPath)
 	{
-		diskPath.overwrite(pPath);
+		diskPath = pPath;
 	}
 
-	String32 name;
-	String128 diskPath;
+	std::string name;
+	std::string diskPath;
 	bool existsOnDisk;
 	u32 size;
 	Type type;

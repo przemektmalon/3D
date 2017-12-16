@@ -16,7 +16,7 @@ UIWindow* createRenderConfigWindow()
 	C_LABEL(lblFPS, win);
 	lblFPS.setName("fps");
 	lblFPS.setStyle(styleA);
-	lblFPS.setString(String<32>("FPS: "));
+	lblFPS.setString("FPS: ");
 	lblFPS.setPosition(glm::fvec2(15, 30));
 	lblFPS.setUpdate(
 		[](UIWindow * win, UIElement* __this) -> void {
@@ -87,7 +87,7 @@ UIWindow* createRenderConfigWindow()
 	butToggleWire.setSize(glm::fvec2(260, 30));
 	butToggleWire.getText().setStyle(styleA);
 	butToggleWire.getText().setCharSize(18);
-	butToggleWire.setString(SSTR("Toggle wireframe"));
+	butToggleWire.setString("Toggle wireframe");
 	butToggleWire.setPosition(glm::fvec2(20, 90));
 	butToggleWire.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
 		UIButton* _this = (UIButton*)__this;
@@ -99,7 +99,7 @@ UIWindow* createRenderConfigWindow()
 	butToggleVSync.setSize(glm::fvec2(260, 30));
 	butToggleVSync.getText().setStyle(styleA);
 	butToggleVSync.getText().setCharSize(18);
-	butToggleVSync.setString(SSTR("Toggle vertical sync"));
+	butToggleVSync.setString("Toggle vertical sync");
 	butToggleVSync.setPosition(glm::fvec2(20, 130));
 	butToggleVSync.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
 		UIButton* _this = (UIButton*)__this;
@@ -111,7 +111,7 @@ UIWindow* createRenderConfigWindow()
 	butReloadShaders.setSize(glm::fvec2(260, 30));
 	butReloadShaders.getText().setStyle(styleA);
 	butReloadShaders.getText().setCharSize(18);
-	butReloadShaders.setString(SSTR("Reload shaders"));
+	butReloadShaders.setString("Reload shaders");
 	butReloadShaders.setPosition(glm::fvec2(20, 170));
 	butReloadShaders.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
 		UIButton* _this = (UIButton*)__this;
@@ -123,7 +123,7 @@ UIWindow* createRenderConfigWindow()
 	butScreenshot.setSize(glm::fvec2(260, 30));
 	butScreenshot.getText().setStyle(styleA);
 	butScreenshot.getText().setCharSize(18);
-	butScreenshot.setString(SSTR("Screenshot"));
+	butScreenshot.setString("Screenshot");
 	butScreenshot.setPosition(glm::fvec2(20, 210));
 	butScreenshot.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
 		UIButton* _this = (UIButton*)__this;
@@ -159,7 +159,7 @@ UIWindow* createRenderConfigWindow()
 	butShaded.setSize(glm::fvec2(260, 30));
 	butShaded.getText().setStyle(styleA);
 	butShaded.getText().setCharSize(18);
-	butShaded.setString(SSTR("Shaded"));
+	butShaded.setString("Shaded");
 	butShaded.setPosition(glm::fvec2(20, 90));
 	butShaded.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
 		UIButton* _this = (UIButton*)__this;
@@ -171,7 +171,7 @@ UIWindow* createRenderConfigWindow()
 	butAlbedo.setSize(glm::fvec2(260, 30));
 	butAlbedo.getText().setStyle(styleA);
 	butAlbedo.getText().setCharSize(18);
-	butAlbedo.setString(SSTR("Albedo"));
+	butAlbedo.setString("Albedo");
 	butAlbedo.setPosition(glm::fvec2(20, 130));
 	butAlbedo.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
 		UIButton* _this = (UIButton*)__this;
@@ -183,7 +183,7 @@ UIWindow* createRenderConfigWindow()
 	butNormal.setSize(glm::fvec2(260, 30));
 	butNormal.getText().setStyle(styleA);
 	butNormal.getText().setCharSize(18);
-	butNormal.setString(SSTR("Normal"));
+	butNormal.setString("Normal");
 	butNormal.setPosition(glm::fvec2(20, 170));
 	butNormal.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
 		UIButton* _this = (UIButton*)__this;
@@ -195,7 +195,7 @@ UIWindow* createRenderConfigWindow()
 	butSSAO.setSize(glm::fvec2(260, 30));
 	butSSAO.getText().setStyle(styleA);
 	butSSAO.getText().setCharSize(18);
-	butSSAO.setString(SSTR("SSAO"));
+	butSSAO.setString("SSAO");
 	butSSAO.setPosition(glm::fvec2(20, 210));
 	butSSAO.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
 		UIButton* _this = (UIButton*)__this;
@@ -207,7 +207,7 @@ UIWindow* createRenderConfigWindow()
 	butDepth.setSize(glm::fvec2(260, 30));
 	butDepth.getText().setStyle(styleA);
 	butDepth.getText().setCharSize(18);
-	butDepth.setString(SSTR("Depth"));
+	butDepth.setString("Depth");
 	butDepth.setPosition(glm::fvec2(20, 250));
 	butDepth.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
 		UIButton* _this = (UIButton*)__this;
@@ -219,7 +219,7 @@ UIWindow* createRenderConfigWindow()
 	butRes0.setSize(glm::fvec2(125, 30));
 	butRes0.getText().setStyle(styleA);
 	butRes0.getText().setCharSize(18);
-	butRes0.setString(SSTR("3840x2160"));
+	butRes0.setString("3840x2160");
 	butRes0.setPosition(glm::fvec2(20, 90));
 	butRes0.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
 		UIButton* _this = (UIButton*)__this;
@@ -231,7 +231,7 @@ UIWindow* createRenderConfigWindow()
 	butRes1.setSize(glm::fvec2(125, 30));
 	butRes1.getText().setStyle(styleA);
 	butRes1.getText().setCharSize(18);
-	butRes1.setString(SSTR("1920x1080"));
+	butRes1.setString("1920x1080");
 	butRes1.setPosition(glm::fvec2(155, 90));
 	butRes1.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
 		UIButton* _this = (UIButton*)__this;
@@ -243,7 +243,7 @@ UIWindow* createRenderConfigWindow()
 	butRes2.setSize(glm::fvec2(125, 30));
 	butRes2.getText().setStyle(styleA);
 	butRes2.getText().setCharSize(18);
-	butRes2.setString(SSTR("1600x900"));
+	butRes2.setString("1600x900");
 	butRes2.setPosition(glm::fvec2(20, 130));
 	butRes2.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
 		UIButton* _this = (UIButton*)__this;
@@ -255,7 +255,7 @@ UIWindow* createRenderConfigWindow()
 	butRes3.setSize(glm::fvec2(125, 30));
 	butRes3.getText().setStyle(styleA);
 	butRes3.getText().setCharSize(18);
-	butRes3.setString(SSTR("1546x864"));
+	butRes3.setString("1546x864");
 	butRes3.setPosition(glm::fvec2(155, 130));
 	butRes3.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
 		UIButton* _this = (UIButton*)__this;
@@ -267,7 +267,7 @@ UIWindow* createRenderConfigWindow()
 	butRes5.setSize(glm::fvec2(125, 30));
 	butRes5.getText().setStyle(styleA);
 	butRes5.getText().setCharSize(18);
-	butRes5.setString(SSTR("1280x720"));
+	butRes5.setString("1280x720");
 	butRes5.setPosition(glm::fvec2(20, 170));
 	butRes5.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
 		UIButton* _this = (UIButton*)__this;
@@ -279,7 +279,7 @@ UIWindow* createRenderConfigWindow()
 	butRes6.setSize(glm::fvec2(125, 30));
 	butRes6.getText().setStyle(styleA);
 	butRes6.getText().setCharSize(18);
-	butRes6.setString(SSTR("1024x576"));
+	butRes6.setString("1024x576");
 	butRes6.setPosition(glm::fvec2(155, 170));
 	butRes6.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
 		UIButton* _this = (UIButton*)__this;
@@ -291,7 +291,7 @@ UIWindow* createRenderConfigWindow()
 	butRes7.setSize(glm::fvec2(125, 30));
 	butRes7.getText().setStyle(styleA);
 	butRes7.getText().setCharSize(18);
-	butRes7.setString(SSTR("960x540"));
+	butRes7.setString("960x540");
 	butRes7.setPosition(glm::fvec2(20, 210));
 	butRes7.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
 		UIButton* _this = (UIButton*)__this;
@@ -303,7 +303,7 @@ UIWindow* createRenderConfigWindow()
 	butRes8.setSize(glm::fvec2(125, 30));
 	butRes8.getText().setStyle(styleA);
 	butRes8.getText().setCharSize(18);
-	butRes8.setString(SSTR("848x480"));
+	butRes8.setString("848x480");
 	butRes8.setPosition(glm::fvec2(155, 210));
 	butRes8.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
 		UIButton* _this = (UIButton*)__this;

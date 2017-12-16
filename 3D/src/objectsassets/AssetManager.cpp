@@ -10,7 +10,7 @@ AssetManager::~AssetManager()
 {
 }
 
-Asset* AssetManager::prepareAsset(Asset::Type pType, String<128>& pPath, String<32>& pName)
+Asset* AssetManager::prepareAsset(Asset::Type pType, std::string pPath, std::string pName)
 {
 	switch (pType)
 	{
@@ -29,10 +29,10 @@ Asset* AssetManager::prepareAsset(Asset::Type pType, String<128>& pPath, String<
 	}
 }
 
-void AssetManager::loadAssets(String128 & assetListFilePath)
+void AssetManager::loadAssets(std::string assetListFilePath)
 {
 	std::ifstream file;
-	file.open(assetListFilePath.getString());
+	file.open(assetListFilePath.c_str());
 
 	std::string section;
 
@@ -64,14 +64,14 @@ void AssetManager::loadAssets(String128 & assetListFilePath)
 				std::getline(file, value);
 				name = value;
 
-				auto find = Engine::assets.texture2DList.find(String32(name.c_str()));
+				auto find = Engine::assets.texture2DList.find(name);
 				if (find != Engine::assets.texture2DList.end())
 				{
 					std::cout << "Texture \"" << name << "\" already loaded" << std::endl;
 					continue;
 				}
 
-				auto tex = Engine::assets.prepareTexture(String128(path.c_str()), String128(name.c_str()));
+				auto tex = Engine::assets.prepareTexture(path, name);
 				if (tex->doesExist())
 				{
 					tex->load();
@@ -163,14 +163,14 @@ void AssetManager::loadAssets(String128 & assetListFilePath)
 					key = getUntil(line, '=');
 				}
 
-				auto find = Engine::assets.modelList.find(String32(name.c_str()));
+				auto find = Engine::assets.modelList.find(name);
 				if (find != Engine::assets.modelList.end())
 				{
 					std::cout << "Mesh \"" << name << "\" already loaded" << std::endl;
 					continue;
 				}
 
-				auto model = Engine::assets.prepareModel(String128(path.c_str()), String32(name.c_str()));
+				auto model = Engine::assets.prepareModel(path, name);
 				if (model->doesExist())
 				{
 					model->physicsInfo = physics;
@@ -287,14 +287,14 @@ void AssetManager::loadAssets(String128 & assetListFilePath)
 				std::getline(file, value);
 				name = value;
 
-				auto find = Engine::assets.fontList.find(String32(name.c_str()));
+				auto find = Engine::assets.fontList.find(name);
 				if (find != Engine::assets.fontList.end())
 				{
 					std::cout << "Font \"" << name << "\" already loaded" << std::endl;
 					continue;
 				}
 
-				auto font = Engine::assets.prepareFont(String128(path.c_str()), String128(name.c_str()));
+				auto font = Engine::assets.prepareFont(path, name);
 				if (font->doesExist())
 				{
 					font->load();

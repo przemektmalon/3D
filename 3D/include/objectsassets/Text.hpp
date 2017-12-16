@@ -41,7 +41,6 @@ public:
 	void setFont(Font* pFont) { font = pFont; update(); }
 	void setCharSize(u8 pSize) { charSize = pSize; update(); }
 	void setString(std::string pStr) { string = pStr; update(); }
-	void setString(StringGeneric& pStr) { string = pStr.getString(); update(); }
 	void setPosition(glm::fvec2 pPos) { position = pPos; update(); }
 	u8 getCharSize() { return charSize;}
 	u16 getHeight() { return boundingBox.height; }

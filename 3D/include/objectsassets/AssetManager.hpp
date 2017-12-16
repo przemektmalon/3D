@@ -14,39 +14,24 @@ public:
 	AssetManager();
 	~AssetManager();
 
-	Asset* prepareAsset(Asset::Type pType, String<128>& pPath, String<32>& pName);
+	Asset* prepareAsset(Asset::Type pType, std::string pPath, std::string pName);
 
-	Texture2D* prepareTexture(String<128>&& pPath, String<32>&& pName)
+	Texture2D* prepareTexture(std::string pPath, std::string pName)
 	{
 		return (Texture2D*)prepareAsset(Asset::Type::Texture2D, pPath, pName);
 	}
 
-	Font* prepareFont(String<128>&& pPath, String<32>&& pName)
+	Font* prepareFont(std::string pPath, std::string pName)
 	{
 		return (Font*)prepareAsset(Asset::Type::Font, pPath, pName);
 	}
 
-	Model* prepareModel(String128& pPath, String32& pName)
+	Model* prepareModel(std::string pPath, std::string pName)
 	{
 		return (Model*)prepareAsset(Asset::Type::Model, pPath, pName);
 	}
 
-	Asset* prepareAsset(Asset::Type pType, String<128>&& pPath, String<32>&& pName)
-	{
-		return prepareAsset(pType, pPath, pName);
-	}
-
-	Asset* prepareAsset(Asset::Type pType, String<128>& pPath, String<32>&& pName)
-	{
-		return prepareAsset(pType, pPath, pName);
-	}
-
-	Asset* prepareAsset(Asset::Type pType, String<128>&& pPath, String<32>& pName)
-	{
-		return prepareAsset(pType, pPath, pName);
-	}
-
-	Font* getFont(String32& pName)
+	Font* getFont(std::string& pName)
 	{
 		auto find = fontList.find(pName);
 		if (find == fontList.end())
@@ -54,53 +39,50 @@ public:
 
 		return &find->second;
 	}
-	Font* getFont(String32&& pName)
+	Font* getFont(std::string&& pName)
 	{
 		return getFont(pName);
 	}
 
-	Texture2D* get2DTex(String32& pName)
+	Texture2D* get2DTex(std::string& pName)
 	{
 		auto find = texture2DList.find(pName);
 		if (find == texture2DList.end())
 		{
-			auto findNull = texture2DList.find(String32("null"));
+			auto findNull = texture2DList.find("null");
 			if (findNull == texture2DList.end())
 				return nullptr;
 			return &findNull->second;
 		}
 		return &find->second;
 	}
-	Texture2D* get2DTex(String<32>&& pName)
+
+	Texture2D* get2DTex(std::string&& pName)
 	{
 		return get2DTex(pName);
 	}
 
-	GLTexture2D* get2DTexGL(String32& pName)
+	GLTexture2D* get2DTexGL(std::string& pName)
 	{
 		auto find = texture2DList.find(pName);
 		if (find == texture2DList.end())
 		{
-			auto findNull = texture2DList.find(String32("null"));
+			auto findNull = texture2DList.find("null");
 			if (findNull == texture2DList.end())
 				return nullptr;
 			return findNull->second.glData;
 		}
 		return find->second.glData;
 	}
-	GLTexture2D* get2DTexGL(String32&& pName)
+
+	GLTexture2D* get2DTexGL(std::string&& pName)
 	{
 		return get2DTexGL(pName);
 	}
 
-	GLTexture2D* get2DTexGL(std::string pName)
-	{
-		return get2DTexGL(String32(pName.c_str()));
-	}
+	GLTextureCube getCubeTex(std::string& pName);
 
-	GLTextureCube getCubeTex(String32& pName);
-
-	Model* getModel(String32& pName)
+	Model* getModel(std::string& pName)
 	{
 		auto find = modelList.find(pName);
 		if (find == modelList.end())
@@ -108,7 +90,7 @@ public:
 		return (Model*)&find->second;
 	}
 
-	void removeTexture(String32& pName)
+	void removeTexture(std::string& pName)
 	{
 		//auto find = texture2DList.find(pName);
 		//if (find == texture2DList.end())
@@ -116,22 +98,22 @@ public:
 		texture2DList.erase(pName);
 	}
 
-	void removeFont(String32& pName)
+	void removeFont(std::string& pName)
 	{
 		fontList.erase(pName);
 	}
 
-	std::map<String32, Font>& getFontList()
+	std::map<std::string, Font>& getFontList()
 	{
 		return fontList;
 	}
 
-	std::map<String32, Texture2D>& getTextureList()
+	std::map<std::string, Texture2D>& getTextureList()
 	{
 		return texture2DList;
 	}
 
-	void loadAssets(String128& assetListFilePath);
+	void loadAssets(std::string assetListFilePath);
 
 	MaterialMeta& getMaterial(std::string pName)
 	{
@@ -143,8 +125,8 @@ public:
 
 private:
 
-	std::map<String32, Font> fontList;
-	std::map<String32, Model> modelList;
-	std::map<String32, Texture2D> texture2DList;
-	std::map<String32, GLTextureCube> textureCubeList;
+	std::map<std::string, Font> fontList;
+	std::map<std::string, Model> modelList;
+	std::map<std::string, Texture2D> texture2DList;
+	std::map<std::string, GLTextureCube> textureCubeList;
 };

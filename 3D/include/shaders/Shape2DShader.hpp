@@ -6,7 +6,7 @@ class Shape2DShader : public ShaderProgram
 public:
 	Shape2DShader() 
 	{
-		name.overwrite(String32("Shape2DShader"));
+		name = "Shape2DShader";
 		type = VertFrag;
 	}
 	~Shape2DShader() {}
@@ -14,7 +14,7 @@ public:
 	int initialise()
 	{
 		//load("res/shader/Shape2DShader", "res/shader/Shape2DShader");
-		load(String32("Shape2DShader"), ShaderProgram::VertFrag);
+		load("Shape2DShader", ShaderProgram::VertFrag);
 		compile();
 		use();
 		projModelLoc = glGetUniformLocation(getGLID(), "projModel");

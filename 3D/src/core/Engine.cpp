@@ -12,7 +12,6 @@
 #include "AssetManager.hpp"
 #include "Billboard.hpp"
 #include "World.hpp"
-#include "StringGenerics.hpp"
 #include "ui/UILabel.hpp"
 #include "ui/UIButton.hpp"
 #include "Console.hpp"
@@ -43,7 +42,7 @@ float Engine::programTime = 0;
 Window Engine::window;
 bool Engine::consoleOpen;
 Log Engine::engineLog;
-Console Engine::console;
+//Console Engine::console;
 PhysicsWorld Engine::physicsWorld;
 EngineConfig Engine::cfg;
 float Engine::linear = 0.001;
@@ -70,7 +69,7 @@ int main()
 
 void Engine::start(HINSTANCE pHInstance)
 {
-	Console::registerConsoleFuncs();
+	//Console::registerConsoleFuncs();
 
 	instance = pHInstance;
 
@@ -138,7 +137,7 @@ void Engine::mainLoop(int resolutionIndex)
 	Billboard::initGLVAO();
 
 	assets.modelManager.init();
-	assets.loadAssets(String128("res/resources.txt"));
+	assets.loadAssets("res/resources.txt");
 
 	r->initialiseRenderer(&window, cam);
 
@@ -181,7 +180,7 @@ void Engine::mainLoop(int resolutionIndex)
 	world->sg.updateAll();
 	world->updateGLBuffers();
 	
-	console.init();
+	//console.init();
 
 	Tweaks tweak;
 	tweak.setTweaksFile("res/tweaks.txt");
@@ -245,15 +244,15 @@ void Engine::mainLoop(int resolutionIndex)
 				}
 				case(Event::KeyDown):
 				{
-					if (console.stateFlags == 0) //Console closed
-						uim.keyDown(ev.key.code);
-					else						 //Console open
-						console.textInput(ev.key.code.code);
+					//if (console.stateFlags == 0) //Console closed
+						//uim.keyDown(ev.key.code);
+					//else						 //Console open
+						//console.textInput(ev.key.code.code);
 					break;
 				}
 				case(Event::KeyUp):
 				{
-					if(console.stateFlags != 0)
+					//if(console.stateFlags != 0)
 						uim.keyUp(ev.key.code);
 					break;
 				}
@@ -264,7 +263,7 @@ void Engine::mainLoop(int resolutionIndex)
 			ev.constructMouse(Mouse::M_NONE, Engine::window.getMousePosition(), 0);
 			physicsWorld.mouseMoveCallback(ev.mouse.position.x, ev.mouse.position.y);
 
-			if(console.stateFlags == 0)
+			//if(console.stateFlags == 0)
 				uim.keyHolds(window.keyboard);
 
 			switch (engineState)
@@ -365,7 +364,7 @@ void printlog()
 
 void toggleConsole()
 {
-	Engine::console.toggle();
+	//Engine::console.toggle();
 }
 
 #define CFG_FUNC(name) []() -> void { Engine::cfg.##name##(); }

@@ -20,8 +20,8 @@ UIWindow::UIWindow(std::string pName, irect pWindowArea, int pBorderWidth, const
 	title->init();
 	title->setParentWindow(this);
 
-	shader = (Shape2DShader*)Engine::r->shaderStore.getShader(String32("Shape2DShader"));
-	shaderNoTex = (Shape2DShaderNoTex*)Engine::r->shaderStore.getShader(String32("Shape2DShaderNoTex"));
+	shader = (Shape2DShader*)Engine::r->shaderStore.getShader("Shape2DShader");
+	shaderNoTex = (Shape2DShaderNoTex*)Engine::r->shaderStore.getShader("Shape2DShaderNoTex");
 
 	glCreateVertexArrays(1, &vao);
 	glCreateBuffers(1, &vbo);
@@ -157,8 +157,7 @@ void UIWindow::setTitle(std::string pTitle)
 	title->setFont(Engine::assets.getFont("clearsansb"));
 	title->setCharSize(14);
 	title->setColour(glm::fvec3(0.f, 1.f, 1.f));
-	String<512> tit; tit.setToChars(name.c_str());
-	title->setString(tit);
+	title->setString(pTitle);
 	title->setTextOrigin(Text2D::TopMiddle);
 	title->setPosition(glm::fvec2(windowArea.width / 2.f, 0));
 

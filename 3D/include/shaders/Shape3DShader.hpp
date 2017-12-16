@@ -6,14 +6,14 @@ class Shape3DShader : public ShaderProgram
 public:
 	Shape3DShader()
 	{
-		name.overwrite(String32("Shape3DShader"));
+		name = "Shape3DShader";
 		type = VertFrag;
 	}
 	~Shape3DShader() {}
 
 	int initialise()
 	{
-		load(String32("Shape3DShader"), ShaderProgram::VertFrag);
+		load("Shape3DShader", ShaderProgram::VertFrag);
 		compile();
 		use();
 		pvmLoc = glGetUniformLocation(getGLID(), "pvm");

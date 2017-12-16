@@ -100,12 +100,12 @@ class Texture2D : public Asset
 {
 public:
 	Texture2D() {}
-	Texture2D(String<128>& pPath, String<32>& pName) : Asset(pPath, pName), glData(nullptr) {}
+	Texture2D(std::string& pPath, std::string& pName) : Asset(pPath, pName), glData(nullptr) {}
 	~Texture2D() {}
 
 	void load()
 	{
-		data.loadFromFile(this->diskPath.getString(), ImageData::Format::RGBA);
+		data.loadFromFile(this->diskPath.c_str(), ImageData::Format::RGBA);
 	}
 
 	void makeGLAsset();

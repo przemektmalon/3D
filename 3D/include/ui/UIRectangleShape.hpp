@@ -26,7 +26,7 @@ public:
 
 	void initOGL()
 	{
-		shader = (Shape2DShader*)Engine::r->shaderStore.getShader(String<32>("Shape2DShaderNoTex"));
+		shader = (Shape2DShader*)Engine::r->shaderStore.getShader("Shape2DShaderNoTex");
 		shader->use();
 
 		glCreateVertexArrays(1, &vao);

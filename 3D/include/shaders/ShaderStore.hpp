@@ -7,7 +7,12 @@ public:
 	ShaderStore() {}
 	~ShaderStore() {}
 
-	ShaderProgram* loadShader(ShaderProgram::ShaderType type, String32& name, String128& path = String128("res/shader/"))
+	ShaderProgram* loadShader(ShaderProgram::ShaderType type, std::string&& name, std::string&& path = std::string("res/shader/"))
+	{
+		return loadShader(type, name, path);
+	}
+
+	ShaderProgram* loadShader(ShaderProgram::ShaderType type, std::string& name, std::string& path = std::string("res/shader/"))
 	{
 		auto itr = shaders.insert(std::make_pair(name, new ShaderProgram()));
 		itr.first->second->load(name, type, path);
@@ -16,7 +21,7 @@ public:
 		return itr.first->second;
 	}
 
-	ShaderProgram* loadShader(ShaderProgram* loc, String128& path = String128("res/shader/"))
+	ShaderProgram* loadShader(ShaderProgram* loc, std::string& path = std::string("res/shader/"))
 	{
 		auto itr = shaders.insert(std::make_pair(loc->getName(), loc));
 		itr.first->second->load(loc->getName(), loc->getType(), path);
@@ -25,7 +30,7 @@ public:
 		return loc;
 	}
 
-	ShaderProgram* reloadShader(String32& pName)
+	ShaderProgram* reloadShader(std::string& pName)
 	{
 		auto s = getShader(pName);
 		if (!s)
@@ -43,7 +48,7 @@ public:
 		}
 	}
 
-	ShaderProgram* getShader(const String32& name)
+	ShaderProgram* getShader(const std::string& name)
 	{
 		auto find = shaders.find(name);
 		if (find == shaders.end())
@@ -52,13 +57,13 @@ public:
 			return find->second;
 	}
 
-	std::map<String32, ShaderProgram*>& getShaderMap()
+	std::map<std::string, ShaderProgram*>& getShaderMap()
 	{
 		return shaders;
 	}
 
 private:
 
-	std::map<String32, ShaderProgram*> shaders;
+	std::map<std::string, ShaderProgram*> shaders;
 
 };

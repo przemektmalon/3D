@@ -93,7 +93,7 @@ void Text2D::draw()
 		glBindVertexArray(vaoBBox);
 
 		glm::fvec4 c(1.f, 0.f, 1.f, 1.f);
-		auto s = (Shape2DShader*)Engine::r->shaderStore.getShader(String32("Shape2DShader"));
+		auto s = (Shape2DShader*)Engine::r->shaderStore.getShader("Shape2DShader");
 		s->use();
 		s->setColour(c);
 		s->sendUniforms();

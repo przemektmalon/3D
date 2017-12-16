@@ -37,7 +37,7 @@ ModelInstance* World::addModelInstance(Model& model, SGNode* parent)
 
 ModelInstance* World::addModelInstance(std::string modelName, SGNode* parent)
 {
-	auto model = Engine::assets.getModel(String32(modelName.c_str()));
+	auto model = Engine::assets.getModel(modelName);
 	return addModelInstance(model, parent);
 }
 

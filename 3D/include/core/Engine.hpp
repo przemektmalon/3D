@@ -21,7 +21,7 @@ class Renderer;
 class QPC;
 class AssetManager;
 class World;
-class Console;
+//class Console;
 
 #define BORDERLESS true
 #define NUM_VALID_RESOLUTIONS 9
@@ -162,7 +162,7 @@ public:
 	static AssetManager assets;
 	static PhysicsWorld physicsWorld;
 	static UIWindowManager uiwm;
-	static Console console;
+	//static Console console;
 	static Camera cam;
 	static QPC qpc; // Clock
 	static UIM uim; // User input manager

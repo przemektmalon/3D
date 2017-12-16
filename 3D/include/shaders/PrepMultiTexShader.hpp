@@ -6,7 +6,7 @@ class PrepMultiTexShader : public ShaderProgram
 public:
 	PrepMultiTexShader()
 	{
-		name.overwrite(String32("prepMultiTex"));
+		name = "prepMultiTex";
 		type = Compute;
 	}
 	~PrepMultiTexShader() {}

@@ -7,7 +7,7 @@ class SAOShader : public ShaderProgram
 public:
 	SAOShader() 
 	{
-		name.overwrite(String32("ssao"));
+		name = "ssao";
 		type = VertFrag;
 	}
 

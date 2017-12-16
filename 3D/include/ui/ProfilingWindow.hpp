@@ -16,7 +16,7 @@ UIWindow* createProfilingWindow()
 	C_LABEL(lblGPUUpdate, win);
 	lblGPUUpdate.setName("lightupdate");
 	lblGPUUpdate.setStyle(styleA);
-	lblGPUUpdate.setString(String<32>("GPU buffer update: "));
+	lblGPUUpdate.setString("GPU buffer update: ");
 	lblGPUUpdate.setTextOrigin(Text2D::TopLeft);
 	lblGPUUpdate.setPosition(glm::fvec2(15, 30));
 	lblGPUUpdate.setUpdate(
@@ -29,7 +29,7 @@ UIWindow* createProfilingWindow()
 	C_LABEL(lblGBuffer, win);
 	lblGBuffer.setName("gbuffer");
 	lblGBuffer.setStyle(styleA);
-	lblGBuffer.setString(String<32>("GBuffer pass: "));
+	lblGBuffer.setString("GBuffer pass: ");
 	lblGBuffer.setTextOrigin(Text2D::TopLeft);
 	lblGBuffer.setPosition(glm::fvec2(15, 70));
 	lblGBuffer.setUpdate(
@@ -42,7 +42,7 @@ UIWindow* createProfilingWindow()
 	C_LABEL(lblShadow, win);
 	lblShadow.setName("shadow");
 	lblShadow.setStyle(styleA);
-	lblShadow.setString(String<32>("Shadow pass: "));
+	lblShadow.setString("Shadow pass: ");
 	lblShadow.setTextOrigin(Text2D::TopLeft);
 	lblShadow.setPosition(glm::fvec2(15, 110));
 	lblShadow.setUpdate(
@@ -55,7 +55,7 @@ UIWindow* createProfilingWindow()
 	C_LABEL(lblSSAO, win);
 	lblSSAO.setName("ssao");
 	lblSSAO.setStyle(styleA);
-	lblSSAO.setString(String<32>("SSAO pass: "));
+	lblSSAO.setString("SSAO pass: ");
 	lblSSAO.setTextOrigin(Text2D::TopLeft);
 	lblSSAO.setPosition(glm::fvec2(15, 150));
 	lblSSAO.setUpdate(
@@ -68,7 +68,7 @@ UIWindow* createProfilingWindow()
 	C_LABEL(lblLightPass, win);
 	lblLightPass.setName("lightpass");
 	lblLightPass.setStyle(styleA);
-	lblLightPass.setString(String<32>("Shading pass: "));
+	lblLightPass.setString("Shading pass: ");
 	lblLightPass.setTextOrigin(Text2D::TopLeft);
 	lblLightPass.setPosition(glm::fvec2(15, 190));
 	lblLightPass.setUpdate(
@@ -81,7 +81,7 @@ UIWindow* createProfilingWindow()
 	C_LABEL(lblScreen, win);
 	lblScreen.setName("screenpass");
 	lblScreen.setStyle(styleA);
-	lblScreen.setString(String<32>("Screen pass: "));
+	lblScreen.setString("Screen pass: ");
 	lblScreen.setTextOrigin(Text2D::TopLeft);
 	lblScreen.setPosition(glm::fvec2(15, 230));
 	lblScreen.setUpdate(
@@ -94,7 +94,7 @@ UIWindow* createProfilingWindow()
 	C_LABEL(lblPhysics, win);
 	lblPhysics.setName("physics");
 	lblPhysics.setStyle(styleA);
-	lblPhysics.setString(String<32>("Physics: "));
+	lblPhysics.setString("Physics: ");
 	lblPhysics.setTextOrigin(Text2D::TopLeft);
 	lblPhysics.setPosition(glm::fvec2(15, 270));
 	lblPhysics.setUpdate(
@@ -107,7 +107,7 @@ UIWindow* createProfilingWindow()
 	C_LABEL(lblRest, win);
 	lblRest.setName("rest");
 	lblRest.setStyle(styleA);
-	lblRest.setString(String<32>("Frame time: "));
+	lblRest.setString("Frame time: ");
 	lblRest.setTextOrigin(Text2D::TopLeft);
 	lblRest.setPosition(glm::fvec2(15, 310));
 	lblRest.setUpdate(

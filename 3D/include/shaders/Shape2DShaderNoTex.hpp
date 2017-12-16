@@ -6,7 +6,7 @@ class Shape2DShaderNoTex : public ShaderProgram
 public:
 	Shape2DShaderNoTex()
 	{
-		name.overwrite(String32("Shape2DShaderNoTex"));
+		name = "Shape2DShaderNoTex";
 		type = VertFrag;
 	}
 	~Shape2DShaderNoTex() {}
@@ -14,7 +14,7 @@ public:
 	int initialise()
 	{
 		//load("res/shader/Shape2DShader", "res/shader/Shape2DShader");
-		load(String32("Shape2DShaderNoTex"), ShaderProgram::VertFrag);
+		load("Shape2DShaderNoTex", ShaderProgram::VertFrag);
 		compile();
 		use();
 		projModelLoc = glGetUniformLocation(getGLID(), "projModel");

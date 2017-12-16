@@ -1,4 +1,4 @@
-#pragma once
+/*#pragma once
 #include <string>
 #include "Types.hpp"
 #include "Text.hpp"
@@ -371,7 +371,7 @@ public:
 	void submitCommand(std::string& command);
 	void postMessage(std::string& post, char prompt = '>')
 	{
-		std::vector<String<HEAP>*> lines;
+		std::vector<std::string*> lines;
 
 		int beg = 0;
 		for (auto i = 0; i < post.length(); ++i)
@@ -396,7 +396,7 @@ public:
 			newPost->setString(String<2>(prompt));
 			newPost->getString().append(" ");
 			newPost->getString().append(*(*itr));
-			consoleHistory.push_back(newPost);*/
+			//consoleHistory.push_back(newPost);
 		}
 
 		for (auto itr = lines.begin(); itr != lines.end(); ++itr)
@@ -459,7 +459,7 @@ private:
 	static std::map<String32, u32> funcIDs;
 
 	std::vector<Text2D*> consoleHistory;
-	std::vector<String<HEAP>> cmdHistory;
+	std::vector<std::string> cmdHistory;
 	Text2D cmd;
 	u32 cursor;
 	s32 stateFlags; // 0 == closed, 1 == open, others ?
@@ -480,4 +480,4 @@ private:
 		return (c > 31 && c < 127);
 	}
 
-};
+};*/

@@ -83,7 +83,7 @@ void Renderer::render()
 
 	Engine::uiwm.drawUIWindows(); //UI Window Manager
 
-	Engine::console.draw();
+	//Engine::console.draw();
 
 	window->swapBuffers();
 
@@ -294,7 +294,7 @@ void Renderer::screenPass()
 	glEnable(GL_CULL_FACE);
 
 	glBindVertexArray(vaoQuadViewRays);
-	auto program = shaderStore.getShader(String<32>("test"));
+	auto program = shaderStore.getShader("test");
 	program->use();
 
 	glUniform1i(0, 2);
@@ -309,7 +309,7 @@ void Renderer::screenPass()
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-		auto wireShader = shaderStore.getShader(String32("wireframe"));
+		auto wireShader = shaderStore.getShader("wireframe");
 		wireShader->use();
 		wireShader->setUniform("proj", &activeCam->proj);
 		wireShader->setUniform("view", &activeCam->view);
@@ -555,9 +555,9 @@ void Renderer::initialiseShaders()
 	shaderStore.loadShader(&shape3DShader);
 	shaderStore.loadShader(&textShader);
 
-	shaderStore.loadShader(ShaderProgram::VertFrag, String32("wireframe"));
-	shaderStore.loadShader(ShaderProgram::VertFrag, String32("Standard"));
-	shaderStore.loadShader(ShaderProgram::VertFrag, String32("test"));
+	shaderStore.loadShader(ShaderProgram::VertFrag, "wireframe");
+	shaderStore.loadShader(ShaderProgram::VertFrag, "Standard");
+	shaderStore.loadShader(ShaderProgram::VertFrag, "test");
 }
 
 void Renderer::initialiseFramebuffers()
@@ -669,7 +669,7 @@ inline void Renderer::initialiseScreenQuad()
 	glBindBuffer(GL_ARRAY_BUFFER, vboQuadViewRays);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVerticesViewRays), quadVerticesViewRays, GL_STATIC_DRAW);
 
-	auto program = shaderStore.getShader(String<32>("Standard"));
+	auto program = shaderStore.getShader("Standard");
 	program->use();
 
 	glBindVertexArray(vaoQuadViewRays);
@@ -690,7 +690,7 @@ inline void Renderer::initialiseScreenQuad()
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	program = shaderStore.getShader(String<32>("test"));
+	program = shaderStore.getShader("test");
 
 	glBindVertexArray(vaoQuadViewRays);
 	glBindBuffer(GL_ARRAY_BUFFER, vboQuadViewRays);

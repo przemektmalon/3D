@@ -29,10 +29,10 @@ class Model : public Asset
 	typedef float* fltptr;
 public:
 	Model() { type = Mesh; }
-	Model(String128& pPath, String32& pName) : Asset(pPath, pName) { type = Mesh; }
+	Model(std::string& pPath, std::string& pName) : Asset(pPath, pName) { type = Mesh; }
 	~Model() {}
 
-	void save(StringGeneric& binPath) {}
+	void save(std::string& binPath) {}
 
 	void load() 
 	{

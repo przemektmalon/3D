@@ -227,14 +227,14 @@
     <ClInclude Include="include\core\Tweaks.hpp" />
     <ClInclude Include="include\core\UserInputManager.hpp" />
     <ClInclude Include="include\core\World.hpp" />
-    <ClInclude Include="include\objectassets\Asset.hpp" />
-    <ClInclude Include="include\objectassets\AssetManager.hpp" />
-    <ClInclude Include="include\objectassets\Billboard.hpp" />
-    <ClInclude Include="include\objectassets\Font.hpp" />
-    <ClInclude Include="include\objectassets\ImageData.hpp" />
-    <ClInclude Include="include\objectassets\Model.hpp" />
-    <ClInclude Include="include\objectassets\Text.hpp" />
-    <ClInclude Include="include\objectassets\TextBillboard.hpp" />
+    <ClInclude Include="include\objectsassets\Asset.hpp" />
+    <ClInclude Include="include\objectsassets\AssetManager.hpp" />
+    <ClInclude Include="include\objectsassets\Billboard.hpp" />
+    <ClInclude Include="include\objectsassets\Font.hpp" />
+    <ClInclude Include="include\objectsassets\ImageData.hpp" />
+    <ClInclude Include="include\objectsassets\Model.hpp" />
+    <ClInclude Include="include\objectsassets\Text.hpp" />
+    <ClInclude Include="include\objectsassets\TextBillboard.hpp" />
     <ClInclude Include="include\os\Keyboard.hpp" />
     <ClInclude Include="include\os\Mouse.hpp" />
     <ClInclude Include="include\os\Window.hpp" />
@@ -291,8 +291,6 @@
     <ClInclude Include="include\util\Include.hpp" />
     <ClInclude Include="include\util\MathIncludes.hpp" />
     <ClInclude Include="include\util\Rect.hpp" />
-    <ClInclude Include="include\util\StringGenerics.hpp" />
-    <ClInclude Include="include\util\Strings.hpp" />
     <ClInclude Include="include\util\Transform.hpp" />
     <ClInclude Include="include\util\Types.hpp" />
     <ClInclude Include="include\util\Util.hpp" />
@@ -345,7 +343,6 @@
     <ClCompile Include="src\ui\UIWindow.cpp" />
     <ClCompile Include="src\ui\UIWindowManager.cpp" />
     <ClCompile Include="src\util\ConfigParser.cpp" />
-    <ClCompile Include="src\util\StringGenerics.cpp" />
     <ClCompile Include="src\util\Util.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

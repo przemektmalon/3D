@@ -13,7 +13,7 @@ const int ShaderProgram::typeSizes[ShaderProgram::UniformTypesCount] = {
 	8
 };
 
-const String16 ShaderProgram::typeGLSLNames[ShaderProgram::UniformTypesCount] = {
+const char ShaderProgram::typeGLSLNames[ShaderProgram::UniformTypesCount][16] = {
 	"int", "ivec2", "ivec3", "ivec4",
 	"uint", "uvec2", "uvec3", "uvec4",
 	"int64_t", "i64vec2", "i64vec3", "i64vec4",
@@ -37,10 +37,10 @@ void ShaderProgram::destroy()
 	freeSourceContent();
 }
 
-void ShaderProgram::load(String32 && pName, ShaderType pType, String128 & pShaderLocationPath)
+void ShaderProgram::load(std::string && pName, ShaderType pType, std::string & pShaderLocationPath)
 {
 	//uniformLocations.insert(std::make_pair(pName, 0));
-	name.overwrite(pName);
+	name = pName;
 	type = pType;
 	switch (type)
 	{
@@ -56,10 +56,10 @@ void ShaderProgram::load(String32 && pName, ShaderType pType, String128 & pShade
 	}
 }
 
-void ShaderProgram::load(String32 & pName, ShaderType pType, String128 & pShaderLocationPath)
+void ShaderProgram::load(std::string & pName, ShaderType pType, std::string & pShaderLocationPath)
 {
 	//uniformLocations.insert(std::make_pair(pName, 0));
-	name.overwrite(pName);
+	name = pName;
 	type = pType;
 	switch (type)
 	{
@@ -106,20 +106,20 @@ void ShaderProgram::setUniform(std::string pUniformName, const void * pUniformDa
 	memcpy(&meta.data, pUniformData, size * count);
 }
 
-void ShaderProgram::setVarVal(String32 & var, String1024 & val)
+void ShaderProgram::setVarVal(std::string & var, std::string & val)
 {
 	for (u32 i = 0; i < 32; ++i)
 	{
 		if (varVals[i].var == var)
 		{
-			varVals[i].val.overwrite(val);
+			varVals[i].val = val;
 			break;
 		}
 
-		if (varVals[i].var.getString()[0] == '\0')
+		if (varVals[i].var.c_str()[0] == '\0')
 		{
-			varVals[i].val.overwrite(val);
-			varVals[i].var.overwrite(var);
+			varVals[i].val = val;
+			varVals[i].var = var;
 			break;
 		}
 	}
@@ -235,30 +235,30 @@ void ShaderProgram::sendUniforms()
 	}
 }
 
-void ShaderProgram::loadVertFrag(String32 & pName, String128 & pShaderLocationPath)
+void ShaderProgram::loadVertFrag(std::string & pName, std::string & pShaderLocationPath)
 {
-	String128 shaderPath; shaderPath.overwrite(pShaderLocationPath);
+	std::string shaderPath; shaderPath = pShaderLocationPath;
 
-	vertexPath.overwrite(shaderPath);
+	vertexPath = shaderPath;
 	vertexPath.append(pName);
-	vertexPath.append(String8(".vert"));
+	vertexPath.append(".vert");
 
-	fragmentPath.overwrite(vertexPath);
-	fragmentPath.shrinkBy(5);
-	fragmentPath.append(String8(".frag"));
+	fragmentPath = vertexPath;
+	fragmentPath.erase(fragmentPath.length() - 5, 5);
+	fragmentPath.append(".frag");
 
-	std::ifstream vertStream(vertexPath.getString(), std::ifstream::in | std::ifstream::ate);
-	std::ifstream fragStream(fragmentPath.getString(), std::ifstream::in | std::ifstream::ate);
+	std::ifstream vertStream(vertexPath.c_str(), std::ifstream::in | std::ifstream::ate);
+	std::ifstream fragStream(fragmentPath.c_str(), std::ifstream::in | std::ifstream::ate);
 
 	if (vertStream.fail())
 	{
-		reportFailedShaderLoad("Vertex", vertexPath.getString());
+		reportFailedShaderLoad("Vertex", (char*)vertexPath.c_str());
 		return;
 	}
 
 	if (fragStream.fail())
 	{
-		reportFailedShaderLoad("Fragment", fragmentPath.getString());
+		reportFailedShaderLoad("Fragment", (char*)fragmentPath.c_str());
 		return;
 	}
 
@@ -336,21 +336,21 @@ void ShaderProgram::compileVertFrag()
 	extractUniforms(fragmentContent);
 }
 
-void ShaderProgram::loadVertGeomFrag(String32 & pName, String128 & pShaderLocationPath)
+void ShaderProgram::loadVertGeomFrag(std::string & pName, std::string & pShaderLocationPath)
 {
 	loadVertFrag(pName, pShaderLocationPath);
 
-	String128 shaderPath; shaderPath.overwrite(pShaderLocationPath);
+	std::string shaderPath; shaderPath  = pShaderLocationPath;
 
-	geomPath.overwrite(shaderPath);
+	geomPath = shaderPath;
 	geomPath.append(pName);
-	geomPath.append(String8(".geom"));
+	geomPath.append(".geom");
 
-	std::ifstream geomStream(geomPath.getString(), std::ifstream::in | std::ifstream::ate);
+	std::ifstream geomStream(geomPath.c_str(), std::ifstream::in | std::ifstream::ate);
 
 	if (geomStream.fail())
 	{
-		reportFailedShaderLoad("Geometry", geomPath.getString());
+		reportFailedShaderLoad("Geometry", (char*)geomPath.c_str());
 		return;
 	}
 
@@ -437,15 +437,15 @@ void ShaderProgram::compileVertGeomFrag()
 	extractUniforms(geomContent);
 }
 
-void ShaderProgram::loadCompute(String32 & pName, String128 & pShaderLocationPath)
+void ShaderProgram::loadCompute(std::string & pName, std::string & pShaderLocationPath)
 {
-	computePath.overwrite(pShaderLocationPath.append(pName).append(String32(".comp")));
+	computePath = pShaderLocationPath.append(pName).append(std::string(".comp"));
 
-	std::ifstream computeStream(computePath.getString(), std::ifstream::in | std::ifstream::ate);
+	std::ifstream computeStream(computePath.c_str(), std::ifstream::in | std::ifstream::ate);
 
 	if (computeStream.fail())
 	{
-		reportFailedShaderLoad("Compute", computePath.getString());
+		reportFailedShaderLoad("Compute", (char*)computePath.c_str());
 		return;
 	}
 
@@ -510,14 +510,14 @@ void ShaderProgram::reportFailedShaderLoad(char* pType, char* pPath)
 	std::string errorMessage;
 	errorMessage.append(pType);
 	errorMessage.append(" shader failed to load: ");
-	errorMessage.append(name.getString());
+	errorMessage.append(name.c_str());
 	errorMessage.append("\n");
 	errorMessage.append("Expected path: ");
 	errorMessage.append(pPath);
 
 	Engine::engineLog.postTime();
 	Engine::engineLog.appendMessage(errorMessage.c_str());
-	Engine::engineLog.printLog(Engine::engineLog, String32("ShaderLoadFailed"));
+	Engine::engineLog.printLog(Engine::engineLog, "ShaderLoadFailed");
 
 	MessageBox(NULL, errorMessage.c_str(), "Shader Loading Failed", MB_OK);
 }
@@ -537,14 +537,14 @@ bool ShaderProgram::checkShaderCompilation(GLuint pShader, char* pType)
 		std::string errorMessage;
 		errorMessage.append(pType);
 		errorMessage.append(" shader failed to compile: ");
-		errorMessage.append(name.getString());
+		errorMessage.append(name.c_str());
 
 		Engine::engineLog.postTime();
 		Engine::engineLog.appendMessage(errorMessage.c_str());
 		Engine::engineLog.appendMessage("\n\n");
 		Engine::engineLog.appendMessage(errorLog.data());
 		Engine::engineLog.appendMessage("\n\n");
-		Engine::engineLog.printLog(Engine::engineLog, String32("ShaderCompileFailed"));
+		Engine::engineLog.printLog(Engine::engineLog, "ShaderCompileFailed");
 
 		MessageBox(NULL, errorMessage.c_str(), "Shader Compilation Failed", MB_OK);
 
@@ -567,14 +567,14 @@ bool ShaderProgram::checkProgramLinking(GLuint pProgram)
 
 		std::string errorMessage;
 		errorMessage.append("Program failed to link: ");
-		errorMessage.append(name.getString());
+		errorMessage.append(name.c_str());
 
 		Engine::engineLog.postTime();
 		Engine::engineLog.appendMessage(errorMessage.c_str());
 		Engine::engineLog.appendMessage("\n\n");
 		Engine::engineLog.appendMessage(errorLog.data());
 		Engine::engineLog.appendMessage("\n\n");
-		Engine::engineLog.printLog(Engine::engineLog, String32("ProgramLinkingFailed"));
+		Engine::engineLog.printLog(Engine::engineLog, "ProgramLinkingFailed");
 
 		MessageBox(NULL, errorMessage.c_str(), "Program Linking Failed", MB_OK);
 
@@ -621,7 +621,11 @@ void ShaderProgram::extractUniforms(char * pSource)
 		if (*pSource == '\n')
 		{
 			curLine.end = pSource;
-			auto pos = StringGeneric::contains(curLine.begin, curLine.end, String32("uniform "));
+			std::string cl; 
+			for (char* c = curLine.begin; c != curLine.end; ++c) {
+				cl.push_back(*c);
+			}
+			auto pos = cl.find("uniform ");
 			if (pos != -1)
 			{
 				lines.push_back(curLine);
@@ -649,9 +653,8 @@ void ShaderProgram::extractUniforms(char * pSource)
 			continue;
 		}
 
-		String16 typeName;
-		typeName.copyChars(typeName.getString(), cm[0].first + 1, (cm[0].second - 1) - (cm[0].first + 1));
-		typeName.determineLength();
+		std::string typeName;
+		typeName.assign(cm[0].first + 1, (cm[0].first + 1) + ((cm[0].second - 1) - (cm[0].first + 1)));
 
 		char* nameBegin = cm[0].second;
 		while (nameBegin[0] == ' ')
@@ -708,7 +711,7 @@ void ShaderProgram::extractUniforms(char * pSource)
 			}
 			else
 			{
-				meta.arrayCount = StringGeneric::strtos32(arraySizeBegin, arraySizeEnd);
+				meta.arrayCount = std::stoi(std::string(arraySizeBegin, arraySizeEnd));
 			}
 
 			meta.data.fmat4 = glm::dmat4(0);
@@ -742,14 +745,12 @@ void ShaderProgram::extractPreprocessorVars(char * pSource)
 		if (foundVar)
 		{
 			++pSource;
-			//std::string varName; varName.reserve(20);
-			//char varName[32];
-			String32 varName;
+			std::string varName; varName.reserve(20);
 
 			u32 varNameIndex = 0;
 			for (;;)
 			{
-				varName.append(*pSource);
+				varName.push_back(*pSource);
 
 				++varNameIndex;
 
@@ -762,15 +763,12 @@ void ShaderProgram::extractPreprocessorVars(char * pSource)
 				}
 			}
 
-			//auto find = std::find(varNamesVals.begin(), varNamesVals.end(), varName);
-
 			bool varExists = false;
 
 			u32 i = 0;
 			for (; i < 32; ++i)
 			{
-				//if (memcmp(varName, varVals[i].var, 32) == 0)
-				if (varVals[i].var.getLength() == 0)
+				if (varVals[i].var.length() == 0)
 				{
 					break;
 				}
@@ -784,7 +782,7 @@ void ShaderProgram::extractPreprocessorVars(char * pSource)
 
 			if (!varExists)
 			{
-				varVals[i].var.overwrite(varName);
+				varVals[i].var = varName;
 			}
 
 			foundVar = false;
@@ -812,14 +810,12 @@ char * ShaderProgram::preprocess(char * pSource, u32 size)
 		if (converting)
 		{
 			++pSource;
-			//std::string varName; varName.reserve(20);
-			//char varName[32];
-			String32 varName;
+			std::string varName; varName.reserve(20);
 
 			u32 varNameIndex = 0;
 			for (;;)
 			{
-				varName.append(*pSource);
+				varName.push_back(*pSource);
 
 				++varNameIndex;
 
@@ -832,14 +828,11 @@ char * ShaderProgram::preprocess(char * pSource, u32 size)
 				}
 			}
 
-			//auto find = std::find(varNamesVals.begin(), varNamesVals.end(), varName);
-
-			String1024* findVal = nullptr;
+			std::string* findVal = nullptr;
 
 			{
 				for (u32 i = 0; i < 32; ++i)
 				{
-					//if (memcmp(varName, varVals[i].var, 32) == 0)
 					if (varName == varVals[i].var)
 					{
 						findVal = &varVals[i].val;
@@ -851,8 +844,8 @@ char * ShaderProgram::preprocess(char * pSource, u32 size)
 			if (findVal == nullptr)
 				assert(0);
 
-			StringGeneric::copyChars(&processedShader[outputIndex], findVal->getString(), findVal->getLength());
-			outputIndex += findVal->getLength();
+			memcpy(processedShader + outputIndex, findVal->c_str(), findVal->length());
+			outputIndex += findVal->length();
 			converting = false;
 		}
 
