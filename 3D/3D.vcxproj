@@ -107,7 +107,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Programming\libs\GLEW-1.13.0\include;C:\Programming\libs\GLM;C:\Programming\libs\SOIL\src;C:\Programming\libs\FreeType-2.6.2\include;C:\Programming\Libs\Assimp\include\;C:\Programming\Libs\boost_1_64_0\;C:\Programming\Libs\bullet3\src;C:\Programming\Libs\rapidxml-1.13;.\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Programming\libs\GLEW-1.13.0\include;C:\Programming\libs\GLM;C:\Programming\libs\SOIL\src;C:\Programming\libs\FreeType-2.6.2\include;C:\Programming\Libs\Assimp\include\;C:\Programming\Libs\boost_1_64_0\;C:\Programming\Libs\bullet3\src;C:\Programming\Libs\rapidxml-1.13;.\include;.\include\os;.\include\core;.\include\objectsassets;.\include\renderer;.\include\ui;.\include\util;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CallingConvention>Cdecl</CallingConvention>
       <StructMemberAlignment>Default</StructMemberAlignment>
@@ -142,7 +142,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Programming\libs\GLEW-1.13.0\include;C:\Programming\libs\GLM;C:\Programming\libs\SOIL\src;C:\Programming\libs\FreeType-2.6.2\include;C:\Programming\Libs\Assimp\include\;C:\Programming\Libs\boost_1_64_0\;C:\Programming\Libs\bullet3\src;C:\Programming\Libs\rapidxml-1.13;.\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Programming\libs\GLEW-1.13.0\include;C:\Programming\libs\GLM;C:\Programming\libs\SOIL\src;C:\Programming\libs\FreeType-2.6.2\include;C:\Programming\Libs\Assimp\include\;C:\Programming\Libs\boost_1_64_0\;C:\Programming\Libs\bullet3\src;C:\Programming\Libs\rapidxml-1.13;.\include;.\include\os;.\include\core;.\include\objectsassets;.\include\renderer;.\include\ui;.\include\util;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -165,7 +165,7 @@
       </FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Programming\libs\GLEW-1.13.0\include;C:\Programming\libs\GLM;C:\Programming\libs\SOIL\src;C:\Programming\libs\FreeType-2.6.2\include;C:\Programming\Libs\Assimp\include\;C:\Programming\Libs\boost_1_64_0\;C:\Programming\Libs\bullet3\src;C:\Programming\Libs\rapidxml-1.13;.\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Programming\libs\GLEW-1.13.0\include;C:\Programming\libs\GLM;C:\Programming\libs\SOIL\src;C:\Programming\libs\FreeType-2.6.2\include;C:\Programming\Libs\Assimp\include\;C:\Programming\Libs\boost_1_64_0\;C:\Programming\Libs\bullet3\src;C:\Programming\Libs\rapidxml-1.13;.\include;.\include\os;.\include\core;.\include\objectsassets;.\include\renderer;.\include\ui;.\include\util;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -213,81 +213,43 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Asset.cpp" />
-    <ClCompile Include="src\AssetManager.cpp" />
-    <ClCompile Include="src\Billboard.cpp" />
-    <ClCompile Include="src\Camera.cpp" />
-    <ClCompile Include="src\ConfigParser.cpp" />
-    <ClCompile Include="src\Console.cpp" />
-    <ClCompile Include="src\Engine.cpp" />
-    <ClCompile Include="src\Event.cpp" />
-    <ClCompile Include="src\Font.cpp" />
-    <ClCompile Include="src\GPUModelManager.cpp" />
-    <ClCompile Include="src\ImageData.cpp" />
-    <ClCompile Include="src\Keyboard.cpp" />
-    <ClCompile Include="src\Lights.cpp" />
-    <ClCompile Include="src\MaterialLibrary.cpp" />
-    <ClCompile Include="src\Model.cpp" />
-    <ClCompile Include="src\Mouse.cpp" />
-    <ClCompile Include="src\PhysicsWorld.cpp" />
-    <ClCompile Include="src\Profiler.cpp" />
-    <ClCompile Include="src\Renderer.cpp" />
-    <ClCompile Include="src\Shader.cpp" />
-    <ClCompile Include="src\StringGenerics.cpp" />
-    <ClCompile Include="src\TextBillboard.cpp" />
-    <ClCompile Include="src\Texture.cpp" />
-    <ClCompile Include="src\UIButton.cpp" />
-    <ClCompile Include="src\UIElement.cpp" />
-    <ClCompile Include="src\UIInputField.cpp" />
-    <ClCompile Include="src\UILabel.cpp" />
-    <ClCompile Include="src\UIMultiTab.cpp" />
-    <ClCompile Include="src\UIRectangleShape.cpp" />
-    <ClCompile Include="src\UISlider.cpp" />
-    <ClCompile Include="src\UISwitchButton.cpp" />
-    <ClCompile Include="src\UIWindow.cpp" />
-    <ClCompile Include="src\UIWindowManager.cpp" />
-    <ClCompile Include="src\UserInputManager.cpp" />
-    <ClCompile Include="src\Util.cpp" />
-    <ClCompile Include="src\Window.cpp" />
-    <ClCompile Include="Text.cpp" />
-    <ClCompile Include="World.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="include\Asset.hpp" />
-    <ClInclude Include="include\AssetManager.hpp" />
-    <ClInclude Include="include\Billboard.hpp" />
-    <ClInclude Include="include\Bounds3D.hpp" />
-    <ClInclude Include="include\BufferObjects.hpp" />
-    <ClInclude Include="include\Camera.hpp" />
-    <ClInclude Include="include\ConfigParser.hpp" />
-    <ClInclude Include="include\Console.hpp" />
-    <ClInclude Include="include\DrawModes.hpp" />
-    <ClInclude Include="include\Engine.hpp" />
-    <ClInclude Include="include\Event.hpp" />
-    <ClInclude Include="include\File.hpp" />
-    <ClInclude Include="include\Font.hpp" />
-    <ClInclude Include="include\Framebuffer.hpp" />
-    <ClInclude Include="include\GLIncludes.hpp" />
-    <ClInclude Include="include\GPUModelManager.hpp" />
-    <ClInclude Include="include\ImageData.hpp" />
-    <ClInclude Include="include\Include.hpp" />
-    <ClInclude Include="include\Keyboard.hpp" />
-    <ClInclude Include="include\Lights.hpp" />
-    <ClInclude Include="include\Log.hpp" />
-    <ClInclude Include="include\Material.hpp" />
-    <ClInclude Include="include\MaterialLibrary.hpp" />
-    <ClInclude Include="include\MathIncludes.hpp" />
-    <ClInclude Include="include\Model.hpp" />
-    <ClInclude Include="include\Mouse.hpp" />
-    <ClInclude Include="include\PhysicsObject.hpp" />
-    <ClInclude Include="include\PhysicsWorld.hpp" />
-    <ClInclude Include="include\Profiler.hpp" />
-    <ClInclude Include="include\QPC.hpp" />
-    <ClInclude Include="include\Rect.hpp" />
-    <ClInclude Include="include\Renderer.hpp" />
-    <ClInclude Include="include\RendererData.hpp" />
-    <ClInclude Include="include\Sampler.hpp" />
-    <ClInclude Include="include\SceneGraph.hpp" />
+    <ClInclude Include="include\core\Console.hpp" />
+    <ClInclude Include="include\core\Engine.hpp" />
+    <ClInclude Include="include\core\Event.hpp" />
+    <ClInclude Include="include\core\File.hpp" />
+    <ClInclude Include="include\core\Log.hpp" />
+    <ClInclude Include="include\core\PhysicsObject.hpp" />
+    <ClInclude Include="include\core\PhysicsWorld.hpp" />
+    <ClInclude Include="include\core\Profiler.hpp" />
+    <ClInclude Include="include\core\QPC.hpp" />
+    <ClInclude Include="include\core\SceneGraph.hpp" />
+    <ClInclude Include="include\core\Time.hpp" />
+    <ClInclude Include="include\core\Tweaks.hpp" />
+    <ClInclude Include="include\core\UserInputManager.hpp" />
+    <ClInclude Include="include\core\World.hpp" />
+    <ClInclude Include="include\objectassets\Asset.hpp" />
+    <ClInclude Include="include\objectassets\AssetManager.hpp" />
+    <ClInclude Include="include\objectassets\Billboard.hpp" />
+    <ClInclude Include="include\objectassets\Font.hpp" />
+    <ClInclude Include="include\objectassets\ImageData.hpp" />
+    <ClInclude Include="include\objectassets\Model.hpp" />
+    <ClInclude Include="include\objectassets\Text.hpp" />
+    <ClInclude Include="include\objectassets\TextBillboard.hpp" />
+    <ClInclude Include="include\os\Keyboard.hpp" />
+    <ClInclude Include="include\os\Mouse.hpp" />
+    <ClInclude Include="include\os\Window.hpp" />
+    <ClInclude Include="include\renderer\BufferObjects.hpp" />
+    <ClInclude Include="include\renderer\Camera.hpp" />
+    <ClInclude Include="include\renderer\DrawModes.hpp" />
+    <ClInclude Include="include\renderer\Framebuffer.hpp" />
+    <ClInclude Include="include\renderer\GPUModelManager.hpp" />
+    <ClInclude Include="include\renderer\Lights.hpp" />
+    <ClInclude Include="include\renderer\Material.hpp" />
+    <ClInclude Include="include\renderer\MaterialLibrary.hpp" />
+    <ClInclude Include="include\renderer\Renderer.hpp" />
+    <ClInclude Include="include\renderer\RendererData.hpp" />
+    <ClInclude Include="include\renderer\Sampler.hpp" />
+    <ClInclude Include="include\renderer\Texture.hpp" />
     <ClInclude Include="include\shaders\BilateralBlurShader.hpp" />
     <ClInclude Include="include\shaders\DeferredTileCullComputeShader.hpp" />
     <ClInclude Include="include\shaders\FrustCullShader.hpp" />
@@ -306,15 +268,6 @@
     <ClInclude Include="include\shaders\Shape3DShader.hpp" />
     <ClInclude Include="include\shaders\SpotShadowPassShader.hpp" />
     <ClInclude Include="include\shaders\TextShader.hpp" />
-    <ClInclude Include="include\StringGenerics.hpp" />
-    <ClInclude Include="include\Strings.hpp" />
-    <ClInclude Include="include\Text.hpp" />
-    <ClInclude Include="include\TextBillboard.hpp" />
-    <ClInclude Include="include\Texture.hpp" />
-    <ClInclude Include="include\Time.hpp" />
-    <ClInclude Include="include\Transform.hpp" />
-    <ClInclude Include="include\Tweaks.hpp" />
-    <ClInclude Include="include\Types.hpp" />
     <ClInclude Include="include\ui\ProfilingWindow.hpp" />
     <ClInclude Include="include\ui\RenderConfigWindow.hpp" />
     <ClInclude Include="include\ui\UIAllElements.hpp" />
@@ -332,10 +285,17 @@
     <ClInclude Include="include\ui\UIWindow.hpp" />
     <ClInclude Include="include\ui\UIWindowManager.hpp" />
     <ClInclude Include="include\ui\WorldEditWindow.hpp" />
-    <ClInclude Include="include\UserInputManager.hpp" />
-    <ClInclude Include="include\Util.hpp" />
-    <ClInclude Include="include\Window.hpp" />
-    <ClInclude Include="include\World.hpp" />
+    <ClInclude Include="include\util\Bounds3D.hpp" />
+    <ClInclude Include="include\util\ConfigParser.hpp" />
+    <ClInclude Include="include\util\GLIncludes.hpp" />
+    <ClInclude Include="include\util\Include.hpp" />
+    <ClInclude Include="include\util\MathIncludes.hpp" />
+    <ClInclude Include="include\util\Rect.hpp" />
+    <ClInclude Include="include\util\StringGenerics.hpp" />
+    <ClInclude Include="include\util\Strings.hpp" />
+    <ClInclude Include="include\util\Transform.hpp" />
+    <ClInclude Include="include\util\Types.hpp" />
+    <ClInclude Include="include\util\Util.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Libs\bullet3\build\src\BulletCollision\BulletCollision.vcxproj">
@@ -347,6 +307,46 @@
     <ProjectReference Include="..\..\Libs\bullet3\build\src\LinearMath\LinearMath.vcxproj">
       <Project>{8b3fc759-19fa-385c-a460-a4271d3a12d3}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\core\Console.cpp" />
+    <ClCompile Include="src\core\Engine.cpp" />
+    <ClCompile Include="src\core\Event.cpp" />
+    <ClCompile Include="src\core\PhysicsWorld.cpp" />
+    <ClCompile Include="src\core\Profiler.cpp" />
+    <ClCompile Include="src\core\UserInputManager.cpp" />
+    <ClCompile Include="src\core\World.cpp" />
+    <ClCompile Include="src\objectsassets\Asset.cpp" />
+    <ClCompile Include="src\objectsassets\AssetManager.cpp" />
+    <ClCompile Include="src\objectsassets\Billboard.cpp" />
+    <ClCompile Include="src\objectsassets\Font.cpp" />
+    <ClCompile Include="src\objectsassets\ImageData.cpp" />
+    <ClCompile Include="src\objectsassets\Model.cpp" />
+    <ClCompile Include="src\objectsassets\Text.cpp" />
+    <ClCompile Include="src\objectsassets\TextBillboard.cpp" />
+    <ClCompile Include="src\os\Keyboard.cpp" />
+    <ClCompile Include="src\os\Mouse.cpp" />
+    <ClCompile Include="src\os\Window.cpp" />
+    <ClCompile Include="src\renderer\Camera.cpp" />
+    <ClCompile Include="src\renderer\GPUModelManager.cpp" />
+    <ClCompile Include="src\renderer\Lights.cpp" />
+    <ClCompile Include="src\renderer\MaterialLibrary.cpp" />
+    <ClCompile Include="src\renderer\Renderer.cpp" />
+    <ClCompile Include="src\renderer\Shader.cpp" />
+    <ClCompile Include="src\renderer\Texture.cpp" />
+    <ClCompile Include="src\ui\UIButton.cpp" />
+    <ClCompile Include="src\ui\UIElement.cpp" />
+    <ClCompile Include="src\ui\UIInputField.cpp" />
+    <ClCompile Include="src\ui\UILabel.cpp" />
+    <ClCompile Include="src\ui\UIMultiTab.cpp" />
+    <ClCompile Include="src\ui\UIRectangleShape.cpp" />
+    <ClCompile Include="src\ui\UISlider.cpp" />
+    <ClCompile Include="src\ui\UISwitchButton.cpp" />
+    <ClCompile Include="src\ui\UIWindow.cpp" />
+    <ClCompile Include="src\ui\UIWindowManager.cpp" />
+    <ClCompile Include="src\util\ConfigParser.cpp" />
+    <ClCompile Include="src\util\StringGenerics.cpp" />
+    <ClCompile Include="src\util\Util.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
