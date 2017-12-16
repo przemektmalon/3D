@@ -7,7 +7,7 @@
 class VAO
 {
 public:
-	void init()
+	void create()
 	{
 		glGenVertexArrays(1, &GLID);
 	}

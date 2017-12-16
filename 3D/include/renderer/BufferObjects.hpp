@@ -75,6 +75,28 @@ protected:
 	GLuint GLID;
 };
 
+class VBO : public GLBufferObject
+{
+public:
+	VBO() : GLBufferObject() {}
+	~VBO() {}
+
+	inline void bindBase(GLuint pIndex, GLenum pBuffer = GL_ARRAY_BUFFER)
+	{
+		glBindBufferBase(pBuffer, pIndex, GLID);
+	}
+
+	inline void bind(GLenum pBuffer = GL_ARRAY_BUFFER)
+	{
+		glBindBuffer(pBuffer, GLID);
+	}
+
+	inline void unbind(GLenum pBuffer = GL_ARRAY_BUFFER)
+	{
+		glBindBuffer(pBuffer, 0);
+	}
+};
+
 class SSBO : public GLBufferObject
 {
 public:
@@ -95,5 +117,4 @@ public:
 	{
 		glBindBuffer(pBuffer, 0);
 	}
-
 };

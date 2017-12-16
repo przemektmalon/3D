@@ -294,7 +294,7 @@ void Renderer::screenPass()
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 
-	glBindVertexArray(vaoQuadViewRays);
+	vaoQuadViewRays.bind();
 	auto program = shaderStore.getShader("test");
 	program->use();
 
@@ -633,50 +633,31 @@ void Renderer::cameraProjUpdated()
 
 inline void Renderer::initialiseScreenQuad()
 {
-	vaoQuad.init();
+	vaoQuad.create();
+	vboQuad.create();
 
-	glGenBuffers(1, &vboQuad);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vboQuad);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
-
-	bilatBlurShader.use();
-	auto locc = glGetUniformLocation(bilatBlurShader.getGLID(), "source");
-	glUniform1i(locc, 0);
-
+	vboQuad.bind();
+	vboQuad.bufferData(sizeof(quadVertices), (void*)quadVertices, GL_STATIC_DRAW);
+	
 	vaoQuad.bind();
-	glBindBuffer(GL_ARRAY_BUFFER, vboQuad);
-
 	vaoQuad.addAttrib("position", 2, GL_FLOAT);
 	vaoQuad.addAttrib("texCoord", 2, GL_FLOAT);
 	vaoQuad.enableFor(bilatBlurShader);
 	vaoQuad.enableFor(ssaoShader);
 
-	vaoQuadViewRays.init();
-	glGenBuffers(1, &vboQuadViewRays);
 
-	glBindBuffer(GL_ARRAY_BUFFER, vboQuadViewRays);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVerticesViewRays), quadVerticesViewRays, GL_STATIC_DRAW);
+	vaoQuadViewRays.create();
+	vboQuadViewRays.create();
 
-	auto program = shaderStore.getShader("Standard");
-	program->use();
-
+	vboQuadViewRays.bind();
+	vboQuadViewRays.bufferData(sizeof(quadVerticesViewRays), quadVerticesViewRays, GL_STATIC_DRAW);
+	
 	vaoQuadViewRays.bind();
-	glBindBuffer(GL_ARRAY_BUFFER, vboQuadViewRays);
-
 	vaoQuadViewRays.addAttrib("position", 2, GL_FLOAT);
 	vaoQuadViewRays.addAttrib("texCoord", 2, GL_FLOAT);
 	vaoQuadViewRays.addAttrib("viewRay", 2, GL_FLOAT);
 	vaoQuadViewRays.enableFor(*shaderStore.getShader("Standard"));
-
-	program = shaderStore.getShader("test");
-
-	glBindBuffer(GL_ARRAY_BUFFER, vboQuadViewRays);
-
 	vaoQuadViewRays.enableFor(*shaderStore.getShader("test"));
-
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 #undef CALL

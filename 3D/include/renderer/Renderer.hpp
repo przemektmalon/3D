@@ -100,9 +100,9 @@ public:
 	// Vertex storage for rendering to window
 	//GLuint vaoQuad;
 	VAO vaoQuad;
-	GLuint vboQuad;
+	VBO vboQuad;
 	VAO vaoQuadViewRays;
-	GLuint vboQuadViewRays;
+	VBO vboQuadViewRays;
 
 	// Shaders
 	ShaderStore shaderStore;
