@@ -13,14 +13,14 @@
 
 #include "Material.hpp"
 
-class MeshBatch;
+class DrawBatch;
 class SGNode;
 class PhysicsObject;
 
 class ModelRenderMeta
 {
 public:
-	MeshBatch* batchPtr;
+	DrawBatch* batchPtr;
 	u32 batchIndex;
 };
 

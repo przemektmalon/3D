@@ -276,6 +276,9 @@ class LightManager
 public: ///TODO: Max light count is 500, add setters etc
 	LightManager() 
 	{
+		spotLightsBuffer.create();
+		pointLightsBuffer.create();
+
 		spotLightsGPUData.reserve(500);
 		pointLightsGPUData.reserve(500);
 	}

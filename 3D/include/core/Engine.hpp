@@ -82,6 +82,10 @@ public:
 		void setDrawWireFrame(bool set) { drawWireframe = set; }
 		void toggleDrawWireframe() { drawWireframe = !drawWireframe; }
 
+		bool drawAABB;
+		void setDrawAABB(bool set) { drawAABB = set; }
+		void toggleDrawAABB() { drawAABB = !drawAABB; }
+
 		bool drawTextBounds;
 		void setDrawTextBounds(bool set) { drawTextBounds = set; }
 		void toggleDrawTextBounds() { drawTextBounds = !drawTextBounds; }

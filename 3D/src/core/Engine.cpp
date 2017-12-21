@@ -1,65 +1,30 @@
 #pragma once
+#include <chrono>
+#include <functional>
+#include <stdio.h>
+#include <io.h>
+#include <fcntl.h>
+
 #include "Engine.hpp"
 #include "Include.hpp"
 #include "Time.hpp"
 #include "QPC.hpp"
 #include "Camera.hpp"
 #include "Renderer.hpp"
-#include <chrono>
 #include "Font.hpp"
 #include "Text.hpp"
-#include <functional>
 #include "AssetManager.hpp"
 #include "Billboard.hpp"
 #include "World.hpp"
-#include "ui/UILabel.hpp"
-#include "ui/UIButton.hpp"
 #include "Console.hpp"
 #include "Tweaks.hpp"
-#include <stdio.h>
-#include <io.h>
-#include <fcntl.h>
 
 #include "ui/RenderConfigWindow.hpp"
 #include "ui/ProfilingWindow.hpp"
 #include "ui/WorldEditWindow.hpp"
 
-FT_Library Engine::ftLib;
-HINSTANCE Engine::instance;
-std::mt19937_64 Engine::rand;
-Engine::EngineState Engine::engineState;
-Camera Engine::cam;
-Time Engine::deltaTime;
-Renderer* Engine::r;
-QPC Engine::qpc;
-UIM Engine::uim;
-char Engine::workingDirectory[MAX_PATH];
-u32 Engine::workingDirectoryLength;
-UIWindowManager Engine::uiwm;
-AssetManager Engine::assets;
-World* Engine::world;
-float Engine::programTime = 0;
-Window Engine::window;
-bool Engine::consoleOpen;
-Log Engine::engineLog;
-//Console Engine::console;
-PhysicsWorld Engine::physicsWorld;
-EngineConfig Engine::cfg;
-float Engine::linear = 0.001;
-float Engine::quad = 0.001;
-
-Profiler Engine::profiler;
-
+// Lambda for passing functions to the profiler
 #define CALL(name) []() -> void { Engine::##name##(); }
-
-float Engine::tau;
-float Engine::damping;
-
-const s32 EngineConfig::RenderConfig::validResolutionsRaw[2][NUM_VALID_RESOLUTIONS] =
-{
-	{3840 , 1920, 1600, 1536, 1366, 1280, 1024, 960, 848 },
-	{2160 , 1080, 900,  864,  768 , 720 , 576 , 540, 480 },
-};
 
 int main()
 {
@@ -151,7 +116,7 @@ void Engine::mainLoop(int resolutionIndex)
 
 	physicsWorld.createGroundPlane();
 
-	for (int i = 0; i < 40; ++i)
+	for (int i = 0; i < 5; ++i)
 	{
 		auto instance = world->addModelInstance("pbrsphere");
 		instance->setInitialPosition(glm::fvec3(50, 10 + (25 * i), 0));
@@ -164,7 +129,7 @@ void Engine::mainLoop(int resolutionIndex)
 			instance->overwriteMaterial(0,0,assets.getMaterial("greasymetal"));
 	}
 
-	for (int i = 0; i < 40; ++i)
+	for (int i = 0; i < 5; ++i)
 	{
 		auto instance = world->addModelInstance("hollowbox");
 		instance->setInitialPosition(glm::fvec3(-50, 20 + (50 * i), 0));
@@ -463,8 +428,6 @@ void EngineConfig::KeyBindConfig::loadKeyBinds()
 
 void EngineConfig::KeyBindConfig::initialiseFunctionBindingConfig()
 {
-	// If this was jai, we could generate this list automatically at compilation time from functions that we mark with some label or metadata
-
 	functionNames["escape"] = escapePress;
 	functionNames["toggle_textbounds"] = CFG_FUNC(render.toggleDrawTextBounds);
 	functionNames["toggle_console"] = CFG_FUNC(render.toggleDrawConsole);
@@ -519,3 +482,38 @@ void EngineConfig::RenderConfig::CameraConfig::setFOV(float set)
 }
 
 #undef CALL
+
+// Static vars
+
+const s32 EngineConfig::RenderConfig::validResolutionsRaw[2][NUM_VALID_RESOLUTIONS] =
+{
+	{ 3840 , 1920, 1600, 1536, 1366, 1280, 1024, 960, 848 },
+	{ 2160 , 1080, 900,  864,  768 , 720 , 576 , 540, 480 },
+};
+
+FT_Library Engine::ftLib;
+HINSTANCE Engine::instance;
+std::mt19937_64 Engine::rand;
+Engine::EngineState Engine::engineState;
+Camera Engine::cam;
+Time Engine::deltaTime;
+Renderer* Engine::r;
+QPC Engine::qpc;
+UIM Engine::uim;
+char Engine::workingDirectory[MAX_PATH];
+u32 Engine::workingDirectoryLength;
+UIWindowManager Engine::uiwm;
+AssetManager Engine::assets;
+World* Engine::world;
+float Engine::programTime = 0;
+Window Engine::window;
+bool Engine::consoleOpen;
+Log Engine::engineLog;
+//Console Engine::console;
+PhysicsWorld Engine::physicsWorld;
+EngineConfig Engine::cfg;
+Profiler Engine::profiler;
+float Engine::linear = 0.001;
+float Engine::quad = 0.001;
+float Engine::tau;
+float Engine::damping;

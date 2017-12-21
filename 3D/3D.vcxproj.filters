@@ -368,9 +368,6 @@
     <ClCompile Include="src\renderer\Renderer.cpp">
       <Filter>Source Files\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="src\renderer\Shader.cpp">
-      <Filter>Source Files\Renderer</Filter>
-    </ClCompile>
     <ClCompile Include="src\renderer\Texture.cpp">
       <Filter>Source Files\Renderer</Filter>
     </ClCompile>
@@ -418,6 +415,9 @@
     </ClCompile>
     <ClCompile Include="src\util\ConfigParser.cpp">
       <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="src\shader\Shader.cpp">
+      <Filter>Source Files\Shader</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

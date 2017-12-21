@@ -331,8 +331,8 @@
     <ClCompile Include="src\renderer\Lights.cpp" />
     <ClCompile Include="src\renderer\MaterialLibrary.cpp" />
     <ClCompile Include="src\renderer\Renderer.cpp" />
-    <ClCompile Include="src\renderer\Shader.cpp" />
     <ClCompile Include="src\renderer\Texture.cpp" />
+    <ClCompile Include="src\shader\Shader.cpp" />
     <ClCompile Include="src\ui\UIButton.cpp" />
     <ClCompile Include="src\ui\UIElement.cpp" />
     <ClCompile Include="src\ui\UIInputField.cpp" />

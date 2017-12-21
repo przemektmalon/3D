@@ -6,10 +6,10 @@ class GLBufferObject
 {
 public:
 	GLBufferObject() {
-		create();
+		//create();
 	}
 	~GLBufferObject() { 
-		destroy();
+		//destroy();
 	}
 
 	void create()
@@ -78,7 +78,7 @@ protected:
 class VBO : public GLBufferObject
 {
 public:
-	VBO() : GLBufferObject() {}
+	VBO() {}
 	~VBO() {}
 
 	inline void bindBase(GLuint pIndex, GLenum pBuffer = GL_ARRAY_BUFFER)
@@ -100,7 +100,7 @@ public:
 class SSBO : public GLBufferObject
 {
 public:
-	SSBO() : GLBufferObject() {}
+	SSBO() {}
 	~SSBO() {}
 
 	inline void bindBase(GLuint pIndex, GLenum pBuffer = GL_SHADER_STORAGE_BUFFER)

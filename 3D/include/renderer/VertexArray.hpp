@@ -2,7 +2,7 @@
 #include "GLIncludes.hpp"
 #include "shaders\Shader.hpp"
 #include <string>
-#include <map>
+#include <unordered_map>
 
 class VAO
 {
@@ -19,6 +19,11 @@ public:
 
 		attribs.insert(std::make_pair(pName, Attrib(pName, pSize, pType)));
 		totalSize += pSize;
+	}
+
+	void overwriteTotalSize(int pTotalSize)
+	{
+		totalSize = pTotalSize;
 	}
 
 	void enableFor(ShaderProgram& shader)
@@ -57,7 +62,7 @@ private:
 		GLenum type;
 	};
 
-	std::map<std::string,Attrib> attribs;
+	std::unordered_map<std::string,Attrib> attribs;
 	int totalSize;
 	GLuint GLID;
 

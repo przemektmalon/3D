@@ -64,16 +64,20 @@ void Renderer::render()
 	Engine::profiler.glEnd("gpuBuffer");
 
 	Engine::profiler.glTimeThis(
-		CALL(gBufferPass), "gBuffer");
+		CALL(gBufferPass), 
+		"gBuffer");
 	
 	Engine::profiler.glTimeThis(
-		CALL(shadowPass), "shadow");
+		CALL(shadowPass), 
+		"shadow");
 
 	Engine::profiler.glTimeThis(
-		CALL(ssaoPass), "ssao");
+		CALL(ssaoPass), 
+		"ssao");
 
 	Engine::profiler.glTimeThis(
-		CALL(shadingPass), "light");
+		CALL(shadingPass), 
+		"light");
 	
 	Engine::profiler.start("screen");
 
@@ -117,7 +121,8 @@ void Renderer::gBufferPass()
 
 	gBufferShaderTex.sendUniforms();
 
-	glBindVertexArray(Engine::assets.modelManager.regularBatch.vaoID);
+	Engine::assets.modelManager.regularBatch.vao.bind();
+	//glBindVertexArray(Engine::assets.modelManager.regularBatch.vaoID);
 
 	world->texHandleBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 3);
 	world->instanceTransformsBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 4);
@@ -156,7 +161,8 @@ void Renderer::shadowPass()
 		pointShadowPassShader.setLightPos(itr->gpuData->position);
 		pointShadowPassShader.sendUniforms();
 
-		glBindVertexArray(Engine::assets.modelManager.shadowVAO);
+		//glBindVertexArray(Engine::assets.modelManager.shadowVAO);
+		Engine::assets.modelManager.shadowVAO.bind();
 		world->drawIndirectBuffer[Regular].bind(GL_DRAW_INDIRECT_BUFFER);
 		world->instanceTransformsBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 1);
 
@@ -184,7 +190,8 @@ void Renderer::shadowPass()
 		spotShadowPassShader.setView(itr->view);
 		spotShadowPassShader.sendUniforms();
 
-		glBindVertexArray(Engine::assets.modelManager.shadowVAO);
+		//glBindVertexArray(Engine::assets.modelManager.shadowVAO);
+		Engine::assets.modelManager.shadowVAO.bind();
 		world->drawIndirectBuffer[Regular].bind(GL_DRAW_INDIRECT_BUFFER);
 		world->instanceTransformsBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 1);
 
@@ -319,7 +326,8 @@ void Renderer::screenPass()
 		wireShader->setUniform("wireColour", &col4);
 		wireShader->sendUniforms();
 
-		glBindVertexArray(Engine::assets.modelManager.shadowVAO);
+		//glBindVertexArray(Engine::assets.modelManager.shadowVAO);
+		Engine::assets.modelManager.shadowVAO.bind();
 		world->drawIndirectBuffer[Regular].bind(GL_DRAW_INDIRECT_BUFFER);
 		world->instanceTransformsBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 1);
 
@@ -327,6 +335,28 @@ void Renderer::screenPass()
 		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
+
+	if (Engine::cfg.render.drawAABB)
+	{
+
+
+		auto wireShader = shaderStore.getShader("wireframe");
+		wireShader->use();
+		wireShader->setUniform("proj", &activeCam->proj);
+		wireShader->setUniform("view", &activeCam->view);
+		float col = std::sin(Engine::programTime*10.f) + 1.f; col *= 0.05; col += 0.05f;
+		glm::fvec4 col4(1.f, 1.f, 0.f, col);
+		wireShader->setUniform("wireColour", &col4);
+		wireShader->sendUniforms();
+
+		//glBindVertexArray(Engine::assets.modelManager.shadowVAO);
+		Engine::assets.modelManager.shadowVAO.bind();
+		world->drawIndirectBuffer[Regular].bind(GL_DRAW_INDIRECT_BUFFER);
+		world->instanceTransformsBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 1);
+
+		glMultiDrawArraysIndirect(GL_TRIANGLES, 0, world->modelInstances.size(), 0);
+		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
 	}
 }
 
@@ -387,6 +417,8 @@ inline void Renderer::initialiseScreenFramebuffer()
 
 inline void Renderer::initialiseLights()
 {
+	shadowMatrixBuffer.create();
+
 	const int nr = NUM_POINT_LIGHTS;
 	for (int i = 0; i < nr; ++i)
 	{

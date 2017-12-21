@@ -4,11 +4,19 @@
 #include "Model.hpp"
 #include "Renderer.hpp"
 
-World::World() {
+World::World() 
+{
 	objectCount = 0; numTriLists[Regular] = 0; objectScopes.maxRegular = 1000; objectScopes.maxMultiTextured = 100;
 	numTriLists[1] = 0;
 	numTriLists[2] = 0;
 	numTriLists[3] = 0;
+	
+	for (int i = 0; i < DrawModesCount; ++i)
+	{
+		texHandleBuffer[i].create();
+		drawIndirectBuffer[i].create();
+		instanceTransformsBuffer[i].create();
+	}
 }
 
 SGNode* World::getWorldRootNode()

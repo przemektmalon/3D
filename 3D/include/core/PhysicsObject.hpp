@@ -2,6 +2,10 @@
 
 #include "btBulletDynamicsCommon.h"
 #include "MathIncludes.hpp"
+#include "BufferObjects.hpp"
+
+#undef min
+#undef max
 
 class ModelInstance;
 
@@ -51,6 +55,33 @@ public:
 	void setAngularDamping(float angular)
 	{
 		rigidBody->setDamping(rigidBody->getLinearDamping(), angular);
+	}
+
+	void updateGLAABB()
+	{
+		btVector3 minbt, maxbt;
+		collisionShape->getAabb(rigidBody->getWorldTransform(), minbt, maxbt);
+		glm::fvec3 min(minbt.x(), minbt.y(), minbt.z()), max(maxbt.x(), maxbt.y(), maxbt.z());
+		glm::fvec3 size(max.x - min.x, max.y - min.y, max.z - min.z);
+		float verts[] = {
+			min.x,			min.y,			min.z,
+			min.x + size.x, min.y,			min.z,
+			min.x + size.x, min.y + size.y, min.z,
+			min.x,			min.y + size.y, min.z,
+
+			min.x,			min.y + size.y, min.z + size.z,
+			min.x + size.x, min.y + size.y, min.z + size.z,
+			min.x + size.x, min.y,			min.z + size.z,
+			min.x,			min.y,			min.z + size.z,
+
+			min.x,			min.y,			min.z,
+			min.x + size.x, min.y,			min.z,
+			min.x + size.x, min.y,			min.z + size.z,
+			min.x + size.x, min.y + size.y,	min.z + size.z,
+			min.x + size.x,	min.y + size.y,	min.z
+		};
+
+		//aabb.bufferData(sizeof(verts), verts, GL_STREAM_DRAW);
 	}
 
 	btRigidBody* rigidBody;
