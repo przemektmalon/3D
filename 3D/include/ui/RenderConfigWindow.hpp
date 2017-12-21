@@ -8,7 +8,7 @@
 
 UIWindow* createRenderConfigWindow()
 {
-	auto win = new UIWindow("Render Config", irect(0, 0, 300, 350), 4, &Engine::window);
+	auto win = new UIWindow("Render Config", irect(0, 0, 300, 380), 4, &Engine::window);
 
 	Text2D::TextStyle styleA(Engine::assets.getFont("clearsansb"), 16);
 	styleA.textOriginPreDef = Text2D::MiddleMiddle;
@@ -28,7 +28,7 @@ UIWindow* createRenderConfigWindow()
 	C_MULTITAB(tab, win);
 	tab.setName("tab");
 	tab.setPosition(glm::fvec2(15, 60));
-	tab.setDimensions(glm::fvec2(270, 280));
+	tab.setDimensions(glm::fvec2(270, 310));
 	tab.addTab("Render");
 	tab.addTab("SSAO");
 	tab.addTab("GBuffer");
@@ -94,13 +94,25 @@ UIWindow* createRenderConfigWindow()
 		Engine::cfg.render.toggleDrawWireframe();
 	});
 
+	C_BUTTON(butToggleAABB, win);
+	butToggleAABB.setName("aabb");
+	butToggleAABB.setSize(glm::fvec2(260, 30));
+	butToggleAABB.getText().setStyle(styleA);
+	butToggleAABB.getText().setCharSize(18);
+	butToggleAABB.setString("Toggle AABB");
+	butToggleAABB.setPosition(glm::fvec2(20, 130));
+	butToggleAABB.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
+		UIButton* _this = (UIButton*)__this;
+		Engine::cfg.render.toggleDrawAABB();
+	});
+
 	C_BUTTON(butToggleVSync, win);
 	butToggleVSync.setName("vsync");
 	butToggleVSync.setSize(glm::fvec2(260, 30));
 	butToggleVSync.getText().setStyle(styleA);
 	butToggleVSync.getText().setCharSize(18);
 	butToggleVSync.setString("Toggle vertical sync");
-	butToggleVSync.setPosition(glm::fvec2(20, 130));
+	butToggleVSync.setPosition(glm::fvec2(20, 170));
 	butToggleVSync.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
 		UIButton* _this = (UIButton*)__this;
 		Engine::cfg.render.toggleVSync();
@@ -112,7 +124,7 @@ UIWindow* createRenderConfigWindow()
 	butReloadShaders.getText().setStyle(styleA);
 	butReloadShaders.getText().setCharSize(18);
 	butReloadShaders.setString("Reload shaders");
-	butReloadShaders.setPosition(glm::fvec2(20, 170));
+	butReloadShaders.setPosition(glm::fvec2(20, 210));
 	butReloadShaders.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
 		UIButton* _this = (UIButton*)__this;
 		Engine::cfg.render.reloadAllShaders();
@@ -124,7 +136,7 @@ UIWindow* createRenderConfigWindow()
 	butScreenshot.getText().setStyle(styleA);
 	butScreenshot.getText().setCharSize(18);
 	butScreenshot.setString("Screenshot");
-	butScreenshot.setPosition(glm::fvec2(20, 210));
+	butScreenshot.setPosition(glm::fvec2(20, 250));
 	butScreenshot.setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
 		UIButton* _this = (UIButton*)__this;
 		Engine::cfg.render.screenshot();
@@ -136,7 +148,7 @@ UIWindow* createRenderConfigWindow()
 	sliExposure.valType = UISlider::Float;
 	sliExposure.setLimits(glm::fvec2(0.1f, 70.f));
 	sliExposure.value.f = 50.f;
-	sliExposure.init(glm::fvec2(20, 250), 260);
+	sliExposure.init(glm::fvec2(20, 285), 260);
 	sliExposure.setUpdate([](UIWindow* win, UIElement* __this) -> void {
 		UISlider* _this = (UISlider*)__this;
 		Engine::cfg.render.camera.setExposure(_this->value.f);
@@ -148,7 +160,7 @@ UIWindow* createRenderConfigWindow()
 	sliFOV.valType = UISlider::Float;
 	sliFOV.setLimits(glm::fvec2(10.f, 150.f));
 	sliFOV.value.f = 90.f;
-	sliFOV.init(glm::fvec2(20, 290), 260);
+	sliFOV.init(glm::fvec2(20, 325), 260);
 	sliFOV.setUpdate([](UIWindow* win, UIElement* __this) -> void {
 		UISlider* _this = (UISlider*)__this;
 		Engine::cfg.render.camera.setFOV(_this->value.f);
@@ -319,6 +331,7 @@ UIWindow* createRenderConfigWindow()
 	tab.addTabElement("SSAO", sliSSAOSpiPtr);
 
 	tab.addTabElement("Render", butToggleWirePtr);
+	tab.addTabElement("Render", butToggleAABBPtr);
 	tab.addTabElement("Render", butToggleVSyncPtr);
 	tab.addTabElement("Render", butReloadShadersPtr);
 	tab.addTabElement("Render", butScreenshotPtr);

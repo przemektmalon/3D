@@ -159,6 +159,7 @@ public:
 	Model* model;
 	SGNode* sgNode;
 	PhysicsObject* physicsObject;
+	u32 id;
 
 	std::vector<std::vector<MaterialMeta>> materialOverwrite;
 };

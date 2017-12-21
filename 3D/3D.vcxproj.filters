@@ -419,5 +419,8 @@
     <ClCompile Include="src\shader\Shader.cpp">
       <Filter>Source Files\Shader</Filter>
     </ClCompile>
+    <ClCompile Include="src\core\PhysicsObject.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

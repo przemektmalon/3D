@@ -20,53 +20,23 @@ void GPUModelManager::init()
 	regularBatch.vao.addAttrib("t", 2, GL_FLOAT);
 	regularBatch.vao.enableFor(Engine::r->gBufferShaderTex);
 
-	/*glGenVertexArrays(1, &regularBatch.vaoID);
-	glBindVertexArray(regularBatch.vaoID);
-
-	glGenBuffers(1, &regularBatch.vboID);
-	glBindBuffer(GL_ARRAY_BUFFER, regularBatch.vboID);
-
-	glBufferData(GL_ARRAY_BUFFER, MAX_BATCH_SIZE, NULL, GL_STATIC_DRAW);
-
-	regularBatch.length = 0;
-
-	auto posAttrib = glGetAttribLocation(program->getGLID(), "p");
-	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
-	glEnableVertexAttribArray(posAttrib);
-
-	auto norAttrib = glGetAttribLocation(program->getGLID(), "n");
-	glVertexAttribPointer(norAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(norAttrib);
-
-	auto texAttrib = glGetAttribLocation(program->getGLID(), "t");
-	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(6 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(texAttrib);
-
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);*/
-
 	shadowVAO.create();
 	shadowVAO.bind();
 	shadowVAO.addAttrib("p", 3, GL_FLOAT);
 	shadowVAO.overwriteTotalSize(8);
 	shadowVAO.enableFor(Engine::r->pointShadowPassShader);
 
-	/*auto program2 = &Engine::r->pointShadowPassShader;
-	program2->use();
+	aabbBatch.vao.create();
+	aabbBatch.vao.bind();
 
-	glGenVertexArrays(1, &shadowVAO);
-	glBindVertexArray(shadowVAO);
+	aabbBatch.vbo.create();
+	aabbBatch.vbo.bind();
 
-	glBindBuffer(GL_ARRAY_BUFFER, regularBatch.vboID);
+	aabbBatch.vbo.bufferData(MAX_BATCH_COUNT * sizeof(PhysicsObject::aabbLines), NULL, GL_STREAM_DRAW);
+	aabbBatch.length = 0;
 
-	posAttrib = glGetAttribLocation(program2->getGLID(), "p");
-	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
-	glEnableVertexAttribArray(posAttrib);
-
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	program2->stop();*/
+	aabbBatch.vao.addAttrib("p", 3, GL_FLOAT);
+	aabbBatch.vao.enableFor(*Engine::r->shaderStore.getShader("wireframe"));
 }
 
 void GPUModelManager::pushModelToBatch(Model& pModel)
@@ -92,23 +62,35 @@ void GPUModelManager::pushModelToBatch(Model& pModel)
 			batch.dataSizeInBytes[batch.length] = itr2->getDataSizeInBytes();
 
 			batch.vao.bind();
-			//glBindVertexArray(batch.vaoID);
 
 			batch.vbo.bind();
-			//glBindBuffer(GL_ARRAY_BUFFER, batch.vboID);
 
 			batch.vbo.bufferSubData(size, batch.dataSizeInBytes[batch.length], batch.data[batch.length]);
-			//glBufferSubData(GL_ARRAY_BUFFER, size, batch.dataSizeInBytes[batch.length], batch.data[batch.length]);
-
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
-			glBindVertexArray(0);
 
 			itr2->renderMeta.batchPtr = &batch;
 			itr2->renderMeta.batchIndex = batch.length;
 
 			size += batch.dataSizeInBytes[batch.length];
+			
 			++batch.length;
 		}
 	}
 }
+
+void GPUModelManager::pushInstanceAABB(ModelInstance& pModel)
+{
+	auto& batch = aabbBatch;
+
+	auto prevFirst = batch.length == 0 ? 0 : batch.firsts[batch.length - 1];
+	auto prevCount = batch.length == 0 ? 0 : batch.counts[batch.length - 1];
+
+	batch.firsts[batch.length] = prevFirst + prevCount;
+	batch.counts[batch.length] = sizeof(pModel.physicsObject->aabbLines) / sizeof(glm::fvec3);
+	batch.data[batch.length] = pModel.physicsObject->aabbLines;
+	batch.dataSizeInBytes[batch.length] = sizeof(pModel.physicsObject->aabbLines);
+
+	++batch.length;
+}
+
+
 

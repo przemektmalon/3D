@@ -4,12 +4,14 @@
 #include "Camera.hpp"
 #include "Model.hpp"
 #include "Renderer.hpp"
+#include "AssetManager.hpp"
 
 void PhysicsWorld::createGroundPlane()
 {
 	auto i = Engine::world->addModelInstance("ground");
 	i->makePhysicsObject();
 	i->setScale(10.f);
+	Engine::assets.modelManager.pushInstanceAABB(*i);
 }
 
 void PhysicsWorld::updateModels()

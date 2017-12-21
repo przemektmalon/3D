@@ -311,6 +311,7 @@
     <ClCompile Include="src\core\Console.cpp" />
     <ClCompile Include="src\core\Engine.cpp" />
     <ClCompile Include="src\core\Event.cpp" />
+    <ClCompile Include="src\core\PhysicsObject.cpp" />
     <ClCompile Include="src\core\PhysicsWorld.cpp" />
     <ClCompile Include="src\core\Profiler.cpp" />
     <ClCompile Include="src\core\UserInputManager.cpp" />

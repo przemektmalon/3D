@@ -98,7 +98,6 @@ public:
 	FBO fboShadow;
 	
 	// Vertex storage for rendering to window
-	//GLuint vaoQuad;
 	VAO vaoQuad;
 	VBO vboQuad;
 	VAO vaoQuadViewRays;

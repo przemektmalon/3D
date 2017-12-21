@@ -23,6 +23,8 @@ public:
 		collisionShape->calculateLocalInertia(mass, inertia);
 
 		rigidBody = new btRigidBody(mass, motionState, collisionShape, inertia);
+
+		updateGLAABB();
 	}
 
 	void setMass(float pMass)
@@ -57,32 +59,7 @@ public:
 		rigidBody->setDamping(rigidBody->getLinearDamping(), angular);
 	}
 
-	void updateGLAABB()
-	{
-		btVector3 minbt, maxbt;
-		collisionShape->getAabb(rigidBody->getWorldTransform(), minbt, maxbt);
-		glm::fvec3 min(minbt.x(), minbt.y(), minbt.z()), max(maxbt.x(), maxbt.y(), maxbt.z());
-		glm::fvec3 size(max.x - min.x, max.y - min.y, max.z - min.z);
-		float verts[] = {
-			min.x,			min.y,			min.z,
-			min.x + size.x, min.y,			min.z,
-			min.x + size.x, min.y + size.y, min.z,
-			min.x,			min.y + size.y, min.z,
-
-			min.x,			min.y + size.y, min.z + size.z,
-			min.x + size.x, min.y + size.y, min.z + size.z,
-			min.x + size.x, min.y,			min.z + size.z,
-			min.x,			min.y,			min.z + size.z,
-
-			min.x,			min.y,			min.z,
-			min.x + size.x, min.y,			min.z,
-			min.x + size.x, min.y,			min.z + size.z,
-			min.x + size.x, min.y + size.y,	min.z + size.z,
-			min.x + size.x,	min.y + size.y,	min.z
-		};
-
-		//aabb.bufferData(sizeof(verts), verts, GL_STREAM_DRAW);
-	}
+	void updateGLAABB();
 
 	btRigidBody* rigidBody;
 	btCollisionShape* collisionShape;
@@ -91,4 +68,5 @@ public:
 	btScalar mass;
 
 	ModelInstance* instance;
+	float aabbLines[48];
 };

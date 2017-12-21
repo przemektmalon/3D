@@ -247,8 +247,8 @@ void ModelInstance::setScale(float scale)
 void ModelInstance::makePhysicsObject(btCollisionShape * collisionShape, float mass)
 {
 	physicsObject = new PhysicsObject();
-	physicsObject->create(sgNode->transform.getTranslation(), sgNode->transform.getQuat(), collisionShape, mass);
 	physicsObject->instance = this;
+	physicsObject->create(sgNode->transform.getTranslation(), sgNode->transform.getQuat(), collisionShape, mass);
 	Engine::physicsWorld.addRigidBody(physicsObject);
 }
 
@@ -363,10 +363,10 @@ void ModelInstance::makePhysicsObject()
 	}
 
 	physicsObject = new PhysicsObject();
+	physicsObject->instance = this;
 	physicsObject->create(sgNode->transform.getTranslation(), sgNode->transform.getQuat(), colShape, mass);
 	physicsObject->setDamping(linearDamping, angularDamping);
 	physicsObject->setFriction(friction);
 	physicsObject->setRestitution(restitution);
-	physicsObject->instance = this;
 	Engine::physicsWorld.addRigidBody(physicsObject);
 }

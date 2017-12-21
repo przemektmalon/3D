@@ -17,6 +17,8 @@ World::World()
 		drawIndirectBuffer[i].create();
 		instanceTransformsBuffer[i].create();
 	}
+	aabbIndirectBuffer.create();
+	aabbTransformsBuffer.create();
 }
 
 SGNode* World::getWorldRootNode()
@@ -26,14 +28,15 @@ SGNode* World::getWorldRootNode()
 
 ModelInstance* World::addModelInstance(Model* model, SGNode* parent)
 {
-	++objectCount;
-
-	u32 instanceID = numTriLists[Regular];
+	u32 instanceID = objectCount;
 	numTriLists[Regular] += model->triLists.size();
 
 	auto inst = modelInstances.insert(std::make_pair(instanceID, ModelInstance())).first;
 	inst->second.setModel(model);
 	inst->second.sgNode = parent->addChild(SGNode());
+	inst->second.id = instanceID;
+
+	++objectCount;
 
 	return &inst->second;
 }
@@ -91,6 +94,9 @@ void World::initialiseGLBuffers()
 	drawIndirectBuffer[Shadow].bufferData((maxRegular + maxMultiTextured) * sizeof(GLCMD), 0, GL_STATIC_READ);
 	instanceTransformsBuffer[Shadow].bufferData((maxRegular + maxMultiTextured) * sizeof(u32), 0, GL_STATIC_READ);
 
+	aabbIndirectBuffer.bufferData((maxRegular + maxMultiTextured) * sizeof(GLCMD), 0, GL_STATIC_DRAW);
+	aabbTransformsBuffer.bufferData((maxRegular) * sizeof(float) * 16, 0, GL_STATIC_READ);
+
 	//instanceIDBuffer.bufferData(objectScopes.getTotalMaxObjects() * sizeof(u32), 0, GL_DYNAMIC_READ);
 }
 
@@ -110,7 +116,8 @@ void World::calculateGLMetrics()
 void World::updateGLTransforms()
 {
 	glm::fmat4* instanceTransformsRegular = (glm::fmat4*)instanceTransformsBuffer[Regular].mapRange(0, numTriLists[Regular] * sizeof(float) * 16, GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_WRITE_BIT);
-	u32 i = 0;
+	auto aabbTransform = (glm::fmat4*)aabbTransformsBuffer.mapRange(0, numTriLists[Regular] * sizeof(float) * 16, GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_WRITE_BIT);
+	u32 i = 0, j = 0;
 
 	for (auto itr = modelInstances.begin(); itr != modelInstances.end(); ++itr)
 	{
@@ -127,6 +134,9 @@ void World::updateGLTransforms()
 				lodLevel++;
 		}
 
+		aabbTransform[j] = glm::fmat4();
+		++j;
+
 		for (auto itr2 = itr->second.model->triLists[lodLevel].begin(); itr2 != itr->second.model->triLists[lodLevel].end(); ++itr2)
 		{
 			instanceTransformsRegular[i] = itr->second.sgNode->transform.getTransformMat();
@@ -135,6 +145,7 @@ void World::updateGLTransforms()
 	}
 
 	instanceTransformsBuffer[Regular].unmap();
+	aabbTransformsBuffer.unmap();
 }
 
 void World::updateGLBuffers()
@@ -142,7 +153,9 @@ void World::updateGLBuffers()
 	GLCMD* indirectReg = (GLCMD*)drawIndirectBuffer[Regular].mapRange(0, numTriLists[Regular] * sizeof(GLCMD), GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_WRITE_BIT);
 	glm::fmat4* instanceTransformsRegular = (glm::fmat4*)instanceTransformsBuffer[Regular].mapRange(0, numTriLists[Regular] * sizeof(float) * 16, GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_WRITE_BIT);
 	auto texHandle = (u64*)texHandleBuffer[Regular].mapRange(0, numTriLists[Regular] * sizeof(u64) * 6, GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_WRITE_BIT);
-	u32 i = 0;
+	auto aabb = (GLCMD*)aabbIndirectBuffer.mapRange(0, numTriLists[Regular] * sizeof(GLCMD), GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_WRITE_BIT);
+	auto aabbTransform = (glm::fmat4*)aabbTransformsBuffer.mapRange(0, numTriLists[Regular] * sizeof(float) * 16, GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_WRITE_BIT);
+	u32 i = 0, j = 0;
 
 	const GPUModelManager& mm = Engine::assets.modelManager;
 
@@ -165,6 +178,17 @@ void World::updateGLBuffers()
 		//	lodLevel--;
 
 		int triList = 0;
+
+		auto& aabbBatch = Engine::assets.modelManager.aabbBatch;
+
+		aabb[j].count = aabbBatch.counts[j];
+		aabb[j].instanceCount = 1;
+		aabb[j].first = aabbBatch.firsts[j];
+		aabb[j].baseInstance = 0;
+
+		aabbTransform[j] = glm::fmat4();
+
+		++j;
 
 		for (auto itr2 = model->triLists[lodLevel].begin(); itr2 != model->triLists[lodLevel].end(); ++itr2)
 		{
@@ -201,7 +225,7 @@ void World::updateGLBuffers()
 			if (matOverwrite.roughness.glTex)
 				texHandle[(6 * i) + 3] = matOverwrite.roughness.glTex->getHandle(Engine::r->defaultSampler.getGLID());
 
-			instanceTransformsRegular[i] = itr->second.sgNode->transform.getTransformMat();
+			instanceTransformsRegular[i] = itr->second.sgNode->transform.getTransformMat(); /// TODO: see if we can work out a way to not store this transform per trilist but instead per instance
 
 			++i;
 			++triList;
@@ -211,6 +235,8 @@ void World::updateGLBuffers()
 	drawIndirectBuffer[Regular].unmap();
 	instanceTransformsBuffer[Regular].unmap();
 	texHandleBuffer[Regular].unmap();
+	aabbIndirectBuffer.unmap();
+	aabbTransformsBuffer.unmap();
 
 	/*MeshGPUMetaMultiTextured* metaMultiTextured = (MeshGPUMetaMultiTextured*)objectMetaBuffer[MultiTextured].mapRange(0, numTriLists[MultiTextured] * sizeof(MeshGPUMetaMultiTextured), GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_WRITE_BIT);
 	glm::fmat4* instanceTransformsMultiTextured = (glm::fmat4*)instanceTransformsBuffer[MultiTextured].mapRange(0, numTriLists[MultiTextured] * sizeof(float) * 16, GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_WRITE_BIT);

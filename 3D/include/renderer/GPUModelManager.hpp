@@ -4,6 +4,7 @@
 #include "VertexArray.hpp"
 
 class Model;
+class ModelInstance;
 
 #define MAX_BATCH_COUNT 512
 #define MAX_BATCH_SIZE 1024*1024*128
@@ -20,9 +21,6 @@ public:
 
 	VBO vbo;
 	VAO vao;
-
-	//GLuint vboID;
-	//GLuint vaoID;
 };
 
 class GPUModelManager
@@ -34,6 +32,7 @@ public:
 	void init();
 
 	void pushModelToBatch(Model& pModel);
+	void pushInstanceAABB(ModelInstance& pModel);
 
 	DrawBatch regularBatch;
 	DrawBatch aabbBatch;

@@ -94,6 +94,7 @@ void Engine::mainLoop(int resolutionIndex)
 	cfg.render.ssao.sampleRadius = 10.f;
 	cfg.mouse.sensitivity = glm::fvec2(0.0035, 0.0035);
 	cfg.render.minimumLightConstant = 15000;
+	cfg.render.drawAABB = false;
 
 	r = new Renderer();
 	r->initialiseShaders();
@@ -122,6 +123,7 @@ void Engine::mainLoop(int resolutionIndex)
 		instance->setInitialPosition(glm::fvec3(50, 10 + (25 * i), 0));
 		instance->makePhysicsObject();
 		instance->setScale(rand() % 10 + 5);
+		assets.modelManager.pushInstanceAABB(*instance);
 		
 		if (i % 3 == 0)
 			instance->overwriteMaterial(0,0,assets.getMaterial("copper"));
@@ -135,6 +137,7 @@ void Engine::mainLoop(int resolutionIndex)
 		instance->setInitialPosition(glm::fvec3(-50, 20 + (50 * i), 0));
 		instance->makePhysicsObject();
 		instance->setScale(rand() % 15 + 10);
+		assets.modelManager.pushInstanceAABB(*instance);
 		
 		if (i % 3 == 0)
 			instance->overwriteMaterial(0, 0, assets.getMaterial("mahogany"));
