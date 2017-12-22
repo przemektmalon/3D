@@ -8,6 +8,16 @@ public:
 
 	std::unordered_map<std::string, UIElement*> elements;
 
+	UIElement* getElement(std::string pName)
+	{
+		for (auto& el : elements)
+		{
+			if (el.second->getName() == pName)
+				return el.second;
+		}
+		return nullptr;
+	}
+
 	virtual void update()
 	{
 		for (auto& el : elements)

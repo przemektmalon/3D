@@ -57,6 +57,22 @@ UIWindow::~UIWindow()
 
 }
 
+UIElement* UIWindow::getElement(std::string pName)
+{
+	for (auto& el : elements)
+	{
+		if (el.second->name == pName)
+			return el.second;
+		if (el.second->elementType == UIElement::MultiTab)
+		{
+			auto ret = ((UIMultiTab*)el.second)->getElement(pName);
+			if (ret)
+				return ret;
+		}
+	}
+	return nullptr;
+}
+
 void UIWindow::draw()
 {
 	glViewport(0, 0, windowArea.width, windowArea.height);

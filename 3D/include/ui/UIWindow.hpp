@@ -32,7 +32,7 @@ public:
 	}
 	void setTitle(std::string pTitle);
 	void addElement(UIElement* pEl);
-	UIElement* getElement(std::string pName) { return elements[pName]; }
+	UIElement* getElement(std::string pName);
 
 	glm::fmat4& getProj() { return proj; }
 
@@ -85,6 +85,8 @@ public:
 	}
 
 //private:
+
+	std::function<void(UIWindow*)> scriptsInitFunc;
 
 	irect windowArea;
 	irect elementArea;

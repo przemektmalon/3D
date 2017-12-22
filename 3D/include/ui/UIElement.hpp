@@ -73,7 +73,7 @@ public:
 	}
 
 	void setPosition(glm::fvec2 pPos) { position = pPos; }
-	void setDimensions(glm::fvec2 pDim) { dimensions = pDim; }
+	void setSize(glm::fvec2 pDim) { size = pDim; }
 
 	virtual void onEngineWindowResize(WindowEvent& pWindowEvent) {}
 	virtual void onParentWindowResize(WindowEvent& pWindowEvent) {}
@@ -93,7 +93,7 @@ public:
 
 	frect getBounds()
 	{
-		return frect(position.x, position.y, dimensions.x, dimensions.y);
+		return frect(position.x, position.y, size.x, size.y);
 	}
 
 	void setUpdate(std::function<void(UIWindow*, UIElement*)> pUpdate)
@@ -178,7 +178,7 @@ protected:
 	UIWindow* parentWindow;
 	
 	glm::fvec2 position;
-	glm::fvec2 dimensions;
+	glm::fvec2 size;
 
 	bool clicked;
 	bool hovered;

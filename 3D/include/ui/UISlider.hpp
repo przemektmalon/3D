@@ -16,12 +16,12 @@ public:
 	void init(glm::fvec2 pPosition, float pWidth)
 	{
 		position = pPosition;
-		dimensions.x = pWidth; dimensions.y = 40;
+		size.x = pWidth; size.y = 40;
 
 		descText.setPosition(glm::fvec2(position.x + 10, position.y));
 		
-		range.setBounds(irect(position.x, position.y + 25, dimensions.x, 10));
-		valueText.setPosition(glm::fvec2(position.x + dimensions.x - 10, position.y));
+		range.setBounds(irect(position.x, position.y + 25, size.x, 10));
+		valueText.setPosition(glm::fvec2(position.x + size.x - 10, position.y));
 
 		float ratio;
 
@@ -45,7 +45,7 @@ public:
 			break;
 		}
 
-		slider.setBounds(irect(position.x + (float(dimensions.x) * ratio), position.y + 17, 12, 24));
+		slider.setBounds(irect(position.x + (float(size.x) * ratio), position.y + 17, 12, 24));
 
 		valueText.setString(valString);
 		valueText.forceUpdate();

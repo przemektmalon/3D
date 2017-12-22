@@ -1,11 +1,14 @@
 #pragma once
 #include "UIWindow.hpp"
 #include "Event.hpp"
+#include <functional>
+#include "WindowCreator.hpp"
+
 
 class UIWindowManager
 {
 public:
-	UIWindowManager() {}
+	UIWindowManager();
 	~UIWindowManager() {}
 
 	void drawUIWindows()
@@ -21,6 +24,10 @@ public:
 
 		windows.insert(std::make_pair(uiw->getName(), uiw));
 	}
+
+	void loadUIWindows();
+
+	void reloadWindows();
 
 	UIWindow* getWindow(std::string pName)
 	{
@@ -81,5 +88,6 @@ public:
 private:
 
 	std::unordered_map<std::string,UIWindow*> windows;
+	std::unordered_map<std::string, std::function<void(UIWindow*)>> uiScripts;
 
 };

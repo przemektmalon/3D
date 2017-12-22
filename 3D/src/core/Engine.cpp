@@ -19,9 +19,10 @@
 #include "Console.hpp"
 #include "Tweaks.hpp"
 
-#include "ui/RenderConfigWindow.hpp"
-#include "ui/ProfilingWindow.hpp"
-#include "ui/WorldEditWindow.hpp"
+//#include "RenderConfigWindow.hpp"
+#include "ProfilingWindow.hpp"
+#include "WorldEditWindow.hpp"
+#include "WindowCreator.hpp"
 
 // Lambda for passing functions to the profiler
 #define CALL(name) []() -> void { Engine::##name##(); }
@@ -159,10 +160,10 @@ void Engine::mainLoop(int resolutionIndex)
 	tweak.bindVariable(Engine::linear, "linear", Tweaks::Floating);
 	tweak.bindVariable(Engine::quad, "quad", Tweaks::Floating);
 
-	uiwm.addWindow(createRenderConfigWindow());
 	uiwm.addWindow(createProfilingWindow());
-	//uiwm.addWindow(createWorldEditWindow());
 	cfg.world.togglePhysics();
+
+	uiwm.loadUIWindows();
 
 	while (engineState != Quitting) {
 		if (!window.processMessages()) 
@@ -435,6 +436,7 @@ void EngineConfig::KeyBindConfig::initialiseFunctionBindingConfig()
 	functionNames["toggle_textbounds"] = CFG_FUNC(render.toggleDrawTextBounds);
 	functionNames["toggle_console"] = CFG_FUNC(render.toggleDrawConsole);
 	functionNames["toggle_physics"] = CFG_FUNC(world.togglePhysics);
+	functionNames["reload_windows"] = CALL(uiwm.reloadWindows);
 }
 
 void EngineConfig::RenderConfig::SSSAOConfig::setFrameScale(float set)

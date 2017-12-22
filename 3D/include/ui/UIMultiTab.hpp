@@ -16,17 +16,28 @@ public:
 		tabElements[tab].elements.insert(std::make_pair(el->getName(), el));
 	}
 
+	UIElement* getElement(std::string pName)
+	{
+		for (auto& tab : tabElements)
+		{
+			auto ret = tab.second.getElement(pName);
+			if (ret != nullptr)
+				return ret;
+		}
+		return nullptr;
+	}
+
 	void setPosition(glm::fvec2 pos)
 	{
 		position = pos;
 		maxRightTab = pos.x;
-		back.setBounds(irect(position.x, position.y + 18, dimensions.x, dimensions.y));
+		back.setBounds(irect(position.x, position.y + 18, size.x, size.y));
 	}
 
-	void setDimensions(glm::fvec2 dim)
+	void setSize(glm::fvec2 pSize)
 	{
-		dimensions = dim;
-		back.setBounds(irect(position.x, position.y + 18, dimensions.x, dimensions.y - 18));
+		size = pSize;
+		back.setBounds(irect(position.x, position.y + 18, size.x, size.y - 18));
 	}
 
 	void forceUpdateAll()

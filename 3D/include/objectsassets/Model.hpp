@@ -1,5 +1,4 @@
 #pragma once
-#include "boost/tokenizer.hpp"
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"

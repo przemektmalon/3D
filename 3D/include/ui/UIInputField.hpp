@@ -16,7 +16,7 @@ public:
 		focused = false;
 
 		position = pos;
-		dimensions = glm::fvec2(width, 24);
+		size = glm::fvec2(width, 24);
 
 		rect.setBounds(irect(pos.x, pos.y, width, 24));
 		rect.setColour(glm::fvec4(0.35, 0.35, 0.35, 0.8));

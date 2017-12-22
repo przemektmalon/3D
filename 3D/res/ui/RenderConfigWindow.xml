@@ -1,0 +1,60 @@
+<window name="Render Config" pos="0 0" size="300 380" border="4" movable="true">
+
+	<element type="multitab" name="tab" position="15 60" size="270 310" currenttab="Render">
+		<tab name="Render"></tab>
+		<tab name="SSAO"></tab>
+		<tab name="GBuffer"></tab>
+		<tab name="Resolution"></tab>
+	</element>
+
+	<element type="label" name="fps" text="FPS: " position="15 30" fontsize="16" fontcolour="1 1 1"></element>
+
+	<element type="button" tab="tab" tabsection="Render" name="togglewire" position="20 90" size="260 30" fontsize="18" fontcolour="1 1 1" text="Toggle Wireframe"></element>
+
+	<element type="button" tab="tab" tabsection="Render" name="toggleaabb" position="20 130" size="260 30" fontsize="18" fontcolour="1 1 1" text="Toggle AABB"></element>
+
+	<element type="button" tab="tab" tabsection="Render" name="togglevsync" position="20 170" size="260 30" fontsize="18" fontcolour="1 1 1" text="Toggle Vertical Sync"></element>
+
+	<element type="button" tab="tab" tabsection="Render" name="reloadshaders" position="20 210" size="260 30" fontsize="18" fontcolour="1 1 1" text="Reload Shaders"></element>
+
+	<element type="button" tab="tab" tabsection="Render" name="screenshot" position="20 250" size="260 30" fontsize="18" fontcolour="1 1 1" text="Screenshot"></element>
+
+	<element type="slider" tab="tab" tabsection="Render" name="exposure" position="20 285" width="260" fontsize="16" text="Exposure" valuetype="float" limits="0.1 70" value="50"></element>
+
+	<element type="slider" tab="tab" tabsection="Render" name="fov" position="20 325" width="260" fontsize="16" text="FOV" valuetype="float" limits="10 150" value="90"></element>
+
+	<element type="slider" tab="tab" tabsection="SSAO" name="ssaorad" position="20 90" width="260" fontsize="16" text="SSAO Radius" valuetype="float" limits="0.1 40" value="15"></element>
+
+	<element type="slider" tab="tab" tabsection="SSAO" name="ssaoint" position="20 130" width="260" fontsize="16" text="SSAO Intensity" valuetype="float" limits="0.1 40" value="4"></element>
+
+	<element type="slider" tab="tab" tabsection="SSAO" name="ssaosamples" position="20 170" width="260" fontsize="16" text="SSAO Samples" valuetype="integer" limits="5 200" value="43"></element>
+
+	<element type="slider" tab="tab" tabsection="SSAO" name="ssaospirals" position="20 210" width="260" fontsize="16" text="SSAO Spirals" valuetype="integer" limits="0 200" value="9"></element>
+
+	<element type="button" tab="tab" tabsection="GBuffer" name="shaded" position="20 90" size="260 30" fontsize="18" fontcolour="1 1 1" text="Shaded"></element>
+
+	<element type="button" tab="tab" tabsection="GBuffer" name="albedo" position="20 130" size="260 30" fontsize="18" fontcolour="1 1 1" text="Albedo"></element>
+
+	<element type="button" tab="tab" tabsection="GBuffer" name="normal" position="20 170" size="260 30" fontsize="18" fontcolour="1 1 1" text="Normal"></element>
+
+	<element type="button" tab="tab" tabsection="GBuffer" name="ssao" position="20 210" size="260 30" fontsize="18" fontcolour="1 1 1" text="SSAO"></element>
+
+	<element type="button" tab="tab" tabsection="GBuffer" name="depth" position="20 250" size="260 30" fontsize="18" fontcolour="1 1 1" text="Depth"></element>
+
+	<element type="button" tab="tab" tabsection="Resolution" name="res0" position="20 90" size="125 30" fontsize="18" fontcolour="1 1 1" text="3840x2160"></element>
+
+	<element type="button" tab="tab" tabsection="Resolution" name="res1" position="155 90" size="125 30" fontsize="18" fontcolour="1 1 1" text="1920x1080"></element>
+
+	<element type="button" tab="tab" tabsection="Resolution" name="res2" position="20 130" size="125 30" fontsize="18" fontcolour="1 1 1" text="1600x900"></element>
+
+	<element type="button" tab="tab" tabsection="Resolution" name="res3" position="155 130" size="125 30" fontsize="18" fontcolour="1 1 1" text="1546x864"></element>
+
+	<element type="button" tab="tab" tabsection="Resolution" name="res5" position="20 170" size="125 30" fontsize="18" fontcolour="1 1 1" text="1280x720"></element>
+
+	<element type="button" tab="tab" tabsection="Resolution" name="res6" position="155 170" size="125 30" fontsize="18" fontcolour="1 1 1" text="1024x576"></element>
+
+	<element type="button" tab="tab" tabsection="Resolution" name="res7" position="20 210" size="125 30" fontsize="18" fontcolour="1 1 1" text="960x540"></element>
+
+	<element type="button" tab="tab" tabsection="Resolution" name="res8" position="155 210" size="125 30" fontsize="18" fontcolour="1 1 1" text="848x480"></element>
+
+</window>

@@ -285,6 +285,7 @@
     <ClInclude Include="include\ui\UIVertexStore.hpp" />
     <ClInclude Include="include\ui\UIWindow.hpp" />
     <ClInclude Include="include\ui\UIWindowManager.hpp" />
+    <ClInclude Include="include\ui\WindowCreator.hpp" />
     <ClInclude Include="include\ui\WorldEditWindow.hpp" />
     <ClInclude Include="include\util\Bounds3D.hpp" />
     <ClInclude Include="include\util\ConfigParser.hpp" />
@@ -295,6 +296,7 @@
     <ClInclude Include="include\util\Transform.hpp" />
     <ClInclude Include="include\util\Types.hpp" />
     <ClInclude Include="include\util\Util.hpp" />
+    <ClInclude Include="include\util\XMLUtil.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Libs\bullet3\build\src\BulletCollision\BulletCollision.vcxproj">
@@ -344,6 +346,7 @@
     <ClCompile Include="src\ui\UISwitchButton.cpp" />
     <ClCompile Include="src\ui\UIWindow.cpp" />
     <ClCompile Include="src\ui\UIWindowManager.cpp" />
+    <ClCompile Include="src\ui\WindowCreator.cpp" />
     <ClCompile Include="src\util\ConfigParser.cpp" />
     <ClCompile Include="src\util\Util.cpp" />
   </ItemGroup>

@@ -7,6 +7,8 @@
 #include "SceneGraph.hpp"
 #include "File.hpp"
 
+#include "boost/tokenizer.hpp"
+
 void Model::importModel(std::string pPath, u32 lod)
 {
 	Assimp::Importer import;
@@ -307,6 +309,8 @@ void ModelInstance::makePhysicsObject()
 		physicsInfoFile.fstream().seekg(0, std::ios::beg);
 
 		xmlString.assign((std::istreambuf_iterator<char>(physicsInfoFile.fstream())), std::istreambuf_iterator<char>());
+
+		physicsInfoFile.close();
 
 		rapidxml::xml_document<> doc;
 		doc.parse<0>(const_cast<char*>(xmlString.c_str()));
