@@ -131,6 +131,7 @@ UIWindow * WindowCreator::createWindow(std::string & specPath, std::function<voi
 			auto font = xmlToString(elNode->first_attribute("font"));
 			auto fontSize = xmlToNum<int>(elNode->first_attribute("fontsize"));
 			auto colour = xmlToVec<glm::fvec3>(elNode->first_attribute("fontcolour"));
+			auto textOriginStr = xmlToString(elNode->first_attribute("textorigin"));
 
 			Font* fontPtr;
 			if (font == "_NULL_")
@@ -138,8 +139,21 @@ UIWindow * WindowCreator::createWindow(std::string & specPath, std::function<voi
 
 			fontPtr = Engine::assets.getFont(font);
 
+			Text2D::Origin textOrigin = Text2D::MiddleMiddle;
+			if (textOriginStr != "_NULL_")
+			{
+				if (textOriginStr == "topleft")
+					textOrigin = Text2D::TopLeft;
+				else if (textOriginStr == "topright")
+					textOrigin = Text2D::TopRight;
+				else 
+					{} /// TODO: the rest of the origins
+			}
+
+
 			lbl->setName(name);
 			lbl->setPosition(pos);
+			lbl->setTextOrigin(textOrigin);
 			lbl->setSize(size);
 			lbl->setFont(fontPtr);
 			lbl->setColour(colour);

@@ -58,6 +58,9 @@
     <Filter Include="Header Files\ObjectsAssets">
       <UniqueIdentifier>{5b84c266-ed3a-4350-b559-0d61521f9da0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\UI\Windows">
+      <UniqueIdentifier>{e961f833-a2c7-4171-9e4b-c3e569082aa3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\shaders\BilateralBlurShader.hpp">
@@ -113,12 +116,6 @@
     </ClInclude>
     <ClInclude Include="include\shaders\TextShader.hpp">
       <Filter>Header Files\Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ui\ProfilingWindow.hpp">
-      <Filter>Header Files\UI\Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ui\RenderConfigWindow.hpp">
-      <Filter>Header Files\UI\Windows</Filter>
     </ClInclude>
     <ClInclude Include="include\ui\WorldEditWindow.hpp">
       <Filter>Header Files\UI\Windows</Filter>
@@ -312,6 +309,9 @@
     <ClInclude Include="include\util\XMLUtil.hpp">
       <Filter>Header Files\Util</Filter>
     </ClInclude>
+    <ClInclude Include="include\ui\WindowScripts.hpp">
+      <Filter>Header Files\UI\Windows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\Console.cpp">
@@ -430,6 +430,12 @@
     </ClCompile>
     <ClCompile Include="src\ui\WindowCreator.cpp">
       <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui\RenderConfigWindow.cpp">
+      <Filter>Source Files\UI\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui\ProfilingWindow.cpp">
+      <Filter>Source Files\UI\Windows</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -19,8 +19,6 @@
 #include "Console.hpp"
 #include "Tweaks.hpp"
 
-//#include "RenderConfigWindow.hpp"
-#include "ProfilingWindow.hpp"
 #include "WorldEditWindow.hpp"
 #include "WindowCreator.hpp"
 
@@ -160,10 +158,8 @@ void Engine::mainLoop(int resolutionIndex)
 	tweak.bindVariable(Engine::linear, "linear", Tweaks::Floating);
 	tweak.bindVariable(Engine::quad, "quad", Tweaks::Floating);
 
-	uiwm.addWindow(createProfilingWindow());
-	cfg.world.togglePhysics();
-
 	uiwm.loadUIWindows();
+	cfg.world.togglePhysics();
 
 	while (engineState != Quitting) {
 		if (!window.processMessages()) 

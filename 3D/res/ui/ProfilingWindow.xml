@@ -1,0 +1,19 @@
+<window name="Profiling" pos="1674 0" size="246 350" border="4" movable="true">
+
+	<element type="label" name="gpu" position="15 30" fontsize="16" fontcolour="1 1 1" textorigin="topleft"></element>
+
+	<element type="label" name="gbuffer" position="15 70" fontsize="16" fontcolour="1 1 1" textorigin="topleft"></element>
+
+	<element type="label" name="shadow" position="15 110" fontsize="16" fontcolour="1 1 1" textorigin="topleft"></element>
+
+	<element type="label" name="ssao" position="15 150" fontsize="16" fontcolour="1 1 1" textorigin="topleft"></element>
+
+	<element type="label" name="shading" position="15 190" fontsize="16" fontcolour="1 1 1" textorigin="topleft"></element>
+
+	<element type="label" name="screen" position="15 230" fontsize="16" fontcolour="1 1 1" textorigin="topleft"></element>
+
+	<element type="label" name="physics" position="15 270" fontsize="16" fontcolour="1 1 1" textorigin="topleft"></element>
+
+	<element type="label" name="frame" position="15 310" fontsize="16" fontcolour="1 1 1" textorigin="topleft"></element>
+
+</window>

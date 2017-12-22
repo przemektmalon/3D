@@ -269,8 +269,6 @@
     <ClInclude Include="include\shaders\Shape3DShader.hpp" />
     <ClInclude Include="include\shaders\SpotShadowPassShader.hpp" />
     <ClInclude Include="include\shaders\TextShader.hpp" />
-    <ClInclude Include="include\ui\ProfilingWindow.hpp" />
-    <ClInclude Include="include\ui\RenderConfigWindow.hpp" />
     <ClInclude Include="include\ui\UIAllElements.hpp" />
     <ClInclude Include="include\ui\UIButton.hpp" />
     <ClInclude Include="include\ui\UIConsole.hpp" />
@@ -286,6 +284,7 @@
     <ClInclude Include="include\ui\UIWindow.hpp" />
     <ClInclude Include="include\ui\UIWindowManager.hpp" />
     <ClInclude Include="include\ui\WindowCreator.hpp" />
+    <ClInclude Include="include\ui\WindowScripts.hpp" />
     <ClInclude Include="include\ui\WorldEditWindow.hpp" />
     <ClInclude Include="include\util\Bounds3D.hpp" />
     <ClInclude Include="include\util\ConfigParser.hpp" />
@@ -336,6 +335,8 @@
     <ClCompile Include="src\renderer\Renderer.cpp" />
     <ClCompile Include="src\renderer\Texture.cpp" />
     <ClCompile Include="src\shader\Shader.cpp" />
+    <ClCompile Include="src\ui\ProfilingWindow.cpp" />
+    <ClCompile Include="src\ui\RenderConfigWindow.cpp" />
     <ClCompile Include="src\ui\UIButton.cpp" />
     <ClCompile Include="src\ui\UIElement.cpp" />
     <ClCompile Include="src\ui\UIInputField.cpp" />

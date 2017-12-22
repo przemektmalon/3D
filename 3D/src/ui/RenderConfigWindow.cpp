@@ -1,12 +1,11 @@
-#pragma once
+#include "WindowScripts.hpp"
 #include "UIWindow.hpp"
 #include "UIAllElements.hpp"
 #include "Text.hpp"
 #include <string>
-
 #include "Engine.hpp"
 
-void renderConfigWindowScripts(UIWindow* win)
+void renderConfigWindowScripts(UIWindow * win)
 {
 	win->getElement("fps")->setUpdate([](UIWindow * win, UIElement* __this) -> void {
 		UILabel* _this = (UILabel*)__this;
@@ -114,6 +113,4 @@ void renderConfigWindowScripts(UIWindow* win)
 	win->getElement("res8")->setOnMouseUp([](UIWindow* win, UIElement* __this, MouseEvent& ke) -> void {
 		Engine::cfg.render.setResolution(8);
 	});
-
-
 }

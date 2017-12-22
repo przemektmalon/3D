@@ -1,7 +1,7 @@
 #pragma once
 #include "UIWindowManager.hpp"
 #include "Engine.hpp"
-#include "RenderConfigWindow.hpp"
+#include "WindowScripts.hpp"
 
 UIWindowManager::UIWindowManager()
 {
@@ -11,6 +11,7 @@ UIWindowManager::UIWindowManager()
 void UIWindowManager::loadUIWindows()
 {
 	addWindow(WindowCreator::createWindow("res/ui/RenderConfigWindow.xml", renderConfigWindowScripts));
+	addWindow(WindowCreator::createWindow("res/ui/ProfilingWindow.xml", profilingWindowScripts));
 }
 
 void UIWindowManager::reloadWindows()

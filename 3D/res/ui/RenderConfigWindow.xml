@@ -7,7 +7,7 @@
 		<tab name="Resolution"></tab>
 	</element>
 
-	<element type="label" name="fps" text="FPS: " position="15 30" fontsize="16" fontcolour="1 1 1"></element>
+	<element type="label" name="fps" text="FPS: " position="15 30" fontsize="16" fontcolour="1 1 1" textorigin="topleft"></element>
 
 	<element type="button" tab="tab" tabsection="Render" name="togglewire" position="20 90" size="260 30" fontsize="18" fontcolour="1 1 1" text="Toggle Wireframe"></element>
 
