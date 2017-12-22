@@ -88,6 +88,5 @@ public:
 private:
 
 	std::unordered_map<std::string,UIWindow*> windows;
-	std::unordered_map<std::string, std::function<void(UIWindow*)>> uiScripts;
 
 };

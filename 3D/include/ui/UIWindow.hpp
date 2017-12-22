@@ -87,6 +87,7 @@ public:
 //private:
 
 	std::function<void(UIWindow*)> scriptsInitFunc;
+	std::string windowSpecFile;
 
 	irect windowArea;
 	irect elementArea;

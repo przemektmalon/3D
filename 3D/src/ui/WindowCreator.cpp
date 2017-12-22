@@ -47,6 +47,7 @@ UIWindow * WindowCreator::createWindow(std::string & specPath, std::function<voi
 
 	UIWindow* w = new UIWindow(windowName, windowArea, borderWidth, &Engine::window);
 	w->scriptsInitFunc = scripts;
+	w->windowSpecFile = specPath;
 
 	if (movable == "true")
 		w->setMovable(true);

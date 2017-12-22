@@ -3,10 +3,7 @@
 #include "Engine.hpp"
 #include "WindowScripts.hpp"
 
-UIWindowManager::UIWindowManager()
-{
-	uiScripts["Render Config"] = renderConfigWindowScripts;
-}
+UIWindowManager::UIWindowManager() {}
 
 void UIWindowManager::loadUIWindows()
 {
@@ -16,11 +13,17 @@ void UIWindowManager::loadUIWindows()
 
 void UIWindowManager::reloadWindows()
 {
-	auto w = windows["Render Config"];
-	delete w;
-	w = WindowCreator::createWindow("res/ui/RenderConfigWindow.xml", renderConfigWindowScripts);
-	uiScripts["Render Config"](w);
-	windows["Render Config"] = w;
+	for (auto& w : windows)
+	{
+		auto spec = w.second->windowSpecFile;
+		auto scripts = w.second->scriptsInitFunc;
+		auto name = w.second->getName();
+
+		delete w.second;
+
+		auto hotload = WindowCreator::createWindow(spec, scripts);
+		windows[name] = hotload;
+	}
 }
 
 void UIWindowManager::checkMouseHovers()
