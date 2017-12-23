@@ -7,10 +7,26 @@
 class Tweaks
 {
 public:
-	Tweaks() {}
-	~Tweaks() {}
-
 	enum Type { Integer, Floating };
+
+private:
+	File file;
+	double updateTimeMS;
+	double curTimeMS;
+
+	struct TweakVariable
+	{
+		Type type;
+		void* data;
+		s32 size;
+	};
+
+
+	std::map<std::string, TweakVariable> vars;
+
+public:
+	Tweaks() : updateTimeMS(1), curTimeMS(0) {}
+	~Tweaks() {}
 
 	void setTweaksFile(std::string fileName)
 	{
@@ -115,19 +131,4 @@ private:
 
 		file.close();
 	}
-
-	File file;
-	double updateTimeMS;
-	double curTimeMS;
-
-	struct TweakVariable
-	{
-		Type type;
-		void* data;
-		s32 size;
-	};
-
-
-	std::map<std::string, TweakVariable> vars;
-
 };

@@ -1,5 +1,5 @@
 #pragma once
-#include "glm\common.hpp"
+#include "MathIncludes.hpp"
 
 #define min(a,b) a > b ? b : a
 #define max(a,b) a > b ? a : b

@@ -1,5 +1,5 @@
 #include "Text.hpp"
-#include "shaders\TextShader.hpp"
+#include "TextShader.hpp"
 #include "Renderer.hpp"
 
 void Text2D::setStyle(TextStyle& pStyle)

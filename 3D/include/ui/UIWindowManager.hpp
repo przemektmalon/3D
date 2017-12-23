@@ -38,7 +38,7 @@ public:
 	{
 		for (auto w : windows)
 		{
-			if (!w.second->isOpen())
+			if (w.second->isOpen())
 			{
 				switch (ev.type)
 				{

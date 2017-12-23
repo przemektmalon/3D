@@ -3,8 +3,31 @@
 
 class DeferredTileCullComputeShader : public ShaderProgram
 {
+private:
+	int viewPosLoc;
+	int viewRaysLoc;
+	int projLoc;
+	int viewLoc;
+	int exposureLoc;
+	int pointLightCountLoc;
+	int spotLightCountLoc;
+	int selectedIDLoc;
+	int renderModeLoc;
+
+	glm::fvec3 viewPos;
+	glm::fvec4 viewRays;
+	glm::fmat4 proj;
+	glm::fmat4 view;
+	float exposure;
+	int pointLightCount;
+	int spotLightCount;
+	int selectedID;
+	int renderMode;
+
 public:
-	DeferredTileCullComputeShader() 
+	DeferredTileCullComputeShader() : viewPosLoc(-1), viewRaysLoc(-1), projLoc(-1), viewLoc(-1), exposureLoc(-1), pointLightCountLoc(-1), spotLightCountLoc(-1),
+		selectedIDLoc(-1), renderModeLoc(-1), viewPos(0, 0, 0), viewRays(0, 0, 0, 0), proj(glm::fmat4()), view(glm::fmat4()), exposure(1),
+		pointLightCount(0), spotLightCount(0), selectedID(0), renderMode(0)
 	{
 		name = "pbrshader";
 		type = Compute;
@@ -108,27 +131,4 @@ public:
 		glUniform1ui(spotLightCountLoc, spotLightCount);
 		glUniform1i(renderModeLoc, renderMode);
 	}
-
-private:
-
-	int viewPosLoc;
-	int viewRaysLoc;
-	int projLoc;
-	int viewLoc;
-	int exposureLoc;
-	int pointLightCountLoc;
-	int spotLightCountLoc;
-	int selectedIDLoc;
-	int renderModeLoc;
-
-	glm::fvec3 viewPos;
-	glm::fvec4 viewRays;
-	glm::fmat4 proj;
-	glm::fmat4 view;
-	float exposure;
-	int pointLightCount;
-	int spotLightCount;
-	int selectedID;
-	int renderMode;
-
 };

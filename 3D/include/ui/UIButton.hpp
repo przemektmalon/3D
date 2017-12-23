@@ -5,6 +5,17 @@
 
 class UIButton : public UIElement
 {
+private:
+	/// TODO: Colour transitions for all classes 
+	/// make a class that takes the address of the colour to change and some parameters like time, start and end colour
+	glm::fvec4 backColour;
+	glm::fvec4 backHoverColour;
+	glm::fvec4 backClickColour;
+
+	Text2D text;
+	RectangleShape rect;
+	glm::fvec2 border;
+
 public:
 	UIButton() : UIElement(Button, nullptr) {}
 	UIButton(UIWindow* pParent);
@@ -123,17 +134,5 @@ public:
 	glm::ivec2 getPosition() { return rect.getBounds().topLeft; }
 	glm::ivec2 getTopLeft() { return getPosition(); }
 	glm::ivec2 getSize() { return rect.getBounds().size; }
-	
-private:
-
-	/// TODO: Colour transitions for all classes 
-	/// make a class that takes the address of the colour to change and some parameters like time, start and end colour
-	glm::fvec4 backColour;
-	glm::fvec4 backHoverColour;
-	glm::fvec4 backClickColour;
-
-	Text2D text;
-	RectangleShape rect;
-	glm::fvec2 border;
 };
 

@@ -1,8 +1,8 @@
-#include "ui/UIElement.hpp"
+#include "UIElement.hpp"
 #include "Engine.hpp"
 #include "Time.hpp"
 
-UIElement::UIElement(ElementType elType, UIWindow* pParent) : elementType(elType), parentWindow(pParent), updateInterval(1.f/30.f), updateClock(0.f)
+UIElement::UIElement(ElementType elType, UIWindow* pParent) : elementType(elType), parentWindow(pParent), updateInterval(1.f/30.f), updateClock(0.f), clicked(false), hovered(false), offClick(false), focused(false)
 {
 }
 

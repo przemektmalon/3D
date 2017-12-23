@@ -6,11 +6,11 @@
 #include "Log.hpp"
 #include <unordered_map>
 #include <ft2build.h>
-#include FT_FREETYPE_H;
+#include "freetype\freetype.h"
 
 #include "PhysicsWorld.hpp"
 
-#include "ui/UIWindowManager.hpp"
+#include "UIWindowManager.hpp"
 
 #include "Profiler.hpp"
 
@@ -150,17 +150,9 @@ public:
 class Engine
 {
 public:
-	Engine() {}
-	~Engine() {}
-
-	static void start(HINSTANCE pHInstance);
-	static void mainLoop(int resolutionIndex);
-	static void processGameFrame();
-	static void processMenuFrame();
-	static void stop();
-
+	static Window window;
+	static HINSTANCE instance;
 	static EngineConfig cfg;
-
 	static World* world;
 	static Renderer* r;
 	static AssetManager assets;
@@ -175,22 +167,23 @@ public:
 	static Time deltaTime;
 	static std::mt19937_64 rand;
 	static FT_Library ftLib;
-	
+
 	static float programTime;
-	
+
 	// Temporary controls
 	static float linear, quad;
 	static float tau, damping;
 	static bool consoleOpen;
-	
-//private:
 
 	enum EngineState { InGame, Menu, Quitting };
-
 	static EngineState engineState;
-	static Window window;
 
-	static HINSTANCE instance;
-	static char workingDirectory[MAX_PATH];
-	static u32 workingDirectoryLength;
+	Engine() {}
+	~Engine() {}
+
+	static void start(HINSTANCE pHInstance);
+	static void mainLoop(int resolutionIndex);
+	static void processGameFrame();
+	static void processMenuFrame();
+	static void stop();
 };

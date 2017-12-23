@@ -1,11 +1,14 @@
-#include "ui/UISlider.hpp"
-#include "ui/UIWindow.hpp"
+#include "UISlider.hpp"
+#include "UIWindow.hpp"
 #include "Engine.hpp"
 #include "Window.hpp"
 #include "AssetManager.hpp"
 
-UISlider::UISlider(UIWindow* pParent) : UIElement(Slider,pParent)
+UISlider::UISlider(UIWindow* pParent) : UIElement(Slider, pParent), isSliding(false)
 {
+	binding.f = nullptr;
+	value.i = 0;
+
 	slider.initOGL();
 	range.initOGL();
 	valueText.init();

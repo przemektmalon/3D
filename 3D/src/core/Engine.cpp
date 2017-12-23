@@ -37,10 +37,6 @@ void Engine::start(HINSTANCE pHInstance)
 
 	instance = pHInstance;
 
-	int bytes = GetModuleFileName(NULL, workingDirectory, MAX_PATH);
-	if (bytes == 0)
-		assert(0);
-
 	DWORD ws = 0;
 
 	if (BORDERLESS)
@@ -501,8 +497,6 @@ Time Engine::deltaTime;
 Renderer* Engine::r;
 QPC Engine::qpc;
 UIM Engine::uim;
-char Engine::workingDirectory[MAX_PATH];
-u32 Engine::workingDirectoryLength;
 UIWindowManager Engine::uiwm;
 AssetManager Engine::assets;
 World* Engine::world;

@@ -99,7 +99,10 @@ struct GPUTextureMeta
 class Texture2D : public Asset
 {
 public:
-	Texture2D() {}
+	ImageData data;
+	GLTexture2D* glData;
+
+	Texture2D() : glData(nullptr) {}
 	Texture2D(std::string& pPath, std::string& pName) : Asset(pPath, pName), glData(nullptr) {}
 	~Texture2D() {}
 
@@ -113,18 +116,17 @@ public:
 	char* getData() { 
 		return data.getData(); 
 	}
-
-	ImageData data;
-	GLTexture2D* glData;
-	//GPUTextureMeta gpuMeta;
 };
 
 class GLTexture
 {
+protected:
+	GLuint GLID;
+	GLuint64 handle;
+
 public:
-	GLTexture() : handle(0) {
-		GLID = 0;
-	}
+	GLTexture() : handle(0), GLID(0) {}
+
 	GLuint getGLID() { return GLID; }
 
 	virtual void bind(GLint pTextureUnit) = 0;
@@ -143,16 +145,21 @@ public:
 		glMakeTextureHandleResidentARB(handle);
 		return handle;
 	}
-
-protected:
-	GLuint GLID;
-	GLuint64 handle;
 };
 
 class GLTexture2D : public GLTexture
 {
 public:
-	GLTexture2D() : format(0), sizedFormat(0), mipLevels(0), streamImageData(nullptr), texture(nullptr) {}
+	Texture2D* texture;
+	ImageData* streamImageData;
+	s32 width, height;
+	GLenum type;
+	GLenum format;
+	GLenum sizedFormat;
+
+	s32 mipLevels;
+
+	GLTexture2D() : format(0), sizedFormat(0), type(0), mipLevels(0), width(0), height(0), streamImageData(nullptr), texture(nullptr) {}
 	~GLTexture2D() 
 	{
 		if (streamImageData)
@@ -270,20 +277,18 @@ public:
 
 		SOIL_save_image(filepath.c_str(), SOIL_SAVE_TYPE_BMP, w, h, 4, screenshot);
 	}
-
-	Texture2D* texture;
-	ImageData* streamImageData;
-	s32 width, height;
-	GLenum type;
-	GLenum format;
-	GLenum sizedFormat;
-	
-	s32 mipLevels;
 };
 
 class GLTextureArray2D : public GLTexture
 {
 public:
+	s32 width, height;
+	GLenum sizedFormat;
+	GLenum format;
+	s32 mipLevels;
+	u32 size;
+	std::vector<Texture2D*> textures;
+
 	GLTextureArray2D() : width(0), height(0), sizedFormat(0), format(0), mipLevels(0), size(0) {}
 	~GLTextureArray2D() {}
 
@@ -356,19 +361,23 @@ public:
 		glActiveTexture(GL_TEXTURE0 + pUnit);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, GLID);
 	}
-
-	s32 width, height;
-	GLenum sizedFormat;
-	GLenum format;
-	s32 mipLevels;
-	u32 size;
-	std::vector<Texture2D*> textures;
 };
 
 class GLTextureCube : public GLTexture
 {
+private:
+	GLint type;
+	GLint format;
+	GLint internalFormat;
+	GLint pixelAlignment;
+	GLuint sampler;
+	s32 width;
+	s32 height;
+	s32 mipLevels;
+	unsigned char* data;
+
 public:
-	GLTextureCube() {}
+	GLTextureCube() : type(0), format(0), internalFormat(0), pixelAlignment(0), sampler(0), width(0), height(0), mipLevels(0), data(nullptr) {}
 	~GLTextureCube() {}
 
 	void load()
@@ -454,23 +463,16 @@ public:
 	s32 getWidth() { return width; }
 	s32 getHeight() { return height; }
 	glm::ivec2 getResolution() { return glm::ivec2(width, height); }
-
-private:
-	GLint type;
-	GLint format;
-	GLint internalFormat;
-	GLint pixelAlignment;
-	GLuint sampler;
-	s32 width;
-	s32 height;
-	s32 mipLevels;
-	unsigned char* data;
 };
 
 class GLRenderbuffer
 {
+protected:
+	GLint internalFormat;
+	GLuint GLID;
+
 public:
-	GLRenderbuffer() {}
+	GLRenderbuffer() : internalFormat(0), GLID(0) {}
 	~GLRenderbuffer() {}
 
 	virtual void create(GLint pInternalFormat, s32 pWidth, s32 pHeight)
@@ -492,9 +494,4 @@ public:
 	}
 
 	GLuint getGLID() { return GLID; }
-
-protected:
-
-	GLint internalFormat;
-	GLuint GLID;
 };

@@ -1,5 +1,5 @@
 #pragma once
-#include "glm\common.hpp"
+#include "MathIncludes.hpp"
 #include "Event.hpp"
 #include <functional>
 #include "Rect.hpp"
@@ -12,6 +12,34 @@ class UIElement
 public:
 	enum ElementType { Label, Button, Slider, SwitchButton, InputField, MultiTab, Console };
 
+protected:
+
+	std::string name;
+
+	UIWindow* parentWindow;
+
+	glm::fvec2 position;
+	glm::fvec2 size;
+
+	bool clicked;
+	bool hovered;
+	bool offClick;
+	bool focused;
+
+	const ElementType elementType;
+
+	float updateInterval;
+	float updateClock;
+	std::function<void(UIWindow*, UIElement*)> initImpl;
+	std::function<void(UIWindow*, UIElement*)> updateImpl;
+	std::function<void(UIWindow*, UIElement*, KeyEvent&)> onKeyUpImpl;
+	std::function<void(UIWindow*, UIElement*, KeyEvent&)> onKeyDownImpl;
+	std::function<void(UIWindow*, UIElement*, MouseEvent&)> onMouseUpImpl;
+	std::function<void(UIWindow*, UIElement*, MouseEvent&)> onMouseDownImpl;
+	std::function<void(UIWindow*, UIElement*, MouseEvent&)> onMouseEnterImpl;
+	std::function<void(UIWindow*, UIElement*, MouseEvent&)> onMouseLeaveImpl;
+
+public:
 	UIElement(ElementType elType, UIWindow* pParent);
 	virtual ~UIElement();
 
@@ -171,30 +199,4 @@ public:
 		focused = state;
 	}
 
-protected:
-
-	std::string name;
-	
-	UIWindow* parentWindow;
-	
-	glm::fvec2 position;
-	glm::fvec2 size;
-
-	bool clicked;
-	bool hovered;
-	bool offClick;
-	bool focused;
-
-	const ElementType elementType;
-
-	float updateInterval;
-	float updateClock;
-	std::function<void(UIWindow*, UIElement*)> initImpl;
-	std::function<void(UIWindow*, UIElement*)> updateImpl;
-	std::function<void(UIWindow*, UIElement*, KeyEvent&)> onKeyUpImpl;
-	std::function<void(UIWindow*, UIElement*, KeyEvent&)> onKeyDownImpl;
-	std::function<void(UIWindow*, UIElement*, MouseEvent&)> onMouseUpImpl;
-	std::function<void(UIWindow*, UIElement*, MouseEvent&)> onMouseDownImpl;
-	std::function<void(UIWindow*, UIElement*, MouseEvent&)> onMouseEnterImpl;
-	std::function<void(UIWindow*, UIElement*, MouseEvent&)> onMouseLeaveImpl;
 };

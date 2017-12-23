@@ -3,8 +3,17 @@
 
 class GBufferShaderTex : public ShaderProgram
 {
+private:
+	int projLoc;
+	int viewLoc;
+	int camPosLoc;
+
+	glm::fmat4 proj;
+	glm::fmat4 view;
+	glm::fvec3 camPos;
+
 public:
-	GBufferShaderTex() 
+	GBufferShaderTex() : projLoc(-1), viewLoc(-1), camPosLoc(-1), proj(0), view(0), camPos(0,0,0)
 	{
 		name = "gBufferPassTex";
 		type = VertFrag;
@@ -51,13 +60,4 @@ public:
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 		glUniform3fv(camPosLoc, 1, glm::value_ptr(camPos));
 	}
-
-private:
-	int projLoc;
-	int viewLoc;
-	int camPosLoc;
-
-	glm::fmat4 proj;
-	glm::fmat4 view;
-	glm::fvec3 camPos;
 };

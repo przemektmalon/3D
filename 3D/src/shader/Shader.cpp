@@ -1,4 +1,4 @@
-#include "shaders/Shader.hpp"
+#include "Shader.hpp"
 #include "Engine.hpp"
 
 const int ShaderProgram::typeSizes[ShaderProgram::UniformTypesCount] = {
@@ -25,7 +25,7 @@ const char ShaderProgram::typeGLSLNames[ShaderProgram::UniformTypesCount][16] = 
 	"sampler2D"
 };
 
-ShaderProgram::ShaderProgram() : geomPath(), vertexPath(), fragmentPath() {}
+ShaderProgram::ShaderProgram() : geomPath(), vertexPath(), fragmentPath(), geomContent(nullptr), vertexContent(nullptr), fragmentContent(nullptr), geomSize(0), vertexSize(0), fragmentSize(0), name(), errorLog(), loaded(false), type(VertFrag), GLID(-1) {}
 ShaderProgram::ShaderProgram(const ShaderProgram& program) : geomPath(), vertexPath(), fragmentPath() {}
 
 ShaderProgram::~ShaderProgram() {}

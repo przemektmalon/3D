@@ -1,5 +1,5 @@
 #pragma once
-#include "glm\common.hpp"
+#include "MathIncludes.hpp"
 
 template<class T>
 class rect

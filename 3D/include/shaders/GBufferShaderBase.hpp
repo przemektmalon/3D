@@ -3,8 +3,19 @@
 
 class GBufferShaderBase : public ShaderProgram
 {
+protected:
+	int projLoc;
+	int viewLoc;
+	int IDLoc;
+	int camPosLoc;
+
+	glm::fmat4 proj;
+	glm::fmat4 view;
+	u32 id;
+	glm::fvec3 camPos;
+
 public:
-	GBufferShaderBase()
+	GBufferShaderBase() : projLoc(-1), viewLoc(-1), IDLoc(-1), camPosLoc(-1), proj(glm::fmat4()), view(glm::fmat4()), id(0), camPos(glm::fvec3())
 	{
 		type = VertFrag;
 	}
@@ -58,15 +69,6 @@ public:
 		glUniform3fv(camPosLoc, 1, glm::value_ptr(camPos));
 	}
 
-protected:
-	int projLoc;
-	int viewLoc;
-	int IDLoc;
-	int camPosLoc;
 
-	glm::fmat4 proj;
-	glm::fmat4 view;
-	u32 id;
-	glm::fvec3 camPos;
 
 };

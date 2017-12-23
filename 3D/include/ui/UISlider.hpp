@@ -8,6 +8,46 @@ class UIWindow;
 class UISlider : public UIElement
 {
 public:
+	glm::fvec4 sliderColour;
+	glm::fvec4 sliderClickColour;
+	glm::fvec4 sliderHoverColour;
+	glm::fvec4 rangeColour;
+
+	bool isSliding;
+
+	RectangleShape slider;
+	RectangleShape range;
+
+	enum ValueType { Integer, Float };
+	ValueType valType;
+	struct Limits
+	{
+		union Left {
+			float f;
+			s32 i;
+		} left;
+		union Right {
+			float f;
+			s32 i;
+		} right;
+	} limits;
+
+	union Value
+	{
+		float f;
+		s32 i;
+	}value;
+
+	union Binding
+	{
+		float* f;
+		s32* i;
+	}binding;
+
+	Text2D valueText;
+	Text2D descText;
+
+public:
 	UISlider(UIWindow* pParent);
 	~UISlider();
 
@@ -142,44 +182,5 @@ public:
 	{
 		descText.setString(pDesc);
 	}
-
-	glm::fvec4 sliderColour;
-	glm::fvec4 sliderClickColour;
-	glm::fvec4 sliderHoverColour;
-	glm::fvec4 rangeColour;
-
-	bool isSliding;
-
-	RectangleShape slider;
-	RectangleShape range;
-
-	enum ValueType { Integer, Float };
-	ValueType valType;
-	struct Limits
-	{
-		union Left {
-			float f;
-			s32 i;
-		} left;
-		union Right {
-			float f;
-			s32 i;
-		} right;
-	} limits;
-
-	union Value
-	{
-		float f;
-		s32 i;
-	}value;
-
-	union Binding
-	{
-		float* f;
-		s32* i;
-	}binding;
-
-	Text2D valueText;
-	Text2D descText;
 };
 

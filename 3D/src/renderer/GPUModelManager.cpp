@@ -1,6 +1,6 @@
 #include "GPUModelManager.hpp"
 #include "Engine.hpp"
-#include "shaders/ShaderStore.hpp"
+#include "ShaderStore.hpp"
 #include "Renderer.hpp"
 #include "Model.hpp"
 

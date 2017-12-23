@@ -107,16 +107,17 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Programming\libs\GLEW-1.13.0\include;C:\Programming\libs\GLM;C:\Programming\libs\SOIL\src;C:\Programming\libs\FreeType-2.6.2\include;C:\Programming\Libs\Assimp\include\;C:\Programming\Libs\boost_1_64_0\;C:\Programming\Libs\bullet3\src;C:\Programming\Libs\rapidxml-1.13;.\include;.\include\os;.\include\core;.\include\objectsassets;.\include\renderer;.\include\ui;.\include\util;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Programming\Libs\GLM;.\libs\glew\include;.\libs\soil\src;.\libs\freetype\include;.\libs\assimp\include\;.\libs\boost;.\libs\bullet\src;.\libs\rapidxml;.\include;.\include\os;.\include\core;.\include\objectsassets;.\include\renderer;.\include\ui;.\include\util;.\libs;.\include\shaders</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CallingConvention>Cdecl</CallingConvention>
       <StructMemberAlignment>Default</StructMemberAlignment>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>C:\Programming\libs\GLEW-1.13.0\lib\Release\Win32;C:\Programming\libs\SOIL\lib;C:\Programming\libs\FreeType-2.6.2\objs\vc2010\Win32;C:\Programming\Libs\Assimp\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;SOIL.lib;assimp.lib;freetype262d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\libs\glew\lib\Win32;.\libs\soil\lib;.\libs\freetype\lib;.\libs\assimp\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;SOIL.lib;assimp.lib;freetype281.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>
       </EntryPointSymbol>
       <OptimizeReferences>
@@ -142,16 +143,17 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Programming\libs\GLEW-1.13.0\include;C:\Programming\libs\GLM;C:\Programming\libs\SOIL\src;C:\Programming\libs\FreeType-2.6.2\include;C:\Programming\Libs\Assimp\include\;C:\Programming\Libs\boost_1_64_0\;C:\Programming\Libs\bullet3\src;C:\Programming\Libs\rapidxml-1.13;.\include;.\include\os;.\include\core;.\include\objectsassets;.\include\renderer;.\include\ui;.\include\util;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Programming\Libs\GLM;.\libs\glew\include;.\libs\soil\src;.\libs\freetype\include;.\libs\assimp\include\;.\libs\boost;.\libs\bullet\src;.\libs\rapidxml;.\include;.\include\os;.\include\core;.\include\objectsassets;.\include\renderer;.\include\ui;.\include\util;.\libs;.\include\shaders</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>C:\Programming\libs\GLEW-1.13.0\lib\Release\Win32;C:\Programming\libs\SOIL\lib;C:\Programming\libs\FreeType-2.6.2\objs\vc2010\Win32;C:\Programming\Libs\Assimp\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;SOIL.lib;assimp.lib;kernel32.lib;freetype262.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\libs\glew\lib\Win32;.\libs\soil\lib;.\libs\freetype\lib;.\libs\assimp\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;SOIL.lib;assimp.lib;kernel32.lib;freetype281.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
       <EntryPointSymbol>
       </EntryPointSymbol>
@@ -165,19 +167,20 @@
       </FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Programming\libs\GLEW-1.13.0\include;C:\Programming\libs\GLM;C:\Programming\libs\SOIL\src;C:\Programming\libs\FreeType-2.6.2\include;C:\Programming\Libs\Assimp\include\;C:\Programming\Libs\boost_1_64_0\;C:\Programming\Libs\bullet3\src;C:\Programming\Libs\rapidxml-1.13;.\include;.\include\os;.\include\core;.\include\objectsassets;.\include\renderer;.\include\ui;.\include\util;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Programming\Libs\GLM;.\libs\glew\include;.\libs\soil\src;.\libs\freetype\include;.\libs\assimp\include\;.\libs\boost;.\libs\bullet\src;.\libs\rapidxml;.\include;.\include\os;.\include\core;.\include\objectsassets;.\include\renderer;.\include\ui;.\include\util;.\libs;.\include\shaders</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>C:\Programming\libs\GLEW-1.13.0\lib\Release\Win32;C:\Programming\libs\SOIL\lib;C:\Programming\libs\FreeType-2.6.2\objs\vc2010\Win32;C:\Programming\Libs\Assimp\lib\x86;C:\Programming\Libs\bullet3\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>.\libs\glew\lib\Win32;.\libs\soil\lib;.\libs\freetype\lib;.\libs\assimp\lib;C:\Programming\Libs\bullet3\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;glew32.lib;SOIL.lib;assimp.lib;Bullet3Dynamics.lib;Bullet3Collision.lib;LinearMath.lib;Bullet3Common.lib;Bullet3Geometry.lib;kernel32.lib;freetype262.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
       <EntryPointSymbol>

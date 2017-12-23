@@ -8,7 +8,7 @@
 #include <type_traits>
 #include <utility>
 #include <functional>
-#include "shaders\TextShader.hpp"
+#include "TextShader.hpp"
 
 template <typename> struct FnArgs;
 

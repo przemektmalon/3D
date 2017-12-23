@@ -3,11 +3,13 @@
 
 class GLTexture;
 
-struct TextureMeta {
-	TextureMeta() : glTex(nullptr) {}
-	TextureMeta(std::string pName, GLTexture* pGLTex) : name(pName), glTex(pGLTex) {}
+struct TextureMeta
+{
 	std::string name;
 	GLTexture* glTex;
+
+	TextureMeta() : glTex(nullptr) {}
+	TextureMeta(std::string pName, GLTexture* pGLTex) : name(pName), glTex(pGLTex) {}
 
 	TextureMeta& operator=(const TextureMeta& rhs)
 	{
@@ -18,9 +20,12 @@ struct TextureMeta {
 	}
 };
 
-struct MaterialMeta {
+struct MaterialMeta
+{
 	bool splatted;
 	TextureMeta albedo, normal, specularMetallic, roughness, ao, height;
+
+	MaterialMeta() : splatted(false) {}
 
 	MaterialMeta& operator=(MaterialMeta& rhs)
 	{

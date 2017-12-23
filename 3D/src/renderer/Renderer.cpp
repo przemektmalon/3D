@@ -5,7 +5,7 @@
 #include "QPC.hpp"
 #include "SOIL.h"
 #include "Camera.hpp"
-#include "ui/UILabel.hpp"
+#include "UILabel.hpp"
 #include "AssetManager.hpp"
 #include "World.hpp"
 #include "Text.hpp"
@@ -14,9 +14,9 @@
 #include "Rect.hpp"
 #include "MathIncludes.hpp"
 
-#include "ui/UIRectangleShape.hpp"
-#include "ui/UIConsole.hpp"
-#include "ui/UIButton.hpp"
+#include "UIRectangleShape.hpp"
+#include "UIConsole.hpp"
+#include "UIButton.hpp"
 
 #define NUM_POINT_LIGHTS 3
 #define NUM_SPOT_LIGHTS 0

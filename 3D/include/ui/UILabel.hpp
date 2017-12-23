@@ -2,7 +2,7 @@
 #include "UIElement.hpp"
 #include "Text.hpp"
 #include "AssetManager.hpp"
-#include "shaders\TextShader.hpp"
+#include "TextShader.hpp"
 
 class UIWindow;
 

@@ -6,10 +6,7 @@
 
 #include <GL\glew.h>
 #include <GL\wglew.h>
-#include <glm\glm.hpp>
-#include "glm\gtc\type_ptr.hpp"
-#include "glm\gtc\matrix_transform.hpp"
-#include "glm\gtx\matrix_transform_2d.hpp"
+#include "MathIncludes.hpp"
 #include <time.h>
 #include <Windows.h>
 #include <SDKDDKVer.h>

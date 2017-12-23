@@ -3,8 +3,15 @@
 
 class BilateralBlurShader : public ShaderProgram
 {
+private:
+	int axisLoc;
+	int sourceLoc;
+
+	glm::ivec2 axis;
+	int source;
+
 public:
-	BilateralBlurShader()
+	BilateralBlurShader() : axisLoc(-1), sourceLoc(-1), axis(0,0), source(0)
 	{
 		name = "bilatBlur";
 		type = VertFrag;
@@ -34,11 +41,4 @@ public:
 		glUniform2iv(axisLoc, 1, &axis[0]);
 		glUniform1i(sourceLoc, source);
 	}
-
-private:
-	int axisLoc;
-	int sourceLoc;
-
-	glm::ivec2 axis;
-	int source;
 };

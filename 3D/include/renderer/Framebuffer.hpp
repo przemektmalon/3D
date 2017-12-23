@@ -23,6 +23,17 @@ public:
 class FBO
 {
 public:
+	bool created;
+
+	GLuint GLID;
+	std::vector<GLTexture2D> textureAttachments;
+	std::vector<GLRenderbuffer> renderbufferAttachments;
+	GLuint depthAttachment;
+
+	glm::ivec2 resolution;
+	glm::fvec4 clearColour;
+	float clearDepth;
+
 	FBO() : created(false) 
 	{
 		glGenFramebuffers(1, &GLID);
@@ -182,14 +193,4 @@ public:
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, GLID);
 	}
 
-	bool created;
-
-	GLuint GLID;
-	std::vector<GLTexture2D> textureAttachments;
-	std::vector<GLRenderbuffer> renderbufferAttachments;
-	GLuint depthAttachment;
-
-	glm::ivec2 resolution;
-	glm::fvec4 clearColour;
-	float clearDepth;
 };

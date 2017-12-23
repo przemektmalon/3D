@@ -5,6 +5,9 @@
 
 class MaterialLibrary
 {
+private:
+	std::unordered_map<std::string, MaterialMeta> materials;
+
 public:
 	MaterialLibrary() {}
 	~MaterialLibrary() {}
@@ -19,9 +22,4 @@ public:
 
 		return find->second;
 	}
-
-private:
-
-	std::unordered_map<std::string, MaterialMeta> materials;
-
 };

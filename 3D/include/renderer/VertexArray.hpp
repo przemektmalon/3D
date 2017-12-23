@@ -1,12 +1,26 @@
 #pragma once
 #include "GLIncludes.hpp"
-#include "shaders\Shader.hpp"
+#include "Shader.hpp"
 #include <string>
 #include <unordered_map>
 
 class VAO
 {
+private:
+	struct Attrib
+	{
+		Attrib(std::string pName, GLint pSize, GLenum pType) : name(pName), size(pSize), type(pType) {}
+		std::string name;
+		GLint size;
+		GLenum type;
+	};
+
+	std::unordered_map<std::string, Attrib> attribs;
+	int totalSize;
+	GLuint GLID;
+
 public:
+	VAO() : totalSize(0) {}
 	void create()
 	{
 		glGenVertexArrays(1, &GLID);
@@ -51,19 +65,4 @@ public:
 	{
 		glBindVertexArray(0);
 	}
-
-private:
-
-	struct Attrib
-	{
-		Attrib(std::string pName, GLint pSize, GLenum pType) : name(pName), size(pSize), type(pType) {}
-		std::string name;
-		GLint size;
-		GLenum type;
-	};
-
-	std::unordered_map<std::string,Attrib> attribs;
-	int totalSize;
-	GLuint GLID;
-
 };

@@ -1,7 +1,7 @@
 #pragma once
 #include "Framebuffer.hpp"
-#include "shaders/Shape2DShader.hpp"
-#include "shaders/Shape2DShaderNoTex.hpp"
+#include "Shape2DShader.hpp"
+#include "Shape2DShaderNoTex.hpp"
 #include "Window.hpp"
 #include "Event.hpp"
 #include "Rect.hpp"
@@ -14,6 +14,35 @@ class UILabel;
 
 class UIWindow : public UIElementContainer
 {
+public:
+	std::function<void(UIWindow*)> scriptsInitFunc;
+	std::string windowSpecFile;
+
+	irect windowArea;
+	irect elementArea;
+	int borderWidth;
+	int titleWidth;
+	bool movable;
+	bool dragging;
+	bool open;
+	glm::ivec2 clickedPos;
+	bool hasTitle;
+	bool hasFocus;
+	std::string name;
+
+	FBO renderTarget;
+
+	UILabel* title;
+
+	Shape2DShader* shader;
+	Shape2DShaderNoTex* shaderNoTex;
+
+	GLuint vao;
+	GLuint vbo;
+
+	glm::fmat4 proj;
+	const Window* parentWindow;
+
 public:
 	UIWindow(std::string pName, irect pWindowArea, int pBorderWidth, const Window* pParentWindow);
 	~UIWindow();
@@ -83,34 +112,4 @@ public:
 	{
 		return open;
 	}
-
-//private:
-
-	std::function<void(UIWindow*)> scriptsInitFunc;
-	std::string windowSpecFile;
-
-	irect windowArea;
-	irect elementArea;
-	int borderWidth;
-	int titleWidth;
-	bool movable;
-	bool dragging;
-	bool open;
-	glm::ivec2 clickedPos;
-	bool hasTitle;
-	bool hasFocus;
-	std::string name;
-
-	FBO renderTarget;
-
-	UILabel* title;
-
-	Shape2DShader* shader;
-	Shape2DShaderNoTex* shaderNoTex;
-
-	GLuint vao;
-	GLuint vbo;
-
-	glm::fmat4 proj;
-	const Window* parentWindow;
 };

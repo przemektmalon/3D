@@ -4,6 +4,33 @@
 
 class SAOShader : public ShaderProgram
 {
+private:
+	//Locations
+	int projScaleLoc = -1;
+	int depthBufferLoc = -1;
+	int radiusLoc = -1;
+	int biasLoc = -1;
+	int intensityDivR6Loc = -1;
+	int gNormalLoc = -1;
+	int viewLoc = -1;
+	int projInfoLoc = -1;
+	int samplesLoc = -1;
+	int spiralTurnsLoc = -1;
+
+	//Variables
+	float projScale;
+	s32 depthBuffer = 0;
+	float radius;
+	float bias;
+	float intensity;
+	s32 gNormal;
+	glm::fmat4 view;
+	glm::fmat4 proj;
+	glm::ivec2 viewport = glm::ivec2(1, 1);
+	glm::fvec4 projInfo = glm::fvec4(1.f, 1.f, 1.f, 1.f);
+	int samples;
+	int spiralTurns;
+
 public:
 	SAOShader() 
 	{
@@ -30,6 +57,7 @@ public:
 		setProjScale(500.f);
 		setSamples(50);
 		setSpiralTurns(9);
+		setBias(0.01);
 
 		stop();
 
@@ -127,32 +155,4 @@ public:
 		glUniform1i(samplesLoc, samples);
 		glUniform1i(spiralTurnsLoc, spiralTurns);
 	}
-
-private:
-	//Locations
-	int projScaleLoc;
-	int depthBufferLoc;
-	int radiusLoc;
-	int biasLoc;
-	int intensityDivR6Loc;
-	int gNormalLoc;
-	int viewLoc;
-	int projInfoLoc;
-	int samplesLoc;
-	int spiralTurnsLoc;
-
-	//Variables
-	float projScale;
-	s32 depthBuffer;
-	float radius;
-	float bias;
-	float intensity;
-	s32 gNormal;
-	glm::fmat4 view;
-	glm::fmat4 proj;
-	glm::ivec2 viewport = glm::ivec2(1,1);
-	glm::fvec4 projInfo = glm::fvec4(1.f,1.f,1.f,1.f);
-	int samples;
-	int spiralTurns;
-
 };

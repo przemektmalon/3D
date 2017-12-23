@@ -11,21 +11,21 @@
 #include "DrawModes.hpp"
 #include "VertexArray.hpp"
 
-#include "shaders/SAOShader.hpp"
-#include "shaders/GBufferShaderTex.hpp"
-#include "shaders/GBufferShaderClay.hpp"
-#include "shaders/DeferredTileCullComputeShader.hpp"
-#include "shaders/GBufferShaderMultiTex.hpp"
-#include "shaders/BilateralBlurShader.hpp"
-#include "shaders/FrustCullShader.hpp"
-#include "shaders/PrepMultiTexShader.hpp"
-#include "shaders/PointShadowPassShader.hpp"
-#include "shaders/SpotShadowPassShader.hpp"
-#include "shaders/TextShader.hpp"
-#include "shaders/ShaderStore.hpp"
-#include "shaders/Shape3DShader.hpp"
-#include "shaders/Shape2DShaderNoTex.hpp"
-#include "shaders/Shape2DShader.hpp"
+#include "SAOShader.hpp"
+#include "GBufferShaderTex.hpp"
+#include "GBufferShaderClay.hpp"
+#include "DeferredTileCullComputeShader.hpp"
+#include "GBufferShaderMultiTex.hpp"
+#include "BilateralBlurShader.hpp"
+#include "FrustCullShader.hpp"
+#include "PrepMultiTexShader.hpp"
+#include "PointShadowPassShader.hpp"
+#include "SpotShadowPassShader.hpp"
+#include "TextShader.hpp"
+#include "ShaderStore.hpp"
+#include "Shape3DShader.hpp"
+#include "Shape2DShaderNoTex.hpp"
+#include "Shape2DShader.hpp"
 
 #define NUM_VALID_RESOLUTIONS 9
 
@@ -46,7 +46,62 @@ typedef struct {
 class Renderer
 {
 public:
-	Renderer() {}
+	Window* window;
+	World* world;
+
+	// Framebuffers
+	FBO fboSSAOBlur;
+	FBO fboSSAO;
+	FBO fboGBuffer;
+	FBO fboScreen;
+	FBO fboShadow;
+
+	// Vertex storage for rendering to window
+	VAO vaoQuad;
+	VBO vboQuad;
+	VAO vaoQuadViewRays;
+	VBO vboQuadViewRays;
+
+	// Shaders
+	ShaderStore shaderStore;
+	GBufferShaderTex gBufferShaderTex;
+	GBufferShaderClay gBufferShaderClay;
+	GBufferShaderMultiTex gBufferShaderMultiTex;
+	DeferredTileCullComputeShader tileCullShader;
+	BilateralBlurShader bilatBlurShader;
+	FrustCullShader frustCullShader;
+	PrepMultiTexShader prepMultiTexShader;
+	SAOShader ssaoShader;
+	SpotShadowPassShader spotShadowPassShader;
+	PointShadowPassShader pointShadowPassShader;
+	Shape2DShader shape2DShader;
+	Shape2DShaderNoTex shape2DShaderNoTex;
+	Shape3DShader shape3DShader;
+	TextShader textShader;
+
+	// Light stuff
+	LightManager lightManager;
+	GLTexture2D lightPassTex;
+	GLBufferObject shadowMatrixBuffer;
+
+	// Camera
+	Camera* activeCam;
+	irect viewport;
+
+	// Samplers
+	Sampler defaultSampler;
+	Sampler billboardSampler;
+	Sampler postSampler;
+	Sampler cubeSampler;
+	Sampler textSampler;
+	Sampler shadowSampler;
+	Sampler shadowCubeSampler;
+
+	u32 drawCount[DrawModesCount];
+
+	enum RenderMode { Shaded, Albedo, Normal, SSAO, Depth } renderMode;
+
+	Renderer() : renderMode(Shaded) { drawCount[0] = 0; drawCount[1] = 0; }
 	~Renderer() {}
 
 	inline void initialiseScreenQuad();
@@ -82,61 +137,4 @@ public:
 
 	/// TODO: this
 	// void bakeStaticLights();
-
-	u32 drawCount[DrawModesCount];
-
-	Window* window;
-	World* world;
-	
-	irect viewport;
-
-	// Framebuffers
-	FBO fboSSAOBlur;
-	FBO fboSSAO;
-	FBO fboGBuffer;
-	FBO fboScreen;
-	FBO fboShadow;
-	
-	// Vertex storage for rendering to window
-	VAO vaoQuad;
-	VBO vboQuad;
-	VAO vaoQuadViewRays;
-	VBO vboQuadViewRays;
-
-	// Shaders
-	ShaderStore shaderStore;
-
-	GBufferShaderTex gBufferShaderTex;
-	GBufferShaderClay gBufferShaderClay;
-	GBufferShaderMultiTex gBufferShaderMultiTex;
-	DeferredTileCullComputeShader tileCullShader;
-	BilateralBlurShader bilatBlurShader;
-	FrustCullShader frustCullShader;
-	PrepMultiTexShader prepMultiTexShader;
-	SAOShader ssaoShader;
-	SpotShadowPassShader spotShadowPassShader;
-	PointShadowPassShader pointShadowPassShader;
-	Shape2DShader shape2DShader;
-	Shape2DShaderNoTex shape2DShaderNoTex;
-	Shape3DShader shape3DShader;
-	TextShader textShader;
-	
-	// Light stuff
-	LightManager lightManager;
-	GLTexture2D lightPassTex;
-	GLBufferObject shadowMatrixBuffer;
-
-	// Camera
-	Camera* activeCam;
-
-	// Samplers
-	Sampler defaultSampler;
-	Sampler billboardSampler;
-	Sampler postSampler;
-	Sampler cubeSampler;
-	Sampler textSampler;
-	Sampler shadowSampler;
-	Sampler shadowCubeSampler;
-
-	enum RenderMode { Shaded, Albedo, Normal, SSAO, Depth } renderMode;
 };
