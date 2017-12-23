@@ -16,24 +16,27 @@ struct Event
 	Event(Type pType) : type(pType) {}
 
 	union {
-		struct mouse {
+		struct mouse_struct {
 			MouseCode code;
 			glm::ivec2 position;
 			glm::ivec2 move;
 			int delta;
-		} mouse;
-		struct key {
+		};
+		mouse_struct mouse;
+		struct key_struct {
 			Key code;
 			bool shift;
 			bool alt;
 			bool sys;
 			bool ctrl;
 			bool caps;
-		} key;
-		struct window {
+		};
+		key_struct key;
+		struct window_struct {
 			glm::ivec2 size;
 			glm::ivec2 position;
-		} window;
+		};
+		window_struct window;
 	};
 
 	void constructMouse(MouseCode pCode, glm::ivec2 pPos, int pDelta)

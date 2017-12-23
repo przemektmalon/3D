@@ -5,26 +5,22 @@
 #include "AssetManager.hpp"
 #include "Billboard.hpp"
 
-PointLight::PointLight() { }
-
 void PointLight::updateRadius()
 {
-	gpuData->radius = (0.5 * (std::sqrtf(gpuData->linear*gpuData->linear + (Engine::cfg.render.minimumLightConstant * gpuData->quadratic) - gpuData->linear))) / gpuData->quadratic;
-	updateProj();
-	updateProjView();
+	matNeedsUpdate = true;
+	gpuData->setRadius(calculateRadius(gpuData->getLinear(), gpuData->getQuadratic()));
+	proj = glm::perspective<float>(glm::radians(90.f), 1.f, 0.01f, gpuData->getRadius());
 }
 
 inline float PointLight::calculateRadius(float linear, float quad)
 {
-	return  (0.5 * (std::sqrtf(linear*linear + (Engine::cfg.render.minimumLightConstant * quad) - linear))) / quad;
+	return (0.5 * (std::sqrtf(linear*linear + (Engine::cfg.render.minimumLightConstant * quad) - linear))) / quad;
 }
 
 void SpotLight::updateRadius()
 {
-	//gpuData->radius = (0.5 * (std::sqrtf(gpuData->linear*gpuData->linear + (Engine::cfg.render.minimumLightConstant * gpuData->quadratic) - gpuData->linear))) / (gpuData->quadratic * 2.f);
-	gpuData->radius = calculateRadius(gpuData->linear, gpuData->quadratic);
-	updateProj();
-	updateProjView();
+	matNeedsUpdate = true;
+	gpuData->setRadius(calculateRadius(gpuData->getLinear(), gpuData->getQuadratic()));
 }
 
 inline float SpotLight::calculateRadius(float linear, float quad)
@@ -39,7 +35,7 @@ PointLight & LightManager::addPointLight(PointLight::GPUData& data)
 	pointLightsGPUData.push_back(data);
 	light.gpuData = &pointLightsGPUData.back();
 
-	pointLightIcons.push_back(Billboard(data.position, glm::fvec2(2, 2), Engine::assets.get2DTex("light")->glData));
+	pointLightIcons.push_back(Billboard(light.getPosition(), glm::fvec2(2, 2), Engine::assets.get2DTex("light")->glData));
 	pointLightIcons.back().initGL();
 
 	return light;
@@ -52,7 +48,7 @@ SpotLight & LightManager::addSpotLight(SpotLight::GPUData& data)
 	spotLightsGPUData.push_back(data);
 	light.gpuData = &spotLightsGPUData.back();
 
-	spotLightIcons.push_back(Billboard(data.position, glm::fvec2(2, 2), Engine::assets.get2DTex("light")->glData));
+	spotLightIcons.push_back(Billboard(light.getPosition(), glm::fvec2(2, 2), Engine::assets.get2DTex("light")->glData));
 	spotLightIcons.back().initGL();
 
 	return light;

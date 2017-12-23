@@ -17,8 +17,8 @@ public:
 
 	u32 getSize() { return size; }
 	bool doesExist() { return existsOnDisk; }
-	std::string& const getPath() { return diskPath; }
-	std::string& const getName() { return name; }
+	std::string getPath() { return diskPath; }
+	std::string getName() { return name; }
 
 protected:
 	void setPath(std::string& pPath)

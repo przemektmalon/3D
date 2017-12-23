@@ -24,6 +24,9 @@
 
 int main()
 {
+	char workingDir[100];
+	GetCurrentDirectory(100, workingDir);
+	std::cout << "Working Directory: " << workingDir << std::endl;
 	Engine::start(GetModuleHandle(NULL));
 	return 0;
 }

@@ -29,31 +29,28 @@ void Renderer::render()
 
 	for (int i = 0; i < lightManager.spotLights.size(); ++i)
 	{
-		lightManager.spotLightsGPUData[i].position = glm::fvec3(std::cos(Engine::programTime*0.2*(i + 1) + (i*PI*0.5))*50.f, 50.f, std::sin(Engine::programTime*0.2*(i + 1) + (i*PI*0.5))*50.f);
-		lightManager.spotLightsGPUData[i].direction = -glm::normalize(lightManager.spotLightsGPUData[i].position + glm::fvec3(0.f,20.f,0.f));
+		auto light = lightManager.getSpotLight(i);
 
-		lightManager.spotLights[i].updateRadius();
-		lightManager.spotLights[i].updateProj();
-		lightManager.spotLights[i].updateView();
-		lightManager.spotLights[i].updateProjView();
+		light->setPosition(glm::fvec3(std::cos(Engine::programTime*0.2*(i + 1) + (i*PI*0.5))*50.f, 50.f, std::sin(Engine::programTime*0.2*(i + 1) + (i*PI*0.5))*50.f));
+		light->setDirection(-glm::normalize(light->getPosition() + glm::fvec3(0.f, 20.f, 0.f)));
 	}
 
 	for (int i = 0; i < lightManager.pointLights.size(); ++i)
 	{
-		lightManager.pointLightsGPUData[i].position.y = 100.f + (10.f * std::sin(Engine::programTime * 0.4f));
-		lightManager.pointLightsGPUData[i].position.x = 40.f * std::sin(Engine::programTime * 0.4f + ((i + 1) * 2 * PI / NUM_POINT_LIGHTS));
-		lightManager.pointLightsGPUData[i].position.z = 40.f * std::cos(Engine::programTime * 0.4f + ((i + 1) * 2 * PI / NUM_POINT_LIGHTS));
+		auto light = lightManager.getPointLight(i);
+
+		glm::fvec3 position;
+
+		position.y = 100.f + (10.f * std::sin(Engine::programTime * 0.4f));
+		position.x = 40.f * std::sin(Engine::programTime * 0.4f + ((i + 1) * 2 * PI / NUM_POINT_LIGHTS));
+		position.z = 40.f * std::cos(Engine::programTime * 0.4f + ((i + 1) * 2 * PI / NUM_POINT_LIGHTS));
 		
-		lightManager.pointLightsGPUData[i].position.x *= (2.f + std::sin(Engine::programTime * 0.8f)) * 1.4f;
-		lightManager.pointLightsGPUData[i].position.z *= (2.f + std::sin(Engine::programTime * 0.8f)) * 1.4f;
+		position.x *= (2.f + std::sin(Engine::programTime * 0.8f)) * 1.4f;
+		position.z *= (2.f + std::sin(Engine::programTime * 0.8f)) * 1.4f;
 
-		lightManager.pointLightsGPUData[i].linear = Engine::linear;
-		lightManager.pointLightsGPUData[i].quadratic = Engine::quad;
-		lightManager.pointLights[i].updateRadius();
-
-		lightManager.pointLights[i].updateProj();
-		lightManager.pointLights[i].updateView();
-		lightManager.pointLights[i].updateProjView();
+		light->setPosition(position);
+		light->setLinear(Engine::linear);
+		light->setQuadratic(Engine::quad);
 	}
 
 	lightManager.updateAllPointLights();
@@ -141,21 +138,21 @@ void Renderer::shadowPass()
 
 	for (auto itr = lightManager.pointLights.begin(); itr != lightManager.pointLights.end(); ++itr)
 	{
-		if (glm::length(itr->gpuData->position - activeCam->pos) > itr->gpuData->fadeStart + itr->gpuData->fadeLength)
+		if (glm::length(itr->getPosition() - activeCam->pos) > itr->getFadeStart() + itr->getFadeLength())
 			continue;
 
-		glViewport(0, 0, itr->shadowTex.getWidth(), itr->shadowTex.getHeight());
+		glViewport(0, 0, itr->getShadowTexture().getWidth(), itr->getShadowTexture().getHeight());
 
 		fboShadow.bind();
-		fboShadow.attachForeignCubeTexture(&itr->shadowTex, GL_DEPTH_ATTACHMENT);
+		fboShadow.attachForeignCubeTexture(&itr->getShadowTexture(), GL_DEPTH_ATTACHMENT);
 
 		glClear(GL_DEPTH_BUFFER_BIT);
 
-		shadowMatrixBuffer.bufferSubData(0, sizeof(glm::fmat4) * 6, &itr->gpuData->projView[0][0]);
+		shadowMatrixBuffer.bufferSubData(0, sizeof(glm::fmat4) * 6, &itr->getProjView()[0][0]);
 		shadowMatrixBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 2);
 
-		pointShadowPassShader.setFarPlane(itr->gpuData->radius);
-		pointShadowPassShader.setLightPos(itr->gpuData->position);
+		pointShadowPassShader.setFarPlane(itr->getRadius());
+		pointShadowPassShader.setLightPos(itr->getPosition());
 		pointShadowPassShader.sendUniforms();
 
 		Engine::assets.modelManager.shadowVAO.bind();
@@ -172,18 +169,18 @@ void Renderer::shadowPass()
 
 	for (auto itr = lightManager.spotLights.begin(); itr != lightManager.spotLights.end(); ++itr)
 	{
-		if (glm::length(itr->gpuData->position - activeCam->pos) > itr->gpuData->fadeStart + itr->gpuData->fadeLength)
+		if (glm::length(itr->getPosition() - activeCam->pos) > itr->getFadeStart() + itr->getFadeLength())
 			continue;
 
-		glViewport(0, 0, itr->shadowTex.getWidth(), itr->shadowTex.getHeight());
+		glViewport(0, 0, itr->getShadowTexture().getWidth(), itr->getShadowTexture().getHeight());
 
 		fboShadow.bind();
-		fboShadow.attachForeignTexture(&itr->shadowTex, GL_DEPTH_ATTACHMENT);
+		fboShadow.attachForeignTexture(&itr->getShadowTexture(), GL_DEPTH_ATTACHMENT);
 
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-		spotShadowPassShader.setProj(itr->proj);
-		spotShadowPassShader.setView(itr->view);
+		spotShadowPassShader.setProj(itr->getProjView());
+		spotShadowPassShader.setView(glm::fmat4(1.f));
 		spotShadowPassShader.sendUniforms();
 
 		Engine::assets.modelManager.shadowVAO.bind();
@@ -448,9 +445,8 @@ inline void Renderer::initialiseLights()
 		add.setLinear(0.00001f);
 		add.setQuadratic(0.005f);
 		add.setPosition(glm::fvec3(0.f, 20.f, 0.f));
-		add.updateRadius();
-		add.gpuData->fadeLength = 50;
-		add.gpuData->fadeStart = 1000;
+		add.setFadeLength(50);
+		add.setFadeStart(1000);
 		add.initTexture(shadowCubeSampler);
 	}
 
@@ -471,8 +467,8 @@ inline void Renderer::initialiseLights()
 		add.setQuadratic(0.005);
 		add.setPosition(glm::fvec3(-100.f + 50.f * i, 10.f, 0.f));
 		add.updateRadius();
-		add.gpuData->fadeLength = 50;
-		add.gpuData->fadeStart = 1000;
+		add.setFadeLength(50);
+		add.setFadeStart(1000);
 		add.initTexture(shadowSampler);
 	}
 

@@ -37,7 +37,7 @@ void ShaderProgram::destroy()
 	freeSourceContent();
 }
 
-void ShaderProgram::load(std::string && pName, ShaderType pType, std::string & pShaderLocationPath)
+void ShaderProgram::load(std::string && pName, ShaderType pType, std::string pShaderLocationPath)
 {
 	//uniformLocations.insert(std::make_pair(pName, 0));
 	name = pName;
@@ -56,7 +56,7 @@ void ShaderProgram::load(std::string && pName, ShaderType pType, std::string & p
 	}
 }
 
-void ShaderProgram::load(std::string & pName, ShaderType pType, std::string & pShaderLocationPath)
+void ShaderProgram::load(std::string & pName, ShaderType pType, std::string pShaderLocationPath)
 {
 	//uniformLocations.insert(std::make_pair(pName, 0));
 	name = pName;

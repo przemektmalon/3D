@@ -30,11 +30,29 @@ private:
 	static const char typeGLSLNames[UniformTypesCount][16];
 
 public:
-	struct UniformData
+	struct UniformMeta
 	{
-		UniformData() {}
-		union
+		UniformMeta() {};
+
+		void operator=(UniformMeta& rhs)
 		{
+			type = rhs.type;
+			name = rhs.name;
+			data = rhs.data;
+			arrayCount = rhs.arrayCount;
+			flags = rhs.flags;
+		}
+
+		void updateLocation(ShaderProgram& program)
+		{
+			location = glGetUniformLocation(program.getGLID(), name.c_str());
+		}
+
+		UniformType type;
+		std::string name;
+		union DataUnion
+		{
+			DataUnion() {}
 			glm::dmat4 dmat4;	//128
 			glm::dmat3 dmat3;	//72
 			glm::dmat2 dmat2;	//32
@@ -76,30 +94,7 @@ public:
 			u64 tex2d;			//8
 
 			void* array;
-		};
-	};
-
-	struct UniformMeta
-	{
-		UniformMeta() {};
-
-		void operator=(UniformMeta& rhs)
-		{
-			type = rhs.type;
-			name = rhs.name;
-			data = rhs.data;
-			arrayCount = rhs.arrayCount;
-			flags = rhs.flags;
-		}
-
-		void updateLocation(ShaderProgram& program)
-		{
-			location = glGetUniformLocation(program.getGLID(), name.c_str());
-		}
-
-		UniformType type;
-		std::string name;
-		UniformData data;
+		}data;
 		GLsizei arrayCount; //1 == not array
 		s32 flags;
 		GLint location;
@@ -109,32 +104,20 @@ public:
 	//std::map<GLint, UniformMeta> uniformObjects;
 
 
-	union {
-		struct {
-			std::string geomPath;
-			std::string vertexPath;
-			std::string fragmentPath;
-		};
-		std::string computePath;
-	};
+	std::string geomPath;
+	std::string vertexPath;
+	std::string fragmentPath;
+	std::string computePath;
 
-	union {
-		struct {
-			char* geomContent;
-			char* vertexContent;
-			char* fragmentContent;
-		};
-		char* computeContent;
-	};
+	char* geomContent;
+	char* vertexContent;
+	char* fragmentContent;
+	char* computeContent;
 
-	union {
-		struct {
-			u32 geomSize;
-			u32 vertexSize;
-			u32 fragmentSize;
-		};
-		u32 computeSize;
-	};
+	u32 geomSize;
+	u32 vertexSize;
+	u32 fragmentSize;
+	u32 computeSize;
 
 	struct VarAndVal
 	{
@@ -160,9 +143,8 @@ public:
 	~ShaderProgram();
 
 	void destroy();
-	void load(std::string&& pName, ShaderType pType, std::string& pShaderLocationPath = std::string("res/shader/"));
-
-	void load(std::string& pName, ShaderType pType, std::string& pShaderLocationPath = std::string("res/shader/"));
+	void load(std::string&& pName, ShaderType pType, std::string pShaderLocationPath = std::string("res/shader/"));
+	void load(std::string& pName, ShaderType pType, std::string pShaderLocationPath = std::string("res/shader/"));
 
 	virtual int initialise() { return  0; }
 

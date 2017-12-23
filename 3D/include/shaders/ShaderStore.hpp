@@ -7,12 +7,12 @@ public:
 	ShaderStore() {}
 	~ShaderStore() {}
 
-	ShaderProgram* loadShader(ShaderProgram::ShaderType type, std::string&& name, std::string&& path = std::string("res/shader/"))
+	ShaderProgram* loadShader(ShaderProgram::ShaderType type, std::string&& name, std::string path = std::string("res/shader/"))
 	{
 		return loadShader(type, name, path);
 	}
 
-	ShaderProgram* loadShader(ShaderProgram::ShaderType type, std::string& name, std::string& path = std::string("res/shader/"))
+	ShaderProgram* loadShader(ShaderProgram::ShaderType type, std::string& name, std::string path = std::string("res/shader/"))
 	{
 		auto itr = shaders.insert(std::make_pair(name, new ShaderProgram()));
 		itr.first->second->load(name, type, path);
@@ -21,7 +21,7 @@ public:
 		return itr.first->second;
 	}
 
-	ShaderProgram* loadShader(ShaderProgram* loc, std::string& path = std::string("res/shader/"))
+	ShaderProgram* loadShader(ShaderProgram* loc, std::string path = std::string("res/shader/"))
 	{
 		auto itr = shaders.insert(std::make_pair(loc->getName(), loc));
 		itr.first->second->load(loc->getName(), loc->getType(), path);
