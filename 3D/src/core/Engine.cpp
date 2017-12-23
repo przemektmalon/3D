@@ -229,8 +229,9 @@ void Engine::mainLoop(int resolutionIndex)
 			case(InGame):
 			{
 				tweak.updateTweaks();
-				profiler.timeThis(
-					processGameFrame, "frame");
+				profiler.start("frame");
+				processGameFrame();
+				profiler.end("frame");
 				deltaTime = profiler.getTime("frame");
 				programTime += deltaTime.getSecondsf();
 				break;
@@ -419,14 +420,33 @@ void EngineConfig::KeyBindConfig::loadKeyBinds()
 	keyBinds.close();
 }
 
+void cfgToggleTextBounds()
+{
+	Engine::cfg.render.toggleDrawTextBounds();
+}
+
+void cfgToggleDrawConsole()
+{
+	Engine::cfg.render.toggleDrawConsole();
+}
+
+void cfgTogglePhysics()
+{
+	Engine::cfg.world.togglePhysics();
+}
+
+void dbgReloadWindows()
+{
+	Engine::uiwm.reloadWindows();
+}
 
 void EngineConfig::KeyBindConfig::initialiseFunctionBindingConfig()
 {
 	functionNames["escape"] = escapePress;
-	functionNames["toggle_textbounds"] = CFG_FUNC(render.toggleDrawTextBounds);
-	functionNames["toggle_console"] = CFG_FUNC(render.toggleDrawConsole);
-	functionNames["toggle_physics"] = CFG_FUNC(world.togglePhysics);
-	//functionNames["reload_windows"] = CALL(uiwm.reloadWindows);
+	functionNames["toggle_textbounds"] = cfgToggleTextBounds;
+	functionNames["toggle_console"] = cfgToggleDrawConsole;
+	functionNames["toggle_physics"] = cfgTogglePhysics;
+	functionNames["reload_windows"] = dbgReloadWindows;
 }
 
 void EngineConfig::RenderConfig::SSSAOConfig::setFrameScale(float set)
