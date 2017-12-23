@@ -22,9 +22,6 @@
 #include "WorldEditWindow.hpp"
 #include "WindowCreator.hpp"
 
-// Lambda for passing functions to the profiler
-#define CALL(name) []() -> void { Engine::##name##(); }
-
 int main()
 {
 	Engine::start(GetModuleHandle(NULL));
@@ -233,7 +230,7 @@ void Engine::mainLoop(int resolutionIndex)
 			{
 				tweak.updateTweaks();
 				profiler.timeThis(
-					CALL(processGameFrame), "frame");
+					processGameFrame, "frame");
 				deltaTime = profiler.getTime("frame");
 				programTime += deltaTime.getSecondsf();
 				break;
@@ -278,8 +275,9 @@ void Engine::processGameFrame()
 	uiwm.updateUIWindows();
 	cam.update(deltaTime);
 
-	profiler.glTimeThis(
-		CALL(r->render), "render");
+	profiler.start("render");
+	r->render();
+	profiler.glEnd("render");
 }
 
 void Engine::processMenuFrame()
@@ -428,7 +426,7 @@ void EngineConfig::KeyBindConfig::initialiseFunctionBindingConfig()
 	functionNames["toggle_textbounds"] = CFG_FUNC(render.toggleDrawTextBounds);
 	functionNames["toggle_console"] = CFG_FUNC(render.toggleDrawConsole);
 	functionNames["toggle_physics"] = CFG_FUNC(world.togglePhysics);
-	functionNames["reload_windows"] = CALL(uiwm.reloadWindows);
+	//functionNames["reload_windows"] = CALL(uiwm.reloadWindows);
 }
 
 void EngineConfig::RenderConfig::SSSAOConfig::setFrameScale(float set)
@@ -477,8 +475,6 @@ void EngineConfig::RenderConfig::CameraConfig::setFOV(float set)
 	fov = set;
 	Engine::r->activeCam->setFOV(fov);
 }
-
-#undef CALL
 
 // Static vars
 

@@ -9,7 +9,6 @@ ESC escape
 P   toggle_physics
 I   toggle_textbounds
 TIL toggle_console
-L   reload_windows
 
 # ESC = escape
 # TIL = tilde

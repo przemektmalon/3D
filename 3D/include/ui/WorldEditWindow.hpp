@@ -12,7 +12,7 @@ UIWindow* createWorldEditWindow()
 	Text2D::TextStyle styleA(Engine::assets.getFont("clearsansb"), 16);
 	styleA.textOriginPreDef = Text2D::MiddleMiddle;
 
-	C_BUTTON(butToggleEdit, win);
+	/*C_BUTTON(butToggleEdit, win);
 	butToggleEdit.setName("toggleedit");
 	butToggleEdit.setSize(glm::fvec2(295, 30));
 	butToggleEdit.getText().setStyle(styleA);
@@ -92,7 +92,7 @@ UIWindow* createWorldEditWindow()
 	tabEdits.setCurrentTab("First");
 
 	win->addElement(butToggleEditPtr);
-	win->addElement(tabEditsPtr);
+	win->addElement(tabEditsPtr);*/
 
 	return win;
 }

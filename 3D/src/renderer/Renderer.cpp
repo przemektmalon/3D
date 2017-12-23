@@ -21,8 +21,6 @@
 #define NUM_POINT_LIGHTS 3
 #define NUM_SPOT_LIGHTS 0
 
-#define CALL(name) []() -> void { Engine::r->##name##(); }
-
 void Renderer::render()
 {
 	Engine::profiler.start("gpuBuffer");
@@ -63,22 +61,22 @@ void Renderer::render()
 
 	Engine::profiler.glEnd("gpuBuffer");
 
-	Engine::profiler.glTimeThis(
-		CALL(gBufferPass), 
-		"gBuffer");
+	Engine::profiler.start("gBuffer");
+	gBufferPass();
+	Engine::profiler.glEnd("gBuffer");
 	
-	Engine::profiler.glTimeThis(
-		CALL(shadowPass), 
-		"shadow");
+	Engine::profiler.start("shadow");
+	shadowPass();
+	Engine::profiler.glEnd("shadow");
 
-	Engine::profiler.glTimeThis(
-		CALL(ssaoPass), 
-		"ssao");
+	Engine::profiler.start("ssao");
+	ssaoPass();
+	Engine::profiler.glEnd("ssao");
 
-	Engine::profiler.glTimeThis(
-		CALL(shadingPass), 
-		"light");
-	
+	Engine::profiler.start("light");
+	shadingPass();
+	Engine::profiler.glEnd("light");
+
 	Engine::profiler.start("screen");
 
 	screenPass();
@@ -693,5 +691,3 @@ inline void Renderer::initialiseScreenQuad()
 	vaoQuadViewRays.enableFor(*shaderStore.getShader("Standard"));
 	vaoQuadViewRays.enableFor(*shaderStore.getShader("test"));
 }
-
-#undef CALL
