@@ -48,7 +48,7 @@ void Engine::start(HINSTANCE pHInstance)
 		ws |= (WS_OVERLAPPED | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX);
 	}
 
-	SetProcessDPIAware();
+	//SetProcessDPIAware();
 	//Sets window to max valid resolution
 	int monitorWidth = GetSystemMetrics(SM_CXSCREEN);
 	int monitorHeight = GetSystemMetrics(SM_CYSCREEN);
@@ -147,7 +147,8 @@ void Engine::mainLoop(int resolutionIndex)
 
 	Tweaks tweak;
 	tweak.setTweaksFile("res/tweaks.txt");
-	tweak.setUpdateTime(Time(1));
+	Time updateTime = Time(1);
+	tweak.setUpdateTime(updateTime);
 	tweak.bindVariable(cfg.world.camSpeed, "camSpeed", Tweaks::Floating);
 	tweak.bindVariable(Engine::tau, "tau", Tweaks::Floating);
 	tweak.bindVariable(Engine::damping, "damping", Tweaks::Floating);
@@ -235,7 +236,7 @@ void Engine::mainLoop(int resolutionIndex)
 				profiler.start("frame");
 				processGameFrame();
 				profiler.end("frame");
-				deltaTime = profiler.getTime("frame");
+				deltaTime.setSeconds(profiler.getTime("frame").getSeconds());
 				programTime += deltaTime.getSecondsf();
 				break;
 			}

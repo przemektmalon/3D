@@ -28,9 +28,19 @@ public:
 		projModel = pProjModel;
 	}
 
+	void setProjModel(glm::fmat4&& pProjModel)
+	{
+		setProjModel(pProjModel);
+	}
+
 	void setColour(glm::fvec4& pColour)
 	{
 		colour = pColour;
+	}
+
+	void setColour(glm::fvec4&& pColour)
+	{
+		setColour(pColour);
 	}
 
 	void sendUniforms()

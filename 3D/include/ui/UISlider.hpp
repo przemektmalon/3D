@@ -99,15 +99,17 @@ public:
 		range.draw();
 		slider.draw();
 
+		auto ident = glm::fmat4();
+
 		descText.shader->setProj(parentWindow->getProj());
-		descText.shader->setModel(glm::fmat4());
-		descText.shader->setView(glm::fmat4());
+		descText.shader->setModel(ident);
+		descText.shader->setView(ident);
 		descText.shader->setFontBinding(12);
 		descText.draw();
 
 		valueText.shader->setProj(parentWindow->getProj());
-		valueText.shader->setModel(glm::fmat4());
-		valueText.shader->setView(glm::fmat4());
+		valueText.shader->setModel(ident);
+		valueText.shader->setView(ident);
 		valueText.shader->setFontBinding(12);
 		valueText.draw();
 	}

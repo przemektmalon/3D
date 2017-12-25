@@ -35,10 +35,20 @@ public:
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
 	}
 
+	void setProj(glm::fmat4&& proj)
+	{
+		setProj(proj);
+	}
+
 	void setView(glm::fmat4& view)
 	{
 		use();
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+	}
+
+	void setView(glm::fmat4&& view)
+	{
+		setView(view);
 	}
 
 	void setModel(glm::fmat4& model)
@@ -47,10 +57,20 @@ public:
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 	}
 
+	void setModel(glm::fmat4&& model)
+	{
+		setModel(model);
+	}
+
 	void setColour(glm::fvec3& colour)
 	{
 		use();
 		glUniform3fv(colourLoc, 1, &colour[0]);
+	}
+
+	void setColour(glm::fvec3&& colour)
+	{
+		setColour(colour);
 	}
 
 private:

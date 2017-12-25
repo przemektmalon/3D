@@ -1,6 +1,7 @@
 #pragma once
 #include "Shader.hpp"
 #include <map>
+#include <math.h>
 
 class SAOShader : public ShaderProgram
 {
@@ -147,7 +148,7 @@ public:
 		glUniform1i(depthBufferLoc, depthBuffer);
 		glUniform1f(radiusLoc, radius);
 		glUniform1f(biasLoc, bias);
-		glUniform1f(intensityDivR6Loc, intensity / std::powf(radius, 6.f));
+		glUniform1f(intensityDivR6Loc, intensity / std::pow(radius, 6.f));
 		glUniform1i(gNormalLoc, gNormal);
 		glUniformMatrix2fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 		glUniform1f(projScaleLoc, projScale);

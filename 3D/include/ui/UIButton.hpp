@@ -68,8 +68,9 @@ public:
 		rect.draw();
 
 		text.shader->setProj(parentWindow->getProj());
-		text.shader->setModel(glm::fmat4());
-		text.shader->setView(glm::fmat4());
+		auto ident = glm::fmat4();
+		text.shader->setModel(ident);
+		text.shader->setView(ident);
 		text.shader->setFontBinding(12);
 		text.draw();
 	}

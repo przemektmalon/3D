@@ -1,0 +1,3 @@
+C:/Programming/3D/3D/build/CMakeFiles/3D.dir
+C:/Programming/3D/3D/build/CMakeFiles/edit_cache.dir
+C:/Programming/3D/3D/build/CMakeFiles/rebuild_cache.dir

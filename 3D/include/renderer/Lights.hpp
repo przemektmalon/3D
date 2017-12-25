@@ -445,7 +445,8 @@ public: ///TODO: Max light count is 500, add setters etc
 
 	PointLight& addPointLight()
 	{
-		return addPointLight(PointLight::GPUData());
+		auto data = PointLight::GPUData();
+		return addPointLight(data);
 	}
 
 	PointLight& addPointLight(PointLight::GPUData& data);
@@ -472,7 +473,8 @@ public: ///TODO: Max light count is 500, add setters etc
 
 	SpotLight& addSpotLight()
 	{
-		return addSpotLight(SpotLight::GPUData());
+		auto data = SpotLight::GPUData();
+		return addSpotLight(data);
 	}
 
 	SpotLight& addSpotLight(SpotLight::GPUData& data);

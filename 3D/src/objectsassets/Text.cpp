@@ -44,8 +44,9 @@ void Text2D::init()
 	shader = &Engine::r->textShader;
 	shader->use();
 
-	shader->setModel(glm::fmat4(1.f));
-	shader->setView(glm::fmat4(1.f));
+	auto ident = glm::fmat4(1.f);
+	shader->setModel(ident);
+	shader->setView(ident);
 
 	glGenVertexArrays(1, &vao);
 	glGenVertexArrays(1, &vaoBBox);

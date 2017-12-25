@@ -3,9 +3,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-
-#include <GL\glew.h>
-#include <GL\wglew.h>
+#include "GLIncludes.hpp"
 #include "MathIncludes.hpp"
 #include <time.h>
 #include <Windows.h>

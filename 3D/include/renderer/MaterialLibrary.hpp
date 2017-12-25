@@ -16,7 +16,7 @@ public:
 
 	MaterialMeta& getMaterial(std::string name)
 	{
-		auto& find = materials.find(name);
+		auto find = materials.find(name);
 		if (find == materials.end())
 			return materials.begin()->second; /// TODO: return a default null material
 

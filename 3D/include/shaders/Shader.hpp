@@ -10,6 +10,8 @@
 #include "Types.hpp"
 #include <map>
 
+
+
 class ShaderProgram
 {
 private:
@@ -143,8 +145,10 @@ public:
 	~ShaderProgram();
 
 	void destroy();
-	void load(std::string&& pName, ShaderType pType, std::string pShaderLocationPath = std::string("res/shader/"));
-	void load(std::string& pName, ShaderType pType, std::string pShaderLocationPath = std::string("res/shader/"));
+	void load(std::string&& pName, ShaderType pType, std::string pShaderLocationPath);
+	void load(std::string&& pName, ShaderType pType) { load(pName, pType, std::string("res/shader/")); }
+	void load(std::string& pName, ShaderType pType, std::string pShaderLocationPath);
+	void load(std::string& pName, ShaderType pType) { load(pName, pType, std::string("res/shader/")); }
 
 	virtual int initialise() { return  0; }
 

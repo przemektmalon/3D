@@ -280,7 +280,7 @@ void Renderer::shadingPass()
 
 	lightManager.pointLightsBuffer.bindBase(0);
 	lightManager.spotLightsBuffer.bindBase(1);
-	glDispatchCompute(std::ceilf(Engine::cfg.render.resolution.x / 16.f), std::ceilf(float(Engine::cfg.render.resolution.y) / 16.f), 1);
+	glDispatchCompute(std::ceil(Engine::cfg.render.resolution.x / 16.f), std::ceil(float(Engine::cfg.render.resolution.y) / 16.f), 1);
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 	lightManager.pointLightsBuffer.unbind();
 	lightManager.spotLightsBuffer.unbind();

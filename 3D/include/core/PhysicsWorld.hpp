@@ -1,10 +1,12 @@
 #pragma once
-
+#include <unordered_map>
 #include "PhysicsObject.hpp"
 #include "btBulletDynamicsCommon.h"
 #include "BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h"
 #include <vector>
 #include "Time.hpp"
+
+class ModelInstance;
 
 class PhysicsWorld
 {

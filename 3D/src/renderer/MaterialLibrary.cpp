@@ -4,7 +4,7 @@
 
 void MaterialLibrary::addMaterial(std::string name, std::string albedo, std::string normal, std::string specMetal, std::string roughness, std::string ao, std::string height)
 {
-	auto& find = materials.find(name);
+	auto find = materials.find(name);
 	if (find != materials.end())
 		return; /// TODO: log ? material already exists
 

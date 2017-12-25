@@ -47,7 +47,7 @@ public:
 
 		meta.fileMode = pFileMode;
 
-		file.open(meta.path.c_str(), meta.fileMode);
+		file.open(meta.path.c_str(), (int)meta.fileMode);
 	}
 
 	bool open(std::string&& pPath, Mode pFileMode = (File::Mode)(File::binary | File::in | File::out))
@@ -72,12 +72,7 @@ public:
 
 		meta.fileMode = pFileMode;
 
-		file.open(meta.path.c_str(), meta.fileMode);
-
-		if (file.bad())
-		{
-			std::cout << "S" << std::endl;
-		}
+		file.open(meta.path.c_str(), (int)meta.fileMode);
 	}
 
 	bool atEOF()

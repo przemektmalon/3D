@@ -1,8 +1,10 @@
 #pragma once
 
+#include <Windows.h>
 #include "btBulletDynamicsCommon.h"
 #include "MathIncludes.hpp"
 #include "BufferObjects.hpp"
+#include "GLIncludes.hpp"
 
 #undef min
 #undef max

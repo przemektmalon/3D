@@ -1,6 +1,8 @@
 #include "Shader.hpp"
 #include "Engine.hpp"
 
+#define _GLIBCXX_USE_CXX11_ABI 1
+
 const int ShaderProgram::typeSizes[ShaderProgram::UniformTypesCount] = {
 	4, 8, 12, 16,
 	4, 8, 12, 16,
@@ -25,7 +27,7 @@ const char ShaderProgram::typeGLSLNames[ShaderProgram::UniformTypesCount][16] = 
 	"sampler2D"
 };
 
-ShaderProgram::ShaderProgram() : geomPath(), vertexPath(), fragmentPath() {}
+ShaderProgram::ShaderProgram() : geomPath(), vertexPath(), fragmentPath(), geomContent(nullptr), vertexContent(nullptr), fragmentContent(nullptr), geomSize(0), vertexSize(0), fragmentSize(0), name(), errorLog(), loaded(false), type(VertFrag), GLID(-1) {}
 ShaderProgram::ShaderProgram(const ShaderProgram& program) : geomPath(), vertexPath(), fragmentPath() {}
 
 ShaderProgram::~ShaderProgram() {}
@@ -37,7 +39,7 @@ void ShaderProgram::destroy()
 	freeSourceContent();
 }
 
-void ShaderProgram::load(std::string && pName, ShaderType pType, std::string & pShaderLocationPath)
+void ShaderProgram::load(std::string && pName, ShaderType pType, std::string pShaderLocationPath)
 {
 	//uniformLocations.insert(std::make_pair(pName, 0));
 	name = pName;
@@ -56,7 +58,7 @@ void ShaderProgram::load(std::string && pName, ShaderType pType, std::string & p
 	}
 }
 
-void ShaderProgram::load(std::string & pName, ShaderType pType, std::string & pShaderLocationPath)
+void ShaderProgram::load(std::string & pName, ShaderType pType, std::string pShaderLocationPath)
 {
 	//uniformLocations.insert(std::make_pair(pName, 0));
 	name = pName;
@@ -328,7 +330,7 @@ void ShaderProgram::compileVertFrag()
 		glDeleteProgram(shaderProgram);
 		return;
 	}
-	
+
 	GLID = shaderProgram;
 
 	use();
@@ -340,7 +342,7 @@ void ShaderProgram::loadVertGeomFrag(std::string & pName, std::string & pShaderL
 {
 	loadVertFrag(pName, pShaderLocationPath);
 
-	std::string shaderPath; shaderPath  = pShaderLocationPath;
+	std::string shaderPath; shaderPath = pShaderLocationPath;
 
 	geomPath = shaderPath;
 	geomPath.append(pName);
@@ -401,7 +403,7 @@ void ShaderProgram::compileVertGeomFrag()
 		glDeleteShader(vertexShader);
 		return;
 	}
-	
+
 	glCompileShader(geomShader);
 	if (!checkShaderCompilation(vertexShader, "Geometry"))
 	{
@@ -621,7 +623,7 @@ void ShaderProgram::extractUniforms(char * pSource)
 		if (*pSource == '\n')
 		{
 			curLine.end = pSource;
-			std::string cl; 
+			std::string cl;
 			for (char* c = curLine.begin; c != curLine.end; ++c) {
 				cl.push_back(*c);
 			}
@@ -647,8 +649,8 @@ void ShaderProgram::extractUniforms(char * pSource)
 
 		std::regex_search(itr->begin, itr->end, cm, e);
 
-		if (cm.size() != 1)	
-		{ 
+		if (cm.size() != 1)
+		{
 			//TODO: USER DEFINE TYPE (STRUCT)
 			continue;
 		}

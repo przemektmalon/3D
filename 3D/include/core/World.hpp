@@ -5,8 +5,8 @@
 #include <map>
 #include "DrawModes.hpp"
 #include "Texture.hpp"
+#include "Model.hpp"
 
-class ModelInstance;
 class Model;
 
 class World

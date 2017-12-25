@@ -53,6 +53,8 @@
 ** MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
 */
 
+#pragma once
+
 #ifndef __wglew_h__
 #define __wglew_h__
 #define __WGLEW_H__
