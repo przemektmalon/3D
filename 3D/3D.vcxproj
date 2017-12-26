@@ -337,7 +337,7 @@
     <ClCompile Include="src\renderer\MaterialLibrary.cpp" />
     <ClCompile Include="src\renderer\Renderer.cpp" />
     <ClCompile Include="src\renderer\Texture.cpp" />
-    <ClCompile Include="src\shader\Shader.cpp" />
+    <ClCompile Include="src\shaders\Shader.cpp" />
     <ClCompile Include="src\ui\ProfilingWindow.cpp" />
     <ClCompile Include="src\ui\RenderConfigWindow.cpp" />
     <ClCompile Include="src\ui\UIButton.cpp" />

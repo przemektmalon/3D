@@ -40,9 +40,6 @@
     <Filter Include="Source Files\Renderer">
       <UniqueIdentifier>{8e1707b5-7085-456c-a68d-140ac432708b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Shader">
-      <UniqueIdentifier>{6e4618cb-9ef6-4c7a-bd4f-e8f4799d9893}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\UI">
       <UniqueIdentifier>{c02a630b-a4d7-4c08-a896-0bd8b9c4304f}</UniqueIdentifier>
     </Filter>
@@ -60,6 +57,9 @@
     </Filter>
     <Filter Include="Source Files\UI\Windows">
       <UniqueIdentifier>{e961f833-a2c7-4171-9e4b-c3e569082aa3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shaders">
+      <UniqueIdentifier>{6e4618cb-9ef6-4c7a-bd4f-e8f4799d9893}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -422,9 +422,6 @@
     <ClCompile Include="src\util\ConfigParser.cpp">
       <Filter>Source Files\Util</Filter>
     </ClCompile>
-    <ClCompile Include="src\shader\Shader.cpp">
-      <Filter>Source Files\Shader</Filter>
-    </ClCompile>
     <ClCompile Include="src\core\PhysicsObject.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
@@ -436,6 +433,9 @@
     </ClCompile>
     <ClCompile Include="src\ui\ProfilingWindow.cpp">
       <Filter>Source Files\UI\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\shaders\Shader.cpp">
+      <Filter>Source Files\Shaders</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

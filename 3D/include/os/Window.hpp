@@ -6,8 +6,11 @@
 #include "GLIncludes.hpp"
 #include "MathIncludes.hpp"
 #include <time.h>
-#include <Windows.h>
 #include <SDKDDKVer.h>
+
+#include <gl/glew.h>
+#include <GL\GL.h>
+#include <GL\wglew.h>
 
 #include <stdlib.h>
 #include <malloc.h>
@@ -17,7 +20,6 @@
 
 #include "Keyboard.hpp"
 #include "Mouse.hpp"
-
 #include "Event.hpp"
 
 class Window

@@ -1,7 +1,7 @@
 #pragma once
 #include <algorithm>
 #include <set>
-#include <ft2build.h>
+#include "ft2build.h"
 #include "Texture.hpp"
 #include "Engine.hpp"
 #include "Asset.hpp"

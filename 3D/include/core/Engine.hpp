@@ -5,7 +5,7 @@
 #include "UserInputManager.hpp"
 #include "Log.hpp"
 #include <unordered_map>
-#include <ft2build.h>
+#include "ft2build.h"
 #include "freetype\freetype.h"
 
 #include "PhysicsWorld.hpp"

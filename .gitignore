@@ -85,6 +85,16 @@ artifacts/
 3D/res/skybox/
 3D/res/fonts/
 3D/screenshot/
+3D/libs/assimp/
+3D/libs/bullet/
+3D/libs/freetype/
+3D/libs/glew/
+3D/libs/soil/
+3D/bin/
+3D/build/
+3D/logs/
+3D/screenshot/
+
 
 # Chutzpah Test files
 _Chutzpah*

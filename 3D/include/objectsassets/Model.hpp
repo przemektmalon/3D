@@ -3,6 +3,8 @@
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 
+
+
 #include "Asset.hpp"
 
 #include "Engine.hpp"
@@ -29,7 +31,7 @@ class Model : public Asset
 public:
 	Model() { type = Mesh; }
 	Model(std::string& pPath, std::string& pName) : Asset(pPath, pName) { type = Mesh; }
-	~Model() {}
+	~Model() { }
 
 	void save(std::string& binPath) {}
 
