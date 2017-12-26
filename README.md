@@ -4,6 +4,18 @@
 
 ![Engine Image](https://github.com/przemektmalon/3D/blob/master/gitimg/engineimg.png)
 
+To build:
+
+Ensure you have all dependancies built on your system (listed at the bottom of this file).
+
+Clone the repo. 
+
+Either open the MSVC solution and amend the usual project properties (include directories, library directories) to point to paths on your system.
+
+Through cmake, launch cmake-gui, open the LIB properties group, input the correct library paths, configure, generate, and build.
+
+CMake process tested with MSVC and GCC. GCC compiles and links, however, the app crashes. Most likely because the GCC compiled 64bit code while libs are 32bit. I might fix this in the future, for the time being though, MSVC works.
+
 # Current features
 
 -Deferred HDR rendering using half-z tile light culling through OGL compute shader. Supports normal and tone mapping. Uses metallic and roughness maps for PBR calculations.
