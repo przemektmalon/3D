@@ -5,9 +5,10 @@
 #include "Renderer.hpp"
 #include "Keyboard.hpp"
 #include "Event.hpp"
+#include "IL\il.h"
+#include "IL\ilut.h"
 
 Window* Window::engineWindow;
-
 
 BOOL Window::processMessages()
 {
@@ -202,40 +203,15 @@ void Window::registerInputDevices()
 
 void Window::screenshot(std::string fileName)
 {
-	u32 imageSize = getSizeX() * getSizeY() * 3;
-	u32 rowSize = getSizeX() * 3;
-	u8* screenshot = new u8[imageSize];
+	fileName.append(".png");
 
-	fileName.append(".bmp");
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-	glReadBuffer(GL_BACK);
-	glReadPixels(0, 0, getSizeX(), getSizeY(), GL_RGB, GL_UNSIGNED_BYTE, screenshot);
-
-	struct pixel {
-		u8 r, g, b;
-	};
-
-	u8* flipped = new u8[imageSize];
-
-	float flipSign = -1.f;
-	float flip = imageSize - (getSizeX() * 3);
-
-	for (int y = 0; y < getSizeY(); ++y)
-	{
-		for (int x = 0; x < getSizeX(); ++x)
-		{
-			u32 sourceOffset = flip + (flipSign * (y * getSizeX() * 3) + (x * 3));
-			u32 targetOffset = (y * getSizeX() * 3) + (x * 3);
-			flipped[targetOffset] = screenshot[sourceOffset];
-			flipped[targetOffset + 1] = screenshot[sourceOffset + 1];
-			flipped[targetOffset + 2] = screenshot[sourceOffset + 2];
-		}
-	}
-
-	SOIL_save_image(fileName.c_str(), SOIL_SAVE_TYPE_BMP, getSizeX(), getSizeY(), 3, (u8*)flipped);
-
-	delete[] screenshot;
-	delete[] flipped;
+	ILuint ilImg;
+	ilGenImages(1, &ilImg);
+	ilBindImage(ilImg);
+	ilTexImage(getSizeX(), getSizeY(), 1, 3, IL_RGB, IL_UNSIGNED_BYTE, NULL);
+	ilutGLScreen();
+	ilSaveImage(fileName.c_str());
+	ilDeleteImage(ilImg);
 }
 
 void Window::screenshot()

@@ -22,6 +22,10 @@
 #include "WorldEditWindow.hpp"
 #include "WindowCreator.hpp"
 
+#include "Event.hpp"
+#include "IL\il.h"
+#include "IL\ilut.h"
+
 int main()
 {
 	char workingDir[100];
@@ -80,6 +84,8 @@ void Engine::mainLoop(int resolutionIndex)
 	glewExperimental = GL_TRUE;
 	glewInit();
 	FT_Init_FreeType(&ftLib);
+	ilInit();
+	ilutInit();
 	rand.seed(rand.default_seed);
 	cam.initialiseProj(float(window.getSizeX()) / float(window.getSizeY()));
 

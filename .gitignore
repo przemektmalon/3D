@@ -93,6 +93,7 @@ artifacts/
 3D/libs/freetype/
 3D/libs/glew/
 3D/libs/soil/
+3D/libs/devil/
 3D/bin/
 3D/build/
 3D/logs/
