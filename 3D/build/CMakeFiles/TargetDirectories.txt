@@ -1,2 +1,0 @@
-C:/Programming/3D/3D/build/CMakeFiles/3D.dir
-C:/Programming/3D/3D/build/CMakeFiles/ALL_BUILD.dir

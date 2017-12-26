@@ -70,6 +70,9 @@ artifacts/
 *.svclog
 *.scc
 
+*.cmake
+*.make
+
 *.jpg
 *.tga
 *.7z
