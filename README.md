@@ -122,3 +122,6 @@ CMake process tested with MSVC and GCC. GCC compiles and links, however, the app
 
 -GLEW
 
+-SOIL
+
+-DevIL
