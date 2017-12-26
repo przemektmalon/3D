@@ -28,6 +28,9 @@ set(LIB_FREETYPE_LIBRARY "Path to your freetype 2.8.1 library file (freetype281.
 set(LIB_SOIL_INCLUDE_DIR "Path to your SOIL library 'src' directory" CACHE PATH "Path to your SOIL library 'src' directory")
 set(LIB_SOIL_LIBRARY "Path to your SOIL library soil.lib or soil.a file" CACHE FILEPATH "Path to your SOIL library soil.lib or soil.a file")
 
+set(LIB_DEVIL_INCLUDE_DIR "Path to your DevIL library 'include' directory" CACHE PATH "Path to your DevIL library 'include' directory")
+set(LIB_DEVIL_LIBRARY "Path to your DevIL library file" CACHE PATH "Path to your DevIL library file")
+
 set(LIB_ASSIMP_INCLUDE_DIR "Path to your assimp library 'include' directory" CACHE PATH "Path to your assimp library 'include' directory")
 set(LIB_ASSIMP_LIBRARY "Path to your assimp library assimp.lib or assimp.a file" CACHE FILEPATH "Path to your assimp library assimp.lib or assimp.a file")
 
@@ -59,8 +62,8 @@ set(MY_SOURCES ${CORE_SOURCES} ${OBJECTSASSETS_SOURCES} ${OS_SOURCES} ${RENDERER
 set(MY_INCLUDES ${CORE_INCLUDES} ${OBJECTSASSETS_INCLUDES} ${OS_INCLUDES} ${RENDERER_INCLUDES} ${UI_INCLUDES} ${UTIL_INCLUDES} ${SHADERS_INCLUDES})
 
 set(ALL_INCLUDE_DIRS ${INCLUDE_DIR}/core ${INCLUDE_DIR}/objectsassets ${INCLUDE_DIR}/os ${INCLUDE_DIR}/renderer ${INCLUDE_DIR}/shaders ${INCLUDE_DIR}/ui ${INCLUDE_DIR}/util
-		${OPENGL_INCLUDE_DIR} ${BOOST_INCLUDE_DIR} ${LIB_FREETYPE_INCLUDE_DIR} ${LIB_BULLET_INCLUDE_DIR} ${LIB_GLEW_INCLUDE_DIR} ${LIB_GLM_INCLUDE_DIR} ${LIB_SOIL_INCLUDE_DIR} ${LIB_ASSIMP_INCLUDE_DIR} ${XML_INCLUDE_DIR}
-		${LIBS_DIR})
+		${OPENGL_INCLUDE_DIR} ${BOOST_INCLUDE_DIR} ${LIB_FREETYPE_INCLUDE_DIR} ${LIB_BULLET_INCLUDE_DIR} ${LIB_GLEW_INCLUDE_DIR} ${LIB_GLM_INCLUDE_DIR} ${LIB_SOIL_INCLUDE_DIR} 
+		${LIB_ASSIMP_INCLUDE_DIR} ${XML_INCLUDE_DIR} ${LIB_DEVIL_INCLUDE_DIR} ${LIBS_DIR})
 
 file(GLOB XML_INCLUDES ${XML_INCLUDE_DIR}/*.hpp)
 file(GLOB BOOST_INCLUDES ${BOOST_INCLUDE_DIR}/*.hpp)
@@ -77,7 +80,7 @@ add_executable(3D ${MY_SOURCES} ${MY_INCLUDES})
 
 set_target_properties(3D PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}")
 
-target_link_libraries(3D ${OPENGL_LIBRARIES} ${LIB_GLEW_LIBRARY} ${LIB_FREETYPE_LIBRARY} ${BULLET_LIBRARIES} ${LIB_ASSIMP_LIBRARY} ${LIB_SOIL_LIBRARY} ${LIB_ASSIMP_LIBRARY})
+target_link_libraries(3D ${OPENGL_LIBRARIES} ${LIB_GLEW_LIBRARY} ${LIB_FREETYPE_LIBRARY} ${BULLET_LIBRARIES} ${LIB_ASSIMP_LIBRARY} ${LIB_SOIL_LIBRARY} ${LIB_ASSIMP_LIBRARY} ${LIB_DEVIL_LIBRARY})
 
 source_group("Header Files\\Core" FILES ${CORE_INCLUDES})
 source_group("Header Files\\Renderer" FILES ${RENDERER_INCLUDES})
