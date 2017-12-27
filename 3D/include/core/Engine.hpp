@@ -25,6 +25,7 @@ class World;
 
 #define BORDERLESS true
 #define NUM_VALID_RESOLUTIONS 9
+#define ENABLE_GL_PROFILING 0
 
 class EngineConfig
 {

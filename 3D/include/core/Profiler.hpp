@@ -4,6 +4,16 @@
 #include "Time.hpp"
 #include <functional>
 
+#define GL_PROFILE_THIS(func,name) Engine::profiler.start(name); func; Engine::profiler.glEnd(name);
+#define GL_PROFILE_START(name) Engine::profiler.start(name);
+#define GL_PROFILE_END(name) Engine::profiler.glEnd(name)
+
+#define PROFILE_THIS(func,name) Engine::profiler.start(name); func; Engine::profiler.end(name);
+#define PROFILE_START(name) Engine::profiler.start(name);
+#define PROFILE_END(name) Engine::profiler.end(name)
+
+#define PROFILE_TIME(name) Engine::profiler.getTime(name)
+
 class Profiler
 {
 public:

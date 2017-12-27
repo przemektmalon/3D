@@ -16,6 +16,8 @@ void Profiler::end(std::string id)
 
 void Profiler::glEnd(std::string id)
 {
+#if ENABLE_GL_PROFILING
 	glFinish();
+#endif
 	times[id].second.setMicroSeconds(Engine::qpc.now() - times[id].first.getMicroSeconds());
 }

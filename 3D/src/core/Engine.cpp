@@ -239,9 +239,7 @@ void Engine::mainLoop(int resolutionIndex)
 			case(InGame):
 			{
 				tweak.updateTweaks();
-				profiler.start("frame");
-				processGameFrame();
-				profiler.end("frame");
+				PROFILE_THIS(processGameFrame(), "frame");
 				deltaTime.setSeconds(profiler.getTime("frame").getSeconds());
 				programTime += deltaTime.getSecondsf();
 				break;
@@ -273,7 +271,7 @@ void Engine::processGameFrame()
 	cam.targetPos.y += cfg.world.camSpeed * deltaTime.getSeconds() * float(window.keyboard.isKeyPressed('R'));
 	cam.targetPos.y -= cfg.world.camSpeed * deltaTime.getSeconds() * float(window.keyboard.isKeyPressed('F'));
 
-	profiler.start("physics");
+	PROFILE_START("physics");
 
 	if (cfg.world.doPhysics)
 	{
@@ -281,14 +279,12 @@ void Engine::processGameFrame()
 		physicsWorld.updateModels();
 	}
 
-	profiler.end("physics");
+	PROFILE_END("physics");
 
 	uiwm.updateUIWindows();
 	cam.update(deltaTime);
 
-	profiler.start("render");
-	r->render();
-	profiler.glEnd("render");
+	GL_PROFILE_THIS(r->render(), "render");
 }
 
 void Engine::processMenuFrame()

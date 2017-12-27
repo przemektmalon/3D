@@ -23,7 +23,7 @@
 
 void Renderer::render()
 {
-	Engine::profiler.start("gpuBuffer");
+	GL_PROFILE_START("gpuBuffer");
 
 	world->updateDrawBuffer(); // For LOD
 
@@ -56,37 +56,29 @@ void Renderer::render()
 	lightManager.updateAllPointLights();
 	lightManager.updateAllSpotLights();
 
-	Engine::profiler.glEnd("gpuBuffer");
+	GL_PROFILE_END("gpuBuffer");
 
-	Engine::profiler.start("gBuffer");
-	gBufferPass();
-	Engine::profiler.glEnd("gBuffer");
+	GL_PROFILE_THIS(gBufferPass(), "gBuffer");
 	
-	Engine::profiler.start("shadow");
-	shadowPass();
-	Engine::profiler.glEnd("shadow");
+	GL_PROFILE_THIS(shadowPass(), "shadow");
 
-	Engine::profiler.start("ssao");
-	ssaoPass();
-	Engine::profiler.glEnd("ssao");
+	GL_PROFILE_THIS(ssaoPass(), "ssao");
 
-	Engine::profiler.start("light");
-	shadingPass();
-	Engine::profiler.glEnd("light");
+	GL_PROFILE_THIS(shadingPass(), "light");
 
-	Engine::profiler.start("screen");
+	GL_PROFILE_START("screen");
 
 	screenPass();
 
 	lightManager.drawLightIcons();
 
-	Engine::uiwm.drawUIWindows(); //UI Window Manager
+	Engine::uiwm.drawUIWindows();
 
 	//Engine::console.draw();
 
 	window->swapBuffers();
 
-	Engine::profiler.glEnd("screen");
+	GL_PROFILE_END("screen");
 }
 
 void Renderer::gBufferPass()
