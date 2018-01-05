@@ -85,7 +85,7 @@ void UIMultiTab::addTab(std::string name)
 
 	but->setName(name);
 	but->getText().setStyle(styleA);
-	but->setString(name);
+	but->setString("tab" + name);
 	auto bounds = but->getText().getBoundingBox();
 	but->setSize(glm::fvec2(bounds.width + 4, 18));
 	but->setOnMouseUp([this](UIWindow* win, UIElement* __this, MouseEvent& me) -> void {

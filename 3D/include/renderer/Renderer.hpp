@@ -83,6 +83,7 @@ public:
 	LightManager lightManager;
 	GLTexture2D lightPassTex;
 	GLBufferObject shadowMatrixBuffer;
+	glm::ivec2 csmViewports[3];
 
 	// Camera
 	Camera* activeCam;

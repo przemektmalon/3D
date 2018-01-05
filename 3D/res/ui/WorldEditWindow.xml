@@ -1,0 +1,9 @@
+<window name="World Edit Utility" pos="1420 380" size="510 700" border="4" movable="true">
+
+	<element type="button" name="selectdrag" position="15 35" size="150 30" fontsize="18" fontcolour="1 1 1" text="Select Mode"></element>
+
+	<element type="button" name="physics" position="180 35" size="150 30" fontsize="18" fontcolour="1 1 1" text="Toggle Physics"></element>
+
+	<element type="button" name="gravity" position="345 35" size="150 30" fontsize="18" fontcolour="1 1 1" text="Toggle Gravity"></element>
+
+</window>

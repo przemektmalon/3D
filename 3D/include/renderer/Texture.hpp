@@ -123,13 +123,22 @@ class GLTexture
 protected:
 	GLuint GLID;
 	GLuint64 handle;
+	s32 mipLevels;
+	GLenum type;
+	GLenum format;
+	GLenum sizedFormat;
 
 public:
-	GLTexture() : handle(0), GLID(0) {}
+	GLTexture() : format(0), sizedFormat(0), type(0), handle(0), GLID(0), mipLevels(0) {}
+
+	void release() { glDeleteTextures(1, &GLID); }
 
 	GLuint getGLID() { return GLID; }
 
-	virtual void bind(GLint pTextureUnit) = 0;
+	void bind(GLint pTextureUnit = 0)
+	{
+		glBindTextureUnit(pTextureUnit, GLID);
+	}
 
 	virtual GLuint64 getHandle(GLuint pSampler)
 	{
@@ -153,27 +162,12 @@ public:
 	Texture2D* texture;
 	ImageData* streamImageData;
 	s32 width, height;
-	GLenum type;
-	GLenum format;
-	GLenum sizedFormat;
 
-	s32 mipLevels;
-
-	GLTexture2D() : format(0), sizedFormat(0), type(0), mipLevels(0), width(0), height(0), streamImageData(nullptr), texture(nullptr) {}
+	GLTexture2D() : width(0), height(0), streamImageData(nullptr), texture(nullptr) {}
 	~GLTexture2D() 
 	{
 		if (streamImageData)
 			streamImageData->free();
-	}
-
-	void release()
-	{
-		glDeleteTextures(1, &GLID);
-	}
-
-	void bind(GLint pTextureUnit = 0)
-	{
-		glBindTextureUnit(pTextureUnit, GLID);
 	}
 
 	void bindImage(GLint pImageUnit, GLenum pAccess, int pMipLevel = 0)
@@ -191,7 +185,7 @@ public:
 	void loadToGPU()
 	{
 		if (!texture)
-			return;
+			return; /// TODO: log error ?
 
 		type = GL_UNSIGNED_BYTE;
 		sizedFormat = GL_RGBA8;
@@ -204,13 +198,8 @@ public:
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, mipLevels);
-		//glTexStorage2D(GL_TEXTURE_2D, mipLevels, sizedFormat, width, height);
 		glTexImage2D(GL_TEXTURE_2D, 0, sizedFormat, width, height, 0, format, type, texture->data.getData());
 		glGenerateMipmap(GL_TEXTURE_2D);
-
-		//glTexStorage2D(GL_TEXTURE_2D, mipLevels, sizedFormat, width, height);
-		//glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, format, type, texture->data.getData());
-		//glGenerateMipmap(GL_TEXTURE_2D);
 	}
 
 	void createFromStream(GLint pSizedFormat, s32 pWidth, s32 pHeight, GLint pFormat, GLenum pType, const void* pPixels, GLint pTextureUnit = 0, GLint pPixelAlignment = 4, int pMipLevels = -1)
@@ -366,18 +355,13 @@ public:
 class GLTextureCube : public GLTexture
 {
 private:
-	GLint type;
-	GLint format;
-	GLint internalFormat;
 	GLint pixelAlignment;
 	GLuint sampler;
-	s32 width;
-	s32 height;
-	s32 mipLevels;
 	unsigned char* data;
+	s32 width, height;
 
 public:
-	GLTextureCube() : type(0), format(0), internalFormat(0), pixelAlignment(0), sampler(0), width(0), height(0), mipLevels(0), data(nullptr) {}
+	GLTextureCube() : pixelAlignment(0), sampler(0), data(nullptr) {}
 	~GLTextureCube() {}
 
 	void load()
@@ -418,7 +402,7 @@ public:
 
 	void createFromStream(GLint pInternalFormat, s32 pWidth, s32 pHeight,GLenum pFormat, GLenum pType, char* image = nullptr, GLint pPixelAlignment = 4)
 	{
-		internalFormat = pInternalFormat;
+		sizedFormat = pInternalFormat;
 		width = pWidth; height = pHeight;
 		format = pFormat;
 		type = pType;
@@ -437,7 +421,7 @@ public:
 		//glTexStorage2D(GL_TEXTURE_CUBE_MAP, 6, pInternalFormat, pWidth, pHeight);
 
 		for (GLuint i = 0; i < 6; ++i)
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, width, height, 0, format, type, NULL);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, sizedFormat, width, height, 0, format, type, NULL);
 
 		/*for (int i = 0; i < 6; ++i)
 		{
@@ -452,7 +436,7 @@ public:
 
 	void bindImage(GLint pImageUnit, GLenum pAccess)
 	{
-		glBindImageTexture(pImageUnit, GLID, 0, GL_FALSE, 0, pAccess, internalFormat);
+		glBindImageTexture(pImageUnit, GLID, 0, GL_FALSE, 0, pAccess, sizedFormat);
 	}
 
 	void saveToFiles(const char* pFilePaths[6])

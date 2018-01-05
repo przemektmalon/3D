@@ -425,9 +425,6 @@
     <ClCompile Include="src\core\PhysicsObject.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
-    <ClCompile Include="src\ui\WindowCreator.cpp">
-      <Filter>Source Files\UI</Filter>
-    </ClCompile>
     <ClCompile Include="src\ui\RenderConfigWindow.cpp">
       <Filter>Source Files\UI\Windows</Filter>
     </ClCompile>
@@ -436,6 +433,12 @@
     </ClCompile>
     <ClCompile Include="src\shaders\Shader.cpp">
       <Filter>Source Files\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui\WorldEditWindow.cpp">
+      <Filter>Source Files\UI\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui\WindowCreator.cpp">
+      <Filter>Source Files\UI\Windows</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

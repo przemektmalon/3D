@@ -1,5 +1,7 @@
 #pragma once
 #include "Shader.hpp"
+#include "Engine.hpp"
+#include "Camera.hpp"
 
 class DeferredTileCullComputeShader : public ShaderProgram
 {

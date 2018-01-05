@@ -113,7 +113,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>C:\Programming\Libs\GLM;.\libs\glew\include;.\libs\soil\src;.\libs\freetype\include;.\libs\assimp\include\;.\libs\boost;.\libs\bullet\src;.\libs\rapidxml;.\include;.\include\os;.\include\core;.\include\objectsassets;.\include\renderer;.\include\ui;.\include\util;.\libs;.\include\shaders;.\libs\devil\include;.\libs\devil\include;C:\Programming\3D\3D\libs\devil\include;.\libs\devil\include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_MBCS;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CallingConvention>Cdecl</CallingConvention>
       <StructMemberAlignment>Default</StructMemberAlignment>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -151,7 +151,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>C:\Programming\Libs\GLM;.\libs\glew\include;.\libs\soil\src;.\libs\freetype\include;.\libs\assimp\include\;.\libs\boost;.\libs\bullet\src;.\libs\rapidxml;.\include;.\include\os;.\include\core;.\include\objectsassets;.\include\renderer;.\include\ui;.\include\util;.\libs;.\include\shaders;.\libs\libpng\include;.\libs\devil\include;C:\Programming\3D\3D\libs\devil\include;.\libs\devil\include</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_MBCS;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -175,7 +175,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>C:\Programming\Libs\GLM;.\libs\glew\include;.\libs\soil\src;.\libs\freetype\include;.\libs\assimp\include\;.\libs\boost;.\libs\bullet\src;.\libs\rapidxml;.\include;.\include\os;.\include\core;.\include\objectsassets;.\include\renderer;.\include\ui;.\include\util;.\libs;.\include\shaders;;.\libs\devil\include;C:\Programming\3D\3D\libs\devil\include;.\libs\devil\include</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_MBCS;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <MinimalRebuild>false</MinimalRebuild>
@@ -346,6 +346,7 @@
     <ClCompile Include="src\ui\UIWindow.cpp" />
     <ClCompile Include="src\ui\UIWindowManager.cpp" />
     <ClCompile Include="src\ui\WindowCreator.cpp" />
+    <ClCompile Include="src\ui\WorldEditWindow.cpp" />
     <ClCompile Include="src\util\ConfigParser.cpp" />
     <ClCompile Include="src\util\Util.cpp" />
   </ItemGroup>

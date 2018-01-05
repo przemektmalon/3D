@@ -18,7 +18,9 @@
 #include "UIConsole.hpp"
 #include "UIButton.hpp"
 
-#define NUM_POINT_LIGHTS 3
+#include <limits>
+
+#define NUM_POINT_LIGHTS 5
 #define NUM_SPOT_LIGHTS 0
 
 void Renderer::render()
@@ -55,6 +57,7 @@ void Renderer::render()
 
 	lightManager.updateAllPointLights();
 	lightManager.updateAllSpotLights();
+	lightManager.updateSunLight();
 
 	GL_PROFILE_END("gpuBuffer");
 
@@ -133,10 +136,10 @@ void Renderer::shadowPass()
 		if (glm::length(itr->getPosition() - activeCam->pos) > itr->getFadeStart() + itr->getFadeLength())
 			continue;
 
-		glViewport(0, 0, itr->getShadowTexture().getWidth(), itr->getShadowTexture().getHeight());
+		glViewport(0, 0, itr->getShadowTexture()->getWidth(), itr->getShadowTexture()->getHeight());
 
 		fboShadow.bind();
-		fboShadow.attachForeignCubeTexture(&itr->getShadowTexture(), GL_DEPTH_ATTACHMENT);
+		fboShadow.attachForeignCubeTexture(itr->getShadowTexture(), GL_DEPTH_ATTACHMENT);
 
 		glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -164,10 +167,10 @@ void Renderer::shadowPass()
 		if (glm::length(itr->getPosition() - activeCam->pos) > itr->getFadeStart() + itr->getFadeLength())
 			continue;
 
-		glViewport(0, 0, itr->getShadowTexture().getWidth(), itr->getShadowTexture().getHeight());
+		glViewport(0, 0, itr->getShadowTexture()->getWidth(), itr->getShadowTexture()->getHeight());
 
 		fboShadow.bind();
-		fboShadow.attachForeignTexture(&itr->getShadowTexture(), GL_DEPTH_ATTACHMENT);
+		fboShadow.attachForeignTexture(itr->getShadowTexture(), GL_DEPTH_ATTACHMENT);
 
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
@@ -184,6 +187,148 @@ void Renderer::shadowPass()
 
 		glBindVertexArray(0);
 	}
+
+	/*float cascadeEnds[4];
+
+	cascadeEnds[0] = activeCam->nearClip;
+	cascadeEnds[1] = 1050.0f;
+	cascadeEnds[2] = 3000.0f;
+	cascadeEnds[3] = 5000.f;
+
+	lightManager.sunLight.getData()->cascadeEnds[0] = cascadeEnds[0];
+	lightManager.sunLight.getData()->cascadeEnds[1] = cascadeEnds[1];
+	lightManager.sunLight.getData()->cascadeEnds[2] = cascadeEnds[2];
+	lightManager.sunLight.getData()->cascadeEnds[3] = cascadeEnds[3];
+
+	glm::fmat4 lightM = glm::translate(glm::fmat4(), glm::fvec3(lightManager.sunLight.getDirection() * -100.f)) * glm::lookAt(glm::fvec3(0, 0, 0), lightManager.sunLight.getDirection(), glm::fvec3(0, 1, 0));
+
+	//lightM = activeCam->view;
+
+	float tanHalfHFOV = tanf(glm::radians(activeCam->fov / 2.0f));
+	float tanHalfVFOV = tanf(glm::radians((activeCam->fov * activeCam->aspect) / 2.0f));
+
+	int maxRes[3] = { 1024, 512, 256 };
+
+	for (int i = 0; i < 3; i++) {
+		float xn = cascadeEnds[i] * tanHalfHFOV;
+		float xf = cascadeEnds[i + 1] * tanHalfHFOV;
+		float yn = cascadeEnds[i] * tanHalfVFOV;
+		float yf = cascadeEnds[i + 1] * tanHalfVFOV;
+
+		glm::fvec4 frustumCorners[8] = {
+			// near face
+			glm::fvec4(xn, yn, cascadeEnds[i], 1.0),
+			glm::fvec4(-xn, yn, cascadeEnds[i], 1.0),
+			glm::fvec4(xn, -yn, cascadeEnds[i], 1.0),
+			glm::fvec4(-xn, -yn, cascadeEnds[i], 1.0),
+
+			// far face
+			glm::fvec4(xf, yf, cascadeEnds[i + 1], 1.0),
+			glm::fvec4(-xf, yf, cascadeEnds[i + 1], 1.0),
+			glm::fvec4(xf, -yf, cascadeEnds[i + 1], 1.0),
+			glm::fvec4(-xf, -yf, cascadeEnds[i + 1], 1.0)
+		};
+
+		glm::fvec4 frustumCornersL[8];
+
+		float minX = std::numeric_limits<float>::max();
+		float maxX = std::numeric_limits<float>::min();
+		float minY = std::numeric_limits<float>::max();
+		float maxY = std::numeric_limits<float>::min();
+		float minZ = std::numeric_limits<float>::max();
+		float maxZ = std::numeric_limits<float>::min();
+
+		for (int j = 0; j < 8; j++) {
+
+			// Transform the frustum coordinate from view to world space
+			glm::fvec4 vW = activeCam->inverseView * frustumCorners[j];
+
+			// Transform the frustum coordinate from world to light space
+			frustumCornersL[j] = lightM * vW;
+
+			minX = std::min(minX, frustumCornersL[j].x);
+			maxX = std::max(maxX, frustumCornersL[j].x);
+			minY = std::min(minY, frustumCornersL[j].y);
+			maxY = std::max(maxY, frustumCornersL[j].y);
+			minZ = std::min(minZ, frustumCornersL[j].z);
+			maxZ = std::max(maxZ, frustumCornersL[j].z);
+		}
+
+		auto ortho = glm::ortho(minX, maxX, minY, maxY, minZ, maxZ);
+		glm::fmat4 pr = glm::ortho<float>(-1000, 1000, -1000, 1000, -1000, 1000) * glm::lookAt(glm::fvec3(0, 0, 0), lightManager.sunLight.getDirection(), glm::fvec3(0, 1, 0));
+		lightManager.sunLight.setProjView(i, ortho);
+
+		glm::ivec2 resolution;
+
+		float width = maxX - minX;
+		float height = maxY - minY;
+
+		if (width > height)
+		{
+			float resFactor = width / maxRes[i];
+			csmViewports[i].x = maxRes[i];
+			csmViewports[i].y /= resFactor;
+		}
+		else
+		{
+			float resFactor = height / maxRes[i];
+			csmViewports[i].y = maxRes[i];
+			csmViewports[i].x /= resFactor;
+		}
+
+		glm::fmat4 cpr;
+
+		if (i == 1)
+		{
+			tileCullShader.use();
+			auto col = glGetUniformLocation(tileCullShader.getGLID(), "sunCol");
+			auto dir = glGetUniformLocation(tileCullShader.getGLID(), "sunDir");
+			auto handle = glGetUniformLocation(tileCullShader.getGLID(), "sunHandle");
+			auto pv = glGetUniformLocation(tileCullShader.getGLID(), "sunPV");
+			auto cas = glGetUniformLocation(tileCullShader.getGLID(), "sunCascadeEnd");
+
+			glm::fmat4 cpr = glm::lookAt(glm::fvec3(-10, 100, -20), glm::fvec3(0, 0, 0), glm::fvec3(0, 1, 0));
+
+			glUniform4f(col, 1, 0, 1, 1);
+			glUniform4fv(dir, 1, &lightManager.sunLight.getDirection()[0]);
+			glUniform2uiv(handle, 1, (GLuint*)&lightManager.sunLight.getData()->shadowHandles[1]);
+			glUniformMatrix4fv(pv, 1, GL_FALSE, glm::value_ptr(cpr));
+			glUniform1f(cas, cascadeEnds[2]);
+		}
+
+		glViewport(0, 0, int(width), int(height));
+
+		fboShadow.bind();
+		fboShadow.attachForeignTexture((GLTexture2D*)(lightManager.sunLight.getShadowTexture() + i), GL_DEPTH_ATTACHMENT);
+
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+		spotShadowPassShader.use();
+
+		spotShadowPassShader.setProj(glm::perspective<float>(3.1415/2.f,1.f, 1.f, 2000.f) * glm::translate(glm::fmat4(), glm::fvec3(-30,300,60)) * cpr);
+		//spotShadowPassShader.setView(glm::lookAt(glm::fvec3(0, 0, 0), glm::fvec3(0.1, -1, 0.2), glm::fvec3(0, 1, 0)));
+		spotShadowPassShader.setView(glm::fmat4(1.f));
+		spotShadowPassShader.sendUniforms();
+
+		Engine::assets.modelManager.shadowVAO.bind();
+		world->drawIndirectBuffer[Regular].bind(GL_DRAW_INDIRECT_BUFFER);
+		world->instanceTransformsBuffer[Regular].bindBase(GL_SHADER_STORAGE_BUFFER, 1);
+
+		glMultiDrawArraysIndirect(GL_TRIANGLES, 0, world->modelInstances.size(), 0);
+		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
+
+		glFinish();
+
+		u8* pix = new u8[sizeof(float) * int(width) * int(height)];
+
+		glBindTexture(GL_TEXTURE_2D, lightManager.sunLight.getShadowTexture()[i].getGLID());
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, GL_FLOAT, pix);
+
+		delete[] pix;
+
+		glBindVertexArray(0);
+	}
+	lightManager.updateSunLight();*/
 }
 
 void Renderer::ssaoPass()
@@ -233,12 +378,12 @@ void Renderer::ssaoPass()
 	fboSSAO.bindDraw();
 	fboSSAOBlur.bindRead();
 	glBlitFramebuffer(0, 0, Engine::cfg.render.resolution.x * Engine::cfg.render.frameScale, Engine::cfg.render.resolution.y * Engine::cfg.render.frameScale, 0, 0, Engine::cfg.render.resolution.x * Engine::cfg.render.frameScale, Engine::cfg.render.resolution.y * Engine::cfg.render.frameScale, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-
 }
 
 void Renderer::shadingPass()
 {
 	tileCullShader.use();
+
 	glBindTextureUnit(2, lightPassTex.getGLID());
 	glBindImageTexture(2, lightPassTex.getGLID(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
@@ -272,10 +417,14 @@ void Renderer::shadingPass()
 
 	lightManager.pointLightsBuffer.bindBase(0);
 	lightManager.spotLightsBuffer.bindBase(1);
+	lightManager.sunLightBuffer.bindBase(8);
+	glFinish();
+	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 	glDispatchCompute(std::ceil(Engine::cfg.render.resolution.x / 16.f), std::ceil(float(Engine::cfg.render.resolution.y) / 16.f), 1);
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 	lightManager.pointLightsBuffer.unbind();
 	lightManager.spotLightsBuffer.unbind();
+	lightManager.sunLightBuffer.unbind();
 }
 
 void Renderer::screenPass()
@@ -472,10 +621,8 @@ inline void Renderer::initialiseLights()
 	
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-	glm::fvec3 ddir(-2, -2, -4);
-	ddir = glm::normalize(ddir);
-
-	DirectLightData dir = DirectLightData(ddir, glm::fvec3(0.1f, 0.1f, 0.125f));
+	int res[3] = { 1024, 512, 256 };
+	lightManager.sunLight.initTexture(shadowSampler, res);
 
 	fboShadow.bind();
 	glDrawBuffer(GL_NONE);

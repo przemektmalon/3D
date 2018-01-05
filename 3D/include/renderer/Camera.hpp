@@ -92,6 +92,7 @@ public:
 
 		rotation = glm::fmat4(qRot);
 		view = rotation * translate;
+		inverseView = glm::inverse(view);
 
 		projView = proj * view;
 	}
@@ -111,6 +112,7 @@ public:
 
 	glm::fmat4 proj, view, projView;
 	glm::fmat4 inverseProj;
+	glm::fmat4 inverseView;
 
 	float nearClip, farClip;
 	float fov, aspect;

@@ -14,6 +14,7 @@ public:
 	{
 		struct { T left, top, width, height; };
 		struct { glm::tvec2<T> topLeft, size; };
+		struct { glm::tvec4<T> all; };
 	};
 
 	T bot() const { return top + height; }
@@ -39,6 +40,11 @@ public:
 		return !(this == rhs);
 	}
 
+	T& operator[](int index)
+	{
+		return all[index];
+	}
+
 	rect<T> operator+(const rect<T>& rhs)
 	{
 		T minX1 = min(left, left + width);
@@ -56,7 +62,7 @@ public:
 		T maxRight = max(maxX1, maxX2);
 		T maxTop = max(maxY1, maxY2);
 
-		return frect(minLeft, minBot, maxRight - minLeft, maxTop - minBot);
+		return rect<T>(minLeft, minBot, maxRight - minLeft, maxTop - minBot);
 	}
 
 	void zero()

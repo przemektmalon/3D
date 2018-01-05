@@ -9,6 +9,7 @@ void UIWindowManager::loadUIWindows()
 {
 	addWindow(WindowCreator::createWindow("res/ui/RenderConfigWindow.xml", renderConfigWindowScripts));
 	addWindow(WindowCreator::createWindow("res/ui/ProfilingWindow.xml", profilingWindowScripts));
+	addWindow(WindowCreator::createWindow("res/ui/WorldEditWindow.xml", worldEditWindowScripts));
 }
 
 void UIWindowManager::reloadWindows()

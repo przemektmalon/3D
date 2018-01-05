@@ -8,44 +8,20 @@
 
 UIWindow * WindowCreator::createWindow(std::string & specPath, std::function<void(UIWindow*)> scripts)
 {
-	// Set up xml parser
+	XML xml;
+	xml.parseFile(specPath);
 
-	File windowSpecFile;
-	windowSpecFile.open(specPath, File::in);
+	// Extract window info
+	auto root = xml.getNode(&xml.doc,"window");
 
-	std::string xmlString;
+	auto name = xml.getString(xml.getAtt(root, "name"));
+	auto pos = xml.toVec<glm::fvec2>(xml.getAtt(root, "pos"));
+	auto size = xml.toVec<glm::fvec2>(xml.getAtt(root, "size"));
+	auto border = xml.toVal<float>(xml.getAtt(root, "border"));
+	auto movable = xml.getString(xml.getAtt(root, "movable"));
 
-	windowSpecFile.fstream().seekg(0, std::ios::end);
-	xmlString.reserve(windowSpecFile.fstream().tellg());
-	windowSpecFile.fstream().seekg(0, std::ios::beg);
 
-	xmlString.assign((std::istreambuf_iterator<char>(windowSpecFile.fstream())), std::istreambuf_iterator<char>());
-
-	rapidxml::xml_document<> doc;
-	doc.parse<0>(const_cast<char*>(xmlString.c_str()));
-
-	rapidxml::xml_node<>* root = doc.first_node("window");
-
-	windowSpecFile.close();
-
-	// Start extracting window info
-
-	std::string windowName;
-	irect windowArea;
-	int borderWidth;
-
-	auto nameAtt = root->first_attribute("name");
-	auto posAtt = root->first_attribute("pos");
-	auto sizeAtt = root->first_attribute("size");
-	auto borderAtt = root->first_attribute("border");
-	auto movable = xmlToString(root->first_attribute("movable"));
-
-	windowName.assign(nameAtt->value(), nameAtt->value_size());
-	windowArea.topLeft = xmlToVec<glm::ivec2>(posAtt);
-	windowArea.size = xmlToVec<glm::ivec2>(sizeAtt);
-	borderWidth = xmlToNum<int>(borderAtt);
-
-	UIWindow* w = new UIWindow(windowName, windowArea, borderWidth, &Engine::window);
+	UIWindow* w = new UIWindow(name, irect(pos.x,pos.y,size.x,size.y), border, &Engine::window);
 	w->scriptsInitFunc = scripts;
 	w->windowSpecFile = specPath;
 
@@ -56,12 +32,11 @@ UIWindow * WindowCreator::createWindow(std::string & specPath, std::function<voi
 
 	// Extract all the window elements
 
-	rapidxml::xml_node<>* elNode = root->first_node("element");
+	auto elNode = xml.getNode(root, "element");
 
 	while (elNode)
 	{
-		auto typeAtt = elNode->first_attribute("type");
-		std::string type(typeAtt->value(), typeAtt->value_size());
+		auto type = xml.getString(xml.getAtt(elNode, "type"));
 
 		/// TODO: completeness checking for mandatory attributes
 
@@ -74,21 +49,18 @@ UIWindow * WindowCreator::createWindow(std::string & specPath, std::function<voi
 			el = new UIMultiTab(w);
 			auto tab = (UIMultiTab*)el;
 
-			auto name = xmlToString(elNode->first_attribute("name"));
-			auto pos = xmlToVec<glm::fvec2>(elNode->first_attribute("position"));
-			auto size = xmlToVec<glm::fvec2>(elNode->first_attribute("size"));
-			auto currentTab = xmlToString(elNode->first_attribute("currenttab"));
+			auto currentTab = xml.getString(xml.getAtt(elNode, "currenttab"));
 
-			tab->setName(name);
-			tab->setPosition(pos);
-			tab->setSize(size);
+			tab->setName(xml.getString(xml.getAtt(elNode, "name")));
+			tab->setPosition(xml.toVec<glm::fvec2>(xml.getAtt(elNode, "position")));
+			tab->setSize(xml.toVec<glm::fvec2>(xml.getAtt(elNode, "size")));
 
-			auto tabNode = elNode->first_node("tab");
+			auto tabNode = xml.getNode(elNode, "tab");
 			while (tabNode)
 			{
-				auto tabName = xmlToString(tabNode->first_attribute("name"));
+				auto tabName = xml.getString(xml.getAtt(tabNode, "name"));
 				tab->addTab(tabName);
-				tabNode = tabNode->next_sibling("tab");
+				tabNode = xml.next(elNode, "tab");
 			}
 
 			tab->setCurrentTab(currentTab);
@@ -98,13 +70,7 @@ UIWindow * WindowCreator::createWindow(std::string & specPath, std::function<voi
 			el = new UIButton(w);
 			auto but = (UIButton*)el;
 
-			auto name = xmlToString(elNode->first_attribute("name"));
-			auto pos = xmlToVec<glm::fvec2>(elNode->first_attribute("position"));
-			auto size = xmlToVec<glm::fvec2>(elNode->first_attribute("size"));
-			auto text = xmlToString(elNode->first_attribute("text"));
-			auto font = xmlToString(elNode->first_attribute("font"));
-			auto fontSize = xmlToNum<int>(elNode->first_attribute("fontsize"));
-			auto colour = xmlToVec<glm::fvec3>(elNode->first_attribute("fontcolour"));
+			auto font = xml.getString(xml.getAtt(elNode, "font"));
 
 			Font* fontPtr;
 			if (font == "_NULL_")
@@ -112,27 +78,21 @@ UIWindow * WindowCreator::createWindow(std::string & specPath, std::function<voi
 				
 			fontPtr = Engine::assets.getFont(font);
 
-			but->setName(name);
-			but->setPosition(pos);
-			but->setSize(size);
+			but->setName(xml.getString(xml.getAtt(elNode,"name")));
+			but->setPosition(xml.toVec<glm::fvec2>(xml.getAtt(elNode, "position")));
+			but->setSize(xml.toVec<glm::fvec2>(xml.getAtt(elNode, "size")));
 			but->getText().setFont(fontPtr);
-			but->setTextColour(colour);
-			but->getText().setCharSize(fontSize);
-			but->setString(text);
+			but->setTextColour(xml.toVec<glm::fvec3>(xml.getAtt(elNode, "fontcolour")));
+			but->getText().setCharSize(xml.toVal<int>(xml.getAtt(elNode, "fontsize")));
+			but->setString(xml.getString(xml.getAtt(elNode, "text")));
 		}
 		else if (type == "label")
 		{
 			el = new UILabel(w);
 			auto lbl = (UILabel*)el;
 
-			auto name = xmlToString(elNode->first_attribute("name"));
-			auto pos = xmlToVec<glm::fvec2>(elNode->first_attribute("position"));
-			auto size = xmlToVec<glm::fvec2>(elNode->first_attribute("size"));
-			auto text = xmlToString(elNode->first_attribute("text"));
-			auto font = xmlToString(elNode->first_attribute("font"));
-			auto fontSize = xmlToNum<int>(elNode->first_attribute("fontsize"));
-			auto colour = xmlToVec<glm::fvec3>(elNode->first_attribute("fontcolour"));
-			auto textOriginStr = xmlToString(elNode->first_attribute("textorigin"));
+			auto font = xml.getString(elNode->first_attribute("font"));
+			auto textOriginStr = xml.getString(elNode->first_attribute("textorigin"));
 
 			Font* fontPtr;
 			if (font == "_NULL_")
@@ -151,47 +111,45 @@ UIWindow * WindowCreator::createWindow(std::string & specPath, std::function<voi
 					{} /// TODO: the rest of the origins
 			}
 
-
-			lbl->setName(name);
-			lbl->setPosition(pos);
-			lbl->setTextOrigin(textOrigin);
-			lbl->setSize(size);
+			lbl->setName(xml.getString(xml.getAtt(elNode, "name")));
+			lbl->setPosition(xml.toVec<glm::fvec2>(xml.getAtt(elNode, "position")));
+			lbl->setSize(xml.toVec<glm::fvec2>(xml.getAtt(elNode, "size")));
 			lbl->setFont(fontPtr);
-			lbl->setColour(colour);
-			lbl->setCharSize(fontSize);
-			lbl->setString(text);
+			lbl->setColour(xml.toVec<glm::fvec3>(xml.getAtt(elNode, "fontcolour")));
+			lbl->setCharSize(xml.toVal<int>(xml.getAtt(elNode, "fontsize")));
+			lbl->setString(xml.getString(xml.getAtt(elNode, "text")));
+			lbl->setTextOrigin(textOrigin);
 		}
 		else if (type == "slider") /// TODO: better default options handling
 		{
 			el = new UISlider(w);
 			auto sli = (UISlider*)el;
 
-			auto name = xmlToString(elNode->first_attribute("name"));
-			auto pos = xmlToVec<glm::fvec2>(elNode->first_attribute("position"));
-			auto width = xmlToNum<float>(elNode->first_attribute("width"));
-			auto desc = xmlToString(elNode->first_attribute("text"));
-			auto font = xmlToString(elNode->first_attribute("font"));
-			auto fontSize = xmlToNum<int>(elNode->first_attribute("fontsize"));
-			auto colour = xmlToVec<glm::fvec3>(elNode->first_attribute("fontcolour"));
-			auto valType = xmlToString(elNode->first_attribute("valuetype"));
+			auto pos = xml.toVec<glm::fvec2>(xml.getAtt(elNode, "position"));
+			auto width = xml.toVal<float>(xml.getAtt(elNode, "width"));
+			auto desc = xml.getString(xml.getAtt(elNode, "text"));
+			auto font = xml.getString(xml.getAtt(elNode, "font"));
+			auto fontSize = xml.toVal<int>(xml.getAtt(elNode, "fontsize"));
+			auto colour = xml.toVec<glm::fvec3>(xml.getAtt(elNode, "fontcolour"));
+			auto valType = xml.getString(xml.getAtt(elNode, "valuetype"));
 			if (valType == "integer")
 			{
 				sli->valType = UISlider::Integer;
-				auto limits = xmlToVec<glm::ivec2>(elNode->first_attribute("limits"));
+				auto limits = xml.toVec<glm::ivec2>(xml.getAtt(elNode, "limits"));
 				sli->setLimits(limits);
-				auto initial = xmlToNum<int>(elNode->first_attribute("value"));
+				auto initial = xml.toVal<int>(xml.getAtt(elNode, "value"));
 				sli->value.i = initial;
 			}
 			else
 			{
 				sli->valType = UISlider::Float;
-				auto limits = xmlToVec<glm::fvec2>(elNode->first_attribute("limits"));
+				auto limits = xml.toVec<glm::fvec2>(xml.getAtt(elNode, "limits"));
 				sli->setLimits(limits);
-				auto initial = xmlToNum<float>(elNode->first_attribute("value"));
+				auto initial = xml.toVal<float>(xml.getAtt(elNode, "value"));
 				sli->value.f = initial;
 			}
 
-			sli->setName(name);
+			sli->setName(xml.getString(xml.getAtt(elNode, "name")));
 			sli->init(pos, width);
 			sli->setDescription(desc);
 		}
@@ -204,8 +162,8 @@ UIWindow * WindowCreator::createWindow(std::string & specPath, std::function<voi
 
 		}
 
-		tab = xmlToString(elNode->first_attribute("tab"));
-		tabSection = xmlToString(elNode->first_attribute("tabsection"));
+		tab = xml.getString(elNode->first_attribute("tab"));
+		tabSection = xml.getString(elNode->first_attribute("tabsection"));
 
 		if (tab != "_NULL_" && tabSection != "_NULL_")
 		{

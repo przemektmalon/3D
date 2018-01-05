@@ -110,9 +110,7 @@ void GlyphContainer::load(u16 pCharSize, FT_Face pFace)
 	glyphs.glData->createFromStream(GL_R8, maxXSize, maxYSize, GL_RED, GL_UNSIGNED_BYTE, NULL, 0, 1);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	//tempTex.saveToFile("A", true);
 	glCopyImageSubData(tempTex.getGLID(), GL_TEXTURE_2D, 0, 0, 0, 0, glyphs.glData->getGLID(), GL_TEXTURE_2D, 0, 0, 0, 0, maxXSize, maxYSize, 1);
-	//glyphs.saveToFile("B", true);
 	tempTex.release();
 }
 

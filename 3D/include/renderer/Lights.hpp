@@ -4,18 +4,89 @@
 #include "Sampler.hpp"
 #include "Billboard.hpp"
 
-struct DirectLightData
+class Light
 {
-	DirectLightData() {}
-	DirectLightData(glm::fvec3 dir, glm::fvec3 col) : direction(dir), colour(col) {}
-	~DirectLightData() {}
+	friend class LightManager;
+public:
+	GLTexture* shadowTex;
 
-	glm::fvec3 direction, colour;
+	virtual GLTexture* getShadowTexture() = 0;
 };
 
-class FBO;
+class LightGPUDataBase
+{
+	friend class LightManager;
+public:
+	union PositionRadius
+	{
+		PositionRadius() : all(0, 0, 0, 0) {}
+		struct Separate
+		{
+			glm::fvec3 position;
+			float radius;
+		} separate;
+		glm::fvec4 all;
+	} positionRadius;
 
-class PointLight
+	union ColourQuadratic
+	{
+		ColourQuadratic() : all(0, 0, 0, 0) {}
+		struct Separate
+		{
+			glm::fvec3 colour;
+			float quadratic;
+		} separate;
+		glm::fvec4 all;
+	} colourQuadratic;
+
+	union LinearFadesTexture
+	{
+		LinearFadesTexture() { separate.linear = 0.001; separate.fadeStart = 500; separate.fadeLength = 100; separate.shadowHandle = 0; }
+		struct Separate
+		{
+			float linear;
+			unsigned short fadeStart;
+			unsigned short fadeLength;
+			GLuint64 shadowHandle;
+		} separate;
+		glm::fvec4 all;
+	} linearFadesTexture;
+
+	float getRadius() { return positionRadius.separate.radius; }
+	void setRadius(float set) {
+		positionRadius.separate.radius = set;
+	}
+	glm::fvec3 getPosition() { return positionRadius.separate.position; }
+	void setPosition(glm::fvec3 set) {
+		positionRadius.separate.position = set;
+	}
+	glm::fvec3 getColour() { return colourQuadratic.separate.colour; }
+	void setColour(glm::fvec3 set) {
+		colourQuadratic.separate.colour = set;
+	}
+	float getQuadratic() { return colourQuadratic.separate.quadratic; }
+	void setQuadratic(float set) {
+		colourQuadratic.separate.quadratic = set;
+	}
+	float getLinear() { return linearFadesTexture.separate.linear; }
+	void setLinear(float set) {
+		linearFadesTexture.separate.linear = set;
+	}
+	float getFadeStart() { return linearFadesTexture.separate.fadeStart; }
+	void setFadeStart(float set) {
+		linearFadesTexture.separate.fadeStart = set;
+	}
+	float getFadeLength() { return linearFadesTexture.separate.fadeLength; }
+	void setFadeLength(float set) {
+		linearFadesTexture.separate.fadeLength = set;
+	}
+	GLuint64 getHandle() { return linearFadesTexture.separate.shadowHandle; }
+	void setHandle(GLuint64 set) {
+		linearFadesTexture.separate.shadowHandle = set;
+	}
+};
+
+class SunLight : public Light
 {
 	friend class LightManager;
 public:
@@ -23,93 +94,106 @@ public:
 
 private:
 	GPUData* gpuData;
-	GLTextureCube shadowTex;
-	FBO* fbo;
 
-	float shadowRenderDistance;
+public:
+
+	GLTexture* getShadowTexture() { return shadowTex; }
+
+	struct GPUData
+	{
+		friend struct SunLight;
+		friend class LightManager;
+	protected:
+		void setHandle(int index, GLuint64 pHandle)
+		{
+			shadowHandles[index] = pHandle;
+		}
+
+	private:
+		union Colour
+		{
+			Colour() : all(100, 100, 100, 1) {}
+			struct Separate
+			{
+				glm::fvec3 colour;
+			} separate;
+			glm::fvec4 all;
+		} colour;
+
+		union Direction
+		{
+			Direction() : all(-1, -1, -1, 0) 
+			{
+				separate.direction = glm::normalize(glm::fvec3(0.1, -1.0, 0.2));
+			}
+			struct Separate
+			{
+				glm::fvec3 direction;
+			} separate;
+			glm::fvec4 all;
+		} direction;
+
+	public:
+		GLuint64 shadowHandles[3];
+		glm::fmat4 projView[3];
+		float cascadeEnds[4];
+		glm::fvec4 box[2];
+	};
+
+	SunLight()
+	{
+		shadowTex = new GLTexture2D[3];
+		gpuData = new GPUData();
+		gpuData->cascadeEnds[0] = 250;
+		gpuData->cascadeEnds[1] = 1050;
+		gpuData->cascadeEnds[2] = 3000;
+		gpuData->cascadeEnds[3] = 5000;
+	}
+
+	void initTexture(Sampler& sampler, int* resolution)
+	{
+		for (int i = 0; i < 3; ++i)
+		{
+			((GLTexture2D*)(shadowTex)+i)->createFromStream(GL_DEPTH_COMPONENT32F_NV, resolution[i], resolution[i], GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+			gpuData->setHandle(i, (((GLTexture2D*)shadowTex)+i)->makeResident(sampler.getGLID()));
+		}
+	}
+
+	glm::fvec3 getDirection() { return gpuData->direction.separate.direction; }
+
+	glm::fmat4* getProjView() { return gpuData->projView; }
+	void setProjView(int index, glm::fmat4& projView) { gpuData->projView[index] = projView; }
+	GPUData* getData() { return gpuData; }
+};
+
+class PointLight : public Light
+{
+	friend class LightManager;
+public:
+	struct GPUData;
+
+private:
+	GPUData* gpuData;
 
 	glm::fmat4 proj;
 	bool matNeedsUpdate;
 
 public:
-	PointLight() : matNeedsUpdate(true), gpuData(nullptr), fbo(nullptr), shadowRenderDistance(10000) {}
+	PointLight() : matNeedsUpdate(true), gpuData(nullptr)
+	{
+		shadowTex = new GLTextureCube();
+	}
 
-	struct GPUData
+	struct GPUData : public LightGPUDataBase
 	{
 		friend struct PointLight;
 		friend class LightManager;
 	private:
 
-		union PositionRadius
-		{
-			PositionRadius() : all(0, 0, 0, 0) {}
-			struct Separate
-			{
-				glm::fvec3 position;
-				float radius;
-			} separate;
-			glm::fvec4 all;
-		} positionRadius;
-
-		union ColourQuadratic
-		{
-			ColourQuadratic() : all(1, 0, 1, 0.001) {}
-			struct Separate
-			{
-				glm::fvec3 colour;
-				float quadratic;
-			} separate;
-			glm::fvec4 all;
-		} colourQuadratic;
-
-		union LinearFadesTexture
-		{
-			LinearFadesTexture() { separate.linear = 0.001; separate.fadeStart = 500; separate.fadeLength = 100; separate.textureHandle = 0; }
-			struct Separate
-			{
-				float linear;
-				unsigned short fadeStart;
-				unsigned short fadeLength;
-				GLuint64 textureHandle;
-			} separate;
-			glm::fvec4 all;
-		} linearFadesTexture;
-
 		glm::fmat4 projView[6];
 
 	protected:
-		float getRadius() { return positionRadius.separate.radius; }
-		void setRadius(float set) {
-			positionRadius.separate.radius = set;
-		}
-		glm::fvec3 getPosition() { return positionRadius.separate.position; }
-		void setPosition(glm::fvec3 set) {
-			positionRadius.separate.position = set;
-		}
-		glm::fvec3 getColour() { return colourQuadratic.separate.colour; }
-		void setColour(glm::fvec3 set) {
-			colourQuadratic.separate.colour = set;
-		}
-		float getQuadratic() { return colourQuadratic.separate.quadratic; }
-		void setQuadratic(float set) {
-			colourQuadratic.separate.quadratic = set;
-		}
-		float getLinear() { return linearFadesTexture.separate.linear; }
-		void setLinear(float set) {
-			linearFadesTexture.separate.linear = set;
-		}
-		float getFadeStart() { return linearFadesTexture.separate.fadeStart; }
-		void setFadeStart(float set) {
-			linearFadesTexture.separate.fadeStart = set;
-		}
-		float getFadeLength() { return linearFadesTexture.separate.fadeLength; }
-		void setFadeLength(float set) {
-			linearFadesTexture.separate.fadeLength = set;
-		}
-		GLuint64 getHandle() { return linearFadesTexture.separate.textureHandle; }
-		void setHandle(GLuint64 set) {
-			linearFadesTexture.separate.textureHandle = set;
-		}
+		
 		glm::fmat4* getProjView() { return projView; }
 		void updateProjView(glm::fmat4& proj) ///TODO: dont need lookAt, just construct manually
 		{
@@ -130,7 +214,7 @@ public:
 	float getFadeStart() { return gpuData->getFadeStart(); }
 	float getFadeLength() { return gpuData->getFadeLength(); }
 	GLuint64 getHandle() { return gpuData->getHandle(); }
-	GLTextureCube& getShadowTexture() { return shadowTex; }
+	GLTextureCube* getShadowTexture() { return (GLTextureCube*)shadowTex; }
 	glm::fmat4* getProjView() { return gpuData->projView; }
 
 	void setPosition(glm::fvec3 set)
@@ -176,8 +260,8 @@ public:
 
 	void initTexture(Sampler& sampler, int resolution = 1024)
 	{
-		shadowTex.createFromStream(GL_DEPTH_COMPONENT32F_NV, resolution, resolution, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-		gpuData->setHandle(shadowTex.makeResident(sampler.getGLID()));
+		((GLTextureCube*)shadowTex)->createFromStream(GL_DEPTH_COMPONENT32F_NV, resolution, resolution, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+		gpuData->setHandle(shadowTex->makeResident(sampler.getGLID()));
 	}
 
 	void updateRadius();
@@ -185,7 +269,7 @@ public:
 
 };
 
-class SpotLight
+class SpotLight : public Light
 {
 	friend class LightManager;
 public:
@@ -194,27 +278,16 @@ public:
 private:
 	bool matNeedsUpdate;
 	GPUData* gpuData;
-	GLTexture2D shadowTex;
 
 public:
 	SpotLight() : matNeedsUpdate(true), gpuData(nullptr) {}
 	~SpotLight() {}
 
-	struct GPUData
+	struct GPUData : public LightGPUDataBase
 	{
 		friend struct SpotLight;
 		friend class LightManager;
 	private:
-		union PositionRadius
-		{
-			PositionRadius() : all(0, 0, 0, 0) {}
-			struct Separate
-			{
-				glm::fvec3 position;
-				float radius;
-			} separate;
-			glm::fvec4 all;
-		} positionRadius;
 
 		union DirectionInner
 		{
@@ -222,103 +295,44 @@ public:
 			struct Separate
 			{
 				glm::fvec3 direction;
-				float innerSpread;
+				float inner;
 			} separate;
 			glm::fvec4 all;
 		} directionInner;
 
-		union ColourOuter
+		union Outer
 		{
-			ColourOuter() : all(0, 0, 0, 0) {}
+			Outer() : all(0, 0, 0, 0) {}
 			struct Separate
 			{
-				glm::fvec3 colour;
-				float outerSpread;
+				float outer;
 			} separate;
 			glm::fvec4 all;
-		} colourOuter;
-
-		union LinearQuadraticHandle
-		{
-			LinearQuadraticHandle() { separate.linear = 0.001; separate.quadratic = 0.001; separate.textureHandle = 0; }
-			struct Separate
-			{
-				float linear;
-				float quadratic;
-				GLuint64 textureHandle;
-			} separate;
-			glm::fvec4 all;
-		} linearQuadraticHandle;
-
-		union Fades
-		{
-			Fades() { separate.fadeStart = 500; separate.fadeLength = 100; }
-			struct Separate
-			{
-				unsigned short fadeStart;
-				unsigned short fadeLength;
-				unsigned int na;
-				unsigned int na2;
-				unsigned int na3;
-			} separate;
-			glm::ivec4 all;
-		} fades;
+		} outer;
 
 		glm::fmat4 projView;
 
 	protected:
 
-		float getRadius() { return positionRadius.separate.radius; }
-		void setRadius(float set) {
-			positionRadius.separate.radius = set;
-		}
-		glm::fvec3 getPosition() { return positionRadius.separate.position; }
-		void setPosition(glm::fvec3 set) {
-			positionRadius.separate.position = set;
-		}
 		glm::fvec3 getDirection() { return directionInner.separate.direction; }
 		void setDirection(glm::fvec3 set) {
 			directionInner.separate.direction = set;
 		}
-		float getInner() { return directionInner.separate.innerSpread; }
+		float getInner() { return colourQuadratic.separate.quadratic; }
 		bool setInner(float set) {
-			directionInner.separate.innerSpread = set;
+			directionInner.separate.inner = set;
 			if (getInner() > getOuter()) {
-				colourOuter.separate.outerSpread = set; return true;
+				outer.separate.outer = set; return true;
 			}
 			return false;
 		}
-		glm::fvec3 getColour() { return colourOuter.separate.colour; }
-		void setColour(glm::fvec3 set) {
-			colourOuter.separate.colour = set;
-		}
-		float getOuter() { return colourOuter.separate.outerSpread; }
+		float getOuter() { return outer.separate.outer; }
 		bool setOuter(float set) {
-			colourOuter.separate.outerSpread = set;
+			outer.separate.outer = set;
 			if (getOuter() < getInner()) {
-				directionInner.separate.innerSpread = set; return true;
+				directionInner.separate.inner = set; return true;
 			}
 			return false;
-		}
-		float getQuadratic() { return linearQuadraticHandle.separate.quadratic; }
-		void setQuadratic(float set) {
-			linearQuadraticHandle.separate.quadratic = set;
-		}
-		float getLinear() { return linearQuadraticHandle.separate.linear; }
-		void setLinear(float set) {
-			linearQuadraticHandle.separate.linear = set;
-		}
-		GLuint64 getHandle() { return linearQuadraticHandle.separate.textureHandle; }
-		void setHandle(GLuint64 set) {
-			linearQuadraticHandle.separate.textureHandle = set;
-		}
-		float getFadeStart() { return fades.separate.fadeStart; }
-		void setFadeStart(float set) {
-			fades.separate.fadeStart = set;
-		}
-		float getFadeLength() { return fades.separate.fadeLength; }
-		void setFadeLength(float set) {
-			fades.separate.fadeLength = set;
 		}
 
 		glm::fmat4& getProjView() { return projView; }
@@ -339,7 +353,7 @@ public:
 	float getFadeStart() { return gpuData->getFadeStart(); }
 	float getFadeLength() { return gpuData->getFadeLength(); }
 	GLuint64 getHandle() { return gpuData->getHandle(); }
-	GLTexture2D& getShadowTexture() { return shadowTex; }
+	GLTexture2D* getShadowTexture() { return (GLTexture2D*)shadowTex; }
 	glm::fmat4& getProjView() { return gpuData->projView; }
 
 	void setPosition(glm::fvec3 set)
@@ -403,8 +417,8 @@ public:
 
 	void initTexture(Sampler& sampler, int resolution = 512)
 	{
-		shadowTex.createFromStream(GL_DEPTH_COMPONENT32F_NV, resolution, resolution, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-		gpuData->setHandle(shadowTex.makeResident(sampler.getGLID()));
+		((GLTexture2D*)shadowTex)->createFromStream(GL_DEPTH_COMPONENT32F_NV, resolution, resolution, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+		gpuData->setHandle(shadowTex->makeResident(sampler.getGLID()));
 	}
 
 	void updateRadius();
@@ -421,6 +435,9 @@ public: ///TODO: Max light count is 500, add setters etc
 
 		spotLightsGPUData.reserve(500);
 		pointLightsGPUData.reserve(500);
+
+		sunLightBuffer.create();
+		sunLightBuffer.bufferData(sizeof(SunLight::GPUData), 0, GL_STREAM_DRAW);
 	}
 	~LightManager() {}
 
@@ -488,9 +505,10 @@ public: ///TODO: Max light count is 500, add setters etc
 	{
 		auto data = (SpotLight::GPUData*)spotLightsBuffer.mapRange(pIndex * sizeof(SpotLight::GPUData), sizeof(SpotLight::GPUData), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
 		data->positionRadius.all = spotLights[pIndex].gpuData->positionRadius.all;
+		data->colourQuadratic.all = spotLights[pIndex].gpuData->colourQuadratic.all;
 		data->directionInner.all = spotLights[pIndex].gpuData->directionInner.all;
-		data->colourOuter.all = spotLights[pIndex].gpuData->colourOuter.all;
-		data->linearQuadraticHandle.all = spotLights[pIndex].gpuData->linearQuadraticHandle.all;
+		data->linearFadesTexture.all = spotLights[pIndex].gpuData->linearFadesTexture.all;
+		data->outer.separate.outer = spotLights[pIndex].gpuData->outer.separate.outer;
 		spotLightsBuffer.unmap();
 	}
 
@@ -501,6 +519,30 @@ public: ///TODO: Max light count is 500, add setters etc
 		spotLightsBuffer.bufferData(sizeof(SpotLight::GPUData) * spotLightsGPUData.size(), spotLightsGPUData.data(), GL_DYNAMIC_DRAW);
 	}
 
+	void updateSunLight()
+	{
+		/*auto data = (SunLight::GPUData*)sunLightBuffer.mapRange(0, sizeof(SunLight::GPUData), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
+		data->colour.all = sunLight.gpuData->colour.all;
+		data->direction.all = sunLight.gpuData->direction.all;
+		for (int i = 0; i < 3; ++i) {
+			data->shadowHandles[i] = sunLight.gpuData->shadowHandles[i];
+			data->projView[i][0] = sunLight.gpuData->projView[i][3];
+			data->projView[i][1] = sunLight.gpuData->projView[i][2];
+			data->projView[i][2] = sunLight.gpuData->projView[i][1];
+			data->projView[i][3] = sunLight.gpuData->projView[i][0];
+		}
+		for (int i = 0; i < 4; ++i)
+			data->cascadeEnds[i] = sunLight.gpuData->cascadeEnds[i];
+		data->box[0] = sunLight.gpuData->box[0];
+		data->box[1] = sunLight.gpuData->box[1];
+		
+		data->cascadeEnds[3] = 1000;
+
+		sunLightBuffer.unmap();*/
+		sunLightBuffer.bind();
+		sunLightBuffer.bufferData(sizeof(SunLight::GPUData), sunLight.gpuData, GL_STREAM_DRAW);
+	}
+
 	std::vector<PointLight> pointLights;
 	std::vector<PointLight::GPUData> pointLightsGPUData;
 	SSBO pointLightsBuffer;
@@ -509,11 +551,14 @@ public: ///TODO: Max light count is 500, add setters etc
 	std::vector<SpotLight::GPUData> spotLightsGPUData;
 	SSBO spotLightsBuffer;
 
-	std::vector<DirectLightData> directLights;
+	//std::vector<DirectLightData> directLights;
 
 	std::vector<Billboard> pointLightIcons;
 	std::vector<Billboard> spotLightIcons;
 	
+	SunLight sunLight;
+	SSBO sunLightBuffer;
+
 	//std::vector<SpotLight::GPUData> staticSpotLights;
 	//std::vector<PointLight::GPUData> staticPointLightsGPUData;
 	//std::vector<GLTextureCube> staticPointLightsShadowTex;
