@@ -170,6 +170,8 @@ public:
 			streamImageData->free();
 	}
 
+	
+
 	void bindImage(GLint pImageUnit, GLenum pAccess, int pMipLevel = 0)
 	{
 		glBindImageTexture(pImageUnit, GLID, pMipLevel, GL_FALSE, 0, pAccess, sizedFormat);

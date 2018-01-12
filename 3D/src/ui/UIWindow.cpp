@@ -12,6 +12,7 @@
 
 UIWindow::UIWindow(std::string pName, irect pWindowArea, int pBorderWidth, const Window* pParentWindow) : name(pName), parentWindow(pParentWindow), title(new UILabel(this)), borderWidth(pBorderWidth), dragging(false), open(true), clickedPos(0,0)
 {
+	renderTarget.create();
 	windowArea = pWindowArea;
 
 	renderTarget.setResolution(glm::ivec2(windowArea.width, windowArea.height));

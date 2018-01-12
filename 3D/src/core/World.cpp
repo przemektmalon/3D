@@ -36,6 +36,9 @@ ModelInstance* World::addModelInstance(Model* model, SGNode* parent)
 	inst->second.sgNode = parent->addChild(SGNode());
 	inst->second.id = instanceID;
 
+	glm::fvec3 pos = parent->transform.getOrigin();
+	auto tag = tags.insert(std::make_pair(instanceID, TextBillboard(pos, std::to_string(instanceID))));
+
 	++objectCount;
 
 	return &inst->second;
@@ -142,6 +145,8 @@ void World::updateGLTransforms()
 			instanceTransformsRegular[i] = itr->second.sgNode->transform.getTransformMat();
 			++i;
 		}
+
+		tags[itr->first].pos = itr->second.sgNode->transform.getTranslation();
 	}
 
 	instanceTransformsBuffer[Regular].unmap();

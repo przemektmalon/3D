@@ -6,6 +6,7 @@
 #include "DrawModes.hpp"
 #include "Texture.hpp"
 #include "Model.hpp"
+#include "TextBillboard.hpp"
 
 class Model;
 
@@ -64,6 +65,7 @@ public:
 	GLBufferObject instanceTransformsBuffer[DrawModesCount];
 
 	std::unordered_map<u32, ModelInstance> modelInstances;
+	std::unordered_map<u32, TextBillboard> tags;
 	u32 numTriLists[DrawModesCount];
 
 	GLTextureCube skybox;

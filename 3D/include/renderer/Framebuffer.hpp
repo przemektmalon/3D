@@ -36,7 +36,7 @@ public:
 
 	FBO() : created(false) 
 	{
-		glGenFramebuffers(1, &GLID);
+		//glGenFramebuffers(1, &GLID);
 	}
 	FBO(glm::ivec2 res) : resolution(res), created(true) 
 	{
@@ -45,6 +45,11 @@ public:
 	~FBO() 
 	{
 		glDeleteFramebuffers(1, &GLID);
+	}
+
+	void create()
+	{
+		glGenFramebuffers(1, &GLID);
 	}
 
 	void setClearDepth(float pDepth)

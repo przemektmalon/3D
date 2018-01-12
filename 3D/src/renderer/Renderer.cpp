@@ -75,6 +75,11 @@ void Renderer::render()
 
 	lightManager.drawLightIcons();
 
+	for (auto tag : world->tags)
+	{
+		tag.second.draw();
+	}
+
 	Engine::uiwm.drawUIWindows();
 
 	//Engine::console.draw();
@@ -523,6 +528,7 @@ void Renderer::initialiseRenderer(Window * pwin, Camera & cam)
 
 inline void Renderer::initialiseGBuffer()
 {
+	fboGBuffer.create();
 	fboGBuffer.setResolution(Engine::cfg.render.resolution);
 	fboGBuffer.attachTexture(GL_RG16F, GL_RG, GL_HALF_FLOAT, GL_COLOR_ATTACHMENT0);							// NORMAL
 	fboGBuffer.attachTexture(GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT1);					// ALBEDO_SPEC
@@ -537,10 +543,12 @@ inline void Renderer::initialiseGBuffer()
 
 inline void Renderer::initialiseSSAOBuffer()
 {
+	fboSSAO.create();
 	fboSSAO.setResolution(Engine::cfg.render.resolution);
 	fboSSAO.attachTexture(GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT0, glm::fvec2(Engine::cfg.render.frameScale));
 	fboSSAO.checkStatus();
 
+	fboSSAOBlur.create();
 	fboSSAOBlur.setResolution(Engine::cfg.render.resolution);
 	fboSSAOBlur.attachTexture(GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT0, glm::fvec2(Engine::cfg.render.frameScale));
 	fboSSAOBlur.checkStatus();
@@ -548,6 +556,7 @@ inline void Renderer::initialiseSSAOBuffer()
 
 inline void Renderer::initialiseScreenFramebuffer()
 {
+	fboScreen.create();
 	fboScreen.setResolution(Engine::cfg.render.resolution);
 	fboScreen.attachTexture(GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT0);
 	fboScreen.checkStatus();
@@ -624,6 +633,7 @@ inline void Renderer::initialiseLights()
 	int res[3] = { 1024, 512, 256 };
 	lightManager.sunLight.initTexture(shadowSampler, res);
 
+	fboShadow.create();
 	fboShadow.bind();
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);

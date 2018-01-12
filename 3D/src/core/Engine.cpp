@@ -164,6 +164,13 @@ void Engine::mainLoop(int resolutionIndex)
 	uiwm.loadUIWindows();
 	cfg.world.togglePhysics();
 
+	TextBillboard::initFBO();
+
+	for (auto& tag : world->tags)
+	{
+		tag.second.initGL();
+	}
+
 	while (engineState != Quitting) {
 		if (!window.processMessages()) 
 		{

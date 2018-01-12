@@ -1,6 +1,8 @@
 #pragma once
 #include "MathIncludes.hpp"
 #include "GLIncludes.hpp"
+#include "VertexArray.hpp"
+#include "BufferObjects.hpp"
 
 class Shape3DShader;
 class GLTexture2D;
@@ -15,8 +17,8 @@ static const float squareVerts[] = {
 class Billboard
 {
 public:
-	Billboard() {}
-	Billboard(glm::fvec3 pPos, glm::fvec2 pSize, GLTexture2D* pTex) : size(pSize), pos(pPos), tex(pTex) {}
+	Billboard() : constantSize(true) {}
+	Billboard(glm::fvec3 pPos, glm::fvec2 pSize, GLTexture2D* pTex) : size(pSize), pos(pPos), tex(pTex), constantSize(true) {}
 	~Billboard() {}
 
 	static void initGLVAO();
@@ -29,7 +31,12 @@ public:
 	glm::fvec3 pos;
 	GLTexture2D* tex;
 
-	GLuint vbo, vao;
+	//GLuint vbo, vao;
+
+	VAO vao;
+	VBO vbo;
+
+	bool constantSize;
 
 private:
 
